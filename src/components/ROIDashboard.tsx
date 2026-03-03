@@ -34,11 +34,20 @@ const ResultCard = ({ icon: Icon, label, value, color, delay }: {
   </motion.div>
 );
 
-const ROIDashboard = ({ results, formData, onReset }: Props) => {
+const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => {
   const [zoomLink, setZoomLink] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [buildCost, setBuildCost] = useState(APP_BUILD_COST);
+  const [buildWeeks, setBuildWeeks] = useState(8);
   const { toast } = useToast();
+
+  // Recalculate ROI metrics based on editable build cost
+  const results: ROIResults = {
+    ...initialResults,
+    roiPercentage: buildCost > 0 ? ((initialResults.totalAnnualImpact - buildCost) / buildCost) * 100 : 0,
+    breakEvenMonths: initialResults.totalAnnualImpact > 0 ? (buildCost / (initialResults.totalAnnualImpact / 12)) : 0,
+  };
 
   const handleSendReport = async (includeZoom: boolean) => {
     if (!formData.contactEmail || !formData.contactName) {
@@ -138,10 +147,30 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           <DollarSign className="w-5 h-5 text-accent" />
           Investment Summary
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="text-center p-4 rounded-lg bg-secondary">
-            <p className="text-xs text-muted-foreground mb-1">App Build Cost</p>
-            <p className="text-xl font-display font-bold text-foreground">{formatCurrency(APP_BUILD_COST)}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="text-center p-4 rounded-lg bg-secondary space-y-1">
+            <p className="text-xs text-muted-foreground">App Build Cost</p>
+            <div className="flex items-center justify-center gap-1">
+              <span className="text-lg font-display font-bold text-foreground">$</span>
+              <Input
+                type="number"
+                value={buildCost}
+                onChange={(e) => setBuildCost(Number(e.target.value) || 0)}
+                className="w-24 text-center text-lg font-display font-bold h-8 border-dashed"
+              />
+            </div>
+          </div>
+          <div className="text-center p-4 rounded-lg bg-secondary space-y-1">
+            <p className="text-xs text-muted-foreground">Approx. Build Time</p>
+            <div className="flex items-center justify-center gap-1">
+              <Input
+                type="number"
+                value={buildWeeks}
+                onChange={(e) => setBuildWeeks(Number(e.target.value) || 0)}
+                className="w-16 text-center text-lg font-display font-bold h-8 border-dashed"
+              />
+              <span className="text-sm text-muted-foreground">weeks</span>
+            </div>
           </div>
           <div className="text-center p-4 rounded-lg bg-secondary">
             <p className="text-xs text-muted-foreground mb-1">Year 1 ROI</p>
