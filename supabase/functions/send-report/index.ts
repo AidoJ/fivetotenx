@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -20,9 +20,9 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
     }
 
     const formatCurrency = (value: number) =>
@@ -100,7 +100,7 @@ serve(async (req) => {
                     <tr>
                       <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
                         <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Build Cost</p>
-                        <p style="color: #1e3a5f; font-size: 16px; font-weight: 700; margin: 0;">${formatCurrency(18000)}</p>
+                        <p style="color: #1e3a5f; font-size: 16px; font-weight: 700; margin: 0;">${formatCurrency(results.buildCost || 18000)}</p>
                       </td>
                       <td style="width: 8px;"></td>
                       <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
@@ -134,30 +134,34 @@ serve(async (req) => {
     </html>
     `;
 
-    // Send email via Lovable AI Gateway (which can send emails)
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Send email via Resend
+    const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [
-          {
-            role: 'user',
-            content: `Please respond with exactly: "EMAIL_READY" - I am preparing an email to send to ${contactEmail}`,
-          },
-        ],
+        from: 'App ROI Report <onboarding@resend.dev>',
+        to: [contactEmail],
+        subject: `Your App ROI Report – ${businessName || 'Your Business'}`,
+        html: emailHtml,
       }),
     });
 
-    // For now, store the assessment - email sending will be enhanced with a proper email service
-    // The edge function saves the data and returns success
+    const resendData = await resendResponse.json();
+
+    if (!resendResponse.ok) {
+      console.error('Resend API error:', resendData);
+      throw new Error(`Email sending failed: ${JSON.stringify(resendData)}`);
+    }
+
+    console.log('Email sent successfully:', resendData);
+
     return new Response(JSON.stringify({ 
       success: true, 
-      message: 'Assessment saved successfully',
-      emailHtml, // Return the HTML so it could be used with an email service later
+      message: 'Report emailed successfully',
+      emailId: resendData.id,
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
