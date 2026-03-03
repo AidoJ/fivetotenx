@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      roi_assessments: {
+        Row: {
+          business_name: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          form_data: Json
+          id: string
+          industry: string | null
+          invite_sent: boolean | null
+          report_sent: boolean | null
+          roi_results: Json
+        }
+        Insert: {
+          business_name?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          form_data?: Json
+          id?: string
+          industry?: string | null
+          invite_sent?: boolean | null
+          report_sent?: boolean | null
+          roi_results?: Json
+        }
+        Update: {
+          business_name?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          form_data?: Json
+          id?: string
+          industry?: string | null
+          invite_sent?: boolean | null
+          report_sent?: boolean | null
+          roi_results?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
