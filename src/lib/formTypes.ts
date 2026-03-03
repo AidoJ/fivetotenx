@@ -1,5 +1,8 @@
 export interface FormData {
   // Section 1
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
   businessName: string;
   industry: string;
   numberOfStaff: string;
@@ -46,6 +49,9 @@ export interface ROIResults {
 }
 
 export const initialFormData: FormData = {
+  contactName: '',
+  contactEmail: '',
+  contactPhone: '',
   businessName: '',
   industry: '',
   numberOfStaff: '',
