@@ -56,7 +56,7 @@ const Index = () => {
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         {results ? (
-          <ROIDashboard results={results} businessName={formData.businessName} onReset={handleReset} />
+          <ROIDashboard results={results} formData={formData} onReset={handleReset} />
         ) : (
           <>
             <StepIndicator currentStep={step} totalSteps={4} labels={STEP_LABELS} />

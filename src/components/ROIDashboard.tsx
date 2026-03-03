@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ROIResults, APP_BUILD_COST } from '@/lib/formTypes';
-import { TrendingUp, Clock, Users, DollarSign, ArrowRight } from 'lucide-react';
+import { ROIResults, APP_BUILD_COST, FormData } from '@/lib/formTypes';
+import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface Props {
   results: ROIResults;
-  businessName: string;
+  formData: FormData;
   onReset: () => void;
 }
 
@@ -28,7 +34,63 @@ const ResultCard = ({ icon: Icon, label, value, color, delay }: {
   </motion.div>
 );
 
-const ROIDashboard = ({ results, businessName, onReset }: Props) => {
+const ROIDashboard = ({ results, formData, onReset }: Props) => {
+  const [zoomLink, setZoomLink] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const { toast } = useToast();
+
+  const handleSendReport = async (includeZoom: boolean) => {
+    if (!formData.contactEmail || !formData.contactName) {
+      toast({ title: 'Missing info', description: 'Name and email are required to send the report.', variant: 'destructive' });
+      return;
+    }
+
+    if (includeZoom && !zoomLink) {
+      toast({ title: 'Missing Zoom link', description: 'Please enter a Zoom link before sending the invite.', variant: 'destructive' });
+      return;
+    }
+
+    setSending(true);
+    try {
+      // Save to database
+      const { error: dbError } = await supabase.from('roi_assessments').insert({
+        contact_name: formData.contactName,
+        contact_email: formData.contactEmail,
+        contact_phone: formData.contactPhone,
+        business_name: formData.businessName,
+        industry: formData.industry,
+        form_data: formData,
+        roi_results: results,
+        report_sent: true,
+        invite_sent: includeZoom,
+      });
+
+      if (dbError) throw dbError;
+
+      // Call edge function to send email
+      const { error: fnError } = await supabase.functions.invoke('send-report', {
+        body: {
+          contactName: formData.contactName,
+          contactEmail: formData.contactEmail,
+          businessName: formData.businessName,
+          results,
+          zoomLink: includeZoom ? zoomLink : null,
+        },
+      });
+
+      if (fnError) throw fnError;
+
+      setSent(true);
+      toast({ title: 'Report sent! ✅', description: `Report sent to ${formData.contactEmail}` });
+    } catch (err: unknown) {
+      console.error('Send error:', err);
+      toast({ title: 'Error', description: 'Failed to send report. Please try again.', variant: 'destructive' });
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <motion.div
@@ -37,7 +99,7 @@ const ROIDashboard = ({ results, businessName, onReset }: Props) => {
         className="text-center"
       >
         <h2 className="text-3xl font-display font-bold text-foreground mb-2">
-          ROI Projection for {businessName || 'Your Business'}
+          ROI Projection for {formData.businessName || 'Your Business'}
         </h2>
         <p className="text-muted-foreground">Here's what a custom app could deliver annually.</p>
       </motion.div>
@@ -60,27 +122,9 @@ const ROIDashboard = ({ results, businessName, onReset }: Props) => {
 
       {/* Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ResultCard
-          icon={TrendingUp}
-          label="Revenue Lift"
-          value={formatCurrency(results.revenueLift)}
-          color="bg-primary/15 text-primary"
-          delay={0.3}
-        />
-        <ResultCard
-          icon={Clock}
-          label="Operational Savings"
-          value={formatCurrency(results.operationalSavings)}
-          color="bg-primary/15 text-primary"
-          delay={0.4}
-        />
-        <ResultCard
-          icon={Users}
-          label="Retention Improvement"
-          value={formatCurrency(results.retentionImprovement)}
-          color="bg-primary/15 text-primary"
-          delay={0.5}
-        />
+        <ResultCard icon={TrendingUp} label="Revenue Lift" value={formatCurrency(results.revenueLift)} color="bg-primary/15 text-primary" delay={0.3} />
+        <ResultCard icon={Clock} label="Operational Savings" value={formatCurrency(results.operationalSavings)} color="bg-primary/15 text-primary" delay={0.4} />
+        <ResultCard icon={Users} label="Retention Improvement" value={formatCurrency(results.retentionImprovement)} color="bg-primary/15 text-primary" delay={0.5} />
       </div>
 
       {/* ROI Summary */}
@@ -118,7 +162,6 @@ const ROIDashboard = ({ results, businessName, onReset }: Props) => {
         className="rounded-xl border border-border bg-card p-6 space-y-5"
       >
         <h3 className="font-display font-bold text-lg text-foreground">How We Calculated This</h3>
-
         <div className="space-y-4 text-sm">
           <div className="p-4 rounded-lg bg-secondary">
             <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
@@ -131,7 +174,6 @@ const ROIDashboard = ({ results, businessName, onReset }: Props) => {
               {formatCurrency(results.currentMonthlyRevenue)}/mo <ArrowRight className="w-3 h-3 inline" /> {formatCurrency(results.newMonthlyRevenue)}/mo
             </p>
           </div>
-
           <div className="p-4 rounded-lg bg-secondary">
             <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" /> Operational Savings
@@ -140,7 +182,6 @@ const ROIDashboard = ({ results, businessName, onReset }: Props) => {
               {results.weeklyAdminHours}h/week manual work → automation removes {results.weeklySavingsHours.toFixed(1)}h/week (40%)
             </p>
           </div>
-
           <div className="p-4 rounded-lg bg-secondary">
             <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" /> Retention & Upsell
@@ -150,6 +191,64 @@ const ROIDashboard = ({ results, businessName, onReset }: Props) => {
             </p>
           </div>
         </div>
+      </motion.div>
+
+      {/* Send Report & Zoom Invite */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        className="rounded-xl border border-border bg-card p-6 space-y-5"
+      >
+        <h3 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
+          <Send className="w-5 h-5 text-primary" />
+          Send Report to {formData.contactName || 'Client'}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Send this ROI report to <strong>{formData.contactEmail}</strong>. Optionally include a Zoom training session invite.
+        </p>
+
+        <div className="space-y-2">
+          <Label htmlFor="zoomLink" className="flex items-center gap-2">
+            <Video className="w-4 h-4 text-primary" />
+            Zoom Training Link (optional)
+          </Label>
+          <Input
+            id="zoomLink"
+            type="url"
+            placeholder="https://zoom.us/j/your-meeting-id"
+            value={zoomLink}
+            onChange={(e) => setZoomLink(e.target.value)}
+            disabled={sent}
+          />
+        </div>
+
+        {sent ? (
+          <div className="flex items-center gap-2 text-primary font-medium">
+            <CheckCircle className="w-5 h-5" />
+            Report sent successfully!
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={() => handleSendReport(false)}
+              disabled={sending}
+              className="gap-2"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Send Report Only
+            </Button>
+            <Button
+              onClick={() => handleSendReport(true)}
+              disabled={sending || !zoomLink}
+              variant="outline"
+              className="gap-2"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+              Send Report + Zoom Invite
+            </Button>
+          </div>
+        )}
       </motion.div>
 
       {/* Tagline */}
