@@ -5,7 +5,7 @@ import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2,
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface Props {
@@ -54,17 +54,17 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
     setSending(true);
     try {
       // Save to database
-      const { error: dbError } = await supabase.from('roi_assessments').insert({
+      const { error: dbError } = await supabase.from('roi_assessments').insert([{
         contact_name: formData.contactName,
         contact_email: formData.contactEmail,
         contact_phone: formData.contactPhone,
         business_name: formData.businessName,
         industry: formData.industry,
-        form_data: formData,
-        roi_results: results,
+        form_data: JSON.parse(JSON.stringify(formData)),
+        roi_results: JSON.parse(JSON.stringify(results)),
         report_sent: true,
         invite_sent: includeZoom,
-      });
+      }]);
 
       if (dbError) throw dbError;
 
