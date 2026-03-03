@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contactName, contactEmail, businessName, results, zoomLink } = await req.json();
+    const { contactName, contactEmail, businessName, results, zoomLink, formData } = await req.json();
 
     if (!contactEmail || !contactName) {
       return new Response(JSON.stringify({ error: 'Name and email are required' }), {
@@ -27,6 +27,96 @@ serve(async (req) => {
 
     const formatCurrency = (value: number) =>
       new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
+    const formatPercent = (value: number) => `${value.toFixed(1)}%`;
+
+    const row = (label: string, value: string) => `
+      <tr>
+        <td style="padding: 8px 12px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${label}</td>
+        <td style="padding: 8px 12px; color: #1e3a5f; font-size: 13px; font-weight: 600; text-align: right; border-bottom: 1px solid #f1f5f9;">${value}</td>
+      </tr>`;
+
+    const sectionHeader = (title: string, emoji: string) => `
+      <tr>
+        <td colspan="2" style="padding: 16px 12px 8px; font-size: 14px; font-weight: 700; color: #1e3a5f; border-bottom: 2px solid #e2e8f0;">
+          ${emoji} ${title}
+        </td>
+      </tr>`;
+
+    // Build input details section
+    const lostReasons = formData?.lostSalesReasons?.length > 0
+      ? formData.lostSalesReasons.join(', ')
+      : 'None selected';
+    const currentFeatures = formData?.currentFeatures?.length > 0
+      ? formData.currentFeatures.join(', ')
+      : 'None selected';
+
+    const inputDetailsHtml = formData ? `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        ${sectionHeader('Business Snapshot', '🏢')}
+        ${row('Business Name', formData.businessName || '—')}
+        ${row('Industry', formData.industry || '—')}
+        ${row('Number of Staff', formData.numberOfStaff || '—')}
+        ${row('Monthly Revenue', formData.monthlyRevenue || '—')}
+        ${row('Avg Transaction Value', formData.avgTransactionValue ? `$${formData.avgTransactionValue}` : '—')}
+
+        ${sectionHeader('Customer Metrics', '👥')}
+        ${row('Monthly Website Visitors', formData.monthlyVisitors || '—')}
+        ${row('Monthly Leads', formData.monthlyLeads || '—')}
+        ${row('Conversion Rate', formData.conversionRate ? `${formData.conversionRate}%` : '—')}
+        ${row('Monthly New Customers', formData.monthlyNewCustomers || '—')}
+        ${row('Avg Purchase Value', formData.avgPurchaseValue ? `$${formData.avgPurchaseValue}` : '—')}
+        ${row('Avg Purchases / Year', formData.avgPurchasesPerYear || '—')}
+        ${row('Avg Retention Years', formData.avgRetentionYears || '—')}
+
+        ${sectionHeader('Operational Hours (Weekly)', '⏱️')}
+        ${row('Admin Tasks', formData.hoursAdmin ? `${formData.hoursAdmin} hrs` : '—')}
+        ${row('Booking & Scheduling', formData.hoursBooking ? `${formData.hoursBooking} hrs` : '—')}
+        ${row('Follow-ups', formData.hoursFollowUps ? `${formData.hoursFollowUps} hrs` : '—')}
+        ${row('Invoicing', formData.hoursInvoicing ? `${formData.hoursInvoicing} hrs` : '—')}
+        ${row('Hourly Staff Cost', formData.hourlyStaffCost ? `$${formData.hourlyStaffCost}/hr` : '—')}
+
+        ${sectionHeader('Growth Context', '📈')}
+        ${row('Lost Sales Reasons', lostReasons)}
+        ${row('Current Features', currentFeatures)}
+      </table>
+    ` : '';
+
+    // Calculation methodology
+    const methodologyHtml = `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        ${sectionHeader('How We Calculated Your ROI', '🔍')}
+        <tr>
+          <td colspan="2" style="padding: 12px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding: 8px 12px; vertical-align: top;">
+                  <p style="color: #1e3a5f; font-size: 13px; font-weight: 600; margin: 0 0 4px;">Revenue Lift</p>
+                  <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">15% conversion rate improvement applied to your current ${formData?.monthlyVisitors || '0'} monthly visitors × $${formData?.avgTransactionValue || formData?.avgPurchaseValue || '0'} avg sale</p>
+                  <p style="color: #2563eb; font-size: 13px; font-weight: 700; margin: 4px 0 0;">${formatCurrency(results.revenueLift)} / year</p>
+                </td>
+              </tr>
+              <tr><td style="height: 8px; border-bottom: 1px solid #f1f5f9;"></td></tr>
+              <tr>
+                <td style="padding: 8px 12px; vertical-align: top;">
+                  <p style="color: #1e3a5f; font-size: 13px; font-weight: 600; margin: 0 0 4px;">Operational Savings</p>
+                  <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">40% reduction of ${results.weeklyAdminHours} weekly admin hours × $${formData?.hourlyStaffCost || '0'}/hr × 52 weeks</p>
+                  <p style="color: #2563eb; font-size: 13px; font-weight: 700; margin: 4px 0 0;">${formatCurrency(results.operationalSavings)} / year</p>
+                </td>
+              </tr>
+              <tr><td style="height: 8px; border-bottom: 1px solid #f1f5f9;"></td></tr>
+              <tr>
+                <td style="padding: 8px 12px; vertical-align: top;">
+                  <p style="color: #1e3a5f; font-size: 13px; font-weight: 600; margin: 0 0 4px;">Retention Improvement</p>
+                  <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">10% retention uplift on ${results.activeCustomers} annual customers × ${formatCurrency(results.clv)} CLV</p>
+                  <p style="color: #2563eb; font-size: 13px; font-weight: 700; margin: 4px 0 0;">${formatCurrency(results.retentionImprovement)} / year</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    `;
 
     const zoomSection = zoomLink
       ? `
@@ -62,10 +152,10 @@ serve(async (req) => {
               <!-- Body -->
               <tr>
                 <td style="padding: 32px;">
-                  <p style="color: #1e3a5f; font-size: 16px; margin: 0 0 24px;">Hi ${contactName},</p>
-                  <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">Thank you for completing your App ROI Assessment. Here's a summary of the potential value a custom app could deliver for your business.</p>
+                  <p style="color: #1e3a5f; font-size: 16px; margin: 0 0 8px;">Hi ${contactName},</p>
+                  <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">Thank you for completing your App ROI Assessment. Below you'll find your complete input data followed by our ROI projections, so you can verify every number behind the calculations.</p>
 
-                  <!-- Total Impact -->
+                  <!-- Total Impact Hero -->
                   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                     <tr>
                       <td style="background: linear-gradient(135deg, #1e3a5f, #2563eb); padding: 24px; border-radius: 12px; text-align: center;">
@@ -75,7 +165,16 @@ serve(async (req) => {
                     </tr>
                   </table>
 
-                  <!-- Breakdown -->
+                  <!-- YOUR INPUTS -->
+                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb;">📋 Your Inputs</h2>
+                  <p style="color: #64748b; font-size: 13px; margin: 0 0 16px;">Please review the data below to ensure accuracy. If anything looks off, the ROI projections can be recalculated.</p>
+                  ${inputDetailsHtml}
+
+                  <!-- ROI METHODOLOGY -->
+                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb;">📊 ROI Breakdown</h2>
+                  ${methodologyHtml}
+
+                  <!-- Summary Stats -->
                   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                     <tr>
                       <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
@@ -119,11 +218,13 @@ serve(async (req) => {
                   ${zoomSection}
 
                   <!-- Footer -->
-                  <tr>
-                    <td style="text-align: center; padding-top: 16px; border-top: 1px solid #e2e8f0;">
-                      <p style="color: #94a3b8; font-size: 12px; margin: 0;">You're not buying tech. You're buying profit.</p>
-                    </td>
-                  </tr>
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="text-align: center; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+                        <p style="color: #94a3b8; font-size: 12px; margin: 0;">You're not buying tech. You're buying profit.</p>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
