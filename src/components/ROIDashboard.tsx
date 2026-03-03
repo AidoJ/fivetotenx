@@ -50,10 +50,10 @@ const ROIDashboard = ({ results, businessName, onReset }: Props) => {
         className="rounded-2xl p-8 text-center"
         style={{ background: 'var(--gradient-gold)' }}
       >
-        <p className="text-sm font-semibold uppercase tracking-wider text-accent-foreground/70 mb-1">
+        <p className="text-sm font-semibold uppercase tracking-wider text-primary-foreground/70 mb-1">
           Total Potential Annual Impact
         </p>
-        <p className="text-5xl md:text-6xl font-display font-bold text-accent-foreground">
+        <p className="text-5xl md:text-6xl font-display font-bold text-primary-foreground">
           {formatCurrency(results.totalAnnualImpact)}
         </p>
       </motion.div>
