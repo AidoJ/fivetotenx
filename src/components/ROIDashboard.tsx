@@ -84,6 +84,7 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
           contactEmail: formData.contactEmail,
           businessName: formData.businessName,
           results,
+          formData,
           zoomLink: includeZoom ? zoomLink : null,
         },
       });
