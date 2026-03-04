@@ -59,7 +59,7 @@ const Index = () => {
         <ROIDashboard results={results} formData={formData} onReset={handleReset} /> :
 
         <>
-            <StepIndicator currentStep={step} totalSteps={4} labels={STEP_LABELS} className="bg-secondary-foreground" />
+            <StepIndicator currentStep={step} totalSteps={4} labels={STEP_LABELS} />
 
             <AnimatePresence mode="wait">
               <motion.div
