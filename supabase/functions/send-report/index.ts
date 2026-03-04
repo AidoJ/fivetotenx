@@ -25,109 +25,70 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
-    const formatCurrency = (value: number) =>
-      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+    const fmt = (v: number) =>
+      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
 
-    const formatPercent = (value: number) => `${value.toFixed(1)}%`;
+    const businessTypeLabel = formData?.businessType === 'hybrid' ? 'Hybrid (Service + Product)' : formData?.businessType === 'product' ? 'Product-Based' : 'Service-Based';
 
+    const isService = formData?.businessType === 'service' || formData?.businessType === 'hybrid';
+    const isProduct = formData?.businessType === 'product' || formData?.businessType === 'hybrid';
+
+    // Helper for data rows
     const row = (label: string, value: string) => `
       <tr>
-        <td style="padding: 8px 12px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${label}</td>
-        <td style="padding: 8px 12px; color: #1e3a5f; font-size: 13px; font-weight: 600; text-align: right; border-bottom: 1px solid #f1f5f9;">${value}</td>
+        <td style="padding: 10px 16px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${label}</td>
+        <td style="padding: 10px 16px; color: #1e293b; font-size: 13px; font-weight: 600; text-align: right; border-bottom: 1px solid #f1f5f9;">${value}</td>
       </tr>`;
 
-    const sectionHeader = (title: string, emoji: string) => `
+    const sectionHead = (title: string) => `
       <tr>
-        <td colspan="2" style="padding: 16px 12px 8px; font-size: 14px; font-weight: 700; color: #1e3a5f; border-bottom: 2px solid #e2e8f0;">
-          ${emoji} ${title}
+        <td colspan="2" style="padding: 18px 16px 10px; font-size: 13px; font-weight: 700; color: #1e3a5f; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #dbeafe;">
+          ${title}
         </td>
       </tr>`;
 
-    // Build input details section
-    const lostReasons = formData?.lostSalesReasons?.length > 0
-      ? formData.lostSalesReasons.join(', ')
-      : 'None selected';
-    const currentFeatures = formData?.currentFeatures?.length > 0
-      ? formData.currentFeatures.join(', ')
-      : 'None selected';
+    const lostReasons = formData?.lostSalesReasons?.length > 0 ? formData.lostSalesReasons.join(', ') : 'None identified';
+    const currentFeatures = formData?.currentFeatures?.length > 0 ? formData.currentFeatures.join(', ') : 'None currently';
 
-    const inputDetailsHtml = formData ? `
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-        ${sectionHeader('Business Snapshot', '🏢')}
-        ${row('Business Name', formData.businessName || '—')}
-        ${row('Industry', formData.industry || '—')}
-        ${row('Number of Staff', formData.numberOfStaff || '—')}
-        ${row('Monthly Revenue', formData.monthlyRevenue || '—')}
-        ${row('Avg Transaction Value', formData.avgTransactionValue ? `$${formData.avgTransactionValue}` : '—')}
+    // Dynamic pricing data
+    const pricing = results?.pricing;
+    const isViable = pricing?.isViable !== false;
 
-        ${sectionHeader('Customer Metrics', '👥')}
-        ${row('Monthly Website Visitors', formData.monthlyVisitors || '—')}
-        ${row('Monthly Leads', formData.monthlyLeads || '—')}
-        ${row('Conversion Rate', formData.conversionRate ? `${formData.conversionRate}%` : '—')}
-        ${row('Monthly New Customers', formData.monthlyNewCustomers || '—')}
-        ${row('Avg Purchase Value', formData.avgPurchaseValue ? `$${formData.avgPurchaseValue}` : '—')}
-        ${row('Avg Purchases / Year', formData.avgPurchasesPerYear || '—')}
-        ${row('Avg Retention Years', formData.avgRetentionYears || '—')}
-
-        ${sectionHeader('Operational Hours (Weekly)', '⏱️')}
-        ${row('Admin Tasks', formData.hoursAdmin ? `${formData.hoursAdmin} hrs` : '—')}
-        ${row('Booking & Scheduling', formData.hoursBooking ? `${formData.hoursBooking} hrs` : '—')}
-        ${row('Follow-ups', formData.hoursFollowUps ? `${formData.hoursFollowUps} hrs` : '—')}
-        ${row('Invoicing', formData.hoursInvoicing ? `${formData.hoursInvoicing} hrs` : '—')}
-        ${row('Hourly Staff Cost', formData.hourlyStaffCost ? `$${formData.hourlyStaffCost}/hr` : '—')}
-
-        ${sectionHeader('Growth Context', '📈')}
-        ${row('Lost Sales Reasons', lostReasons)}
-        ${row('Current Features', currentFeatures)}
-      </table>
-    ` : '';
-
-    // Calculation methodology
-    const methodologyHtml = `
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-        ${sectionHeader('How We Calculated Your ROI', '🔍')}
+    // Build payment plans HTML
+    let paymentPlansHtml = '';
+    if (isViable && pricing?.plans?.length > 0) {
+      const planRows = pricing.plans.map((plan: { label: string; deposit: number; monthlyAmount: number; totalCost: number; includesMaintenance: boolean; description: string }) => `
         <tr>
-          <td colspan="2" style="padding: 12px;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="padding: 8px 12px; vertical-align: top;">
-                  <p style="color: #1e3a5f; font-size: 13px; font-weight: 600; margin: 0 0 4px;">Revenue Lift</p>
-                  <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">15% conversion rate improvement applied to your current ${formData?.monthlyVisitors || '0'} monthly visitors × $${formData?.avgTransactionValue || formData?.avgPurchaseValue || '0'} avg sale</p>
-                  <p style="color: #2563eb; font-size: 13px; font-weight: 700; margin: 4px 0 0;">${formatCurrency(results.revenueLift)} / year</p>
-                </td>
-              </tr>
-              <tr><td style="height: 8px; border-bottom: 1px solid #f1f5f9;"></td></tr>
-              <tr>
-                <td style="padding: 8px 12px; vertical-align: top;">
-                  <p style="color: #1e3a5f; font-size: 13px; font-weight: 600; margin: 0 0 4px;">Operational Savings</p>
-                  <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">40% reduction of ${results.weeklyAdminHours} weekly admin hours × $${formData?.hourlyStaffCost || '0'}/hr × 52 weeks</p>
-                  <p style="color: #2563eb; font-size: 13px; font-weight: 700; margin: 4px 0 0;">${formatCurrency(results.operationalSavings)} / year</p>
-                </td>
-              </tr>
-              <tr><td style="height: 8px; border-bottom: 1px solid #f1f5f9;"></td></tr>
-              <tr>
-                <td style="padding: 8px 12px; vertical-align: top;">
-                  <p style="color: #1e3a5f; font-size: 13px; font-weight: 600; margin: 0 0 4px;">Retention Improvement</p>
-                  <p style="color: #64748b; font-size: 12px; line-height: 1.5; margin: 0;">10% retention uplift on ${results.activeCustomers} annual customers × ${formatCurrency(results.clv)} CLV</p>
-                  <p style="color: #2563eb; font-size: 13px; font-weight: 700; margin: 4px 0 0;">${formatCurrency(results.retentionImprovement)} / year</p>
-                </td>
-              </tr>
-            </table>
+          <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9;">
+            <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">${plan.label}</p>
+            <p style="color: #64748b; font-size: 12px; margin: 0;">${plan.description}</p>
+          </td>
+          <td style="padding: 14px 16px; text-align: right; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
+            ${plan.deposit > 0 ? `<p style="color: #1e293b; font-size: 13px; margin: 0;">Deposit: ${fmt(plan.deposit)}</p>` : ''}
+            ${plan.monthlyAmount > 0 ? `<p style="color: #2563eb; font-size: 13px; font-weight: 600; margin: 2px 0 0;">${fmt(plan.monthlyAmount)}/mo${plan.includesMaintenance ? ' (incl. maintenance)' : ''}</p>` : ''}
+            ${plan.totalCost > 0 ? `<p style="color: #64748b; font-size: 12px; margin: 2px 0 0;">Total: ${fmt(plan.totalCost)}</p>` : ''}
           </td>
         </tr>
-      </table>
-    `;
+      `).join('');
+      
+      paymentPlansHtml = `
+        <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 12px;">
+          ${planRows}
+        </table>
+      `;
+    }
 
     const zoomSection = zoomLink
       ? `
-        <tr>
-          <td style="padding: 24px 32px; background: #1e3a5f; border-radius: 12px; text-align: center;">
-            <p style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 8px;">🎥 You're Invited: App Building Training Session</p>
-            <p style="color: #b0c4de; font-size: 14px; margin: 0 0 16px;">Join us to explore how a custom app can transform your business.</p>
-            <a href="${zoomLink}" style="display: inline-block; padding: 12px 32px; background: #3b82f6; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Join Zoom Session</a>
-          </td>
-        </tr>
-        <tr><td style="height: 24px;"></td></tr>
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+          <tr>
+            <td style="padding: 24px 32px; background: #1e3a5f; border-radius: 12px; text-align: center;">
+              <p style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 8px;">🎥 Your Strategy Session Is Booked</p>
+              <p style="color: #b0c4de; font-size: 14px; margin: 0 0 16px;">Let's walk through these numbers together and map out your implementation roadmap.</p>
+              <a href="${zoomLink}" style="display: inline-block; padding: 12px 32px; background: #3b82f6; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Join Strategy Session</a>
+            </td>
+          </tr>
+        </table>
       `
       : '';
 
@@ -135,98 +96,299 @@ serve(async (req) => {
     <!DOCTYPE html>
     <html>
     <head><meta charset="utf-8"></head>
-    <body style="margin: 0; padding: 0; background: #f0f4f8; font-family: 'Segoe UI', Arial, sans-serif;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0f4f8; padding: 40px 20px;">
+    <body style="margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; padding: 40px 20px;">
         <tr>
           <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.08);">
+            <table width="640" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.06);">
               
               <!-- Header -->
               <tr>
-                <td style="background: linear-gradient(135deg, #1e3a5f, #2563eb); padding: 32px; text-align: center;">
-                  <h1 style="color: #ffffff; font-size: 24px; margin: 0;">📊 Your App ROI Report</h1>
-                  <p style="color: #b0c4de; font-size: 14px; margin: 8px 0 0;">Prepared for ${businessName || 'Your Business'}</p>
+                <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 40px 32px; text-align: center;">
+                  <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">Strategic Growth Assessment</p>
+                  <h1 style="color: #ffffff; font-size: 26px; margin: 0; font-weight: 700;">Digital Transformation ROI Report</h1>
+                  <p style="color: #bfdbfe; font-size: 15px; margin: 12px 0 0;">Prepared exclusively for ${businessName || 'Your Business'}</p>
                 </td>
               </tr>
 
-              <!-- Body -->
+              <!-- Opening Letter -->
               <tr>
-                <td style="padding: 32px;">
-                  <p style="color: #1e3a5f; font-size: 16px; margin: 0 0 8px;">Hi ${contactName},</p>
-                  <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">Thank you for completing your App ROI Assessment. Below you'll find your complete input data followed by our ROI projections, so you can verify every number behind the calculations.</p>
+                <td style="padding: 36px 32px 0;">
+                  <p style="color: #1e293b; font-size: 16px; line-height: 1.7; margin: 0 0 16px;">Dear ${contactName},</p>
+                  
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
+                    Thank you for investing the time to complete this assessment. What follows isn't just a set of numbers — it's a strategic roadmap for how <strong>${businessName || 'your business'}</strong> can leverage modern technology to unlock measurable growth.
+                  </p>
 
-                  <!-- Total Impact Hero -->
-                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
-                    <tr>
-                      <td style="background: linear-gradient(135deg, #1e3a5f, #2563eb); padding: 24px; border-radius: 12px; text-align: center;">
-                        <p style="color: #b0c4de; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Total Potential Annual Impact</p>
-                        <p style="color: #ffffff; font-size: 36px; font-weight: 800; margin: 0;">${formatCurrency(results.totalAnnualImpact)}</p>
-                      </td>
-                    </tr>
-                  </table>
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
+                    The business landscape is shifting rapidly. Companies that adopt AI-powered tools, automation, and custom digital solutions aren't just keeping up — they're <strong>pulling ahead</strong>. According to recent industry research, businesses that embrace digital transformation see an average 20–30% improvement in operational efficiency and customer retention within the first year.
+                  </p>
 
-                  <!-- YOUR INPUTS -->
-                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb;">📋 Your Inputs</h2>
-                  <p style="color: #64748b; font-size: 13px; margin: 0 0 16px;">Please review the data below to ensure accuracy. If anything looks off, the ROI projections can be recalculated.</p>
-                  ${inputDetailsHtml}
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
+                    The question is no longer <em>"Should we invest in technology?"</em> — it's <em>"How much are we losing by waiting?"</em>
+                  </p>
 
-                  <!-- ROI METHODOLOGY -->
-                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb;">📊 ROI Breakdown</h2>
-                  ${methodologyHtml}
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 24px;">
+                    Based on the data you provided, here's what a custom-built app could deliver for your ${businessTypeLabel.toLowerCase()} business. We've included every input you gave us so you can verify the foundations of these projections.
+                  </p>
+                </td>
+              </tr>
 
-                  <!-- Summary Stats -->
-                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
-                    <tr>
-                      <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
-                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Revenue Lift</p>
-                        <p style="color: #1e3a5f; font-size: 18px; font-weight: 700; margin: 0;">${formatCurrency(results.revenueLift)}</p>
-                      </td>
-                      <td style="width: 8px;"></td>
-                      <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
-                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Op. Savings</p>
-                        <p style="color: #1e3a5f; font-size: 18px; font-weight: 700; margin: 0;">${formatCurrency(results.operationalSavings)}</p>
-                      </td>
-                      <td style="width: 8px;"></td>
-                      <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
-                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Retention</p>
-                        <p style="color: #1e3a5f; font-size: 18px; font-weight: 700; margin: 0;">${formatCurrency(results.retentionImprovement)}</p>
-                      </td>
-                    </tr>
-                  </table>
-
-                  <!-- ROI Stats -->
-                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
-                    <tr>
-                      <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
-                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Build Cost</p>
-                        <p style="color: #1e3a5f; font-size: 16px; font-weight: 700; margin: 0;">${formatCurrency(results.buildCost || 18000)}</p>
-                      </td>
-                      <td style="width: 8px;"></td>
-                      <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
-                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Year 1 ROI</p>
-                        <p style="color: #2563eb; font-size: 16px; font-weight: 700; margin: 0;">${results.roiPercentage.toFixed(0)}%</p>
-                      </td>
-                      <td style="width: 8px;"></td>
-                      <td style="padding: 16px; background: #f0f4f8; border-radius: 8px; text-align: center; width: 33%;">
-                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Break-even</p>
-                        <p style="color: #2563eb; font-size: 16px; font-weight: 700; margin: 0;">${results.breakEvenMonths.toFixed(1)} mo</p>
-                      </td>
-                    </tr>
-                  </table>
-
-                  <!-- Zoom Invite -->
-                  ${zoomSection}
-
-                  <!-- Footer -->
+              <!-- TOTAL IMPACT HERO -->
+              <tr>
+                <td style="padding: 0 32px 32px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="text-align: center; padding-top: 16px; border-top: 1px solid #e2e8f0;">
-                        <p style="color: #94a3b8; font-size: 12px; margin: 0;">You're not buying tech. You're buying profit.</p>
+                      <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 28px; border-radius: 12px; text-align: center;">
+                        <p style="color: #93c5fd; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px;">Your Projected Annual Impact</p>
+                        <p style="color: #ffffff; font-size: 42px; font-weight: 800; margin: 0; letter-spacing: -1px;">${fmt(results.totalAnnualImpact)}</p>
+                        <p style="color: #bfdbfe; font-size: 13px; margin: 8px 0 0;">per year in combined revenue growth, savings & efficiency gains</p>
                       </td>
                     </tr>
                   </table>
                 </td>
               </tr>
+
+              <!-- YOUR INPUTS: Verification Section -->
+              <tr>
+                <td style="padding: 0 32px 28px;">
+                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">📋 Your Business Data — Please Verify</h2>
+                  <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0 0 16px;">
+                    Accuracy matters. Every projection below is built on these inputs. If anything looks incorrect, let us know and we'll recalculate immediately.
+                  </p>
+
+                  <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                    ${sectionHead('Business Profile')}
+                    ${row('Business Name', formData?.businessName || '—')}
+                    ${row('Industry', formData?.industry || '—')}
+                    ${row('Business Model', businessTypeLabel)}
+                    ${row('Number of Staff', formData?.numberOfStaff || '—')}
+                    ${row('Monthly Revenue', formData?.monthlyRevenue || '—')}
+                    ${row('Avg Transaction Value', formData?.avgTransactionValue ? `$${formData.avgTransactionValue}` : '—')}
+
+                    ${sectionHead('Customer & Sales Metrics')}
+                    ${row('Monthly Website Visitors', formData?.monthlyVisitors || '—')}
+                    ${row('Monthly Leads / Enquiries', formData?.monthlyLeads || '—')}
+                    ${row('Lead-to-Sale Conversion Rate', formData?.conversionRate ? `${formData.conversionRate}%` : '—')}
+                    ${row('Monthly New Customers', formData?.monthlyNewCustomers || '—')}
+                    ${isService && formData?.noShowRate ? row('No-Show / Cancellation Rate', `${formData.noShowRate}%`) : ''}
+                    ${isProduct && formData?.upsellRevenuePercent ? row('Upsell / Cross-sell Revenue', `${formData.upsellRevenuePercent}%`) : ''}
+                    ${formData?.monthlyMarketingSpend ? row('Monthly Marketing Spend', `$${formData.monthlyMarketingSpend}`) : ''}
+                    ${formData?.customerAcquisitionCost ? row('Customer Acquisition Cost', `$${formData.customerAcquisitionCost}`) : ''}
+
+                    ${sectionHead('Customer Lifetime Value Inputs')}
+                    ${row('Avg Purchase Value', formData?.avgPurchaseValue ? `$${formData.avgPurchaseValue}` : '—')}
+                    ${row('Avg Purchases Per Year', formData?.avgPurchasesPerYear || '—')}
+                    ${row('Avg Customer Retention', formData?.avgRetentionYears ? `${formData.avgRetentionYears} years` : '—')}
+                    ${row('Calculated CLV', fmt(results.clv || 0))}
+
+                    ${sectionHead('Weekly Operational Hours')}
+                    ${row('Admin Tasks', formData?.hoursAdmin ? `${formData.hoursAdmin} hrs` : '—')}
+                    ${row('Booking & Scheduling', formData?.hoursBooking ? `${formData.hoursBooking} hrs` : '—')}
+                    ${row('Follow-ups', formData?.hoursFollowUps ? `${formData.hoursFollowUps} hrs` : '—')}
+                    ${row('Invoicing', formData?.hoursInvoicing ? `${formData.hoursInvoicing} hrs` : '—')}
+                    ${row('Total Weekly Hours', `${results.weeklyAdminHours || 0} hrs`)}
+                    ${row('Hourly Staff Cost', formData?.hourlyStaffCost ? `$${formData.hourlyStaffCost}/hr` : '—')}
+
+                    ${sectionHead('Growth Context')}
+                    ${row('Lost Sales Reasons', lostReasons)}
+                    ${row('Current Digital Features', currentFeatures)}
+                  </table>
+                </td>
+              </tr>
+
+              <!-- COACHING SECTION: Why This Matters Now -->
+              <tr>
+                <td style="padding: 0 32px 28px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; overflow: hidden;">
+                    <tr>
+                      <td style="padding: 24px;">
+                        <h3 style="color: #92400e; font-size: 16px; margin: 0 0 12px;">💡 A Note on Timing & Competitive Advantage</h3>
+                        <p style="color: #78350f; font-size: 13px; line-height: 1.8; margin: 0 0 10px;">
+                          Every month without automation, your business absorbs <strong>${fmt((results.operationalSavings || 0) / 12)}</strong> in avoidable operational costs. Every month without conversion optimisation, you're leaving approximately <strong>${fmt((results.revenueLift || 0) / 12)}</strong> on the table.
+                        </p>
+                        <p style="color: #78350f; font-size: 13px; line-height: 1.8; margin: 0 0 10px;">
+                          Your competitors are already adopting AI-driven customer engagement, automated scheduling, and intelligent upsell systems. The businesses that move first don't just gain efficiency — they <strong>capture market share</strong> from those who wait.
+                        </p>
+                        <p style="color: #78350f; font-size: 13px; line-height: 1.8; margin: 0;">
+                          This isn't about buying software. It's about making a strategic investment in your business's future competitiveness and profitability.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- ROI BREAKDOWN -->
+              <tr>
+                <td style="padding: 0 32px 28px;">
+                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 16px;">📊 How We Calculated Your ROI</h2>
+
+                  <!-- Revenue Lift -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0f9ff; border-radius: 8px; margin-bottom: 12px;">
+                    <tr>
+                      <td style="padding: 16px;">
+                        <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 6px;">📈 Revenue Lift — ${fmt(results.revenueLift)}/year</p>
+                        <p style="color: #475569; font-size: 13px; line-height: 1.7; margin: 0;">
+                          Your current conversion rate of ${results.currentConversion?.toFixed(1) || '0'}% means you're converting ${formData?.monthlyVisitors || '0'} visitors into ${fmt(results.currentMonthlyRevenue || 0)}/mo. With a custom app delivering a 15% conversion improvement (to ${results.newConversion?.toFixed(2) || '0'}%), your monthly revenue rises to ${fmt(results.newMonthlyRevenue || 0)} — that's an extra <strong>${fmt((results.revenueLift || 0) / 12)}/mo</strong>.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Operational Savings -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0fdf4; border-radius: 8px; margin-bottom: 12px;">
+                    <tr>
+                      <td style="padding: 16px;">
+                        <p style="color: #14532d; font-size: 14px; font-weight: 700; margin: 0 0 6px;">⏱️ Operational Savings — ${fmt(results.operationalSavings)}/year</p>
+                        <p style="color: #475569; font-size: 13px; line-height: 1.7; margin: 0;">
+                          Your team currently spends ${results.weeklyAdminHours || 0} hours/week on manual admin, booking, follow-ups, and invoicing at $${formData?.hourlyStaffCost || '0'}/hr. App automation typically removes 40% of this workload — freeing up <strong>${results.weeklySavingsHours?.toFixed(1) || '0'} hours every week</strong> for revenue-generating activities.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Retention -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #fdf4ff; border-radius: 8px; margin-bottom: 12px;">
+                    <tr>
+                      <td style="padding: 16px;">
+                        <p style="color: #581c87; font-size: 14px; font-weight: 700; margin: 0 0 6px;">👥 Customer Retention — ${fmt(results.retentionImprovement)}/year</p>
+                        <p style="color: #475569; font-size: 13px; line-height: 1.7; margin: 0;">
+                          With ${results.activeCustomers || 0} customers per year and a CLV of ${fmt(results.clv || 0)}, even a conservative 10% retention improvement — through push notifications, loyalty features, and personalised engagement — adds significant value.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  ${results.noShowRecovery > 0 ? `
+                  <!-- No-Show Recovery -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #fef2f2; border-radius: 8px; margin-bottom: 12px;">
+                    <tr>
+                      <td style="padding: 16px;">
+                        <p style="color: #7f1d1d; font-size: 14px; font-weight: 700; margin: 0 0 6px;">🛡️ No-Show Recovery — ${fmt(results.noShowRecovery)}/year</p>
+                        <p style="color: #475569; font-size: 13px; line-height: 1.7; margin: 0;">
+                          With a ${formData?.noShowRate || '0'}% no-show rate, you're currently losing revenue on missed appointments. Automated reminders, easy rescheduling, and deposit integration typically recover 50% of no-shows — putting that money back in your pocket.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  ` : ''}
+
+                  ${results.upsellLift > 0 ? `
+                  <!-- Upsell Lift -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #fffbeb; border-radius: 8px; margin-bottom: 12px;">
+                    <tr>
+                      <td style="padding: 16px;">
+                        <p style="color: #78350f; font-size: 14px; font-weight: 700; margin: 0 0 6px;">🛒 Upsell & Cross-sell Lift — ${fmt(results.upsellLift)}/year</p>
+                        <p style="color: #475569; font-size: 13px; line-height: 1.7; margin: 0;">
+                          Currently ${formData?.upsellRevenuePercent || '0'}% of your revenue comes from add-on products. Smart in-app recommendations — powered by customer behaviour data and AI — can lift this by 15%, turning every transaction into a higher-value interaction.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  ` : ''}
+
+                  ${results.marketingEfficiency > 0 ? `
+                  <!-- Marketing Efficiency -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0f9ff; border-radius: 8px; margin-bottom: 12px;">
+                    <tr>
+                      <td style="padding: 16px;">
+                        <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 6px;">📣 Marketing Efficiency — ${fmt(results.marketingEfficiency)}/year</p>
+                        <p style="color: #475569; font-size: 13px; line-height: 1.7; margin: 0;">
+                          You're spending $${formData?.monthlyMarketingSpend || '0'}/mo on marketing with a customer acquisition cost of $${formData?.customerAcquisitionCost || '0'}. Better in-app conversion reduces your effective CAC, saving approximately 20% of marketing spend while acquiring the same number of customers.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  ` : ''}
+                </td>
+              </tr>
+
+              <!-- INVESTMENT & PAYMENT OPTIONS -->
+              ${isViable ? `
+              <tr>
+                <td style="padding: 0 32px 28px;">
+                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">💰 Your Investment & Payment Options</h2>
+                  <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0 0 6px;">
+                    Based on your projected ${fmt(results.totalAnnualImpact)}/year impact, your app falls in our <strong>${pricing?.tierLabel || ''}</strong> tier.
+                  </p>
+
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin: 16px 0;">
+                    <tr>
+                      <td style="padding: 16px; background: #f0f9ff; border-radius: 8px; text-align: center; width: 33%;">
+                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Build Investment</p>
+                        <p style="color: #1e3a5f; font-size: 20px; font-weight: 700; margin: 0;">${fmt(pricing?.buildCost || 0)}</p>
+                      </td>
+                      <td style="width: 8px;"></td>
+                      <td style="padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center; width: 33%;">
+                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Break-even</p>
+                        <p style="color: #16a34a; font-size: 20px; font-weight: 700; margin: 0;">${results.breakEvenMonths?.toFixed(1) || '0'} months</p>
+                      </td>
+                      <td style="width: 8px;"></td>
+                      <td style="padding: 16px; background: #fdf4ff; border-radius: 8px; text-align: center; width: 33%;">
+                        <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Year 1 ROI</p>
+                        <p style="color: #7c3aed; font-size: 20px; font-weight: 700; margin: 0;">${results.roiPercentage?.toFixed(0) || '0'}%</p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="color: #1e3a5f; font-size: 14px; font-weight: 600; margin: 16px 0 8px;">Choose a Payment Plan:</p>
+                  ${paymentPlansHtml}
+
+                  ${pricing?.annualMaintenance > 0 ? `
+                  <p style="color: #64748b; font-size: 12px; margin: 12px 0 0;">
+                    * Annual maintenance (updates, monitoring, support): ${fmt(pricing.annualMaintenance)}/year — included in subscription plans, optional add-on for upfront plans.
+                  </p>
+                  ` : ''}
+                </td>
+              </tr>
+              ` : `
+              <tr>
+                <td style="padding: 0 32px 28px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;">
+                    <tr>
+                      <td style="padding: 24px;">
+                        <h3 style="color: #991b1b; font-size: 16px; margin: 0 0 8px;">⚠️ Viability Assessment</h3>
+                        <p style="color: #7f1d1d; font-size: 13px; line-height: 1.7; margin: 0;">
+                          Based on current figures, the projected annual impact of ${fmt(results.totalAnnualImpact)} may not justify a custom app build at this stage. We'd recommend focusing on growing your customer base and revenue first, then revisiting this assessment. We're here to help when the time is right.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              `}
+
+              <!-- Zoom section -->
+              ${zoomSection ? `<tr><td style="padding: 0 32px;">${zoomSection}</td></tr>` : ''}
+
+              <!-- CLOSING COACHING MESSAGE -->
+              <tr>
+                <td style="padding: 0 32px 32px;">
+                  <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 12px;">🚀 Our Recommendation</h2>
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
+                    ${contactName}, the data is clear: <strong>${businessName || 'your business'}</strong> has significant untapped potential. The businesses that thrive in the next 5 years won't be the ones with the best products alone — they'll be the ones that deliver the best <em>experience</em>, powered by smart technology.
+                  </p>
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
+                    A custom app isn't an expense — it's an <strong>investment that pays for itself in ${results.breakEvenMonths?.toFixed(1) || 'a few'} months</strong> and continues generating returns year after year. With AI-driven automation handling your repetitive tasks, intelligent customer engagement driving retention, and data-driven insights optimising every interaction, you're not just keeping up — you're setting the pace.
+                  </p>
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
+                    <strong>The cost of inaction is real:</strong> every month of delay represents approximately <strong>${fmt(results.totalAnnualImpact / 12)}</strong> in unrealised value. That's not a scare tactic — it's simply what the numbers show.
+                  </p>
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
+                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is a brief strategy call to map out your app's features and timeline.
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 24px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
+                  <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">You're not buying tech. You're buying profit.</p>
+                  <p style="color: #94a3b8; font-size: 12px; margin: 0;">This report was generated by AppItRight — Strategic App ROI Assessment</p>
+                </td>
+              </tr>
+
             </table>
           </td>
         </tr>
@@ -245,7 +407,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'App ROI Report <onboarding@resend.dev>',
         to: [contactEmail],
-        subject: `Your App ROI Report – ${businessName || 'Your Business'}`,
+        subject: `Strategic Growth Report – ${businessName || 'Your Business'} | App ROI Assessment`,
         html: emailHtml,
       }),
     });
