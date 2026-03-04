@@ -112,8 +112,8 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        className="rounded-2xl p-8 text-center"
-        style={{ background: 'var(--gradient-gold)' }}
+        className="rounded-2xl p-8 text-center animate-gradient-shift"
+        style={{ backgroundImage: 'var(--gradient-vibrant)', backgroundSize: '200% 200%' }}
       >
         <p className="text-sm font-semibold uppercase tracking-wider text-primary-foreground/70 mb-1">
           Total Potential Annual Impact
@@ -261,7 +261,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
       {/* Tagline */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="text-center py-6">
         <p className="text-lg font-display font-semibold text-foreground mb-1">You're not buying tech.</p>
-        <p className="text-2xl font-display font-bold text-primary">You're buying profit.</p>
+        <p className="text-2xl font-display font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>You're buying profit.</p>
         <button onClick={onReset} className="mt-6 text-sm text-muted-foreground hover:text-foreground underline transition-colors">
           Start a new assessment
         </button>

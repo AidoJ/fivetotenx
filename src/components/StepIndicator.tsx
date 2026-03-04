@@ -15,9 +15,9 @@ const StepIndicator = ({ currentStep, totalSteps, labels }: StepIndicatorProps) 
             <motion.div
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-colors ${
                 i < currentStep
-                  ? 'bg-primary border-primary text-primary-foreground'
+                  ? 'bg-primary border-primary text-primary-foreground shadow-[0_0_12px_hsl(260_70%_58%/0.4)]'
                   : i === currentStep
-                  ? 'border-primary text-primary bg-primary/10'
+                  ? 'border-primary text-primary bg-primary/15'
                   : 'border-border text-muted-foreground bg-secondary'
               }`}
               animate={i === currentStep ? { scale: [1, 1.08, 1] } : {}}
