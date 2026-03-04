@@ -7,6 +7,7 @@ import CustomerMetrics from '@/components/steps/CustomerMetrics';
 import OperationalEfficiency from '@/components/steps/OperationalEfficiency';
 import GrowthOpportunity from '@/components/steps/GrowthOpportunity';
 import ROIDashboard from '@/components/ROIDashboard';
+import LandingPage from '@/components/LandingPage';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, BarChart3 } from 'lucide-react';
 import logo from '@/assets/logo-5to10x.png';
@@ -14,6 +15,7 @@ import logo from '@/assets/logo-5to10x.png';
 const STEP_LABELS = ['Business', 'Metrics', 'Operations', 'Growth'];
 
 const Index = () => {
+  const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [results, setResults] = useState<ROIResults | null>(null);
@@ -32,6 +34,10 @@ const Index = () => {
     setResults(null);
     setStep(0);
   };
+
+  if (!started) {
+    return <LandingPage onStart={() => setStarted(true)} />;
+  }
 
   const steps = [
     <BusinessSnapshot key="s1" data={formData} onChange={handleChange} />,
