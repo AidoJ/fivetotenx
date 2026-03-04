@@ -8,6 +8,9 @@ interface Props {
 }
 
 const CustomerMetrics = ({ data, onChange }: Props) => {
+  const isService = data.businessType === 'service' || data.businessType === 'hybrid';
+  const isProduct = data.businessType === 'product' || data.businessType === 'hybrid';
+
   return (
     <div className="space-y-6">
       <div>
@@ -35,6 +38,37 @@ const CustomerMetrics = ({ data, onChange }: Props) => {
           <Label htmlFor="newCustomers">Monthly New Customers</Label>
           <Input id="newCustomers" type="number" placeholder="e.g. 25"
             value={data.monthlyNewCustomers} onChange={(e) => onChange({ monthlyNewCustomers: e.target.value })} />
+        </div>
+      </div>
+
+      {/* Conditional fields based on business type */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {isService && (
+          <div className="space-y-2">
+            <Label htmlFor="noShowRate">No-Show / Cancellation Rate (%)</Label>
+            <Input id="noShowRate" type="number" placeholder="e.g. 15"
+              value={data.noShowRate} onChange={(e) => onChange({ noShowRate: e.target.value })} />
+            <p className="text-xs text-muted-foreground">% of bookings that don't show up</p>
+          </div>
+        )}
+        {isProduct && (
+          <div className="space-y-2">
+            <Label htmlFor="upsellPercent">Upsell / Cross-sell Revenue (%)</Label>
+            <Input id="upsellPercent" type="number" placeholder="e.g. 20"
+              value={data.upsellRevenuePercent} onChange={(e) => onChange({ upsellRevenuePercent: e.target.value })} />
+            <p className="text-xs text-muted-foreground">% of revenue from add-on / cross-sell products</p>
+          </div>
+        )}
+        <div className="space-y-2">
+          <Label htmlFor="marketingSpend">Monthly Marketing Spend ($)</Label>
+          <Input id="marketingSpend" type="number" placeholder="e.g. 2000"
+            value={data.monthlyMarketingSpend} onChange={(e) => onChange({ monthlyMarketingSpend: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="cac">Customer Acquisition Cost ($)</Label>
+          <Input id="cac" type="number" placeholder="e.g. 50"
+            value={data.customerAcquisitionCost} onChange={(e) => onChange({ customerAcquisitionCost: e.target.value })} />
+          <p className="text-xs text-muted-foreground">How much it costs to win one new customer</p>
         </div>
       </div>
 

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ROIResults, APP_BUILD_COST, FormData } from '@/lib/formTypes';
-import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle } from 'lucide-react';
+import { ROIResults, FormData } from '@/lib/formTypes';
+import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle, ShieldAlert, ShoppingBag, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import PricingSection from '@/components/dashboard/PricingSection';
 
 interface Props {
   results: ROIResults;
@@ -34,27 +35,17 @@ const ResultCard = ({ icon: Icon, label, value, color, delay }: {
   </motion.div>
 );
 
-const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => {
+const ROIDashboard = ({ results, formData, onReset }: Props) => {
   const [zoomLink, setZoomLink] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [buildCost, setBuildCost] = useState(APP_BUILD_COST);
-  const [buildWeeks, setBuildWeeks] = useState(8);
   const { toast } = useToast();
-
-  // Recalculate ROI metrics based on editable build cost
-  const results: ROIResults = {
-    ...initialResults,
-    roiPercentage: buildCost > 0 ? ((initialResults.totalAnnualImpact - buildCost) / buildCost) * 100 : 0,
-    breakEvenMonths: initialResults.totalAnnualImpact > 0 ? (buildCost / (initialResults.totalAnnualImpact / 12)) : 0,
-  };
 
   const handleSendReport = async (includeZoom: boolean) => {
     if (!formData.contactEmail || !formData.contactName) {
       toast({ title: 'Missing info', description: 'Name and email are required to send the report.', variant: 'destructive' });
       return;
     }
-
     if (includeZoom && !zoomLink) {
       toast({ title: 'Missing Zoom link', description: 'Please enter a Zoom link before sending the invite.', variant: 'destructive' });
       return;
@@ -62,7 +53,6 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
 
     setSending(true);
     try {
-      // Save to database
       const { error: dbError } = await supabase.from('roi_assessments').insert([{
         contact_name: formData.contactName,
         contact_email: formData.contactEmail,
@@ -74,10 +64,8 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
         report_sent: true,
         invite_sent: includeZoom,
       }]);
-
       if (dbError) throw dbError;
 
-      // Call edge function to send email
       const { error: fnError } = await supabase.functions.invoke('send-report', {
         body: {
           contactName: formData.contactName,
@@ -88,7 +76,6 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
           zoomLink: includeZoom ? zoomLink : null,
         },
       });
-
       if (fnError) throw fnError;
 
       setSent(true);
@@ -101,13 +88,19 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
     }
   };
 
+  // Build breakdown cards - only show non-zero values
+  const breakdownCards = [
+    { icon: TrendingUp, label: 'Revenue Lift', value: results.revenueLift, delay: 0.3 },
+    { icon: Clock, label: 'Operational Savings', value: results.operationalSavings, delay: 0.35 },
+    { icon: Users, label: 'Retention Improvement', value: results.retentionImprovement, delay: 0.4 },
+    { icon: ShieldAlert, label: 'No-Show Recovery', value: results.noShowRecovery, delay: 0.45 },
+    { icon: ShoppingBag, label: 'Upsell / Cross-sell Lift', value: results.upsellLift, delay: 0.5 },
+    { icon: Megaphone, label: 'Marketing Efficiency', value: results.marketingEfficiency, delay: 0.55 },
+  ].filter(card => card.value > 0);
+
   return (
     <div className="space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
         <h2 className="text-3xl font-display font-bold text-foreground mb-2">
           ROI Projection for {formData.businessName || 'Your Business'}
         </h2>
@@ -131,58 +124,21 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
       </motion.div>
 
       {/* Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ResultCard icon={TrendingUp} label="Revenue Lift" value={formatCurrency(results.revenueLift)} color="bg-primary/15 text-primary" delay={0.3} />
-        <ResultCard icon={Clock} label="Operational Savings" value={formatCurrency(results.operationalSavings)} color="bg-primary/15 text-primary" delay={0.4} />
-        <ResultCard icon={Users} label="Retention Improvement" value={formatCurrency(results.retentionImprovement)} color="bg-primary/15 text-primary" delay={0.5} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {breakdownCards.map((card) => (
+          <ResultCard
+            key={card.label}
+            icon={card.icon}
+            label={card.label}
+            value={formatCurrency(card.value)}
+            color="bg-primary/15 text-primary"
+            delay={card.delay}
+          />
+        ))}
       </div>
 
-      {/* ROI Summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="rounded-xl border border-border bg-card p-6 space-y-4"
-      >
-        <h3 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-accent" />
-          Investment Summary
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div className="text-center p-4 rounded-lg bg-secondary space-y-1">
-            <p className="text-xs text-muted-foreground">App Build Cost</p>
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-lg font-display font-bold text-foreground">$</span>
-              <Input
-                type="number"
-                value={buildCost}
-                onChange={(e) => setBuildCost(Number(e.target.value) || 0)}
-                className="w-24 text-center text-lg font-display font-bold h-8 border-dashed"
-              />
-            </div>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-secondary space-y-1">
-            <p className="text-xs text-muted-foreground">Approx. Build Time</p>
-            <div className="flex items-center justify-center gap-1">
-              <Input
-                type="number"
-                value={buildWeeks}
-                onChange={(e) => setBuildWeeks(Number(e.target.value) || 0)}
-                className="w-16 text-center text-lg font-display font-bold h-8 border-dashed"
-              />
-              <span className="text-sm text-muted-foreground">weeks</span>
-            </div>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-secondary">
-            <p className="text-xs text-muted-foreground mb-1">Year 1 ROI</p>
-            <p className="text-xl font-display font-bold text-primary">{results.roiPercentage.toFixed(0)}%</p>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-secondary">
-            <p className="text-xs text-muted-foreground mb-1">Break-even</p>
-            <p className="text-xl font-display font-bold text-primary">{results.breakEvenMonths.toFixed(1)} months</p>
-          </div>
-        </div>
-      </motion.div>
+      {/* Dynamic Pricing & Payment Plans */}
+      <PricingSection pricing={results.pricing} totalAnnualImpact={results.totalAnnualImpact} />
 
       {/* Detail Breakdown */}
       <motion.div
@@ -220,6 +176,36 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
               {results.activeCustomers} active customers × {formatCurrency(results.clv)} CLV × 10% retention lift
             </p>
           </div>
+          {results.noShowRecovery > 0 && (
+            <div className="p-4 rounded-lg bg-secondary">
+              <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-primary" /> No-Show Recovery
+              </p>
+              <p className="text-muted-foreground">
+                App reminders recover ~50% of no-shows → {formatCurrency(results.noShowRecovery)}/year saved
+              </p>
+            </div>
+          )}
+          {results.upsellLift > 0 && (
+            <div className="p-4 rounded-lg bg-secondary">
+              <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-primary" /> Upsell / Cross-sell
+              </p>
+              <p className="text-muted-foreground">
+                Smart in-app recommendations lift upsell revenue by 15% → {formatCurrency(results.upsellLift)}/year
+              </p>
+            </div>
+          )}
+          {results.marketingEfficiency > 0 && (
+            <div className="p-4 rounded-lg bg-secondary">
+              <p className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                <Megaphone className="w-4 h-4 text-primary" /> Marketing Efficiency
+              </p>
+              <p className="text-muted-foreground">
+                Better in-app conversion reduces effective CAC → 20% marketing spend saved ({formatCurrency(results.marketingEfficiency)}/year)
+              </p>
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -260,20 +246,11 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
           </div>
         ) : (
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              onClick={() => handleSendReport(false)}
-              disabled={sending}
-              className="gap-2"
-            >
+            <Button onClick={() => handleSendReport(false)} disabled={sending} className="gap-2">
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Send Report Only
             </Button>
-            <Button
-              onClick={() => handleSendReport(true)}
-              disabled={sending || !zoomLink}
-              variant="outline"
-              className="gap-2"
-            >
+            <Button onClick={() => handleSendReport(true)} disabled={sending || !zoomLink} variant="outline" className="gap-2">
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
               Send Report + Zoom Invite
             </Button>
@@ -282,18 +259,10 @@ const ROIDashboard = ({ results: initialResults, formData, onReset }: Props) => 
       </motion.div>
 
       {/* Tagline */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9 }}
-        className="text-center py-6"
-      >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="text-center py-6">
         <p className="text-lg font-display font-semibold text-foreground mb-1">You're not buying tech.</p>
         <p className="text-2xl font-display font-bold text-primary">You're buying profit.</p>
-        <button
-          onClick={onReset}
-          className="mt-6 text-sm text-muted-foreground hover:text-foreground underline transition-colors"
-        >
+        <button onClick={onReset} className="mt-6 text-sm text-muted-foreground hover:text-foreground underline transition-colors">
           Start a new assessment
         </button>
       </motion.div>
