@@ -31,12 +31,8 @@ const LandingPage = ({ onStart }: Props) => {
       {/* Hero Section */}
       <section
         className="relative flex-1 flex flex-col items-center justify-center px-4 py-16 md:py-24 overflow-hidden"
-        style={{ background: 'var(--gradient-hero)' }}
+        style={{ background: 'hsl(228 30% 14%)' }}
       >
-        {/* Decorative orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 rounded-full opacity-20 blur-3xl" style={{ background: 'hsl(260 65% 52%)' }} />
-        <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full opacity-15 blur-3xl" style={{ background: 'hsl(328 68% 52%)' }} />
-        <div className="absolute top-40 right-1/4 w-48 h-48 rounded-full opacity-10 blur-3xl" style={{ background: 'hsl(85 65% 48%)' }} />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -47,7 +43,7 @@ const LandingPage = ({ onStart }: Props) => {
           <motion.img
             src={logo}
             alt="5to10X — Build • Innovate • Scale"
-            className="h-24 md:h-32 w-auto mx-auto drop-shadow-2xl"
+            className="h-48 md:h-64 w-auto mx-auto drop-shadow-2xl"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
