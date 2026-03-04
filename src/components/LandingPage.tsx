@@ -31,7 +31,7 @@ const LandingPage = ({ onStart }: Props) => {
       {/* Hero Section */}
       <section
         className="relative flex-1 flex flex-col items-center justify-center px-4 py-16 md:py-24 overflow-hidden"
-        style={{ background: 'hsl(220 20% 20%)' }}
+        style={{ background: '#13152a' }}
       >
 
         <motion.div
