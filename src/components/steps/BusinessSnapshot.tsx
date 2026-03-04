@@ -1,4 +1,4 @@
-import { FormData, REVENUE_OPTIONS } from '@/lib/formTypes';
+import { FormData, REVENUE_OPTIONS, BUSINESS_TYPES } from '@/lib/formTypes';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -39,37 +39,45 @@ const BusinessSnapshot = ({ data, onChange }: Props) => {
           <Input id="businessName" placeholder="e.g. Acme Services"
             value={data.businessName} onChange={(e) => onChange({ businessName: e.target.value })} />
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="industry">Industry</Label>
-          <Input
-            id="industry"
-            placeholder="e.g. Construction, Fitness, Retail"
-            value={data.industry}
-            onChange={(e) => onChange({ industry: e.target.value })}
-          />
+          <Input id="industry" placeholder="e.g. Construction, Fitness, Retail"
+            value={data.industry} onChange={(e) => onChange({ industry: e.target.value })} />
         </div>
+      </div>
 
+      {/* Business Type */}
+      <div className="space-y-3">
+        <Label>Business Type</Label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {BUSINESS_TYPES.map((type) => (
+            <button
+              key={type.value}
+              type="button"
+              onClick={() => onChange({ businessType: type.value })}
+              className={`px-4 py-3 rounded-lg text-left border transition-all ${
+                data.businessType === type.value
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-secondary text-secondary-foreground hover:border-muted-foreground'
+              }`}
+            >
+              <span className="text-sm font-semibold block">{type.label}</span>
+              <span className="text-xs text-muted-foreground">{type.description}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="space-y-2">
           <Label htmlFor="staff">Number of Staff</Label>
-          <Input
-            id="staff"
-            type="number"
-            placeholder="e.g. 12"
-            value={data.numberOfStaff}
-            onChange={(e) => onChange({ numberOfStaff: e.target.value })}
-          />
+          <Input id="staff" type="number" placeholder="e.g. 12"
+            value={data.numberOfStaff} onChange={(e) => onChange({ numberOfStaff: e.target.value })} />
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="avgTransaction">Average Transaction Value ($)</Label>
-          <Input
-            id="avgTransaction"
-            type="number"
-            placeholder="e.g. 200"
-            value={data.avgTransactionValue}
-            onChange={(e) => onChange({ avgTransactionValue: e.target.value })}
-          />
+          <Input id="avgTransaction" type="number" placeholder="e.g. 200"
+            value={data.avgTransactionValue} onChange={(e) => onChange({ avgTransactionValue: e.target.value })} />
         </div>
       </div>
 
