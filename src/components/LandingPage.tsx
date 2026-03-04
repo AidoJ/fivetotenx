@@ -31,7 +31,7 @@ const LandingPage = ({ onStart }: Props) => {
       {/* Hero Section */}
       <section
         className="relative flex-1 flex flex-col items-center justify-center px-4 py-16 md:py-24 overflow-hidden"
-        style={{ background: 'hsl(228 30% 14%)' }}
+        style={{ background: 'hsl(220 20% 20%)' }}
       >
 
         <motion.div
@@ -43,7 +43,7 @@ const LandingPage = ({ onStart }: Props) => {
           <motion.img
             src={logo}
             alt="5to10X — Build • Innovate • Scale"
-            className="h-48 md:h-64 w-auto mx-auto drop-shadow-2xl"
+            className="h-72 md:h-96 w-auto mx-auto drop-shadow-2xl"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
