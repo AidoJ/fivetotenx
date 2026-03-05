@@ -52,7 +52,7 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <img src={logo} alt="5to10X" className="h-10 w-auto" />
+          <img src={logo} alt="5to10X" className="h-20 w-auto" />
           <div>
             <h1 className="text-base font-display font-bold text-foreground">App ROI Calculator</h1>
             <p className="text-xs text-muted-foreground">See the real value before you build</p>

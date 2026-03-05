@@ -54,7 +54,7 @@ const HeroSection = ({ onStartAssessment }: { onStartAssessment: () => void }) =
       <motion.img
         src={logo}
         alt="5to10X — Build • Innovate • Scale"
-        className="h-48 md:h-64 w-auto mx-auto drop-shadow-2xl"
+        className="h-96 md:h-[32rem] w-auto mx-auto drop-shadow-2xl"
         initial={{ opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7, delay: 0.2 }}
@@ -749,7 +749,7 @@ const FooterSection = () => (
   <footer className="px-4 py-8 border-t" style={{ background: '#0E0B1F', borderColor: 'hsl(260 30% 20%)' }}>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <img src={logo} alt="5to10X" className="h-8 w-auto" />
+        <img src={logo} alt="5to10X" className="h-16 w-auto" />
         <span className="text-sm" style={{ color: 'hsl(220 15% 55%)' }}>
           © {new Date().getFullYear()} 5to10X — Build • Innovate • Scale
         </span>
