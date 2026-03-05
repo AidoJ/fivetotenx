@@ -88,27 +88,19 @@ const HeroSection = ({ onStartAssessment }: { onStartAssessment: () => void }) =
       </p>
 
         <div className="flex flex-col items-center justify-center gap-4 pt-4">
-          <p
-            className="text-base md:text-lg font-semibold"
-            style={{ color: 'hsl(0 0% 90%)' }}
-          >
-            How much efficiency is hiding in your business?
-          </p>
-          <p
-            className="text-sm md:text-base max-w-lg mx-auto"
-            style={{ color: 'hsl(220 20% 72%)' }}
-          >
-            Take the free assessment to discover where automation could unlock time, profit and growth.
-          </p>
           <Button
             onClick={onStartAssessment}
             size="lg"
-            className="text-lg px-8 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            className="text-lg px-8 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 flex-col h-auto"
             style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}
           >
-            <Sparkles className="w-5 h-5" />
-            Start Free Assessment
-            <ArrowRight className="w-5 h-5" />
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              How much efficiency is hiding in your business?
+            </span>
+            <span className="text-sm font-normal opacity-85">
+              Take the free assessment to discover where automation could unlock time, profit and growth.
+            </span>
           </Button>
           <p className="text-sm" style={{ color: 'hsl(220 15% 55%)' }}>
             Takes 2 minutes &bull; No obligation
