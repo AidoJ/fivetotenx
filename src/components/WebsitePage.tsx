@@ -71,12 +71,12 @@ const HeroSection = ({ onStartAssessment }: { onStartAssessment: () => void }) =
         className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight"
         style={{ color: 'hsl(0 0% 95%)' }}
       >
-        The Businesses Winning Today Are the Ones{' '}
+        What if your business could run{' '}
         <span
           className="bg-clip-text text-transparent"
           style={{ backgroundImage: 'var(--gradient-vibrant)', backgroundSize: '200% auto' }}
         >
-          Adopting AI the Fastest
+          5–10x more efficiently?
         </span>
       </h1>
 
@@ -84,7 +84,7 @@ const HeroSection = ({ onStartAssessment }: { onStartAssessment: () => void }) =
         className="text-base md:text-xl max-w-2xl mx-auto leading-relaxed"
         style={{ color: 'hsl(220 20% 72%)' }}
       >
-        AI-powered apps are transforming how small and mid-sized businesses operate — cutting costs, delighting customers, and unlocking growth that was never possible before.
+        Discover how AI-powered operational apps can eliminate manual work and transform your business in weeks.
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
