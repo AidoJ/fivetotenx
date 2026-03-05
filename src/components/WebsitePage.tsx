@@ -745,6 +745,34 @@ const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
   </section>;
 
 
+const ContactSection = () =>
+  <section className="px-4 py-20" style={{ background: '#0E0B1F' }}>
+    <div className="max-w-3xl mx-auto text-center">
+      <motion.div {...fadeUp}>
+        <Mail className="w-10 h-10 mx-auto mb-4" style={{ color: 'hsl(260 80% 65%)' }} />
+        <h2 className="text-3xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(220 15% 93%)' }}>
+          Get in Touch
+        </h2>
+        <p className="text-lg mb-8" style={{ color: 'hsl(220 15% 65%)' }}>
+          Ready to multiply your business? Drop us a line — we'd love to hear from you.
+        </p>
+        <a
+          href="mailto:grow@5to10x.app"
+          className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105"
+          style={{
+            background: 'linear-gradient(135deg, hsl(260 80% 60%), hsl(280 80% 55%))',
+            color: '#fff',
+            boxShadow: '0 4px 20px hsl(260 80% 50% / 0.3)'
+          }}
+        >
+          <Mail className="w-5 h-5" />
+          grow@5to10x.app
+        </a>
+      </motion.div>
+    </div>
+  </section>;
+
+
 const FooterSection = () =>
 <footer className="px-4 py-8 border-t" style={{ background: '#0E0B1F', borderColor: 'hsl(260 30% 20%)' }}>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
@@ -777,6 +805,7 @@ const WebsitePage = ({ onStartAssessment }: Props) =>
     <ZeroRiskSection />
     <FreeTrainingSection />
     <CTASection onStartAssessment={onStartAssessment} />
+    <ContactSection />
     <FooterSection />
   </div>;
 
