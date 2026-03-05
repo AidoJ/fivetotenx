@@ -483,7 +483,7 @@ const CaseStudiesSection = () => {
       name: 'Cellular Wellbeing',
       description: 'Client systems and digital service delivery tools.',
       logo: cellularWellbeingLogo,
-      logoClass: 'max-h-36',
+      logoClass: 'max-h-52',
     },
   ];
 
