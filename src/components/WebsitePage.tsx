@@ -35,7 +35,7 @@ const stagger = (delay: number) => ({
 
 const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 <section
-  className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden"
+  className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden max-w-full"
   style={{ background: '#0E0B1F' }}>
   
     {/* Subtle radial glow */}
@@ -49,12 +49,12 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
     initial={{ opacity: 0, y: 40 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.9 }}
-    className="relative z-10 text-center max-w-4xl mx-auto space-y-8">
+    className="relative z-10 text-center w-full max-w-4xl mx-auto space-y-8 px-2">
     
       <motion.img
       src={logo}
       alt="5to10X — Build • Innovate • Scale"
-      className="h-72 md:h-96 w-auto mx-auto drop-shadow-2xl"
+      className="max-h-40 sm:max-h-72 md:max-h-96 w-auto max-w-full mx-auto drop-shadow-2xl"
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, delay: 0.2 }} />
@@ -68,7 +68,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
     
 
       <h1
-      className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight"
+      className="text-xl sm:text-2xl md:text-5xl lg:text-6xl font-display font-bold leading-tight break-words"
       style={{ color: 'hsl(0 0% 95%)' }}>
       
         What if your business could run{' '}
@@ -81,24 +81,24 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       </h1>
 
       <p
-      className="text-base md:text-xl max-w-2xl mx-auto leading-relaxed"
+      className="text-sm sm:text-base md:text-xl max-w-2xl mx-auto leading-relaxed"
       style={{ color: 'hsl(220 20% 72%)' }}>
       
         Discover how AI-powered operational apps can eliminate manual work and transform your business in weeks.
       </p>
 
-        <div className="flex flex-col items-center justify-center gap-4 pt-4">
+        <div className="flex flex-col items-center justify-center gap-4 pt-4 w-full">
           <Button
         onClick={onStartAssessment}
         size="lg"
-        className="text-lg px-8 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 flex-col h-auto"
+        className="text-sm sm:text-base md:text-lg px-4 md:px-8 py-6 gap-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 flex-col h-auto w-full max-w-lg whitespace-normal"
         style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
         
-            <span className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5" />
-              How much efficiency is hiding in your business?
+            <span className="flex items-center gap-2 text-center">
+              <Sparkles className="w-5 h-5 shrink-0" />
+              <span>How much efficiency is hiding in your business?</span>
             </span>
-            <span className="text-sm font-normal opacity-85">
+            <span className="text-xs sm:text-sm font-normal opacity-85 text-center">
               Click HERE to discover where automation could unlock time, profit and growth.
             </span>
           </Button>
@@ -792,7 +792,7 @@ const FooterSection = () =>
 /* ─────────────── Main Page ─────────────── */
 
 const WebsitePage = ({ onStartAssessment }: Props) =>
-<div className="min-h-screen">
+<div className="min-h-screen overflow-x-hidden">
     <HeroSection onStartAssessment={onStartAssessment} />
     <ShiftSection />
     <WhatWeDoSection />
