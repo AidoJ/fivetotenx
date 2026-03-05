@@ -7,7 +7,7 @@ import CustomerMetrics from '@/components/steps/CustomerMetrics';
 import OperationalEfficiency from '@/components/steps/OperationalEfficiency';
 import GrowthOpportunity from '@/components/steps/GrowthOpportunity';
 import ROIDashboard from '@/components/ROIDashboard';
-import LandingPage from '@/components/LandingPage';
+import WebsitePage from '@/components/WebsitePage';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import logo from '@/assets/logo-5to10x.png';
@@ -37,7 +37,7 @@ const Index = () => {
   };
 
   if (!started) {
-    return <LandingPage onStart={() => setStarted(true)} />;
+    return <WebsitePage onStartAssessment={() => setStarted(true)} />;
   }
 
   const steps = [
