@@ -471,16 +471,19 @@ const CaseStudiesSection = () => {
       name: 'Rejuvenators',
       description: 'Custom booking and therapist management systems.',
       logo: rejuvenatorsLogo,
+      logoClass: 'max-h-24',
     },
     {
       name: '13Creators',
       description: 'Operational workflow and automation tools.',
       logo: creatorsLogo,
+      logoClass: 'max-h-36',
     },
     {
       name: 'Cellular Wellbeing',
       description: 'Client systems and digital service delivery tools.',
       logo: cellularWellbeingLogo,
+      logoClass: 'max-h-36',
     },
   ];
 
@@ -504,8 +507,8 @@ const CaseStudiesSection = () => {
               className="rounded-2xl border border-border bg-card p-6 space-y-4"
               style={{ boxShadow: 'var(--shadow-card)' }}
             >
-              <div className="rounded-xl bg-white h-32 flex items-center justify-center p-4">
-                <img src={client.logo} alt={client.name} className="max-h-24 w-auto object-contain" />
+              <div className="rounded-xl bg-white h-40 flex items-center justify-center p-4">
+                <img src={client.logo} alt={client.name} className={`${client.logoClass} w-auto object-contain`} />
               </div>
               <h3 className="font-display font-bold text-lg text-foreground">{client.name}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{client.description}</p>
