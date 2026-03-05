@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import logo from '@/assets/logo-5to10x.png';
+import cellularWellbeingImg from '@/assets/cellular-wellbeing.png';
 
 interface Props {
   onStartAssessment: () => void;
@@ -244,10 +245,9 @@ const RapidDeploySection = () => {
             <Rocket className="w-16 h-16 mx-auto mb-4 text-primary" />
             <p className="text-4xl font-display font-bold text-foreground mb-2">1–2 Weeks</p>
             <p className="text-muted-foreground">Many MVP apps delivered</p>
-            {/* Placeholder for image */}
-            <div className="mt-6 rounded-xl bg-muted/50 border border-border h-40 flex items-center justify-center">
-              <span className="text-sm text-muted-foreground">📸 App screenshot placeholder</span>
-            </div>
+            <a href="https://cellularwellbeing.lovable.app" target="_blank" rel="noopener noreferrer" className="mt-6 block">
+              <img src={cellularWellbeingImg} alt="Cellular Wellbeing" className="rounded-xl w-full object-cover" />
+            </a>
           </motion.div>
         </div>
       </div>
