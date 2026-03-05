@@ -99,7 +99,7 @@ const HeroSection = ({ onStartAssessment }: { onStartAssessment: () => void }) =
               How much efficiency is hiding in your business?
             </span>
             <span className="text-sm font-normal opacity-85">
-              Take the free assessment to discover where automation could unlock time, profit and growth.
+              Click HERE to discover where automation could unlock time, profit and growth.
             </span>
           </Button>
           <p className="text-sm" style={{ color: 'hsl(220 15% 55%)' }}>
