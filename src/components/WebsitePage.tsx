@@ -11,6 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import logo from '@/assets/logo-5to10x.png';
 import cellularWellbeingImg from '@/assets/cellular-wellbeing.png';
+import rejuvenatorsLogo from '@/assets/rejuvenators-logo.png';
+import creatorsLogo from '@/assets/13creators-logo.png';
+import cellularWellbeingLogo from '@/assets/cellular-wellbeing-logo.png';
 
 interface Props {
   onStartAssessment: () => void;
@@ -467,14 +470,17 @@ const CaseStudiesSection = () => {
     {
       name: 'Rejuvenators',
       description: 'Custom booking and therapist management systems.',
+      logo: rejuvenatorsLogo,
     },
     {
       name: '13Creators',
       description: 'Operational workflow and automation tools.',
+      logo: creatorsLogo,
     },
     {
-      name: 'Spirallight Healing',
+      name: 'Cellular Wellbeing',
       description: 'Client systems and digital service delivery tools.',
+      logo: cellularWellbeingLogo,
     },
   ];
 
@@ -498,9 +504,8 @@ const CaseStudiesSection = () => {
               className="rounded-2xl border border-border bg-card p-6 space-y-4"
               style={{ boxShadow: 'var(--shadow-card)' }}
             >
-              {/* Placeholder for client logo */}
-              <div className="rounded-xl bg-muted/50 border border-border h-32 flex items-center justify-center">
-                <span className="text-sm text-muted-foreground">📸 {client.name} logo</span>
+              <div className="rounded-xl bg-white h-32 flex items-center justify-center p-4">
+                <img src={client.logo} alt={client.name} className="max-h-24 w-auto object-contain" />
               </div>
               <h3 className="font-display font-bold text-lg text-foreground">{client.name}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{client.description}</p>
