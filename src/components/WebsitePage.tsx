@@ -37,7 +37,7 @@ const stagger = (delay: number) => ({
 const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 <section
   className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden max-w-full"
-  style={{ background: '#0E0B1F' }}>
+   style={{ background: '#000000' }}>
   
     {/* Subtle radial glow */}
     <div
@@ -167,7 +167,7 @@ const WhatWeDoSection = () => {
 
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#0E0B1F' }}>
+     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -273,7 +273,7 @@ const IntegrationsSection = () => {
 
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#0E0B1F' }}>
+     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -395,7 +395,7 @@ const SelfAssessmentSection = () => {
   const yesCount = answers.filter(Boolean).length;
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#0E0B1F' }}>
+     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-3xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -534,7 +534,7 @@ const ProcessSection = () => {
 
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#0E0B1F' }}>
+     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-16">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -628,7 +628,7 @@ const FreeTrainingSection = () => {
   const [formState, setFormState] = useState({ name: '', email: '', business: '', industry: '' });
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#0E0B1F' }}>
+    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
           <motion.div {...fadeUp} className="space-y-6">
@@ -747,7 +747,7 @@ const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 
 
 const ContactSection = () =>
-  <section className="px-4 py-20" style={{ background: '#0E0B1F' }}>
+  <section className="px-4 py-20" style={{ background: '#000000' }}>
     <div className="max-w-3xl mx-auto text-center">
       <motion.div {...fadeUp}>
         <Mail className="w-10 h-10 mx-auto mb-4" style={{ color: 'hsl(260 80% 65%)' }} />
@@ -775,7 +775,7 @@ const ContactSection = () =>
 
 
 const FooterSection = () =>
-<footer className="px-4 py-8 border-t" style={{ background: '#0E0B1F', borderColor: 'hsl(260 30% 20%)' }}>
+<footer className="px-4 py-8 border-t" style={{ background: '#000000', borderColor: 'hsl(260 30% 20%)' }}>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         <img src={logoWhiteStrap} alt="5to10X" className="h-12 w-auto" />
