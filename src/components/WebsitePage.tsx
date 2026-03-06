@@ -37,7 +37,7 @@ const stagger = (delay: number) => ({
 const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 <section
   className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden max-w-full"
-   style={{ background: '#000000' }}>
+  style={{ background: '#000000' }}>
   
     {/* Subtle radial glow */}
     <div
@@ -53,12 +53,12 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
     className="relative z-10 text-center w-full max-w-4xl mx-auto space-y-8 px-2">
     
       <motion.img
-       src={logoWhiteStrap}
+
       alt="5to10X — Build • Innovate • Scale"
       className="max-h-56 sm:max-h-[28rem] md:max-h-[36rem] w-auto max-w-full mx-auto drop-shadow-2xl"
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7, delay: 0.2 }} />
+      transition={{ duration: 0.7, delay: 0.2 }} src="/lovable-uploads/cae4ee2a-35e8-4583-ae6c-b5faca07184b.png" />
     
 
       
@@ -167,7 +167,7 @@ const WhatWeDoSection = () => {
 
 
   return (
-     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
+    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -273,7 +273,7 @@ const IntegrationsSection = () => {
 
 
   return (
-     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
+    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -395,7 +395,7 @@ const SelfAssessmentSection = () => {
   const yesCount = answers.filter(Boolean).length;
 
   return (
-     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
+    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-3xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -534,7 +534,7 @@ const ProcessSection = () => {
 
 
   return (
-     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
+    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-16">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
@@ -747,7 +747,7 @@ const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 
 
 const ContactSection = () =>
-  <section className="px-4 py-20" style={{ background: '#000000' }}>
+<section className="px-4 py-20" style={{ background: '#000000' }}>
     <div className="max-w-3xl mx-auto text-center">
       <motion.div {...fadeUp}>
         <Mail className="w-10 h-10 mx-auto mb-4" style={{ color: 'hsl(260 80% 65%)' }} />
@@ -758,14 +758,14 @@ const ContactSection = () =>
           Ready to multiply your business? Drop us a line — we'd love to hear from you.
         </p>
         <a
-          href="mailto:grow@5to10x.app"
-          className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105"
-          style={{
-            background: 'linear-gradient(135deg, hsl(260 80% 60%), hsl(280 80% 55%))',
-            color: '#fff',
-            boxShadow: '0 4px 20px hsl(260 80% 50% / 0.3)'
-          }}
-        >
+        href="mailto:grow@5to10x.app"
+        className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105"
+        style={{
+          background: 'linear-gradient(135deg, hsl(260 80% 60%), hsl(280 80% 55%))',
+          color: '#fff',
+          boxShadow: '0 4px 20px hsl(260 80% 50% / 0.3)'
+        }}>
+        
           <Mail className="w-5 h-5" />
           grow@5to10x.app
         </a>
