@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import logo from '@/assets/logo-5to10x-new.png';
+import logoWhiteStrap from '@/assets/logo-5to10x-white-strap.png';
 import cellularWellbeingImg from '@/assets/cellular-wellbeing.png';
 import rejuvenatorsLogo from '@/assets/rejuvenators-logo.png';
 import creatorsLogo from '@/assets/13creators-logo.png';
@@ -52,9 +53,9 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
     className="relative z-10 text-center w-full max-w-4xl mx-auto space-y-8 px-2">
     
       <motion.img
-      src={logo}
+       src={logoWhiteStrap}
       alt="5to10X — Build • Innovate • Scale"
-      className="max-h-40 sm:max-h-72 md:max-h-96 w-auto max-w-full mx-auto drop-shadow-2xl"
+      className="max-h-56 sm:max-h-[28rem] md:max-h-[36rem] w-auto max-w-full mx-auto drop-shadow-2xl"
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, delay: 0.2 }} />
@@ -777,7 +778,7 @@ const FooterSection = () =>
 <footer className="px-4 py-8 border-t" style={{ background: '#0E0B1F', borderColor: 'hsl(260 30% 20%)' }}>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <img src={logo} alt="5to10X" className="h-12 w-auto" />
+        <img src={logoWhiteStrap} alt="5to10X" className="h-12 w-auto" />
         <span className="text-sm" style={{ color: 'hsl(0 0% 100%)' }}>
           © {new Date().getFullYear()} 5to10X — Build • Innovate • Scale
         </span>
