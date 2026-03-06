@@ -18,8 +18,8 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     transition={{ duration: 0.6 }}
     className="w-full max-w-[420px] aspect-[1.75/1] rounded-2xl overflow-hidden relative"
     style={{
-      background: 'linear-gradient(145deg, #0E0B1F 0%, hsl(260 45% 15%) 50%, #0E0B1F 100%)',
-      boxShadow: '0 25px 60px hsl(260 60% 20% / 0.4), 0 0 0 1px hsl(260 40% 25% / 0.5)',
+      background: '#FFFFFF',
+      boxShadow: '0 25px 60px hsl(230 20% 70% / 0.3), 0 0 0 1px hsl(230 20% 85% / 0.5)',
     }}
   >
     {/* Gradient accent line */}
@@ -39,13 +39,13 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
       <div className="space-y-1">
         <h3
           className="text-lg font-display font-bold"
-          style={{ color: 'hsl(0 0% 95%)' }}
+          style={{ color: 'hsl(230 35% 12%)' }}
         >
           {name}
         </h3>
         <p
           className="text-xs font-medium tracking-wide uppercase"
-          style={{ color: 'hsl(260 60% 70%)' }}
+          style={{ color: 'hsl(260 50% 50%)' }}
         >
           {title}
         </p>
@@ -54,7 +54,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
           <a
             href={`mailto:${email}`}
             className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
-            style={{ color: 'hsl(220 20% 72%)' }}
+            style={{ color: 'hsl(230 20% 35%)' }}
           >
             <Mail className="w-3 h-3" />
             {email}
@@ -62,7 +62,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
           <a
             href={`tel:${phone.replace(/\s/g, '')}`}
             className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
-            style={{ color: 'hsl(220 20% 72%)' }}
+            style={{ color: 'hsl(230 20% 35%)' }}
           >
             <Phone className="w-3 h-3" />
             {phone}
@@ -72,7 +72,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
-            style={{ color: 'hsl(220 20% 72%)' }}
+            style={{ color: 'hsl(230 20% 35%)' }}
           >
             <Globe className="w-3 h-3" />
             5to10x.app
