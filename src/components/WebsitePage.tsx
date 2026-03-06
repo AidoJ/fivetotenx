@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import logo from '@/assets/logo-5to10x.png';
+import logo from '@/assets/logo-5to10x-new.png';
 import cellularWellbeingImg from '@/assets/cellular-wellbeing.png';
 import rejuvenatorsLogo from '@/assets/rejuvenators-logo.png';
 import creatorsLogo from '@/assets/13creators-logo.png';
@@ -778,7 +778,7 @@ const FooterSection = () =>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         <img src={logo} alt="5to10X" className="h-12 w-auto" />
-        <span className="text-sm" style={{ color: 'hsl(220 15% 55%)' }}>
+        <span className="text-sm" style={{ color: 'hsl(0 0% 100%)' }}>
           © {new Date().getFullYear()} 5to10X — Build • Innovate • Scale
         </span>
       </div>
