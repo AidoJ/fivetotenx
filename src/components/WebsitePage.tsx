@@ -36,15 +36,8 @@ const stagger = (delay: number) => ({
 
 const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 <section
-  className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden max-w-full bg-black"
-  style={{ background: '#000000' }}>
-  
-    {/* Subtle radial glow */}
-    <div
-    className="absolute inset-0 pointer-events-none"
-    style={{
-      background: 'radial-gradient(ellipse 60% 50% at 50% 40%, hsl(260 65% 30% / 0.3), transparent)'
-    }} />
+  className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden max-w-full"
+  style={{ background: '#010100' }}>
   
     <motion.div
     initial={{ opacity: 0, y: 40 }}
