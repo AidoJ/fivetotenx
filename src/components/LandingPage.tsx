@@ -43,7 +43,7 @@ const LandingPage = ({ onStart }: Props) => {
           <motion.img
             src={logo}
             alt="5to10X — Build • Innovate • Scale"
-            className="h-72 md:h-96 w-auto mx-auto drop-shadow-2xl"
+            className="h-72 md:h-96 w-auto mx-auto"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
