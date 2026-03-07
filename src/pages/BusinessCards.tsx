@@ -16,7 +16,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className="w-full max-w-[420px] aspect-[1.75/1] rounded-2xl overflow-hidden relative"
+    className="w-full max-w-[420px] rounded-2xl overflow-hidden relative"
     style={{
       background: '#FFFFFF',
       boxShadow: '0 25px 60px hsl(230 20% 70% / 0.3), 0 0 0 1px hsl(230 20% 85% / 0.5)',
@@ -29,14 +29,14 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     />
 
     {/* Content */}
-      <div className="relative z-10 h-full flex flex-col justify-between p-6">
-      {/* Top: Logo */}
-      <div className="flex items-start justify-between">
-        <img src={logo} alt="5to10X" className="h-24 w-auto" />
+    <div className="relative z-10 flex flex-col p-6 pt-5 gap-4">
+      {/* Logo */}
+      <div className="flex items-start">
+        <img src={logo} alt="5to10X" className="h-16 w-auto" />
       </div>
 
-      {/* Bottom: Contact info */}
-      <div className="space-y-1">
+      {/* Name & Title */}
+      <div className="space-y-0.5">
         <h3
           className="text-lg font-display font-bold"
           style={{ color: 'hsl(230 35% 12%)' }}
@@ -49,35 +49,36 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
         >
           {title}
         </p>
+      </div>
 
-        <div className="flex flex-col gap-1 pt-2">
-          <a
-            href={`mailto:${email}`}
-            className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
-            style={{ color: 'hsl(230 20% 35%)' }}
-          >
-            <Mail className="w-3 h-3 shrink-0" />
-            {email}
-          </a>
-          <a
-            href={`tel:${phone.replace(/\s/g, '')}`}
-            className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
-            style={{ color: 'hsl(230 20% 35%)' }}
-          >
-            <Phone className="w-3 h-3 shrink-0" />
-            {phone}
-          </a>
-          <a
-            href="https://5to10x.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
-            style={{ color: 'hsl(230 20% 35%)' }}
-          >
-            <Globe className="w-3 h-3 shrink-0" />
-            5to10x.app
-          </a>
-        </div>
+      {/* Contact details stacked */}
+      <div className="flex flex-col gap-1.5">
+        <a
+          href={`mailto:${email}`}
+          className="flex items-center gap-2 text-xs hover:opacity-80 transition-opacity"
+          style={{ color: 'hsl(230 20% 35%)' }}
+        >
+          <Mail className="w-3.5 h-3.5 shrink-0" />
+          {email}
+        </a>
+        <a
+          href={`tel:${phone.replace(/\s/g, '')}`}
+          className="flex items-center gap-2 text-xs hover:opacity-80 transition-opacity"
+          style={{ color: 'hsl(230 20% 35%)' }}
+        >
+          <Phone className="w-3.5 h-3.5 shrink-0" />
+          {phone}
+        </a>
+        <a
+          href="https://5to10x.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-xs hover:opacity-80 transition-opacity"
+          style={{ color: 'hsl(230 20% 35%)' }}
+        >
+          <Globe className="w-3.5 h-3.5 shrink-0" />
+          5to10x.app
+        </a>
       </div>
     </div>
 
