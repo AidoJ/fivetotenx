@@ -36,7 +36,7 @@ const stagger = (delay: number) => ({
 
 const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 <section
-  className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden max-w-full"
+  className="relative flex flex-col items-center justify-center px-4 py-20 md:py-32 overflow-hidden max-w-full bg-black"
   style={{ background: '#000000' }}>
   
     {/* Subtle radial glow */}
