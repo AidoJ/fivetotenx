@@ -10,7 +10,7 @@ import ROIDashboard from '@/components/ROIDashboard';
 import WebsitePage from '@/components/WebsitePage';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import logo from '@/assets/logo-5to10x-new.png';
+import logo from '@/assets/logo-5to10x-color.png';
 
 const STEP_LABELS = ['Business', 'Metrics', 'Operations', 'Growth'];
 
