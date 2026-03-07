@@ -29,10 +29,10 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     />
 
     {/* Content */}
-    <div className="relative z-10 h-full flex flex-col justify-between p-6">
+      <div className="relative z-10 h-full flex flex-col justify-between p-6">
       {/* Top: Logo */}
       <div className="flex items-start justify-between">
-        <img src={logo} alt="5to10X" className="h-12 w-auto" />
+        <img src={logo} alt="5to10X" className="h-24 w-auto" />
       </div>
 
       {/* Bottom: Contact info */}
@@ -50,13 +50,13 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
           {title}
         </p>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2">
+        <div className="flex flex-col gap-1 pt-2">
           <a
             href={`mailto:${email}`}
             className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
             style={{ color: 'hsl(230 20% 35%)' }}
           >
-            <Mail className="w-3 h-3" />
+            <Mail className="w-3 h-3 shrink-0" />
             {email}
           </a>
           <a
@@ -64,7 +64,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
             className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
             style={{ color: 'hsl(230 20% 35%)' }}
           >
-            <Phone className="w-3 h-3" />
+            <Phone className="w-3 h-3 shrink-0" />
             {phone}
           </a>
           <a
@@ -74,7 +74,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
             className="flex items-center gap-1.5 text-xs hover:opacity-80 transition-opacity"
             style={{ color: 'hsl(230 20% 35%)' }}
           >
-            <Globe className="w-3 h-3" />
+            <Globe className="w-3 h-3 shrink-0" />
             5to10x.app
           </a>
         </div>
