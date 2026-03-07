@@ -58,7 +58,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       className="max-h-56 sm:max-h-[28rem] md:max-h-[36rem] w-auto max-w-full mx-auto drop-shadow-2xl"
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7, delay: 0.2 }} src="/lovable-uploads/cae4ee2a-35e8-4583-ae6c-b5faca07184b.png" />
+      transition={{ duration: 0.7, delay: 0.2 }} src="/lovable-uploads/2a3ce54a-2b50-427c-ba72-d87883d29702.png" />
     
 
       
