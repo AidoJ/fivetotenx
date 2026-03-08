@@ -15,6 +15,8 @@ import cellularWellbeingImg from '@/assets/cellular-wellbeing.png';
 import rejuvenatorsLogo from '@/assets/rejuvenators-logo.png';
 import creatorsLogo from '@/assets/13creators-logo.png';
 import cellularWellbeingLogo from '@/assets/cellular-wellbeing-logo.png';
+import headshotEoghan from '@/assets/headshot-eoghan.png';
+import headshotAidan from '@/assets/headshot-aidan.png';
 
 interface Props {
   onStartAssessment: () => void;
