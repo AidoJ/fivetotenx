@@ -53,7 +53,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive }: {
   const roi = lead.roi_results as any;
   const currentIdx = STAGES.findIndex(s => s.key === lead.pipeline_stage);
   const canSendDeepDive = lead.is_qualified && (lead.pipeline_stage === 'qualified' || lead.pipeline_stage === 'deep_dive_sent');
-  const deepDiveUrl = `https://fivetotenx.lovable.app/deep-dive?id=${lead.id}`;
+  const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(deepDiveUrl);
@@ -177,7 +177,7 @@ const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave:
   const previewHtml = editing.html_body
     .replace(/\{\{contactName\}\}/g, 'John Smith')
     .replace(/\{\{businessName\}\}/g, 'Acme Corp')
-    .replace(/\{\{deepDiveUrl\}\}/g, 'https://fivetotenx.lovable.app/deep-dive?id=sample');
+    .replace(/\{\{deepDiveUrl\}\}/g, `${window.location.origin}/deep-dive?id=sample`);
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
