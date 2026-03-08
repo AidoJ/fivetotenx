@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FormData, LOST_SALES_REASONS } from '@/lib/formTypes';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const OperationalEfficiency = ({ data, onChange }: Props) => {
+  const [otherReason, setOtherReason] = useState('');
+
   const toggleReason = (reason: string) => {
     const current = data.lostSalesReasons;
     const updated = current.includes(reason)
@@ -16,6 +19,16 @@ const OperationalEfficiency = ({ data, onChange }: Props) => {
       : [...current, reason];
     onChange({ lostSalesReasons: updated });
   };
+
+  const addOtherReason = () => {
+    const trimmed = otherReason.trim();
+    if (trimmed && !data.lostSalesReasons.includes(trimmed)) {
+      onChange({ lostSalesReasons: [...data.lostSalesReasons, trimmed] });
+      setOtherReason('');
+    }
+  };
+
+  const isCustomReason = (reason: string) => !LOST_SALES_REASONS.includes(reason);
 
   return (
     <div className="space-y-6">
@@ -75,6 +88,31 @@ const OperationalEfficiency = ({ data, onChange }: Props) => {
               <span className="text-sm">{reason}</span>
             </label>
           ))}
+          {data.lostSalesReasons.filter(isCustomReason).map((reason) => (
+            <label
+              key={reason}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg border border-primary bg-primary/5 cursor-pointer transition-all"
+            >
+              <Checkbox checked onCheckedChange={() => toggleReason(reason)} />
+              <span className="text-sm">{reason}</span>
+            </label>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-2">
+          <Input
+            placeholder="Other reason..."
+            value={otherReason}
+            onChange={(e) => setOtherReason(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOtherReason())}
+            className="max-w-xs"
+          />
+          <button
+            type="button"
+            onClick={addOtherReason}
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-border bg-secondary text-secondary-foreground hover:border-muted-foreground transition-all"
+          >
+            Add
+          </button>
         </div>
       </div>
     </div>
