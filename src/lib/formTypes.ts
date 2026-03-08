@@ -10,7 +10,6 @@ export interface FormData {
   businessType: BusinessType;
   numberOfStaff: string;
   monthlyRevenue: string;
-  avgTransactionValue: string;
 
   // Section 2
   monthlyVisitors: string;
