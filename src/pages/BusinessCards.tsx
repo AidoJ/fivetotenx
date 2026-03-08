@@ -18,8 +18,8 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     transition={{ duration: 0.6 }}
     className="rounded-2xl overflow-hidden relative"
     style={{
-      width: '3.5in',
-      height: '2in',
+      width: '2in',
+      height: '3.5in',
       background: '#FFFFFF',
       boxShadow: '0 25px 60px hsl(230 20% 70% / 0.3), 0 0 0 1px hsl(230 20% 85% / 0.5)',
     }}
