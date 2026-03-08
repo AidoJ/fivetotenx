@@ -16,7 +16,12 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
-    className="w-full max-w-[420px] rounded-2xl overflow-hidden relative"
+    className="rounded-2xl overflow-hidden relative"
+    style={{
+      width: '3.5in',
+      height: '2in',
+      ...({} as any),
+    }}
     style={{
       background: '#FFFFFF',
       boxShadow: '0 25px 60px hsl(230 20% 70% / 0.3), 0 0 0 1px hsl(230 20% 85% / 0.5)',
