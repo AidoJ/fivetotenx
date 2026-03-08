@@ -252,7 +252,6 @@ const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave:
               style={{ minHeight: 500 }}
               title={`Preview: ${template.name}`}
             />
-            />
           </div>
         </div>
       ) : (
