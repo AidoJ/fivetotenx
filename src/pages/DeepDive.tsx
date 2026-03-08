@@ -139,6 +139,7 @@ const DeepDive = () => {
       }
       setBusinessName(data.business_name || '');
       setContactName(data.contact_name || '');
+      setContactEmail(data.contact_email || '');
       setLoading(false);
     };
     fetchAssessment();
