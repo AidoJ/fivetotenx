@@ -90,7 +90,7 @@ serve(async (req) => {
       : '';
 
     // Deep Dive CTA for qualified leads
-    const deepDiveBaseUrl = 'https://fivetotenx.lovable.app';
+    const deepDiveBaseUrl = 'https://5to10x.app';
     const deepDiveSection = (isQualified && assessmentId)
       ? `
         <tr>
