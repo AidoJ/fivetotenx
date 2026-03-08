@@ -15,6 +15,8 @@ import cellularWellbeingImg from '@/assets/cellular-wellbeing.png';
 import rejuvenatorsLogo from '@/assets/rejuvenators-logo.png';
 import creatorsLogo from '@/assets/13creators-logo.png';
 import cellularWellbeingLogo from '@/assets/cellular-wellbeing-logo.png';
+import headshotEoghan from '@/assets/headshot-eoghan.png';
+import headshotAidan from '@/assets/headshot-aidan.png';
 
 interface Props {
   onStartAssessment: () => void;
@@ -711,6 +713,71 @@ const FreeTrainingSection = () => {
 
 };
 
+const CoFoundersSection = () => {
+  const founders = [
+    {
+      name: 'Eoghan Leonard',
+      role: 'Senior Developer & Co-Founder',
+      image: headshotEoghan,
+      bio: 'With over a decade of full-stack development experience, Eoghan architects and builds the custom operational apps that transform how businesses run. He specialises in AI integration, automation workflows, and rapid MVP delivery — turning complex business problems into elegant, scalable solutions.',
+    },
+    {
+      name: 'Aidan Leonard',
+      role: 'Business Analyst & Co-Founder',
+      image: headshotAidan,
+      bio: 'Aidan bridges the gap between business strategy and technology. With a sharp eye for operational inefficiencies and a deep understanding of how SMEs actually work, he ensures every app we build solves real problems and delivers measurable ROI from day one.',
+    },
+  ];
+
+  return (
+    <section className="bg-background px-4 py-20 md:py-28">
+      <div className="max-w-4xl mx-auto">
+        <motion.div {...fadeUp} className="text-center mb-14">
+          <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
+            Meet the{' '}
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+              Co-Founders
+            </span>
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            A developer and analyst team that understands both the technology and the business behind it.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {founders.map((founder, i) => (
+            <motion.div
+              key={founder.name}
+              {...stagger(0.2 * i)}
+              className="rounded-2xl border border-border bg-card overflow-hidden"
+              style={{ boxShadow: 'var(--shadow-card)' }}
+            >
+              <div className="aspect-square relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1e3a5f, #4338ca)' }}>
+                <img
+                  src={founder.image}
+                  alt={founder.name}
+                  className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"
+                />
+              </div>
+              <div className="p-6 space-y-3">
+                <div>
+                  <h3 className="text-xl font-display font-bold text-foreground">{founder.name}</h3>
+                  <p className="text-sm font-medium bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+                    {founder.role}
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {founder.bio}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
 <section className="bg-background px-4 py-20 md:py-28">
     <div className="max-w-3xl mx-auto text-center">
@@ -798,6 +865,7 @@ const WebsitePage = ({ onStartAssessment }: Props) =>
     <ProcessSection />
     <ZeroRiskSection />
     <FreeTrainingSection />
+    <CoFoundersSection />
     <CTASection onStartAssessment={onStartAssessment} />
     <ContactSection />
     <FooterSection />
