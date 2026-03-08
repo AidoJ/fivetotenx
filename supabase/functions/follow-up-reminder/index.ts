@@ -20,6 +20,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    // Load template from DB
+    const { data: template } = await supabase
+      .from('email_templates')
+      .select('*')
+      .eq('template_key', 'follow-up-reminder')
+      .single();
+
     // Find qualified leads that haven't completed deep dive and were qualified > 48h ago
     const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
@@ -43,54 +50,24 @@ serve(async (req) => {
     for (const lead of staleLeads) {
       const deepDiveUrl = `https://fivetotenx.lovable.app/deep-dive?id=${lead.id}`;
 
-      const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head><meta charset="utf-8"></head>
-      <body style="margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; padding: 40px 20px;">
-          <tr>
-            <td align="center">
-              <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.06);">
-                <tr>
-                  <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 32px; text-align: center;">
-                    <h1 style="color: #ffffff; font-size: 22px; margin: 0; font-weight: 700;">Still Interested, ${lead.contact_name}?</h1>
-                    <p style="color: #bfdbfe; font-size: 14px; margin: 10px 0 0;">Your custom app proposal is waiting</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 32px;">
-                    <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 16px;">
-                      A few days ago, your ROI assessment showed that <strong>${lead.business_name || 'your business'}</strong> could unlock significant growth with a custom app. You qualified for the next step — our Deep Dive questionnaire — but we noticed you haven't completed it yet.
-                    </p>
-                    <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 24px;">
-                      It only takes 5 minutes and helps us build a proposal tailored exactly to your needs. No commitment — just clarity on what's possible.
-                    </p>
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td align="center">
-                          <a href="${deepDiveUrl}" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #1e3a5f, #4338ca); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 15px;">
-                            Complete Deep Dive →
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                    <p style="color: #64748b; font-size: 13px; margin: 20px 0 0; text-align: center;">
-                      If you have questions or the timing isn't right, simply reply to this email. We're here to help.
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 20px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
-                    <p style="color: #94a3b8; font-size: 12px; margin: 0;">5to10X — Strategic App ROI Assessment</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </body>
-      </html>`;
+      let emailHtml: string;
+      let subject: string;
+      let fromField: string;
+
+      if (template) {
+        emailHtml = template.html_body
+          .replace(/\{\{contactName\}\}/g, lead.contact_name || '')
+          .replace(/\{\{businessName\}\}/g, lead.business_name || 'your business')
+          .replace(/\{\{deepDiveUrl\}\}/g, deepDiveUrl);
+        subject = template.subject
+          .replace(/\{\{contactName\}\}/g, lead.contact_name || '')
+          .replace(/\{\{businessName\}\}/g, lead.business_name || 'your business');
+        fromField = `${template.from_name} <${template.from_email}>`;
+      } else {
+        subject = `${lead.contact_name}, your custom app proposal is waiting — 5 min to complete`;
+        fromField = '5to10X <grow@5to10x.app>';
+        emailHtml = `<p>Hi ${lead.contact_name}, please complete your Deep Dive: <a href="${deepDiveUrl}">${deepDiveUrl}</a></p>`;
+      }
 
       try {
         const res = await fetch('https://api.resend.com/emails', {
@@ -100,16 +77,15 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: '5to10X <grow@5to10x.app>',
+            from: fromField,
             to: [lead.contact_email],
-            subject: `${lead.contact_name}, your custom app proposal is waiting — 5 min to complete`,
+            subject,
             html: emailHtml,
           }),
         });
 
         if (res.ok) {
           sent++;
-          // Move to deep_dive_sent so we don't re-send
           await supabase
             .from('roi_assessments')
             .update({ pipeline_stage: 'deep_dive_sent', invite_sent: true })
