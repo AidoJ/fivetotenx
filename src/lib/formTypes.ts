@@ -178,6 +178,10 @@ export const LOST_SALES_REASONS = [
   'No automated follow-up',
   'Poor mobile experience',
   'Manual quoting delays',
+  'No online payments',
+  'Complex or lengthy checkout',
+  'No loyalty or rewards program',
+  'Lack of social proof / reviews',
 ];
 
 export const CURRENT_FEATURES = [
