@@ -82,6 +82,48 @@ export type Database = {
           },
         ]
       }
+      email_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          from_email: string
+          from_name: string
+          html_body: string
+          id: string
+          name: string
+          subject: string
+          template_key: string
+          trigger_description: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          from_email?: string
+          from_name?: string
+          html_body: string
+          id?: string
+          name: string
+          subject: string
+          template_key: string
+          trigger_description?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          from_email?: string
+          from_name?: string
+          html_body?: string
+          id?: string
+          name?: string
+          subject?: string
+          template_key?: string
+          trigger_description?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       roi_assessments: {
         Row: {
           business_name: string | null
