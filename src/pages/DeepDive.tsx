@@ -190,7 +190,7 @@ const DeepDive = () => {
       // Send confirmation email
       try {
         await supabase.functions.invoke('send-deep-dive-confirmation', {
-          body: { contactName, contactEmail: '', businessName },
+          body: { contactName, contactEmail, businessName },
         });
       } catch (e) {
         console.error('Confirmation email failed (non-blocking):', e);
