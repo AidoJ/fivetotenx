@@ -164,7 +164,7 @@ serve(async (req) => {
                     ${row('Business Model', businessTypeLabel)}
                     ${row('Number of Staff', formData?.numberOfStaff || '—')}
                     ${row('Monthly Revenue', formData?.monthlyRevenue || '—')}
-                    ${row('Avg Transaction Value', formData?.avgTransactionValue ? `$${formData.avgTransactionValue}` : '—')}
+                    ${row('Avg Purchase Value', formData?.avgPurchaseValue ? `$${formData.avgPurchaseValue}` : '—')}
 
                     ${sectionHead('Customer & Sales Metrics')}
                     ${row('Monthly Website Visitors', formData?.monthlyVisitors || '—')}
