@@ -48,7 +48,7 @@ serve(async (req) => {
 
     let sent = 0;
     for (const lead of staleLeads) {
-      const deepDiveUrl = `https://fivetotenx.lovable.app/deep-dive?id=${lead.id}`;
+      const deepDiveUrl = `https://5to10x.app/deep-dive?id=${lead.id}`;
 
       let emailHtml: string;
       let subject: string;

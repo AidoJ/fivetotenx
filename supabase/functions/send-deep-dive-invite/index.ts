@@ -22,7 +22,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const deepDiveUrl = `https://fivetotenx.lovable.app/deep-dive?id=${assessmentId}`;
+    const deepDiveUrl = `https://5to10x.app/deep-dive?id=${assessmentId}`;
 
     // Try to load template from DB
     const { data: template } = await supabase
