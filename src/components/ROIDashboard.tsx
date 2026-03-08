@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ROIResults, FormData } from '@/lib/formTypes';
-import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle, ShieldAlert, ShoppingBag, Megaphone } from 'lucide-react';
+import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle, ShieldAlert, ShoppingBag, Megaphone, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
