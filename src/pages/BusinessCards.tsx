@@ -20,9 +20,6 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     style={{
       width: '3.5in',
       height: '2in',
-      ...({} as any),
-    }}
-    style={{
       background: '#FFFFFF',
       boxShadow: '0 25px 60px hsl(230 20% 70% / 0.3), 0 0 0 1px hsl(230 20% 85% / 0.5)',
     }}
