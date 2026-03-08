@@ -82,6 +82,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
       if (fnError) throw fnError;
 
       setSent(true);
+      if (insertedRow) setAssessmentId(insertedRow.id);
       toast({ title: 'Report sent! ✅', description: `Report sent to ${formData.contactEmail}` });
     } catch (err: unknown) {
       console.error('Send error:', err);
