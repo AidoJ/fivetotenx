@@ -31,10 +31,10 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
     />
 
     {/* Content */}
-    <div className="relative z-10 flex flex-col p-6 pt-5 gap-4">
+    <div className="relative z-10 flex flex-col p-4 pt-3 gap-2">
       {/* Logo */}
       <div className="flex items-start">
-        <img src={logo} alt="5to10X" className="h-16 w-auto" />
+        <img src={logo} alt="5to10X" className="h-10 w-auto" />
       </div>
 
       {/* Name & Title */}
