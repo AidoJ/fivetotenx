@@ -55,7 +55,7 @@ export const PRICING_TIERS: PricingTier[] = [
   { minROI: 100000, maxROI: Infinity, percentage: 25, label: 'Enterprise' },
 ];
 
-export const PRICE_FLOOR = 3000;
+export const PRICE_FLOOR = 5000;
 export const PRICE_CAP = 40000;
 export const MAINTENANCE_UPLIFT = 0.15; // 15% of build cost annually
 
