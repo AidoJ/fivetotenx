@@ -2,8 +2,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
-import { motion } from 'framer-motion';
-import { Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp, Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
+  Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
+  MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,6 +32,34 @@ interface EmailTemplate {
   updated_at: string;
 }
 
+interface DeepDiveSubmission {
+  id: string;
+  assessment_id: string;
+  current_website: string | null;
+  current_tools: string | null;
+  pain_points: string | null;
+  primary_goals: string[] | null;
+  timeline: string | null;
+  budget_comfort: string | null;
+  decision_maker_name: string | null;
+  decision_maker_role: string | null;
+  decision_timeline: string | null;
+  required_integrations: string[] | null;
+  must_have_features: string | null;
+  nice_to_have_features: string | null;
+  competitors: string | null;
+  additional_notes: string | null;
+  created_at: string;
+}
+
+interface LeadNote {
+  id: string;
+  assessment_id: string;
+  note_type: string;
+  content: string;
+  created_at: string;
+}
+
 const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'assessment', label: 'Assessment' },
   { key: 'qualified', label: 'Qualified' },
@@ -43,12 +75,160 @@ const formatCurrency = (v: number) =>
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-const LeadCard = ({ lead, onMove, onSendDeepDive }: {
+/* ─────────── Deep Dive Viewer ─────────── */
+
+const DeepDiveField = ({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: any }) => {
+  if (!value) return null;
+  return (
+    <div className="space-y-0.5">
+      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+        {Icon && <Icon className="w-3 h-3" />}
+        {label}
+      </p>
+      <p className="text-xs text-foreground whitespace-pre-wrap">{value}</p>
+    </div>
+  );
+};
+
+const DeepDiveArrayField = ({ label, items, icon: Icon }: { label: string; items: string[] | null | undefined; icon?: any }) => {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+        {Icon && <Icon className="w-3 h-3" />}
+        {label}
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {items.map((item, i) => (
+          <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const DeepDiveViewer = ({ submission }: { submission: DeepDiveSubmission }) => (
+  <motion.div
+    initial={{ opacity: 0, height: 0 }}
+    animate={{ opacity: 1, height: 'auto' }}
+    exit={{ opacity: 0, height: 0 }}
+    className="space-y-4 border-t border-border pt-3"
+  >
+    <div className="flex items-center gap-2">
+      <ClipboardList className="w-4 h-4 text-primary" />
+      <h4 className="text-xs font-bold text-foreground">Deep Dive Responses</h4>
+      <span className="text-[10px] text-muted-foreground">Submitted {formatDate(submission.created_at)}</span>
+    </div>
+
+    <div className="grid grid-cols-1 gap-3 bg-secondary/50 rounded-lg p-3">
+      <DeepDiveField label="Current Website" value={submission.current_website} icon={ExternalLink} />
+      <DeepDiveField label="Current Tools & Software" value={submission.current_tools} icon={Wrench} />
+      <DeepDiveField label="Biggest Pain Points" value={submission.pain_points} icon={AlertCircle} />
+      <DeepDiveArrayField label="Primary Goals" items={submission.primary_goals} icon={Target} />
+      <DeepDiveField label="Timeline" value={submission.timeline} icon={Clock} />
+      <DeepDiveField label="Budget Comfort" value={submission.budget_comfort} icon={DollarSign} />
+      <DeepDiveArrayField label="Required Integrations" items={submission.required_integrations} icon={Wrench} />
+      <DeepDiveField label="Must-Have Features" value={submission.must_have_features} />
+      <DeepDiveField label="Nice-to-Have Features" value={submission.nice_to_have_features} />
+      <DeepDiveField label="Competitors" value={submission.competitors} />
+      <DeepDiveField label="Decision Maker" value={
+        [submission.decision_maker_name, submission.decision_maker_role].filter(Boolean).join(' — ') || null
+      } icon={Users} />
+      <DeepDiveField label="Decision Timeline" value={submission.decision_timeline} icon={Calendar} />
+      <DeepDiveField label="Additional Notes" value={submission.additional_notes} icon={MessageSquare} />
+    </div>
+  </motion.div>
+);
+
+/* ─────────── Lead Notes ─────────── */
+
+const LeadNotes = ({ assessmentId, notes, onAdd }: {
+  assessmentId: string;
+  notes: LeadNote[];
+  onAdd: (assessmentId: string, content: string, noteType: string) => Promise<void>;
+}) => {
+  const [newNote, setNewNote] = useState('');
+  const [noteType, setNoteType] = useState('comment');
+  const [adding, setAdding] = useState(false);
+
+  const handleAdd = async () => {
+    if (!newNote.trim()) return;
+    setAdding(true);
+    await onAdd(assessmentId, newNote.trim(), noteType);
+    setNewNote('');
+    setAdding(false);
+  };
+
+  const filteredNotes = notes.filter(n => n.assessment_id === assessmentId);
+  const typeColors: Record<string, string> = {
+    comment: 'bg-secondary text-foreground',
+    question: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
+    action: 'bg-primary/10 text-primary border-primary/20',
+  };
+
+  return (
+    <div className="space-y-2 border-t border-border pt-3">
+      <div className="flex items-center gap-2">
+        <MessageSquare className="w-4 h-4 text-primary" />
+        <h4 className="text-xs font-bold text-foreground">Notes & Comments</h4>
+        {filteredNotes.length > 0 && (
+          <Badge variant="outline" className="text-[9px] h-4">{filteredNotes.length}</Badge>
+        )}
+      </div>
+
+      {filteredNotes.length > 0 && (
+        <div className="space-y-1.5 max-h-40 overflow-y-auto">
+          {filteredNotes.map(note => (
+            <div key={note.id} className={`text-[11px] px-2.5 py-1.5 rounded-md border ${typeColors[note.note_type] || typeColors.comment}`}>
+              <div className="flex items-center justify-between gap-2 mb-0.5">
+                <Badge variant="outline" className="text-[8px] h-3.5 px-1 capitalize">{note.note_type}</Badge>
+                <span className="text-[9px] text-muted-foreground">{formatDate(note.created_at)}</span>
+              </div>
+              <p className="whitespace-pre-wrap">{note.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-1.5">
+        <select
+          value={noteType}
+          onChange={e => setNoteType(e.target.value)}
+          className="h-7 text-[10px] rounded-md border border-border bg-secondary px-1.5 text-foreground"
+        >
+          <option value="comment">💬 Comment</option>
+          <option value="question">❓ Question</option>
+          <option value="action">⚡ Action</option>
+        </select>
+        <Input
+          value={newNote}
+          onChange={e => setNewNote(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleAdd()}
+          placeholder="Add a note..."
+          className="h-7 text-[10px] flex-1"
+        />
+        <Button size="sm" variant="outline" className="h-7 w-7 p-0" onClick={handleAdd} disabled={adding || !newNote.trim()}>
+          {adding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+/* ─────────── Lead Card ─────────── */
+
+const LeadCard = ({ lead, onMove, onSendDeepDive, deepDive, notes, onAddNote }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
+  deepDive: DeepDiveSubmission | null;
+  notes: LeadNote[];
+  onAddNote: (assessmentId: string, content: string, noteType: string) => Promise<void>;
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [showDeepDive, setShowDeepDive] = useState(false);
   const [copied, setCopied] = useState(false);
   const roi = lead.roi_results as any;
   const currentIdx = STAGES.findIndex(s => s.key === lead.pipeline_stage);
@@ -96,6 +276,9 @@ const LeadCard = ({ lead, onMove, onSendDeepDive }: {
         {lead.is_qualified && (
           <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary border-0">Qualified</Badge>
         )}
+        {deepDive && (
+          <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-700 border-0">Deep Dive ✓</Badge>
+        )}
       </div>
 
       {/* On-site & email actions for qualified leads */}
@@ -116,8 +299,22 @@ const LeadCard = ({ lead, onMove, onSendDeepDive }: {
             {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
             {copied ? 'Copied' : 'Copy Link'}
           </Button>
+          {deepDive && (
+            <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+              onClick={() => setShowDeepDive(!showDeepDive)}>
+              <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+            </Button>
+          )}
         </div>
       )}
+
+      {/* Deep Dive Responses */}
+      <AnimatePresence>
+        {showDeepDive && deepDive && <DeepDiveViewer submission={deepDive} />}
+      </AnimatePresence>
+
+      {/* Notes section - always visible */}
+      <LeadNotes assessmentId={lead.id} notes={notes} onAdd={onAddNote} />
 
       {expanded && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
@@ -155,6 +352,8 @@ const LeadCard = ({ lead, onMove, onSendDeepDive }: {
   );
 };
 
+/* ─────────── Template Editor (unchanged) ─────────── */
+
 const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave: (t: EmailTemplate) => Promise<void> }) => {
   const [editing, setEditing] = useState({ ...template });
   const [saving, setSaving] = useState(false);
@@ -173,7 +372,6 @@ const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave:
     setDirty(false);
   };
 
-  // Preview with sample data
   const previewHtml = editing.html_body
     .replace(/\{\{contactName\}\}/g, 'John Smith')
     .replace(/\{\{businessName\}\}/g, 'Acme Corp')
@@ -223,20 +421,12 @@ const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave:
 
       <div className="border-b border-border">
         <div className="flex">
-          <button
-            onClick={() => setViewMode('preview')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
-              viewMode === 'preview' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
+          <button onClick={() => setViewMode('preview')}
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium border-b-2 transition-colors ${viewMode === 'preview' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
             <Eye className="w-3.5 h-3.5" /> Preview
           </button>
-          <button
-            onClick={() => setViewMode('html')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
-              viewMode === 'html' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
+          <button onClick={() => setViewMode('html')}
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium border-b-2 transition-colors ${viewMode === 'html' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
             <Code className="w-3.5 h-3.5" /> HTML
           </button>
         </div>
@@ -245,22 +435,12 @@ const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave:
       {viewMode === 'preview' ? (
         <div className="bg-muted/30 p-4">
           <div className="mx-auto max-w-[640px] bg-card rounded-lg shadow-sm border border-border overflow-hidden">
-            <iframe
-              srcDoc={previewHtml}
-              sandbox="allow-same-origin"
-              className="w-full border-0"
-              style={{ minHeight: 500 }}
-              title={`Preview: ${template.name}`}
-            />
+            <iframe srcDoc={previewHtml} sandbox="allow-same-origin" className="w-full border-0" style={{ minHeight: 500 }} title={`Preview: ${template.name}`} />
           </div>
         </div>
       ) : (
         <div className="p-4">
-          <Textarea
-            value={editing.html_body}
-            onChange={e => update('html_body', e.target.value)}
-            className="font-mono text-xs min-h-[400px] leading-relaxed"
-          />
+          <Textarea value={editing.html_body} onChange={e => update('html_body', e.target.value)} className="font-mono text-xs min-h-[400px] leading-relaxed" />
         </div>
       )}
     </div>
@@ -275,17 +455,30 @@ const ROI_REPORT_INFO = {
   description: 'Full ROI breakdown with business data, coaching, pricing, and Deep Dive CTA. This template is code-managed due to its complexity (dynamic pricing tables, conditional sections). Edit via the send-report edge function.',
 };
 
+/* ─────────── Main Admin ─────────── */
+
 const Admin = () => {
   const [leads, setLeads] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
+  const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const { toast } = useToast();
 
   const fetchLeads = async () => {
-    const { data, error } = await supabase.from('roi_assessments').select('*').order('created_at', { ascending: false });
-    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    else setLeads(data || []);
+    const [leadsRes, deepDivesRes, notesRes] = await Promise.all([
+      supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
+      supabase.from('deep_dive_submissions').select('*'),
+      supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
+    ]);
+
+    if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
+    else setLeads(leadsRes.data || []);
+
+    if (!deepDivesRes.error) setDeepDives((deepDivesRes.data as DeepDiveSubmission[]) || []);
+    if (!notesRes.error) setLeadNotes((notesRes.data as LeadNote[]) || []);
+
     setLoading(false);
   };
 
@@ -327,6 +520,20 @@ const Admin = () => {
     }
   };
 
+  const handleAddNote = async (assessmentId: string, content: string, noteType: string) => {
+    const { data, error } = await supabase.from('lead_notes').insert([{
+      assessment_id: assessmentId,
+      content,
+      note_type: noteType,
+    }]).select().single();
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else if (data) {
+      setLeadNotes(prev => [...prev, data as LeadNote]);
+    }
+  };
+
   const handleSaveTemplate = async (updated: EmailTemplate) => {
     const { error } = await supabase.from('email_templates')
       .update({
@@ -343,6 +550,8 @@ const Admin = () => {
       toast({ title: 'Template saved ✅' });
     }
   };
+
+  const getDeepDive = (assessmentId: string) => deepDives.find(d => d.assessment_id === assessmentId) || null;
 
   const grouped = STAGES.map(stage => ({ ...stage, leads: leads.filter(l => l.pipeline_stage === stage.key) }));
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
@@ -389,7 +598,15 @@ const Admin = () => {
                     </div>
                     <div className="space-y-3 min-h-[200px]">
                       {stage.leads.map(lead => (
-                        <LeadCard key={lead.id} lead={lead} onMove={handleMove} onSendDeepDive={handleSendDeepDive} />
+                        <LeadCard
+                          key={lead.id}
+                          lead={lead}
+                          onMove={handleMove}
+                          onSendDeepDive={handleSendDeepDive}
+                          deepDive={getDeepDive(lead.id)}
+                          notes={leadNotes}
+                          onAddNote={handleAddNote}
+                        />
                       ))}
                     </div>
                   </div>
@@ -405,7 +622,6 @@ const Admin = () => {
                 <p className="text-sm text-muted-foreground">Edit subject lines, content, and styling. Changes apply immediately to all future emails.</p>
               </div>
 
-              {/* ROI Report (code-managed) */}
               <div className="rounded-xl border border-border bg-card p-5 space-y-2 opacity-80">
                 <div className="flex items-start justify-between">
                   <h3 className="font-display font-bold text-foreground flex items-center gap-2">
@@ -422,7 +638,6 @@ const Admin = () => {
                 <p className="text-xs text-muted-foreground">{ROI_REPORT_INFO.description}</p>
               </div>
 
-              {/* Editable templates */}
               {templatesLoading ? (
                 <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
               ) : (
