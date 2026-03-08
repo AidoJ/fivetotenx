@@ -256,12 +256,19 @@ function calculateDynamicPricing(totalAnnualImpact: number): DynamicPricing {
     };
   });
 
+  const buildCostLow = Math.round(buildCost * 0.75);
+  const buildCostHigh = Math.round(buildCost * 1.25);
+  const isQualified = isViable && buildCostLow > 10000;
+
   return {
     buildCost,
+    buildCostLow,
+    buildCostHigh,
     tierLabel: tier.label,
     tierPercentage: tier.percentage,
     annualMaintenance,
     isViable,
+    isQualified,
     plans,
   };
 }
