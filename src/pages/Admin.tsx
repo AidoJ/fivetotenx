@@ -177,7 +177,7 @@ const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave:
   const previewHtml = editing.html_body
     .replace(/\{\{contactName\}\}/g, 'John Smith')
     .replace(/\{\{businessName\}\}/g, 'Acme Corp')
-    .replace(/\{\{deepDiveUrl\}\}/g, 'https://fivetotenx.lovable.app/deep-dive?id=sample');
+    .replace(/\{\{deepDiveUrl\}\}/g, `${window.location.origin}/deep-dive?id=sample`);
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
