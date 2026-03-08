@@ -97,10 +97,13 @@ export const PAYMENT_PLANS: PaymentPlan[] = [
 
 export interface DynamicPricing {
   buildCost: number;
+  buildCostLow: number;
+  buildCostHigh: number;
   tierLabel: string;
   tierPercentage: number;
   annualMaintenance: number;
   isViable: boolean;
+  isQualified: boolean; // lower bound > $10K
   plans: {
     type: PaymentPlan['type'];
     label: string;
