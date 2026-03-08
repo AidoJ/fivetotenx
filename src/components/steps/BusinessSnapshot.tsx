@@ -68,17 +68,10 @@ const BusinessSnapshot = ({ data, onChange }: Props) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <Label htmlFor="staff">Number of Staff</Label>
-          <Input id="staff" type="number" placeholder="e.g. 12"
-          value={data.numberOfStaff} onChange={(e) => onChange({ numberOfStaff: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="avgTransaction">Average Transaction Value ($)</Label>
-          <Input id="avgTransaction" type="number" placeholder="e.g. 200"
-          value={data.avgTransactionValue} onChange={(e) => onChange({ avgTransactionValue: e.target.value })} />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="staff">Number of Staff</Label>
+        <Input id="staff" type="number" placeholder="e.g. 12"
+        value={data.numberOfStaff} onChange={(e) => onChange({ numberOfStaff: e.target.value })} />
       </div>
 
       <div className="space-y-3">

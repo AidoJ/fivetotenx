@@ -10,7 +10,6 @@ export interface FormData {
   businessType: BusinessType;
   numberOfStaff: string;
   monthlyRevenue: string;
-  avgTransactionValue: string;
 
   // Section 2
   monthlyVisitors: string;
@@ -145,7 +144,6 @@ export const initialFormData: FormData = {
   businessType: 'service',
   numberOfStaff: '',
   monthlyRevenue: '',
-  avgTransactionValue: '',
   monthlyVisitors: '',
   monthlyLeads: '',
   conversionRate: '',
@@ -276,7 +274,7 @@ function calculateDynamicPricing(totalAnnualImpact: number): DynamicPricing {
 export function calculateROI(data: FormData): ROIResults {
   const visitors = parseFloat(data.monthlyVisitors) || 0;
   const conversionRate = parseFloat(data.conversionRate) || 0;
-  const avgSaleValue = parseFloat(data.avgTransactionValue) || parseFloat(data.avgPurchaseValue) || 0;
+  const avgSaleValue = parseFloat(data.avgPurchaseValue) || 0;
   const isService = data.businessType === 'service' || data.businessType === 'hybrid';
   const isProduct = data.businessType === 'product' || data.businessType === 'hybrid';
 
