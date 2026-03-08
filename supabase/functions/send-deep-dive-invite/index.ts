@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,57 +17,39 @@ serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
     if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY is not configured');
 
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
     const deepDiveUrl = `https://fivetotenx.lovable.app/deep-dive?id=${assessmentId}`;
 
-    const emailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="utf-8"></head>
-    <body style="margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; padding: 40px 20px;">
-        <tr>
-          <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.06);">
-              <tr>
-                <td style="background: linear-gradient(135deg, #1e3a5f, #4338ca); padding: 36px 32px; text-align: center;">
-                  <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">You're Qualified</p>
-                  <h1 style="color: #ffffff; font-size: 24px; margin: 0; font-weight: 700;">Your Custom App Awaits, ${contactName}</h1>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding: 32px;">
-                  <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 16px;">
-                    Based on your ROI assessment, <strong>${businessName || 'your business'}</strong> qualifies for a custom app build. The next step is a quick 5-minute questionnaire so we can scope the perfect solution.
-                  </p>
-                  <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 24px;">
-                    This helps us understand your current tools, goals, timeline, and technical requirements — so your proposal is tailored exactly to your needs.
-                  </p>
-                  <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td align="center">
-                        <a href="${deepDiveUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #1e3a5f, #4338ca); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 16px;">
-                          Start Deep Dive Questionnaire →
-                        </a>
-                      </td>
-                    </tr>
-                  </table>
-                  <p style="color: #64748b; font-size: 12px; margin: 24px 0 0; text-align: center;">
-                    Or copy this link: ${deepDiveUrl}
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding: 20px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
-                  <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">You're not buying tech. You're buying profit.</p>
-                  <p style="color: #94a3b8; font-size: 12px; margin: 0;">5to10X — Strategic App ROI Assessment</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>`;
+    // Try to load template from DB
+    const { data: template } = await supabase
+      .from('email_templates')
+      .select('*')
+      .eq('template_key', 'deep-dive-invite')
+      .single();
+
+    let emailHtml: string;
+    let subject: string;
+    let fromField: string;
+
+    if (template) {
+      emailHtml = template.html_body
+        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{businessName\}\}/g, businessName || 'your business')
+        .replace(/\{\{deepDiveUrl\}\}/g, deepDiveUrl);
+      subject = template.subject
+        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{businessName\}\}/g, businessName || 'your business');
+      fromField = `${template.from_name} <${template.from_email}>`;
+    } else {
+      // Fallback
+      subject = `${contactName}, your custom app proposal starts here — complete the Deep Dive`;
+      fromField = '5to10X <grow@5to10x.app>';
+      emailHtml = `<p>Hi ${contactName}, please complete your Deep Dive: <a href="${deepDiveUrl}">${deepDiveUrl}</a></p>`;
+    }
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -75,9 +58,9 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: '5to10X <grow@5to10x.app>',
+        from: fromField,
         to: [contactEmail],
-        subject: `${contactName}, your custom app proposal starts here — complete the Deep Dive`,
+        subject,
         html: emailHtml,
       }),
     });
