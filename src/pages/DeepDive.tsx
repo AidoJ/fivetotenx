@@ -184,6 +184,15 @@ const DeepDive = () => {
 
       setSubmitted(true);
       toast({ title: 'Submitted! 🎉', description: 'Your deep dive has been received. We\'ll be in touch soon.' });
+
+      // Send confirmation email
+      try {
+        await supabase.functions.invoke('send-deep-dive-confirmation', {
+          body: { contactName, contactEmail: '', businessName },
+        });
+      } catch (e) {
+        console.error('Confirmation email failed (non-blocking):', e);
+      }
     } catch (err) {
       console.error('Submit error:', err);
       toast({ title: 'Error', description: 'Failed to submit. Please try again.', variant: 'destructive' });

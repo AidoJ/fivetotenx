@@ -78,6 +78,8 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           results,
           formData,
           zoomLink: includeZoom ? zoomLink : null,
+          assessmentId: insertedRow?.id || null,
+          isQualified: results.pricing.isQualified,
         },
       });
       if (fnError) throw fnError;
