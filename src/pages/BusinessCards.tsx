@@ -54,7 +54,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
       </div>
 
       {/* Contact details stacked */}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1">
         <a
           href={`mailto:${email}`}
           className="flex items-center gap-2 text-xs hover:opacity-80 transition-opacity"
