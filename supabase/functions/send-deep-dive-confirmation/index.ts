@@ -78,7 +78,7 @@ serve(async (req) => {
         html: `<div style="font-family: sans-serif; padding: 20px;">
           <h2>✅ Deep Dive Submitted</h2>
           <p><strong>${contactName}</strong> from <strong>${businessName || 'Unknown'}</strong> has completed their Deep Dive questionnaire.</p>
-          <p><a href="https://fivetotenx.lovable.app/admin">View in Pipeline →</a></p>
+          <p><a href="https://5to10x.app/admin">View in Pipeline →</a></p>
         </div>`,
       }),
     }).catch(e => console.error('Admin notify failed:', e));

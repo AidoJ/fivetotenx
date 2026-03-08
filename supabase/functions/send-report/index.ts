@@ -90,7 +90,7 @@ serve(async (req) => {
       : '';
 
     // Deep Dive CTA for qualified leads
-    const deepDiveBaseUrl = 'https://fivetotenx.lovable.app';
+    const deepDiveBaseUrl = 'https://5to10x.app';
     const deepDiveSection = (isQualified && assessmentId)
       ? `
         <tr>
@@ -451,7 +451,7 @@ serve(async (req) => {
           <p>Email: ${contactEmail}</p>
           <p>Projected Annual Impact: ${fmt(results.totalAnnualImpact)}</p>
           <p>Build Cost: ${fmt(pricing?.buildCostLow || 0)} – ${fmt(pricing?.buildCostHigh || 0)}</p>
-          <p><a href="https://fivetotenx.lovable.app/admin">View in Pipeline →</a></p>
+          <p><a href="https://5to10x.app/admin">View in Pipeline →</a></p>
         </div>`;
 
         await fetch('https://api.resend.com/emails', {
