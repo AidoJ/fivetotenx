@@ -717,21 +717,21 @@ const CoFoundersSection = () => {
   const founders = [
     {
       name: 'Eoghan Leonard',
-      role: 'Senior Developer & Co-Founder',
+      role: 'Technical Co-Founder',
       image: headshotEoghan,
-      bio: 'With over a decade of full-stack development experience, Eoghan architects and builds the custom operational apps that transform how businesses run. He specialises in AI integration, automation workflows, and rapid MVP delivery — turning complex business problems into elegant, scalable solutions.',
+      bio: 'Eoghan has deep experience across Snowflake, dbt, Salesforce, and Fivetran, and has spent his career solving the kinds of data problems that quietly slow businesses down and keep owners up at night. His focus is on helping growing businesses move from scattered spreadsheets and disconnected systems to data that is clear, reliable, and easy to use when making important decisions.\n\nHe specialises in building modern data platforms that simply work. Rather than just installing tools, Eoghan designs practical systems that bring together information from across the business — sales, operations, finance, and marketing — so owners and managers can see what\'s really happening without spending hours chasing numbers.\n\nHis client work includes companies such as David Jones, Isuzu, and Xero, where he has helped solve complex data challenges and turn raw information into insights that support better decisions.\n\nAcross every project, his approach stays the same: understand the business first, then build the technology to support it. The goal is simple — create data systems that run quietly in the background so business owners can spend less time worrying about reports and more time focusing on growth.',
     },
     {
       name: 'Aidan Leonard',
-      role: 'Business Analyst & Co-Founder',
+      role: 'Business Co-Founder',
       image: headshotAidan,
-      bio: 'Aidan bridges the gap between business strategy and technology. With a sharp eye for operational inefficiencies and a deep understanding of how SMEs actually work, he ensures every app we build solves real problems and delivers measurable ROI from day one.',
+      bio: 'Aidan is a business transformation advisor with 30+ years of experience helping organisations improve performance through smarter strategy, operational design, and data-driven decision making.\n\nHaving held senior and executive roles with organisations including Cable & Wireless, Ericsson, Almarai, Construction Skills Queensland, Civil Contractors Federation, and Orbus3, Aidan has spent his career working at the intersection of business strategy, operational efficiency, and technology transformation.\n\nHe has a deep passion for adapting cutting-edge technology to practical business challenges, helping organisations simplify complex workflows and unlock new opportunities for growth.\n\nToday Aidan works closely with SME leaders, advising them on how to modernise their operations and build businesses that run more efficiently. His work focuses on delivering practical improvements that create immediate impact — reducing operational costs, implementing analytics that improve project margins, scaling efficiently as demand grows, and designing workflow systems that cut administrative workload in half.\n\nAidan\'s philosophy is simple: when businesses combine clear strategy with the right technology and efficient workflows, growth becomes far easier to achieve.',
     },
   ];
 
   return (
     <section className="bg-background px-4 py-20 md:py-28">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-14">
           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
             Meet the{' '}
@@ -740,7 +740,7 @@ const CoFoundersSection = () => {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A developer and analyst team that understands both the technology and the business behind it.
+            A developer and advisor team that understands both the technology and the business behind it.
           </p>
         </motion.div>
 
@@ -766,9 +766,11 @@ const CoFoundersSection = () => {
                     {founder.role}
                   </p>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {founder.bio}
-                </p>
+                <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
+                  {founder.bio.split('\n\n').map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
+                  ))}
+                </div>
               </div>
             </motion.div>
           ))}
