@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import BusinessCards from "./pages/BusinessCards";
+import DeepDive from "./pages/DeepDive";
 
 const queryClient = new QueryClient();
 
