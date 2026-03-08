@@ -124,6 +124,38 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_notes: {
+        Row: {
+          assessment_id: string
+          content: string
+          created_at: string
+          id: string
+          note_type: string
+        }
+        Insert: {
+          assessment_id: string
+          content: string
+          created_at?: string
+          id?: string
+          note_type?: string
+        }
+        Update: {
+          assessment_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          note_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_notes_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roi_assessments: {
         Row: {
           business_name: string | null
