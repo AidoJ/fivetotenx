@@ -247,9 +247,11 @@ const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave:
           <div className="mx-auto max-w-[640px] bg-card rounded-lg shadow-sm border border-border overflow-hidden">
             <iframe
               srcDoc={previewHtml}
+              sandbox="allow-same-origin"
               className="w-full border-0"
               style={{ minHeight: 500 }}
               title={`Preview: ${template.name}`}
+            />
             />
           </div>
         </div>
