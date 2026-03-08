@@ -53,7 +53,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
 
     setSending(true);
     try {
-      const { error: dbError } = await supabase.from('roi_assessments').insert([{
+      const { data: insertedRow, error: dbError } = await supabase.from('roi_assessments').insert([{
         contact_name: formData.contactName,
         contact_email: formData.contactEmail,
         contact_phone: formData.contactPhone,
@@ -63,7 +63,10 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         roi_results: JSON.parse(JSON.stringify(results)),
         report_sent: true,
         invite_sent: includeZoom,
-      }]);
+        is_qualified: results.pricing.isQualified,
+        pipeline_stage: results.pricing.isQualified ? 'qualified' : 'assessment',
+        qualified_at: results.pricing.isQualified ? new Date().toISOString() : null,
+      } as any]).select('id').single();
       if (dbError) throw dbError;
 
       const { error: fnError } = await supabase.functions.invoke('send-report', {
