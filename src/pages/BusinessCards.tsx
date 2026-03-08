@@ -40,7 +40,7 @@ const BusinessCard = ({ name, title, email, phone }: CardProps) => (
       {/* Name & Title */}
       <div className="space-y-0">
         <h3
-          className="text-lg font-display font-bold"
+          className="text-sm font-display font-bold"
           style={{ color: 'hsl(230 35% 12%)' }}
         >
           {name}
