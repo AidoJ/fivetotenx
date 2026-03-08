@@ -144,7 +144,6 @@ export const initialFormData: FormData = {
   businessType: 'service',
   numberOfStaff: '',
   monthlyRevenue: '',
-  avgTransactionValue: '',
   monthlyVisitors: '',
   monthlyLeads: '',
   conversionRate: '',
