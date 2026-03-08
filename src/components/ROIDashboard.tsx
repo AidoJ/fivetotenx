@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ROIResults, FormData } from '@/lib/formTypes';
-import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle, ShieldAlert, ShoppingBag, Megaphone } from 'lucide-react';
+import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle, ShieldAlert, ShoppingBag, Megaphone, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +39,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
   const [zoomLink, setZoomLink] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [assessmentId, setAssessmentId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleSendReport = async (includeZoom: boolean) => {
@@ -53,7 +54,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
 
     setSending(true);
     try {
-      const { error: dbError } = await supabase.from('roi_assessments').insert([{
+      const { data: insertedRow, error: dbError } = await supabase.from('roi_assessments').insert([{
         contact_name: formData.contactName,
         contact_email: formData.contactEmail,
         contact_phone: formData.contactPhone,
@@ -63,7 +64,10 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         roi_results: JSON.parse(JSON.stringify(results)),
         report_sent: true,
         invite_sent: includeZoom,
-      }]);
+        is_qualified: results.pricing.isQualified,
+        pipeline_stage: results.pricing.isQualified ? 'qualified' : 'assessment',
+        qualified_at: results.pricing.isQualified ? new Date().toISOString() : null,
+      } as any]).select('id').single();
       if (dbError) throw dbError;
 
       const { error: fnError } = await supabase.functions.invoke('send-report', {
@@ -79,6 +83,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
       if (fnError) throw fnError;
 
       setSent(true);
+      if (insertedRow) setAssessmentId(insertedRow.id);
       toast({ title: 'Report sent! ✅', description: `Report sent to ${formData.contactEmail}` });
     } catch (err: unknown) {
       console.error('Send error:', err);
@@ -257,6 +262,31 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           </div>
         )}
       </motion.div>
+
+      {/* Deep Dive CTA for qualified leads */}
+      {results.pricing.isQualified && sent && assessmentId && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85 }}
+          className="rounded-xl p-6 text-center space-y-4"
+          style={{ backgroundImage: 'var(--gradient-primary)' }}
+        >
+          <Sparkles className="w-8 h-8 text-primary-foreground mx-auto" />
+          <h3 className="text-xl font-display font-bold text-primary-foreground">Ready for the Next Step?</h3>
+          <p className="text-sm text-primary-foreground/80 max-w-md mx-auto">
+            Your business qualifies for a custom build. Complete the deep dive questionnaire so we can scope the perfect solution.
+          </p>
+          <Button
+            variant="secondary"
+            className="gap-2"
+            onClick={() => window.open(`/deep-dive?id=${assessmentId}`, '_blank')}
+          >
+            <ArrowRight className="w-4 h-4" />
+            Start Deep Dive
+          </Button>
+        </motion.div>
+      )}
 
       {/* Tagline */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="text-center py-6">

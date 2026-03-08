@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      deep_dive_submissions: {
+        Row: {
+          additional_notes: string | null
+          assessment_id: string
+          budget_comfort: string | null
+          competitors: string | null
+          created_at: string
+          current_tools: string | null
+          current_website: string | null
+          decision_maker_name: string | null
+          decision_maker_role: string | null
+          decision_timeline: string | null
+          id: string
+          must_have_features: string | null
+          nice_to_have_features: string | null
+          pain_points: string | null
+          primary_goals: string[] | null
+          required_integrations: string[] | null
+          timeline: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          assessment_id: string
+          budget_comfort?: string | null
+          competitors?: string | null
+          created_at?: string
+          current_tools?: string | null
+          current_website?: string | null
+          decision_maker_name?: string | null
+          decision_maker_role?: string | null
+          decision_timeline?: string | null
+          id?: string
+          must_have_features?: string | null
+          nice_to_have_features?: string | null
+          pain_points?: string | null
+          primary_goals?: string[] | null
+          required_integrations?: string[] | null
+          timeline?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          assessment_id?: string
+          budget_comfort?: string | null
+          competitors?: string | null
+          created_at?: string
+          current_tools?: string | null
+          current_website?: string | null
+          decision_maker_name?: string | null
+          decision_maker_role?: string | null
+          decision_timeline?: string | null
+          id?: string
+          must_have_features?: string | null
+          nice_to_have_features?: string | null
+          pain_points?: string | null
+          primary_goals?: string[] | null
+          required_integrations?: string[] | null
+          timeline?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deep_dive_submissions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roi_assessments: {
         Row: {
           business_name: string | null
@@ -25,6 +93,9 @@ export type Database = {
           id: string
           industry: string | null
           invite_sent: boolean | null
+          is_qualified: boolean
+          pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
+          qualified_at: string | null
           report_sent: boolean | null
           roi_results: Json
         }
@@ -38,6 +109,9 @@ export type Database = {
           id?: string
           industry?: string | null
           invite_sent?: boolean | null
+          is_qualified?: boolean
+          pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
+          qualified_at?: string | null
           report_sent?: boolean | null
           roi_results?: Json
         }
@@ -51,6 +125,9 @@ export type Database = {
           id?: string
           industry?: string | null
           invite_sent?: boolean | null
+          is_qualified?: boolean
+          pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
+          qualified_at?: string | null
           report_sent?: boolean | null
           roi_results?: Json
         }
@@ -64,7 +141,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      pipeline_stage:
+        | "assessment"
+        | "qualified"
+        | "deep_dive_sent"
+        | "deep_dive_complete"
+        | "proposal"
+        | "signed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -191,6 +274,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      pipeline_stage: [
+        "assessment",
+        "qualified",
+        "deep_dive_sent",
+        "deep_dive_complete",
+        "proposal",
+        "signed",
+      ],
+    },
   },
 } as const
