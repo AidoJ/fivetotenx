@@ -263,6 +263,31 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         )}
       </motion.div>
 
+      {/* Deep Dive CTA for qualified leads */}
+      {results.pricing.isQualified && sent && assessmentId && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85 }}
+          className="rounded-xl p-6 text-center space-y-4"
+          style={{ backgroundImage: 'var(--gradient-primary)' }}
+        >
+          <Sparkles className="w-8 h-8 text-primary-foreground mx-auto" />
+          <h3 className="text-xl font-display font-bold text-primary-foreground">Ready for the Next Step?</h3>
+          <p className="text-sm text-primary-foreground/80 max-w-md mx-auto">
+            Your business qualifies for a custom build. Complete the deep dive questionnaire so we can scope the perfect solution.
+          </p>
+          <Button
+            variant="secondary"
+            className="gap-2"
+            onClick={() => window.open(`/deep-dive?id=${assessmentId}`, '_blank')}
+          >
+            <ArrowRight className="w-4 h-4" />
+            Start Deep Dive
+          </Button>
+        </motion.div>
+      )}
+
       {/* Tagline */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="text-center py-6">
         <p className="text-lg font-display font-semibold text-foreground mb-1">You're not buying tech.</p>
