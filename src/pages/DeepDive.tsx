@@ -109,6 +109,7 @@ const DeepDive = () => {
   const [loading, setLoading] = useState(true);
   const [businessName, setBusinessName] = useState('');
   const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<DeepDiveForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
@@ -122,7 +123,7 @@ const DeepDive = () => {
     const fetchAssessment = async () => {
       const { data, error } = await supabase
         .from('roi_assessments')
-        .select('business_name, contact_name, is_qualified')
+        .select('business_name, contact_name, contact_email, is_qualified')
         .eq('id', assessmentId)
         .single();
 
@@ -138,6 +139,7 @@ const DeepDive = () => {
       }
       setBusinessName(data.business_name || '');
       setContactName(data.contact_name || '');
+      setContactEmail(data.contact_email || '');
       setLoading(false);
     };
     fetchAssessment();
@@ -184,6 +186,15 @@ const DeepDive = () => {
 
       setSubmitted(true);
       toast({ title: 'Submitted! 🎉', description: 'Your deep dive has been received. We\'ll be in touch soon.' });
+
+      // Send confirmation email
+      try {
+        await supabase.functions.invoke('send-deep-dive-confirmation', {
+          body: { contactName, contactEmail, businessName },
+        });
+      } catch (e) {
+        console.error('Confirmation email failed (non-blocking):', e);
+      }
     } catch (err) {
       console.error('Submit error:', err);
       toast({ title: 'Error', description: 'Failed to submit. Please try again.', variant: 'destructive' });

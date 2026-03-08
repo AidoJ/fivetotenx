@@ -2,3 +2,12 @@ project_id = "hfszmulinpwzmroqemke"
 
 [functions.send-report]
 verify_jwt = false
+
+[functions.send-deep-dive-confirmation]
+verify_jwt = false
+
+[functions.send-deep-dive-invite]
+verify_jwt = false
+
+[functions.follow-up-reminder]
+verify_jwt = false

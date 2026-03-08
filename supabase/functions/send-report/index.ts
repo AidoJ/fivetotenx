@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contactName, contactEmail, businessName, results, zoomLink, formData } = await req.json();
+    const { contactName, contactEmail, businessName, results, zoomLink, formData, assessmentId, isQualified } = await req.json();
 
     if (!contactEmail || !contactName) {
       return new Response(JSON.stringify({ error: 'Name and email are required' }), {
@@ -33,7 +33,6 @@ serve(async (req) => {
     const isService = formData?.businessType === 'service' || formData?.businessType === 'hybrid';
     const isProduct = formData?.businessType === 'product' || formData?.businessType === 'hybrid';
 
-    // Helper for data rows
     const row = (label: string, value: string) => `
       <tr>
         <td style="padding: 10px 16px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${label}</td>
@@ -50,11 +49,9 @@ serve(async (req) => {
     const lostReasons = formData?.lostSalesReasons?.length > 0 ? formData.lostSalesReasons.join(', ') : 'None identified';
     const currentFeatures = formData?.currentFeatures?.length > 0 ? formData.currentFeatures.join(', ') : 'None currently';
 
-    // Dynamic pricing data
     const pricing = results?.pricing;
     const isViable = pricing?.isViable !== false;
 
-    // Build payment plans HTML
     let paymentPlansHtml = '';
     if (isViable && pricing?.plans?.length > 0) {
       const planRows = pricing.plans.map((plan: { label: string; deposit: number; monthlyAmount: number; totalCost: number; includesMaintenance: boolean; description: string }) => `
@@ -89,6 +86,31 @@ serve(async (req) => {
             </td>
           </tr>
         </table>
+      `
+      : '';
+
+    // Deep Dive CTA for qualified leads
+    const deepDiveBaseUrl = 'https://fivetotenx.lovable.app';
+    const deepDiveSection = (isQualified && assessmentId)
+      ? `
+        <tr>
+          <td style="padding: 0 32px 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1e3a5f, #4338ca); border-radius: 12px; overflow: hidden;">
+              <tr>
+                <td style="padding: 32px; text-align: center;">
+                  <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR A CUSTOM BUILD</p>
+                  <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for the Next Step?</h2>
+                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 20px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    Your business qualifies for a custom app build. Complete our 5-minute Deep Dive questionnaire so we can scope the perfect solution for ${businessName || 'your business'}.
+                  </p>
+                  <a href="${deepDiveBaseUrl}/deep-dive?id=${assessmentId}" style="display: inline-block; padding: 14px 36px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">
+                    Start Deep Dive →
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
       `
       : '';
 
@@ -149,7 +171,7 @@ serve(async (req) => {
                 </td>
               </tr>
 
-              <!-- YOUR INPUTS: Verification Section -->
+              <!-- YOUR INPUTS -->
               <tr>
                 <td style="padding: 0 32px 28px;">
                   <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">📋 Your Business Data — Please Verify</h2>
@@ -197,7 +219,7 @@ serve(async (req) => {
                 </td>
               </tr>
 
-              <!-- COACHING SECTION: Why This Matters Now -->
+              <!-- COACHING SECTION -->
               <tr>
                 <td style="padding: 0 32px 28px;">
                   <table width="100%" cellpadding="0" cellspacing="0" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; overflow: hidden;">
@@ -261,7 +283,6 @@ serve(async (req) => {
                   </table>
 
                   ${results.noShowRecovery > 0 ? `
-                  <!-- No-Show Recovery -->
                   <table width="100%" cellpadding="0" cellspacing="0" style="background: #fef2f2; border-radius: 8px; margin-bottom: 12px;">
                     <tr>
                       <td style="padding: 16px;">
@@ -275,7 +296,6 @@ serve(async (req) => {
                   ` : ''}
 
                   ${results.upsellLift > 0 ? `
-                  <!-- Upsell Lift -->
                   <table width="100%" cellpadding="0" cellspacing="0" style="background: #fffbeb; border-radius: 8px; margin-bottom: 12px;">
                     <tr>
                       <td style="padding: 16px;">
@@ -289,7 +309,6 @@ serve(async (req) => {
                   ` : ''}
 
                   ${results.marketingEfficiency > 0 ? `
-                  <!-- Marketing Efficiency -->
                   <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0f9ff; border-radius: 8px; margin-bottom: 12px;">
                     <tr>
                       <td style="padding: 16px;">
@@ -359,10 +378,13 @@ serve(async (req) => {
               </tr>
               `}
 
+              <!-- Deep Dive CTA -->
+              ${deepDiveSection}
+
               <!-- Zoom section -->
               ${zoomSection ? `<tr><td style="padding: 0 32px;">${zoomSection}</td></tr>` : ''}
 
-              <!-- CLOSING COACHING MESSAGE -->
+              <!-- CLOSING -->
               <tr>
                 <td style="padding: 0 32px 32px;">
                   <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 12px;">🚀 Our Recommendation</h2>
@@ -385,7 +407,7 @@ serve(async (req) => {
               <tr>
                 <td style="padding: 24px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
                   <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">You're not buying tech. You're buying profit.</p>
-                  <p style="color: #94a3b8; font-size: 12px; margin: 0;">This report was generated by AppItRight — Strategic App ROI Assessment</p>
+                  <p style="color: #94a3b8; font-size: 12px; margin: 0;">This report was generated by 5to10X — Strategic App ROI Assessment</p>
                 </td>
               </tr>
 
@@ -405,7 +427,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'App ROI Report <onboarding@resend.dev>',
+        from: '5to10X Growth Report <grow@5to10x.app>',
         to: [contactEmail],
         subject: `Strategic Growth Report – ${businessName || 'Your Business'} | App ROI Assessment`,
         html: emailHtml,
@@ -417,6 +439,37 @@ serve(async (req) => {
     if (!resendResponse.ok) {
       console.error('Resend API error:', resendData);
       throw new Error(`Email sending failed: ${JSON.stringify(resendData)}`);
+    }
+
+    // If qualified, also notify admin
+    if (isQualified) {
+      try {
+        const adminNotifyHtml = `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2>🔥 New Qualified Lead</h2>
+          <p><strong>${contactName}</strong> from <strong>${businessName || 'Unknown Business'}</strong></p>
+          <p>Email: ${contactEmail}</p>
+          <p>Projected Annual Impact: ${fmt(results.totalAnnualImpact)}</p>
+          <p>Build Cost: ${fmt(pricing?.buildCostLow || 0)} – ${fmt(pricing?.buildCostHigh || 0)}</p>
+          <p><a href="https://fivetotenx.lovable.app/admin">View in Pipeline →</a></p>
+        </div>`;
+
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: '5to10X Pipeline <grow@5to10x.app>',
+            to: ['grow@5to10x.app'],
+            subject: `🔥 New Qualified Lead: ${contactName} – ${businessName || 'Unknown'}`,
+            html: adminNotifyHtml,
+          }),
+        });
+      } catch (adminErr) {
+        console.error('Admin notification failed (non-blocking):', adminErr);
+      }
     }
 
     console.log('Email sent successfully:', resendData);
