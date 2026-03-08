@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { DynamicPricing, MAINTENANCE_UPLIFT } from '@/lib/formTypes';
-import { DollarSign, AlertTriangle, CreditCard, Calendar, Repeat, Wrench } from 'lucide-react';
+import { DollarSign, AlertTriangle, CreditCard, Calendar, Repeat, Wrench, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface Props {
   pricing: DynamicPricing;
@@ -49,15 +50,32 @@ const PricingSection = ({ pricing, totalAnnualImpact }: Props) => {
       transition={{ delay: 0.6 }}
       className="rounded-xl border border-border bg-card p-6 space-y-5"
     >
-      <h3 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
-        <DollarSign className="w-5 h-5 text-accent" />
-        Investment & Payment Options
-      </h3>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h3 className="font-display font-bold text-lg text-foreground flex items-center gap-2">
+          <DollarSign className="w-5 h-5 text-accent" />
+          Investment & Payment Options
+        </h3>
+        {pricing.isQualified && (
+          <Badge className="gap-1.5 px-3 py-1 text-xs font-semibold" style={{ backgroundImage: 'var(--gradient-vibrant)', color: 'white', border: 'none' }}>
+            <Sparkles className="w-3.5 h-3.5" />
+            Qualified for Deep Dive
+          </Badge>
+        )}
+      </div>
+
+      {/* Price Range Banner */}
+      <div className="rounded-lg p-4 text-center space-y-1" style={{ backgroundImage: 'var(--gradient-primary)', color: 'white' }}>
+        <p className="text-xs font-semibold uppercase tracking-wider opacity-80">Estimated Build Investment</p>
+        <p className="text-2xl md:text-3xl font-display font-bold">
+          {formatCurrency(pricing.buildCostLow)} – {formatCurrency(pricing.buildCostHigh)}
+        </p>
+        <p className="text-xs opacity-70">Based on {pricing.tierLabel} tier ({pricing.tierPercentage}% of projected Year 1 ROI)</p>
+      </div>
 
       {/* Summary bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="text-center p-3 rounded-lg bg-secondary space-y-1">
-          <p className="text-xs text-muted-foreground">Build Investment</p>
+          <p className="text-xs text-muted-foreground">Mid-point Estimate</p>
           <p className="text-lg font-display font-bold text-foreground">{formatCurrency(pricing.buildCost)}</p>
         </div>
         <div className="text-center p-3 rounded-lg bg-secondary space-y-1">

@@ -55,7 +55,7 @@ export const PRICING_TIERS: PricingTier[] = [
   { minROI: 100000, maxROI: Infinity, percentage: 25, label: 'Enterprise' },
 ];
 
-export const PRICE_FLOOR = 3000;
+export const PRICE_FLOOR = 5000;
 export const PRICE_CAP = 40000;
 export const MAINTENANCE_UPLIFT = 0.15; // 15% of build cost annually
 
@@ -97,10 +97,13 @@ export const PAYMENT_PLANS: PaymentPlan[] = [
 
 export interface DynamicPricing {
   buildCost: number;
+  buildCostLow: number;
+  buildCostHigh: number;
   tierLabel: string;
   tierPercentage: number;
   annualMaintenance: number;
   isViable: boolean;
+  isQualified: boolean; // lower bound > $10K
   plans: {
     type: PaymentPlan['type'];
     label: string;
@@ -253,12 +256,19 @@ function calculateDynamicPricing(totalAnnualImpact: number): DynamicPricing {
     };
   });
 
+  const buildCostLow = Math.round(buildCost * 0.75);
+  const buildCostHigh = Math.round(buildCost * 1.25);
+  const isQualified = isViable && buildCostLow > 10000;
+
   return {
     buildCost,
+    buildCostLow,
+    buildCostHigh,
     tierLabel: tier.label,
     tierPercentage: tier.percentage,
     annualMaintenance,
     isViable,
+    isQualified,
     plans,
   };
 }
