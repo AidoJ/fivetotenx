@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X } from 'lucide-react';
+import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -20,9 +20,11 @@ interface ProposalData {
 interface AssessmentData {
   contact_name: string;
   contact_email: string;
+  contact_phone: string | null;
   business_name: string | null;
   roi_results: any;
   form_data: any;
+  industry: string | null;
 }
 
 interface DeepDiveData {
@@ -33,43 +35,91 @@ interface DeepDiveData {
   must_have_features: string | null;
   nice_to_have_features: string | null;
   required_integrations: string[] | null;
+  current_website: string | null;
+  current_tools: string | null;
+  competitors: string | null;
+  decision_maker_name: string | null;
+  decision_maker_role: string | null;
+  decision_timeline: string | null;
+  additional_notes: string | null;
+}
+
+interface InterviewData {
+  id: string;
+  title: string;
+  content: string | null;
+  transcript: string | null;
+  interviewed_at: string;
 }
 
 interface EditableContent {
-  executiveSummary: string;
-  scopeNotes: string;
-  investmentNotes: string;
+  projectOverview: string;
+  proposedSolution: string;
+  appFeatures: string[];
+  integrations: string[];
+  uxDesign: string;
+  deploymentSupport: string;
+  expectedImpact: string[];
+  deliverables: string[];
   timelinePhases: { phase: string; duration: string; desc: string }[];
-  terms: string[];
+  investmentAmount: number;
+  paymentStructure: { label: string; percentage: number; description: string }[];
+  clientResponsibilities: string[];
+  variations: string;
+  thirdPartyServices: string;
+  intellectualProperty: string;
+  confidentiality: string;
+  dataProtection: string;
+  limitationOfLiability: string;
+  roiDisclaimer: string;
+  termination: string;
+  governingLaw: string;
   customSections: { title: string; body: string }[];
 }
 
-const DEFAULT_TIMELINE = [
-  { phase: 'Discovery & Planning', duration: '1–2 weeks', desc: 'Finalize scope, wireframes, and technical architecture' },
-  { phase: 'Design & Prototyping', duration: '1–2 weeks', desc: 'UI/UX design, interactive prototypes, and feedback rounds' },
-  { phase: 'Development', duration: '4–8 weeks', desc: 'Core feature build, integrations, and iterative testing' },
-  { phase: 'Launch & Support', duration: '1–2 weeks', desc: 'Final QA, deployment, training, and handoff' },
-];
-
-const DEFAULT_TERMS = [
-  'This proposal is valid for 30 days from the date of issue.',
-  'Payment terms: 50% upfront, 25% at midpoint, 25% at launch.',
-  'All work includes 30 days of post-launch support and bug fixes.',
-  'Client owns all custom code and assets produced during the project.',
-  'Scope changes after acceptance may affect timeline and pricing.',
-];
-
 const formatCurrency = (v: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+  new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(v);
 
 const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  new Date(d).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const SectionTitle = ({ icon: Icon, number, title }: { icon: any; number: number; title: string }) => (
+  <h2 className="text-xl font-display font-bold text-foreground mb-4 flex items-center gap-3">
+    <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">{number}</span>
+    <Icon className="w-5 h-5 text-primary" />
+    {title}
+  </h2>
+);
+
+const EditableList = ({ items, onChange, placeholder }: { items: string[]; onChange: (items: string[]) => void; placeholder: string }) => (
+  <div className="space-y-1.5">
+    {items.map((item, i) => (
+      <div key={i} className="flex gap-2 items-start">
+        <span className="text-muted-foreground mt-2 text-xs">•</span>
+        <Input value={item} onChange={e => { const u = [...items]; u[i] = e.target.value; onChange(u); }} className="text-sm flex-1" placeholder={placeholder} />
+        <Button size="sm" variant="ghost" onClick={() => onChange(items.filter((_, j) => j !== i))} className="h-8 w-8 p-0 text-destructive"><X className="w-3 h-3" /></Button>
+      </div>
+    ))}
+    <Button variant="ghost" size="sm" onClick={() => onChange([...items, ''])} className="text-xs">+ Add Item</Button>
+  </div>
+);
+
+const BulletList = ({ items }: { items: string[] }) => (
+  <ul className="space-y-1.5">
+    {items.filter(Boolean).map((item, i) => (
+      <li key={i} className="text-sm text-muted-foreground leading-relaxed flex items-start gap-2">
+        <span className="text-primary mt-1">•</span> {item}
+      </li>
+    ))}
+  </ul>
+);
 
 const Proposal = () => {
   const { id } = useParams<{ id: string }>();
   const [proposal, setProposal] = useState<ProposalData | null>(null);
   const [assessment, setAssessment] = useState<AssessmentData | null>(null);
   const [deepDive, setDeepDive] = useState<DeepDiveData | null>(null);
+  const [interviews, setInterviews] = useState<InterviewData[]>([]);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -79,49 +129,74 @@ const Proposal = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAdmin(!!session);
-    });
+    supabase.auth.getSession().then(({ data: { session } }) => setIsAdmin(!!session));
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
+      const { data: prop } = await supabase.from('proposals').select('*').eq('id', id).single();
+      if (!prop) { setLoading(false); return; }
+      
+      setProposal(prop as ProposalData);
+      const pData = (prop as ProposalData).proposal_data || {};
 
-      const { data: prop } = await supabase
-        .from('proposals')
-        .select('*')
-        .eq('id', id)
+      const { data: assess } = await supabase
+        .from('roi_assessments')
+        .select('contact_name, contact_email, contact_phone, business_name, roi_results, form_data, industry')
+        .eq('id', prop.assessment_id)
         .single();
+      if (assess) setAssessment(assess as AssessmentData);
 
-      if (prop) {
-        setProposal(prop as ProposalData);
-        const pData = (prop as ProposalData).proposal_data || {};
+      const { data: dd } = await supabase
+        .from('deep_dive_submissions')
+        .select('*')
+        .eq('assessment_id', prop.assessment_id)
+        .single();
+      if (dd) setDeepDive(dd as DeepDiveData);
 
-        const { data: assess } = await supabase
-          .from('roi_assessments')
-          .select('contact_name, contact_email, business_name, roi_results, form_data')
-          .eq('id', prop.assessment_id)
-          .single();
-        if (assess) setAssessment(assess as AssessmentData);
+      const { data: intData } = await supabase
+        .from('client_interviews')
+        .select('id, title, content, transcript, interviewed_at')
+        .eq('assessment_id', prop.assessment_id)
+        .order('interviewed_at', { ascending: true });
+      if (intData) setInterviews(intData as InterviewData[]);
 
-        const { data: dd } = await supabase
-          .from('deep_dive_submissions')
-          .select('pain_points, primary_goals, timeline, budget_comfort, must_have_features, nice_to_have_features, required_integrations')
-          .eq('assessment_id', prop.assessment_id)
-          .single();
-        if (dd) setDeepDive(dd as DeepDiveData);
-
-        // Initialize editable content from proposal_data or defaults
-        setContent({
-          executiveSummary: pData.executiveSummary || '',
-          scopeNotes: pData.scopeNotes || '',
-          investmentNotes: pData.investmentNotes || '',
-          timelinePhases: pData.timelinePhases || DEFAULT_TIMELINE,
-          terms: pData.terms || DEFAULT_TERMS,
-          customSections: pData.customSections || [],
-        });
-      }
+      // Initialize content from saved proposal_data or defaults
+      setContent({
+        projectOverview: pData.projectOverview || '',
+        proposedSolution: pData.proposedSolution || '',
+        appFeatures: pData.appFeatures || [],
+        integrations: pData.integrations || [],
+        uxDesign: pData.uxDesign || '',
+        deploymentSupport: pData.deploymentSupport || '',
+        expectedImpact: pData.expectedImpact || [],
+        deliverables: pData.deliverables || [],
+        timelinePhases: pData.timelinePhases || [],
+        investmentAmount: pData.investmentAmount || 0,
+        paymentStructure: pData.paymentStructure || [
+          { label: 'Deposit', percentage: 40, description: 'Payable upon acceptance of this proposal to commence work.' },
+          { label: 'Development Milestone', percentage: 30, description: 'Payable at agreed development milestone.' },
+          { label: 'Completion', percentage: 30, description: 'Prior to deployment or delivery of the final application.' },
+        ],
+        clientResponsibilities: pData.clientResponsibilities || [
+          'Provide accurate business information during intake',
+          'Supply required content, assets, and documentation',
+          'Nominate a primary project contact',
+          'Provide timely approvals and feedback',
+          'Ensure they hold rights to any materials supplied',
+        ],
+        variations: pData.variations || 'Requests for additional features or changes to scope after development has begun may require revised timelines and additional development costs. All variations will be confirmed with the Client before work proceeds.',
+        thirdPartyServices: pData.thirdPartyServices || 'Applications may rely on external services including hosting providers, payment systems, messaging services, or APIs. The Developer is not responsible for outages of third-party platforms, changes to third-party pricing, or service disruptions outside the Developer\'s control. The Client may be required to maintain accounts with these services.',
+        intellectualProperty: pData.intellectualProperty || 'Upon full payment of the project, the Client will own the custom application code developed specifically for this project. The Developer retains ownership of proprietary frameworks, reusable code libraries, and development tools. These may be used in future projects.',
+        confidentiality: pData.confidentiality || 'Both parties agree to maintain confidentiality regarding business operations, technical systems, financial information, and customer data. This obligation continues after the completion of the project.',
+        dataProtection: pData.dataProtection || 'Where personal information is involved, both parties agree to comply with the obligations of the Privacy Act 1988. The Client is responsible for ensuring their business complies with relevant privacy obligations including obtaining user consent where required and maintaining a privacy policy where applicable.',
+        limitationOfLiability: pData.limitationOfLiability || 'To the maximum extent permitted by law, the Developer\'s liability is limited to the value of the services provided under this agreement. The Developer will not be liable for loss of profits, business interruption, or indirect or consequential losses. Nothing in this agreement excludes rights under the Australian Consumer Law.',
+        roiDisclaimer: pData.roiDisclaimer || 'Any revenue forecasts, automation savings calculations, or return-on-investment projections provided during the intake or proposal process are indicative only. Actual business outcomes depend on many variables including market conditions, marketing activity, internal processes, and user adoption. The Developer does not guarantee financial outcomes.',
+        termination: pData.termination || 'Either party may terminate this agreement if the other party materially breaches the agreement and does not remedy the breach within 14 days. If the project is terminated, work completed to date will be invoiced and all outstanding invoices become payable immediately.',
+        governingLaw: pData.governingLaw || 'This agreement is governed by the laws of Australia under the Competition and Consumer Act 2010 and relevant State or Territory legislation.',
+        customSections: pData.customSections || [],
+      });
 
       setLoading(false);
     };
@@ -132,10 +207,7 @@ const Proposal = () => {
     if (!proposal || !content) return;
     setSaving(true);
     const newData = { ...(proposal.proposal_data || {}), ...content };
-    const { error } = await supabase
-      .from('proposals')
-      .update({ proposal_data: newData })
-      .eq('id', proposal.id);
+    const { error } = await supabase.from('proposals').update({ proposal_data: newData }).eq('id', proposal.id);
     if (error) {
       toast({ title: 'Error saving', description: error.message, variant: 'destructive' });
     } else {
@@ -149,14 +221,8 @@ const Proposal = () => {
   const handleAccept = async () => {
     if (!proposal) return;
     setAccepting(true);
-    await supabase
-      .from('proposals')
-      .update({ accepted: true, accepted_at: new Date().toISOString() })
-      .eq('id', proposal.id);
-    await supabase
-      .from('roi_assessments')
-      .update({ pipeline_stage: 'signed' as any })
-      .eq('id', proposal.assessment_id);
+    await supabase.from('proposals').update({ accepted: true, accepted_at: new Date().toISOString() }).eq('id', proposal.id);
+    await supabase.from('roi_assessments').update({ pipeline_stage: 'signed' as any }).eq('id', proposal.assessment_id);
     setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString() } : null);
     setAccepting(false);
   };
@@ -168,107 +234,51 @@ const Proposal = () => {
     setContent({ ...content, timelinePhases: updated });
   };
 
-  const addTimelinePhase = () => {
+  const updatePayment = (index: number, field: string, value: string | number) => {
     if (!content) return;
-    setContent({ ...content, timelinePhases: [...content.timelinePhases, { phase: 'New Phase', duration: '1 week', desc: '' }] });
-  };
-
-  const removeTimelinePhase = (index: number) => {
-    if (!content) return;
-    setContent({ ...content, timelinePhases: content.timelinePhases.filter((_, i) => i !== index) });
-  };
-
-  const updateTerm = (index: number, value: string) => {
-    if (!content) return;
-    const updated = [...content.terms];
-    updated[index] = value;
-    setContent({ ...content, terms: updated });
-  };
-
-  const addTerm = () => {
-    if (!content) return;
-    setContent({ ...content, terms: [...content.terms, ''] });
-  };
-
-  const removeTerm = (index: number) => {
-    if (!content) return;
-    setContent({ ...content, terms: content.terms.filter((_, i) => i !== index) });
-  };
-
-  const addCustomSection = () => {
-    if (!content) return;
-    setContent({ ...content, customSections: [...content.customSections, { title: 'New Section', body: '' }] });
-  };
-
-  const updateCustomSection = (index: number, field: 'title' | 'body', value: string) => {
-    if (!content) return;
-    const updated = [...content.customSections];
+    const updated = [...content.paymentStructure];
     updated[index] = { ...updated[index], [field]: value };
-    setContent({ ...content, customSections: updated });
+    setContent({ ...content, paymentStructure: updated });
   };
 
-  const removeCustomSection = (index: number) => {
-    if (!content) return;
-    setContent({ ...content, customSections: content.customSections.filter((_, i) => i !== index) });
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!proposal || !assessment || !content) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Proposal not found.</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  if (!proposal || !assessment || !content) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Proposal not found.</p></div>;
 
   const roi = assessment.roi_results as any;
-  const defaultSummary = `Based on our ROI assessment and deep dive analysis, we've identified a significant opportunity to grow ${assessment.business_name || 'your business'} through a custom-built application.`;
-  const summaryText = content.executiveSummary || defaultSummary;
+  const businessName = assessment.business_name || 'your business';
 
   return (
     <>
-      {/* Action buttons - hidden when printing */}
+      {/* Action buttons */}
       <div className="print:hidden fixed top-4 right-4 z-50 flex gap-2">
         {isAdmin && !editing && (
-          <Button variant="outline" onClick={() => setEditing(true)} className="gap-2 shadow-lg">
-            <Pencil className="w-4 h-4" /> Edit Proposal
-          </Button>
+          <Button variant="outline" onClick={() => setEditing(true)} className="gap-2 shadow-lg"><Pencil className="w-4 h-4" /> Edit</Button>
         )}
         {editing && (
           <>
-            <Button variant="outline" onClick={() => setEditing(false)} className="gap-2 shadow-lg">
-              <X className="w-4 h-4" /> Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setEditing(false)} className="gap-2 shadow-lg"><X className="w-4 h-4" /> Cancel</Button>
             <Button onClick={handleSave} disabled={saving} className="gap-2 shadow-lg">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
             </Button>
           </>
         )}
-        <Button onClick={() => window.print()} className="gap-2 shadow-lg">
-          <Printer className="w-4 h-4" /> Print / Save PDF
-        </Button>
+        <Button onClick={() => window.print()} className="gap-2 shadow-lg"><Printer className="w-4 h-4" /> Print / PDF</Button>
       </div>
 
-      {/* Print styles */}
       <style>{`
         @media print {
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .print\\:hidden { display: none !important; }
           .page-break { break-before: page; }
-          @page { margin: 0.5in; size: A4; }
+          @page { margin: 0.6in; size: A4; }
         }
       `}</style>
 
       <div className="min-h-screen bg-background text-foreground">
         <div className="max-w-3xl mx-auto px-8 py-12">
-          <div className="flex items-center justify-between mb-12">
+
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
             <img src={logo} alt="5to10X" className="h-14" />
             <div className="text-right text-sm text-muted-foreground">
               <p>Proposal #{proposal.id.slice(0, 8).toUpperCase()}</p>
@@ -276,12 +286,16 @@ const Proposal = () => {
             </div>
           </div>
 
-          <div className="mb-10">
-            <h1 className="text-3xl font-display font-bold text-foreground mb-2">Custom App Proposal</h1>
-            <p className="text-lg text-muted-foreground">
-              Prepared for <strong className="text-foreground">{assessment.contact_name}</strong>
-              {assessment.business_name && <> at <strong className="text-foreground">{assessment.business_name}</strong></>}
-            </p>
+          {/* Title Block */}
+          <div className="mb-8 pb-8 border-b border-border">
+            <h1 className="text-3xl font-display font-bold text-foreground mb-2">App Development & Automation Proposal</h1>
+            <p className="text-sm text-muted-foreground mb-1">Including Terms of Engagement</p>
+            <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+              <div><span className="text-muted-foreground">Prepared for:</span> <strong className="text-foreground">{assessment.contact_name}</strong>{assessment.business_name && <> at <strong className="text-foreground">{assessment.business_name}</strong></>}</div>
+              <div><span className="text-muted-foreground">Prepared by:</span> <strong className="text-foreground">5to10X</strong></div>
+              <div><span className="text-muted-foreground">Date:</span> <strong className="text-foreground">{formatDate(proposal.sent_at)}</strong></div>
+              {assessment.industry && <div><span className="text-muted-foreground">Industry:</span> <strong className="text-foreground">{assessment.industry}</strong></div>}
+            </div>
           </div>
 
           {/* Accepted banner */}
@@ -295,40 +309,136 @@ const Proposal = () => {
             </div>
           )}
 
-          {/* Executive Summary */}
+          {/* 1. Project Overview */}
           <section className="mb-10">
-            <h2 className="text-xl font-display font-bold text-foreground mb-4 flex items-center gap-2">
-              <Target className="w-5 h-5 text-primary" /> Executive Summary
-            </h2>
-            <div className="bg-card border border-border rounded-lg p-6 space-y-3">
+            <SectionTitle icon={Target} number={1} title="Project Overview" />
+            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
               {editing ? (
-                <Textarea
-                  value={content.executiveSummary}
-                  onChange={e => setContent({ ...content, executiveSummary: e.target.value })}
-                  placeholder={defaultSummary}
-                  className="text-sm min-h-[80px]"
-                />
+                <Textarea value={content.projectOverview} onChange={e => setContent({ ...content, projectOverview: e.target.value })}
+                  placeholder={`Based on the information provided during the intake and discovery process, this proposal outlines the development of a custom application and automation solution for ${businessName}...`}
+                  className="text-sm min-h-[120px]" />
               ) : (
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{summaryText}</p>
+                <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {content.projectOverview || `Thank you for the opportunity to work with ${businessName}.\n\nBased on the information provided during the intake and discovery process, this proposal outlines the development of a custom application and automation solution designed to:\n\n• Streamline operational workflows\n• Improve customer experience\n• Reduce manual administration\n• Enable automation and system integration\n• Unlock measurable business efficiencies and revenue opportunities\n\nThe objective is to deliver a scalable digital platform that supports the ongoing growth and efficiency of your business.`}
+                </div>
               )}
+              {/* ROI summary stats */}
               {roi?.totalAnnualImpact && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-primary">{formatCurrency(roi.totalAnnualImpact)}</p>
-                    <p className="text-xs text-muted-foreground">Annual Impact</p>
+                    <p className="text-xs text-muted-foreground">Projected Annual Impact</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-foreground">{Math.round(roi.roiPercentage || 0)}%</p>
                     <p className="text-xs text-muted-foreground">Projected ROI</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-foreground">{Math.round(roi.breakEvenMonths || 0)}</p>
-                    <p className="text-xs text-muted-foreground">Break-even (months)</p>
+                    <p className="text-2xl font-bold text-foreground">{Math.round(roi.breakEvenMonths || 0)} mo</p>
+                    <p className="text-xs text-muted-foreground">Break-even</p>
                   </div>
-                  {roi?.pricing && (
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-foreground">{roi.pricing.tierLabel}</p>
-                      <p className="text-xs text-muted-foreground">Recommended Tier</p>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-foreground">{roi.pricing?.tierLabel || '—'}</p>
+                    <p className="text-xs text-muted-foreground">Recommended Tier</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* 2. Proposed Solution */}
+          <section className="mb-10">
+            <SectionTitle icon={Wrench} number={2} title="Proposed Solution" />
+            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
+              {/* Application Features */}
+              <div>
+                <h3 className="text-sm font-bold text-foreground mb-2">Application Development</h3>
+                {editing ? (
+                  <EditableList items={content.appFeatures} onChange={items => setContent({ ...content, appFeatures: items })} placeholder="Feature description" />
+                ) : (
+                  <BulletList items={content.appFeatures.length > 0 ? content.appFeatures : [
+                    'Mobile or web-based interface',
+                    'Secure database architecture',
+                    'User authentication and permissions',
+                    'Customer or staff dashboards',
+                    'Workflow automation',
+                    'Reporting and analytics',
+                  ]} />
+                )}
+              </div>
+
+              {/* Integrations */}
+              <div>
+                <h3 className="text-sm font-bold text-foreground mb-2">System Integrations</h3>
+                {editing ? (
+                  <EditableList items={content.integrations} onChange={items => setContent({ ...content, integrations: items })} placeholder="Integration" />
+                ) : (
+                  <BulletList items={content.integrations.length > 0 ? content.integrations : (deepDive?.required_integrations || [
+                    'CRM platforms',
+                    'Payment systems',
+                    'Scheduling platforms',
+                    'Marketing automation tools',
+                    'API-based services',
+                  ])} />
+                )}
+              </div>
+
+              {/* UX Design */}
+              <div>
+                <h3 className="text-sm font-bold text-foreground mb-2">User Experience Design</h3>
+                {editing ? (
+                  <Textarea value={content.uxDesign} onChange={e => setContent({ ...content, uxDesign: e.target.value })}
+                    placeholder="Creation of an intuitive user interface..." className="text-sm min-h-[60px]" />
+                ) : (
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {content.uxDesign || 'Creation of an intuitive user interface designed to reduce friction for users, simplify operational processes, and improve engagement and retention.'}
+                  </p>
+                )}
+              </div>
+
+              {/* Deployment */}
+              <div>
+                <h3 className="text-sm font-bold text-foreground mb-2">Deployment Support</h3>
+                {editing ? (
+                  <Textarea value={content.deploymentSupport} onChange={e => setContent({ ...content, deploymentSupport: e.target.value })}
+                    placeholder="Assistance with application deployment..." className="text-sm min-h-[60px]" />
+                ) : (
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {content.deploymentSupport || 'Assistance with application deployment, hosting configuration, and launch support.'}
+                  </p>
+                )}
+              </div>
+
+              {/* Deep Dive insights */}
+              {deepDive && !editing && (
+                <div className="border-t border-border pt-4 space-y-3">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">From Discovery</p>
+                  {deepDive.pain_points && (
+                    <div>
+                      <p className="text-xs font-medium text-foreground mb-1">Key Challenges Identified</p>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.pain_points}</p>
+                    </div>
+                  )}
+                  {deepDive.primary_goals && deepDive.primary_goals.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-foreground mb-2">Primary Goals</p>
+                      <div className="flex flex-wrap gap-2">
+                        {deepDive.primary_goals.map((g, i) => (
+                          <span key={i} className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">{g}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {deepDive.must_have_features && (
+                    <div>
+                      <p className="text-xs font-medium text-foreground mb-1">Must-Have Features</p>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.must_have_features}</p>
+                    </div>
+                  )}
+                  {deepDive.nice_to_have_features && (
+                    <div>
+                      <p className="text-xs font-medium text-foreground mb-1">Nice-to-Have Features</p>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.nice_to_have_features}</p>
                     </div>
                   )}
                 </div>
@@ -336,120 +446,164 @@ const Proposal = () => {
             </div>
           </section>
 
-          {/* Scope / Needs */}
-          {(deepDive || editing) && (
-            <section className="mb-10">
-              <h2 className="text-xl font-display font-bold text-foreground mb-4 flex items-center gap-2">
-                <Wrench className="w-5 h-5 text-primary" /> Understanding Your Needs
-              </h2>
-              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-                {deepDive?.pain_points && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Key Challenges</p>
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{deepDive.pain_points}</p>
-                  </div>
-                )}
-                {deepDive?.primary_goals && deepDive.primary_goals.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Primary Goals</p>
-                    <div className="flex flex-wrap gap-2">
-                      {deepDive.primary_goals.map((g, i) => (
-                        <span key={i} className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">{g}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {deepDive?.must_have_features && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Must-Have Features</p>
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{deepDive.must_have_features}</p>
-                  </div>
-                )}
-                {/* Editable scope notes */}
-                {editing ? (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Additional Scope Notes</p>
-                    <Textarea
-                      value={content.scopeNotes}
-                      onChange={e => setContent({ ...content, scopeNotes: e.target.value })}
-                      placeholder="Add custom scope notes, clarifications, or feature details..."
-                      className="text-sm min-h-[60px]"
-                    />
-                  </div>
-                ) : content.scopeNotes ? (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Additional Scope Notes</p>
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{content.scopeNotes}</p>
-                  </div>
-                ) : null}
-              </div>
-            </section>
-          )}
-
-          {/* Investment */}
-          <section className="mb-10 page-break">
-            <h2 className="text-xl font-display font-bold text-foreground mb-4 flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-primary" /> Investment
-            </h2>
+          {/* 3. Expected Business Impact */}
+          <section className="mb-10">
+            <SectionTitle icon={Target} number={3} title="Expected Business Impact" />
             <div className="bg-card border border-border rounded-lg p-6">
-              {roi?.pricing ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-secondary/50 rounded-lg p-4 text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Estimated Build Cost</p>
-                      <p className="text-xl font-bold text-foreground">
-                        {formatCurrency(roi.pricing.buildCostLow)} – {formatCurrency(roi.pricing.buildCostHigh)}
-                      </p>
-                    </div>
-                    <div className="bg-primary/5 rounded-lg p-4 text-center border border-primary/20">
-                      <p className="text-xs text-muted-foreground mb-1">Recommended Package</p>
-                      <p className="text-xl font-bold text-primary">{roi.pricing.tierLabel}</p>
-                    </div>
+              {editing ? (
+                <EditableList items={content.expectedImpact} onChange={items => setContent({ ...content, expectedImpact: items })} placeholder="Impact area" />
+              ) : (
+                <>
+                  <BulletList items={content.expectedImpact.length > 0 ? content.expectedImpact : [
+                    'Operational time savings',
+                    'Improved conversion rates',
+                    'Improved customer retention',
+                    'Reduced administrative overhead',
+                    'Increased scalability',
+                  ]} />
+                  <p className="text-xs text-muted-foreground mt-4 italic">
+                    These projections are indicative only and rely on the accuracy of data provided during intake.
+                  </p>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* 4. Project Deliverables */}
+          <section className="mb-10">
+            <SectionTitle icon={FileText} number={4} title="Project Deliverables" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              {editing ? (
+                <EditableList items={content.deliverables} onChange={items => setContent({ ...content, deliverables: items })} placeholder="Deliverable" />
+              ) : (
+                <>
+                  <BulletList items={content.deliverables.length > 0 ? content.deliverables : [
+                    'Application architecture design',
+                    'UI/UX interface design',
+                    'Development of agreed features',
+                    'Testing and bug resolution',
+                    'Deployment support',
+                    'Documentation for core functionality',
+                  ]} />
+                  <p className="text-xs text-muted-foreground mt-4 italic">
+                    Specific features and technical specifications will be confirmed prior to development.
+                  </p>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* 5. Project Timeline */}
+          <section className="mb-10 page-break">
+            <SectionTitle icon={Clock} number={5} title="Project Timeline" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="space-y-3">
+                {content.timelinePhases.map((step, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</div>
+                    {editing ? (
+                      <div className="flex-1 space-y-1">
+                        <div className="flex gap-2">
+                          <Input value={step.phase} onChange={e => updateTimeline(i, 'phase', e.target.value)} className="text-sm font-semibold" />
+                          <Input value={step.duration} onChange={e => updateTimeline(i, 'duration', e.target.value)} className="text-sm w-32" />
+                          <Button size="sm" variant="ghost" onClick={() => setContent({ ...content, timelinePhases: content.timelinePhases.filter((_, j) => j !== i) })} className="h-8 w-8 p-0 text-destructive"><X className="w-3 h-3" /></Button>
+                        </div>
+                        <Input value={step.desc} onChange={e => updateTimeline(i, 'desc', e.target.value)} className="text-xs" />
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{step.phase} <span className="text-muted-foreground font-normal">({step.duration})</span></p>
+                        <p className="text-xs text-muted-foreground">{step.desc}</p>
+                      </div>
+                    )}
                   </div>
-                  {editing ? (
-                    <Textarea
-                      value={content.investmentNotes}
-                      onChange={e => setContent({ ...content, investmentNotes: e.target.value })}
-                      placeholder="Add custom investment notes, payment details, or discount info..."
-                      className="text-sm min-h-[60px]"
-                    />
-                  ) : content.investmentNotes ? (
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{content.investmentNotes}</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Final pricing will be confirmed after scope refinement. The above range is based on your
-                      assessment data, business complexity, and feature requirements.
-                    </p>
+                ))}
+                {editing && (
+                  <Button variant="ghost" size="sm" onClick={() => setContent({ ...content, timelinePhases: [...content.timelinePhases, { phase: 'New Phase', duration: '1–2 weeks', desc: '' }] })} className="text-xs ml-12">+ Add Phase</Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-6 italic">
+                Project timelines are estimates and may vary depending on scope changes, client feedback timelines, integration complexity, and third-party platform availability.
+              </p>
+            </div>
+          </section>
+
+          {/* 6. Investment */}
+          <section className="mb-10">
+            <SectionTitle icon={DollarSign} number={6} title="Investment" />
+            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
+              <div className="text-center bg-primary/5 rounded-lg p-6 border border-primary/20">
+                <p className="text-xs text-muted-foreground mb-2">Total Project Investment</p>
+                {editing ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-2xl font-bold text-primary">$</span>
+                    <Input type="number" value={content.investmentAmount} onChange={e => setContent({ ...content, investmentAmount: parseInt(e.target.value) || 0 })}
+                      className="text-2xl font-bold text-primary w-40 text-center" />
+                  </div>
+                ) : (
+                  <p className="text-3xl font-bold text-primary">{formatCurrency(content.investmentAmount)}</p>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm font-bold text-foreground mb-3">Payment Structure</p>
+                <div className="space-y-3">
+                  {content.paymentStructure.map((ps, i) => (
+                    <div key={i} className="flex items-start gap-4 bg-secondary/30 rounded-lg p-3">
+                      {editing ? (
+                        <div className="flex-1 space-y-1">
+                          <div className="flex gap-2 items-center">
+                            <Input value={ps.label} onChange={e => updatePayment(i, 'label', e.target.value)} className="text-sm font-semibold flex-1" />
+                            <Input type="number" value={ps.percentage} onChange={e => updatePayment(i, 'percentage', parseInt(e.target.value) || 0)} className="text-sm w-20 text-center" />
+                            <span className="text-sm text-muted-foreground">%</span>
+                            <Button size="sm" variant="ghost" onClick={() => setContent({ ...content, paymentStructure: content.paymentStructure.filter((_, j) => j !== i) })} className="h-8 w-8 p-0 text-destructive"><X className="w-3 h-3" /></Button>
+                          </div>
+                          <Input value={ps.description} onChange={e => updatePayment(i, 'description', e.target.value)} className="text-xs" />
+                        </div>
+                      ) : (
+                        <>
+                          <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">{ps.percentage}%</div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{ps.label} – {formatCurrency(content.investmentAmount * ps.percentage / 100)}</p>
+                            <p className="text-xs text-muted-foreground">{ps.description}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  {editing && (
+                    <Button variant="ghost" size="sm" onClick={() => setContent({ ...content, paymentStructure: [...content.paymentStructure, { label: 'New Payment', percentage: 0, description: '' }] })} className="text-xs">+ Add Payment Stage</Button>
                   )}
                 </div>
+              </div>
+              <p className="text-xs text-muted-foreground italic">Invoices are payable within 7 days unless otherwise agreed. Late payments may delay project progress.</p>
+            </div>
+          </section>
+
+          {/* 7. Client Responsibilities */}
+          <section className="mb-10">
+            <SectionTitle icon={Users} number={7} title="Client Responsibilities" />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <p className="text-sm text-muted-foreground mb-3">To ensure successful delivery, the Client agrees to:</p>
+              {editing ? (
+                <EditableList items={content.clientResponsibilities} onChange={items => setContent({ ...content, clientResponsibilities: items })} placeholder="Responsibility" />
               ) : (
-                <p className="text-sm text-muted-foreground">Investment details will be discussed in our next call.</p>
+                <BulletList items={content.clientResponsibilities} />
               )}
+              <p className="text-xs text-muted-foreground mt-4 italic">Delays in providing required information may result in project timeline adjustments.</p>
             </div>
           </section>
 
           {/* Custom Sections */}
           {content.customSections.map((section, i) => (
-            <section key={i} className="mb-10">
+            <section key={`custom-${i}`} className="mb-10">
               {editing ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Input
-                      value={section.title}
-                      onChange={e => updateCustomSection(i, 'title', e.target.value)}
-                      className="text-xl font-bold"
-                      placeholder="Section title"
-                    />
-                    <Button size="sm" variant="destructive" onClick={() => removeCustomSection(i)} className="h-8 w-8 p-0">
-                      <X className="w-4 h-4" />
-                    </Button>
+                    <Input value={section.title} onChange={e => { const u = [...content.customSections]; u[i] = { ...u[i], title: e.target.value }; setContent({ ...content, customSections: u }); }} className="text-xl font-bold" />
+                    <Button size="sm" variant="destructive" onClick={() => setContent({ ...content, customSections: content.customSections.filter((_, j) => j !== i) })} className="h-8 w-8 p-0"><X className="w-4 h-4" /></Button>
                   </div>
-                  <Textarea
-                    value={section.body}
-                    onChange={e => updateCustomSection(i, 'body', e.target.value)}
-                    placeholder="Section content..."
-                    className="text-sm min-h-[80px]"
-                  />
+                  <Textarea value={section.body} onChange={e => { const u = [...content.customSections]; u[i] = { ...u[i], body: e.target.value }; setContent({ ...content, customSections: u }); }} className="text-sm min-h-[80px]" />
                 </div>
               ) : (
                 <>
@@ -461,86 +615,76 @@ const Proposal = () => {
               )}
             </section>
           ))}
-
           {editing && (
             <div className="mb-10">
-              <Button variant="outline" onClick={addCustomSection} className="gap-2 text-sm">
-                + Add Custom Section
-              </Button>
+              <Button variant="outline" onClick={() => setContent({ ...content, customSections: [...content.customSections, { title: 'New Section', body: '' }] })} className="gap-2 text-sm">+ Add Custom Section</Button>
             </div>
           )}
 
-          {/* Timeline */}
-          <section className="mb-10">
-            <h2 className="text-xl font-display font-bold text-foreground mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" /> Timeline
-            </h2>
-            <div className="bg-card border border-border rounded-lg p-6">
-              <div className="space-y-3">
-                {content.timelinePhases.map((step, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
-                      {i + 1}
-                    </div>
-                    {editing ? (
-                      <div className="flex-1 space-y-1">
-                        <div className="flex gap-2">
-                          <Input value={step.phase} onChange={e => updateTimeline(i, 'phase', e.target.value)} className="text-sm font-semibold" placeholder="Phase name" />
-                          <Input value={step.duration} onChange={e => updateTimeline(i, 'duration', e.target.value)} className="text-sm w-32" placeholder="Duration" />
-                          <Button size="sm" variant="ghost" onClick={() => removeTimelinePhase(i)} className="h-8 w-8 p-0 text-destructive">
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
-                        <Input value={step.desc} onChange={e => updateTimeline(i, 'desc', e.target.value)} className="text-xs" placeholder="Description" />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{step.phase} <span className="text-muted-foreground font-normal">({step.duration})</span></p>
-                        <p className="text-xs text-muted-foreground">{step.desc}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {editing && (
-                  <Button variant="ghost" size="sm" onClick={addTimelinePhase} className="text-xs ml-12">+ Add Phase</Button>
+          {/* 8-17: Legal / Terms Sections */}
+          {[
+            { num: 8, icon: Wrench, title: 'Variations', field: 'variations' as const },
+            { num: 9, icon: Shield, title: 'Third-Party Services', field: 'thirdPartyServices' as const },
+            { num: 10, icon: BookOpen, title: 'Intellectual Property', field: 'intellectualProperty' as const },
+            { num: 11, icon: Lock, title: 'Confidentiality', field: 'confidentiality' as const },
+            { num: 12, icon: Shield, title: 'Data Protection', field: 'dataProtection' as const },
+            { num: 13, icon: AlertTriangle, title: 'Limitation of Liability', field: 'limitationOfLiability' as const },
+            { num: 14, icon: DollarSign, title: 'ROI Estimates', field: 'roiDisclaimer' as const },
+            { num: 15, icon: Gavel, title: 'Termination', field: 'termination' as const },
+            { num: 16, icon: Scale, title: 'Governing Law', field: 'governingLaw' as const },
+          ].map(({ num, icon, title, field }) => (
+            <section key={field} className="mb-8">
+              <SectionTitle icon={icon} number={num} title={title} />
+              <div className="bg-card border border-border rounded-lg p-6">
+                {editing ? (
+                  <Textarea value={content[field]} onChange={e => setContent({ ...content, [field]: e.target.value })} className="text-sm min-h-[80px]" />
+                ) : (
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{content[field]}</p>
                 )}
               </div>
-            </div>
-          </section>
+            </section>
+          ))}
 
-          {/* Terms */}
-          <section className="mb-10">
-            <h2 className="text-xl font-display font-bold text-foreground mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary" /> Terms & Conditions
-            </h2>
-            <div className="bg-card border border-border rounded-lg p-6 space-y-2">
-              {content.terms.map((term, i) => (
-                editing ? (
-                  <div key={i} className="flex gap-2 items-start">
-                    <span className="text-xs text-muted-foreground mt-2">•</span>
-                    <Input value={term} onChange={e => updateTerm(i, e.target.value)} className="text-xs flex-1" />
-                    <Button size="sm" variant="ghost" onClick={() => removeTerm(i)} className="h-7 w-7 p-0 text-destructive">
-                      <X className="w-3 h-3" />
-                    </Button>
+          {/* 17. Acceptance */}
+          <section className="mb-10 page-break">
+            <SectionTitle icon={CheckCircle2} number={17} title="Acceptance of Proposal" />
+            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                By accepting this proposal, the Client confirms they understand the scope and investment, agree to the terms outlined in this document, and authorise the Developer to commence work upon receipt of the deposit.
+              </p>
+
+              {proposal.accepted ? (
+                <div className="flex items-center gap-3 bg-green-500/10 text-green-700 border border-green-500/20 rounded-lg px-5 py-4">
+                  <CheckCircle2 className="w-6 h-6" />
+                  <div>
+                    <p className="font-bold">Accepted by {assessment.contact_name}</p>
+                    {proposal.accepted_at && <p className="text-sm opacity-80">{formatDate(proposal.accepted_at)}</p>}
                   </div>
-                ) : (
-                  <p key={i} className="text-xs text-muted-foreground leading-relaxed">• {term}</p>
-                )
-              ))}
-              {editing && (
-                <Button variant="ghost" size="sm" onClick={addTerm} className="text-xs">+ Add Term</Button>
+                </div>
+              ) : (
+                <div className="print:hidden grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-border">
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Client</p>
+                    <p className="text-sm text-foreground font-semibold">{assessment.contact_name}</p>
+                    <p className="text-sm text-muted-foreground">{businessName}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Developer</p>
+                    <p className="text-sm text-foreground font-semibold">5to10X</p>
+                  </div>
+                </div>
               )}
             </div>
           </section>
 
-          {/* Accept CTA - hidden in print */}
+          {/* Accept CTA */}
           {!proposal.accepted && (
             <div className="print:hidden text-center py-8">
               <Button size="lg" onClick={handleAccept} disabled={accepting} className="gap-2 text-base px-10 py-6">
                 {accepting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 Accept Proposal
               </Button>
-              <p className="text-xs text-muted-foreground mt-3">By accepting, you agree to the terms above.</p>
+              <p className="text-xs text-muted-foreground mt-3">By accepting, you agree to the terms outlined above.</p>
             </div>
           )}
 
@@ -548,7 +692,7 @@ const Proposal = () => {
           <footer className="border-t border-border pt-6 mt-10 flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <img src={logo} alt="5to10X" className="h-6 opacity-50" />
-              <span>5to10X — Custom App Development</span>
+              <span>5to10X — App Development & Automation</span>
             </div>
             <span>grow@5to10x.app</span>
           </footer>
