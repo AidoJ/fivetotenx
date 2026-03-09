@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
-  MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle
+  MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -221,7 +221,16 @@ const LeadNotes = ({ assessmentId, notes, onAdd }: {
 
 /* ─────────── Lead Card ─────────── */
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onSendProposal, onUpdateProposalFollowUp }: {
+interface ProposalRecord {
+  id: string;
+  assessment_id: string;
+  proposal_data: any;
+  sent_at: string;
+  accepted: boolean;
+  accepted_at: string | null;
+}
+
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -229,8 +238,10 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   deepDive: DeepDiveSubmission | null;
   notes: LeadNote[];
   onAddNote: (assessmentId: string, content: string, noteType: string) => Promise<void>;
+  onPrepareProposal: (lead: Assessment) => void;
   onSendProposal: (lead: Assessment) => void;
   onUpdateProposalFollowUp: (id: string, days: number) => void;
+  proposal: ProposalRecord | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
@@ -313,28 +324,45 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
               {copied ? 'Copied' : 'Copy Link'}
             </Button>
             {deepDive && (
-              <>
-                <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
-                  onClick={() => setShowDeepDive(!showDeepDive)}>
-                  <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
-                </Button>
-                <div className="flex flex-col items-start">
-                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                    onClick={() => onSendProposal(lead)}>
-                    <FileText className="w-3 h-3" /> {(lead as any).proposal_sent_at ? 'Resend Proposal' : 'Send Proposal'}
-                  </Button>
-                  {(lead as any).proposal_sent_at && (
-                    <span className="text-[9px] text-muted-foreground ml-0.5 mt-0.5">
-                      Sent {formatDate((lead as any).proposal_sent_at)}
-                    </span>
-                  )}
-                </div>
-              </>
+              <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => setShowDeepDive(!showDeepDive)}>
+                <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+              </Button>
             )}
           </div>
 
+          {/* Proposal actions - only when deep dive exists */}
+          {deepDive && (
+            <div className="flex flex-col items-start gap-1">
+              <div className="flex items-center gap-1.5">
+                {!proposal ? (
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                    onClick={() => onPrepareProposal(lead)}>
+                    <FileText className="w-3 h-3" /> Prepare Proposal
+                  </Button>
+                ) : (
+                  <>
+                    <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                      onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
+                      <Pencil className="w-3 h-3" /> Edit Proposal
+                    </Button>
+                    <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
+                      onClick={() => onSendProposal(lead)}>
+                      <Send className="w-3 h-3" /> {(lead as any).proposal_sent_at ? 'Resend Proposal' : 'Send Proposal'}
+                    </Button>
+                  </>
+                )}
+              </div>
+              {(lead as any).proposal_sent_at && (
+                <span className="text-[9px] text-muted-foreground ml-0.5">
+                  Sent {formatDate((lead as any).proposal_sent_at)}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Follow-up scheduler - shown for deep_dive_sent stage */}
-          {(lead.pipeline_stage === 'deep_dive_sent') && (
+          {lead.pipeline_stage === 'deep_dive_sent' && (
             <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Follow up in</span>
@@ -362,7 +390,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
           )}
 
           {/* Follow-up scheduler - shown for proposal stage */}
-          {(lead.pipeline_stage === 'proposal') && (
+          {lead.pipeline_stage === 'proposal' && (
             <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Proposal follow up in</span>
@@ -549,6 +577,7 @@ const Admin = () => {
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
+  const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -564,10 +593,11 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
+      supabase.from('proposals').select('*').order('created_at', { ascending: false }),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
@@ -575,6 +605,7 @@ const Admin = () => {
 
     if (!deepDivesRes.error) setDeepDives((deepDivesRes.data as DeepDiveSubmission[]) || []);
     if (!notesRes.error) setLeadNotes((notesRes.data as LeadNote[]) || []);
+    if (!proposalsRes.error) setProposals((proposalsRes.data as ProposalRecord[]) || []);
 
     setLoading(false);
   };
@@ -646,13 +677,52 @@ const Admin = () => {
     }
   };
 
+  const handlePrepareProposal = async (lead: Assessment) => {
+    try {
+      // Create draft proposal in DB
+      const proposalData = {
+        executiveSummary: '',
+        scopeNotes: '',
+        investmentNotes: '',
+        timelinePhases: [
+          { phase: 'Discovery & Planning', duration: '1–2 weeks', desc: 'Finalize scope, wireframes, and technical architecture' },
+          { phase: 'Design & Prototyping', duration: '1–2 weeks', desc: 'UI/UX design, interactive prototypes, and feedback rounds' },
+          { phase: 'Development', duration: '4–8 weeks', desc: 'Core feature build, integrations, and iterative testing' },
+          { phase: 'Launch & Support', duration: '1–2 weeks', desc: 'Final QA, deployment, training, and handoff' },
+        ],
+        terms: [
+          'This proposal is valid for 30 days from the date of issue.',
+          'Payment terms: 50% upfront, 25% at midpoint, 25% at launch.',
+          'All work includes 30 days of post-launch support and bug fixes.',
+          'Client owns all custom code and assets produced during the project.',
+          'Scope changes after acceptance may affect timeline and pricing.',
+        ],
+        customSections: [],
+      };
+      const { data, error } = await supabase.from('proposals').insert({
+        assessment_id: lead.id,
+        proposal_data: proposalData,
+      }).select().single();
+      if (error) throw error;
+      setProposals(prev => [...prev, data as ProposalRecord]);
+      toast({ title: 'Proposal Draft Created ✅', description: 'Opening for editing...' });
+      window.open(`${window.location.origin}/proposal/${data.id}`, '_blank');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to create proposal.', variant: 'destructive' });
+    }
+  };
+
   const handleSendProposal = async (lead: Assessment) => {
+    const existingProposal = proposals.find(p => p.assessment_id === lead.id);
+    if (!existingProposal) {
+      toast({ title: 'Error', description: 'Please prepare the proposal first.', variant: 'destructive' });
+      return;
+    }
     try {
       const res = await supabase.functions.invoke('send-proposal', {
-        body: { assessmentId: lead.id },
+        body: { assessmentId: lead.id, proposalId: existingProposal.id },
       });
       if (res.error) throw res.error;
-      const proposalId = res.data?.proposalId;
       const now = new Date().toISOString();
       const followUpDays = (lead as any).proposal_follow_up_days || 3;
       const followUpAt = new Date(Date.now() + followUpDays * 24 * 60 * 60 * 1000).toISOString();
@@ -722,6 +792,7 @@ const Admin = () => {
   };
 
   const getDeepDive = (assessmentId: string) => deepDives.find(d => d.assessment_id === assessmentId) || null;
+  const getProposal = (assessmentId: string) => proposals.find(p => p.assessment_id === assessmentId) || null;
 
   const grouped = STAGES.map(stage => ({ ...stage, leads: leads.filter(l => l.pipeline_stage === stage.key) }));
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
@@ -786,9 +857,11 @@ const Admin = () => {
                           onMove={handleMove}
                           onSendDeepDive={handleSendDeepDive}
                           onUpdateFollowUp={handleUpdateFollowUp}
+                          onPrepareProposal={handlePrepareProposal}
                           onSendProposal={handleSendProposal}
                           onUpdateProposalFollowUp={handleUpdateProposalFollowUp}
                           deepDive={getDeepDive(lead.id)}
+                          proposal={getProposal(lead.id)}
                           notes={leadNotes}
                           onAddNote={handleAddNote}
                         />
