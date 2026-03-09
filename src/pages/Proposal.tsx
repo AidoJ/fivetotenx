@@ -130,7 +130,11 @@ const Proposal = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAdmin(!!session);
+    });
     supabase.auth.getSession().then(({ data: { session } }) => setIsAdmin(!!session));
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
