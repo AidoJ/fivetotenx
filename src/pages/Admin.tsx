@@ -221,7 +221,16 @@ const LeadNotes = ({ assessmentId, notes, onAdd }: {
 
 /* ─────────── Lead Card ─────────── */
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onSendProposal, onUpdateProposalFollowUp }: {
+interface ProposalRecord {
+  id: string;
+  assessment_id: string;
+  proposal_data: any;
+  sent_at: string;
+  accepted: boolean;
+  accepted_at: string | null;
+}
+
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -229,8 +238,10 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   deepDive: DeepDiveSubmission | null;
   notes: LeadNote[];
   onAddNote: (assessmentId: string, content: string, noteType: string) => Promise<void>;
+  onPrepareProposal: (lead: Assessment) => void;
   onSendProposal: (lead: Assessment) => void;
   onUpdateProposalFollowUp: (id: string, days: number) => void;
+  proposal: ProposalRecord | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
