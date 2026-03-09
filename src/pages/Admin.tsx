@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
+import AdminLogin from '@/components/AdminLogin';
+import type { Session } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
