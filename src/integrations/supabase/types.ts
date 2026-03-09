@@ -156,6 +156,44 @@ export type Database = {
           },
         ]
       }
+      proposals: {
+        Row: {
+          accepted: boolean | null
+          accepted_at: string | null
+          assessment_id: string
+          created_at: string
+          id: string
+          proposal_data: Json
+          sent_at: string
+        }
+        Insert: {
+          accepted?: boolean | null
+          accepted_at?: string | null
+          assessment_id: string
+          created_at?: string
+          id?: string
+          proposal_data?: Json
+          sent_at?: string
+        }
+        Update: {
+          accepted?: boolean | null
+          accepted_at?: string | null
+          assessment_id?: string
+          created_at?: string
+          id?: string
+          proposal_data?: Json
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roi_assessments: {
         Row: {
           business_name: string | null
@@ -163,10 +201,14 @@ export type Database = {
           contact_name: string
           contact_phone: string | null
           created_at: string
+          follow_up_days: number | null
+          follow_up_scheduled_at: string | null
+          follow_up_sent: boolean | null
           form_data: Json
           id: string
           industry: string | null
           invite_sent: boolean | null
+          invite_sent_at: string | null
           is_qualified: boolean
           pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
           qualified_at: string | null
@@ -179,10 +221,14 @@ export type Database = {
           contact_name: string
           contact_phone?: string | null
           created_at?: string
+          follow_up_days?: number | null
+          follow_up_scheduled_at?: string | null
+          follow_up_sent?: boolean | null
           form_data?: Json
           id?: string
           industry?: string | null
           invite_sent?: boolean | null
+          invite_sent_at?: string | null
           is_qualified?: boolean
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
           qualified_at?: string | null
@@ -195,10 +241,14 @@ export type Database = {
           contact_name?: string
           contact_phone?: string | null
           created_at?: string
+          follow_up_days?: number | null
+          follow_up_scheduled_at?: string | null
+          follow_up_sent?: boolean | null
           form_data?: Json
           id?: string
           industry?: string | null
           invite_sent?: boolean | null
+          invite_sent_at?: string | null
           is_qualified?: boolean
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
           qualified_at?: string | null
