@@ -163,7 +163,7 @@ const Proposal = () => {
         .order('interviewed_at', { ascending: true });
       if (intData) setInterviews(intData as InterviewData[]);
 
-      // Initialize content from saved proposal_data or defaults
+      // Initialize content from saved proposal_data
       setContent({
         projectOverview: pData.projectOverview || '',
         proposedSolution: pData.proposedSolution || '',
@@ -175,27 +175,22 @@ const Proposal = () => {
         deliverables: pData.deliverables || [],
         timelinePhases: pData.timelinePhases || [],
         investmentAmount: pData.investmentAmount || 0,
+        investmentNote: pData.investmentNote || '',
         paymentStructure: pData.paymentStructure || [
           { label: 'Deposit', percentage: 40, description: 'Payable upon acceptance of this proposal to commence work.' },
           { label: 'Development Milestone', percentage: 30, description: 'Payable at agreed development milestone.' },
           { label: 'Completion', percentage: 30, description: 'Prior to deployment or delivery of the final application.' },
         ],
-        clientResponsibilities: pData.clientResponsibilities || [
-          'Provide accurate business information during intake',
-          'Supply required content, assets, and documentation',
-          'Nominate a primary project contact',
-          'Provide timely approvals and feedback',
-          'Ensure they hold rights to any materials supplied',
-        ],
-        variations: pData.variations || 'Requests for additional features or changes to scope after development has begun may require revised timelines and additional development costs. All variations will be confirmed with the Client before work proceeds.',
-        thirdPartyServices: pData.thirdPartyServices || 'Applications may rely on external services including hosting providers, payment systems, messaging services, or APIs. The Developer is not responsible for outages of third-party platforms, changes to third-party pricing, or service disruptions outside the Developer\'s control. The Client may be required to maintain accounts with these services.',
-        intellectualProperty: pData.intellectualProperty || 'Upon full payment of the project, the Client will own the custom application code developed specifically for this project. The Developer retains ownership of proprietary frameworks, reusable code libraries, and development tools. These may be used in future projects.',
-        confidentiality: pData.confidentiality || 'Both parties agree to maintain confidentiality regarding business operations, technical systems, financial information, and customer data. This obligation continues after the completion of the project.',
-        dataProtection: pData.dataProtection || 'Where personal information is involved, both parties agree to comply with the obligations of the Privacy Act 1988. The Client is responsible for ensuring their business complies with relevant privacy obligations including obtaining user consent where required and maintaining a privacy policy where applicable.',
-        limitationOfLiability: pData.limitationOfLiability || 'To the maximum extent permitted by law, the Developer\'s liability is limited to the value of the services provided under this agreement. The Developer will not be liable for loss of profits, business interruption, or indirect or consequential losses. Nothing in this agreement excludes rights under the Australian Consumer Law.',
-        roiDisclaimer: pData.roiDisclaimer || 'Any revenue forecasts, automation savings calculations, or return-on-investment projections provided during the intake or proposal process are indicative only. Actual business outcomes depend on many variables including market conditions, marketing activity, internal processes, and user adoption. The Developer does not guarantee financial outcomes.',
-        termination: pData.termination || 'Either party may terminate this agreement if the other party materially breaches the agreement and does not remedy the breach within 14 days. If the project is terminated, work completed to date will be invoiced and all outstanding invoices become payable immediately.',
-        governingLaw: pData.governingLaw || 'This agreement is governed by the laws of Australia under the Competition and Consumer Act 2010 and relevant State or Territory legislation.',
+        clientResponsibilities: pData.clientResponsibilities || [],
+        variations: pData.variations || '',
+        thirdPartyServices: pData.thirdPartyServices || '',
+        intellectualProperty: pData.intellectualProperty || '',
+        confidentiality: pData.confidentiality || '',
+        dataProtection: pData.dataProtection || '',
+        limitationOfLiability: pData.limitationOfLiability || '',
+        roiDisclaimer: pData.roiDisclaimer || '',
+        termination: pData.termination || '',
+        governingLaw: pData.governingLaw || '',
         customSections: pData.customSections || [],
       });
 
