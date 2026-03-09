@@ -63,6 +63,7 @@ interface EditableContent {
   deliverables: string[];
   timelinePhases: { phase: string; duration: string; desc: string }[];
   investmentAmount: number;
+  investmentNote: string;
   paymentStructure: { label: string; percentage: number; description: string }[];
   clientResponsibilities: string[];
   variations: string;
