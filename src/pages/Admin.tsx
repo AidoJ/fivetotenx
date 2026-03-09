@@ -573,11 +573,54 @@ const Admin = () => {
         body: { contactName: lead.contact_name, contactEmail: lead.contact_email, businessName: lead.business_name, assessmentId: lead.id },
       });
       if (error) throw error;
-      await supabase.from('roi_assessments').update({ pipeline_stage: 'deep_dive_sent' as any, invite_sent: true }).eq('id', lead.id);
-      setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'deep_dive_sent' as PipelineStage, invite_sent: true } : l));
+      const now = new Date().toISOString();
+      const followUpDays = lead.follow_up_days || 2;
+      const followUpAt = new Date(Date.now() + followUpDays * 24 * 60 * 60 * 1000).toISOString();
+      await supabase.from('roi_assessments').update({
+        pipeline_stage: 'deep_dive_sent' as any,
+        invite_sent: true,
+        invite_sent_at: now,
+        follow_up_scheduled_at: followUpAt,
+      }).eq('id', lead.id);
+      setLeads(prev => prev.map(l => l.id === lead.id ? {
+        ...l,
+        pipeline_stage: 'deep_dive_sent' as PipelineStage,
+        invite_sent: true,
+        invite_sent_at: now,
+        follow_up_scheduled_at: followUpAt,
+      } : l));
       toast({ title: 'Deep Dive Sent ✅', description: `Invite sent to ${lead.contact_email}` });
     } catch {
       toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
+    }
+  };
+
+  const handleUpdateFollowUp = async (id: string, days: number) => {
+    const followUpAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    const { error } = await supabase.from('roi_assessments').update({
+      follow_up_days: days,
+      follow_up_scheduled_at: followUpAt,
+      follow_up_sent: false,
+    }).eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, follow_up_days: days, follow_up_scheduled_at: followUpAt, follow_up_sent: false } : l));
+      toast({ title: 'Follow-up updated', description: `Reminder set for ${days} days` });
+    }
+  };
+
+  const handleSendProposal = async (lead: Assessment) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-proposal', {
+        body: { assessmentId: lead.id },
+      });
+      if (error) throw error;
+      await supabase.from('roi_assessments').update({ pipeline_stage: 'proposal' as any }).eq('id', lead.id);
+      setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'proposal' as PipelineStage } : l));
+      toast({ title: 'Proposal Sent ✅', description: `Proposal sent to ${lead.contact_email}` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to send proposal.', variant: 'destructive' });
     }
   };
 
