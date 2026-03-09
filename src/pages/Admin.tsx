@@ -221,7 +221,7 @@ const LeadNotes = ({ assessmentId, notes, onAdd }: {
 
 /* ─────────── Lead Card ─────────── */
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onSendProposal }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onSendProposal, onUpdateProposalFollowUp }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -230,6 +230,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   notes: LeadNote[];
   onAddNote: (assessmentId: string, content: string, noteType: string) => Promise<void>;
   onSendProposal: (lead: Assessment) => void;
+  onUpdateProposalFollowUp: (id: string, days: number) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
