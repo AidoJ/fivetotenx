@@ -577,6 +577,7 @@ const Admin = () => {
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
+  const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
