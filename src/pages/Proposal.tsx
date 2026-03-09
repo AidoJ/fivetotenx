@@ -63,6 +63,7 @@ interface EditableContent {
   deliverables: string[];
   timelinePhases: { phase: string; duration: string; desc: string }[];
   investmentAmount: number;
+  investmentNote: string;
   paymentStructure: { label: string; percentage: number; description: string }[];
   clientResponsibilities: string[];
   variations: string;
@@ -162,7 +163,7 @@ const Proposal = () => {
         .order('interviewed_at', { ascending: true });
       if (intData) setInterviews(intData as InterviewData[]);
 
-      // Initialize content from saved proposal_data or defaults
+      // Initialize content from saved proposal_data
       setContent({
         projectOverview: pData.projectOverview || '',
         proposedSolution: pData.proposedSolution || '',
@@ -174,27 +175,22 @@ const Proposal = () => {
         deliverables: pData.deliverables || [],
         timelinePhases: pData.timelinePhases || [],
         investmentAmount: pData.investmentAmount || 0,
+        investmentNote: pData.investmentNote || '',
         paymentStructure: pData.paymentStructure || [
           { label: 'Deposit', percentage: 40, description: 'Payable upon acceptance of this proposal to commence work.' },
           { label: 'Development Milestone', percentage: 30, description: 'Payable at agreed development milestone.' },
           { label: 'Completion', percentage: 30, description: 'Prior to deployment or delivery of the final application.' },
         ],
-        clientResponsibilities: pData.clientResponsibilities || [
-          'Provide accurate business information during intake',
-          'Supply required content, assets, and documentation',
-          'Nominate a primary project contact',
-          'Provide timely approvals and feedback',
-          'Ensure they hold rights to any materials supplied',
-        ],
-        variations: pData.variations || 'Requests for additional features or changes to scope after development has begun may require revised timelines and additional development costs. All variations will be confirmed with the Client before work proceeds.',
-        thirdPartyServices: pData.thirdPartyServices || 'Applications may rely on external services including hosting providers, payment systems, messaging services, or APIs. The Developer is not responsible for outages of third-party platforms, changes to third-party pricing, or service disruptions outside the Developer\'s control. The Client may be required to maintain accounts with these services.',
-        intellectualProperty: pData.intellectualProperty || 'Upon full payment of the project, the Client will own the custom application code developed specifically for this project. The Developer retains ownership of proprietary frameworks, reusable code libraries, and development tools. These may be used in future projects.',
-        confidentiality: pData.confidentiality || 'Both parties agree to maintain confidentiality regarding business operations, technical systems, financial information, and customer data. This obligation continues after the completion of the project.',
-        dataProtection: pData.dataProtection || 'Where personal information is involved, both parties agree to comply with the obligations of the Privacy Act 1988. The Client is responsible for ensuring their business complies with relevant privacy obligations including obtaining user consent where required and maintaining a privacy policy where applicable.',
-        limitationOfLiability: pData.limitationOfLiability || 'To the maximum extent permitted by law, the Developer\'s liability is limited to the value of the services provided under this agreement. The Developer will not be liable for loss of profits, business interruption, or indirect or consequential losses. Nothing in this agreement excludes rights under the Australian Consumer Law.',
-        roiDisclaimer: pData.roiDisclaimer || 'Any revenue forecasts, automation savings calculations, or return-on-investment projections provided during the intake or proposal process are indicative only. Actual business outcomes depend on many variables including market conditions, marketing activity, internal processes, and user adoption. The Developer does not guarantee financial outcomes.',
-        termination: pData.termination || 'Either party may terminate this agreement if the other party materially breaches the agreement and does not remedy the breach within 14 days. If the project is terminated, work completed to date will be invoiced and all outstanding invoices become payable immediately.',
-        governingLaw: pData.governingLaw || 'This agreement is governed by the laws of Australia under the Competition and Consumer Act 2010 and relevant State or Territory legislation.',
+        clientResponsibilities: pData.clientResponsibilities || [],
+        variations: pData.variations || '',
+        thirdPartyServices: pData.thirdPartyServices || '',
+        intellectualProperty: pData.intellectualProperty || '',
+        confidentiality: pData.confidentiality || '',
+        dataProtection: pData.dataProtection || '',
+        limitationOfLiability: pData.limitationOfLiability || '',
+        roiDisclaimer: pData.roiDisclaimer || '',
+        termination: pData.termination || '',
+        governingLaw: pData.governingLaw || '',
         customSections: pData.customSections || [],
       });
 
@@ -315,11 +311,10 @@ const Proposal = () => {
             <div className="bg-card border border-border rounded-lg p-6 space-y-4">
               {editing ? (
                 <Textarea value={content.projectOverview} onChange={e => setContent({ ...content, projectOverview: e.target.value })}
-                  placeholder={`Based on the information provided during the intake and discovery process, this proposal outlines the development of a custom application and automation solution for ${businessName}...`}
-                  className="text-sm min-h-[120px]" />
+                  className="text-sm min-h-[200px]" />
               ) : (
                 <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {content.projectOverview || `Thank you for the opportunity to work with ${businessName}.\n\nBased on the information provided during the intake and discovery process, this proposal outlines the development of a custom application and automation solution designed to:\n\n• Streamline operational workflows\n• Improve customer experience\n• Reduce manual administration\n• Enable automation and system integration\n• Unlock measurable business efficiencies and revenue opportunities\n\nThe objective is to deliver a scalable digital platform that supports the ongoing growth and efficiency of your business.`}
+                  {content.projectOverview || 'No project overview generated. Please re-prepare this proposal from the admin dashboard.'}
                 </div>
               )}
               {/* ROI summary stats */}
@@ -350,20 +345,25 @@ const Proposal = () => {
           <section className="mb-10">
             <SectionTitle icon={Wrench} number={2} title="Proposed Solution" />
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
+              {/* Solution narrative */}
+              {(content.proposedSolution || editing) && (
+                <div>
+                  {editing ? (
+                    <Textarea value={content.proposedSolution} onChange={e => setContent({ ...content, proposedSolution: e.target.value })}
+                      className="text-sm min-h-[120px]" />
+                  ) : (
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap mb-4">{content.proposedSolution}</p>
+                  )}
+                </div>
+              )}
+
               {/* Application Features */}
               <div>
                 <h3 className="text-sm font-bold text-foreground mb-2">Application Development</h3>
                 {editing ? (
                   <EditableList items={content.appFeatures} onChange={items => setContent({ ...content, appFeatures: items })} placeholder="Feature description" />
                 ) : (
-                  <BulletList items={content.appFeatures.length > 0 ? content.appFeatures : [
-                    'Mobile or web-based interface',
-                    'Secure database architecture',
-                    'User authentication and permissions',
-                    'Customer or staff dashboards',
-                    'Workflow automation',
-                    'Reporting and analytics',
-                  ]} />
+                  <BulletList items={content.appFeatures} />
                 )}
               </div>
 
@@ -373,13 +373,7 @@ const Proposal = () => {
                 {editing ? (
                   <EditableList items={content.integrations} onChange={items => setContent({ ...content, integrations: items })} placeholder="Integration" />
                 ) : (
-                  <BulletList items={content.integrations.length > 0 ? content.integrations : (deepDive?.required_integrations || [
-                    'CRM platforms',
-                    'Payment systems',
-                    'Scheduling platforms',
-                    'Marketing automation tools',
-                    'API-based services',
-                  ])} />
+                  <BulletList items={content.integrations} />
                 )}
               </div>
 
@@ -388,11 +382,9 @@ const Proposal = () => {
                 <h3 className="text-sm font-bold text-foreground mb-2">User Experience Design</h3>
                 {editing ? (
                   <Textarea value={content.uxDesign} onChange={e => setContent({ ...content, uxDesign: e.target.value })}
-                    placeholder="Creation of an intuitive user interface..." className="text-sm min-h-[60px]" />
+                    className="text-sm min-h-[80px]" />
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {content.uxDesign || 'Creation of an intuitive user interface designed to reduce friction for users, simplify operational processes, and improve engagement and retention.'}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{content.uxDesign}</p>
                 )}
               </div>
 
@@ -401,48 +393,11 @@ const Proposal = () => {
                 <h3 className="text-sm font-bold text-foreground mb-2">Deployment Support</h3>
                 {editing ? (
                   <Textarea value={content.deploymentSupport} onChange={e => setContent({ ...content, deploymentSupport: e.target.value })}
-                    placeholder="Assistance with application deployment..." className="text-sm min-h-[60px]" />
+                    className="text-sm min-h-[80px]" />
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {content.deploymentSupport || 'Assistance with application deployment, hosting configuration, and launch support.'}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{content.deploymentSupport}</p>
                 )}
               </div>
-
-              {/* Deep Dive insights */}
-              {deepDive && !editing && (
-                <div className="border-t border-border pt-4 space-y-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">From Discovery</p>
-                  {deepDive.pain_points && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-1">Key Challenges Identified</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.pain_points}</p>
-                    </div>
-                  )}
-                  {deepDive.primary_goals && deepDive.primary_goals.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-2">Primary Goals</p>
-                      <div className="flex flex-wrap gap-2">
-                        {deepDive.primary_goals.map((g, i) => (
-                          <span key={i} className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">{g}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {deepDive.must_have_features && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-1">Must-Have Features</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.must_have_features}</p>
-                    </div>
-                  )}
-                  {deepDive.nice_to_have_features && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-1">Nice-to-Have Features</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.nice_to_have_features}</p>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </section>
 
@@ -454,13 +409,12 @@ const Proposal = () => {
                 <EditableList items={content.expectedImpact} onChange={items => setContent({ ...content, expectedImpact: items })} placeholder="Impact area" />
               ) : (
                 <>
-                  <BulletList items={content.expectedImpact.length > 0 ? content.expectedImpact : [
-                    'Operational time savings',
-                    'Improved conversion rates',
-                    'Improved customer retention',
-                    'Reduced administrative overhead',
-                    'Increased scalability',
-                  ]} />
+                  <BulletList items={content.expectedImpact} />
+                  {roi?.totalAnnualImpact && (
+                    <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                      <p className="text-sm font-semibold text-foreground">Total Projected Annual Impact: <span className="text-primary">{formatCurrency(roi.totalAnnualImpact)}</span></p>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground mt-4 italic">
                     These projections are indicative only and rely on the accuracy of data provided during intake.
                   </p>
@@ -477,14 +431,7 @@ const Proposal = () => {
                 <EditableList items={content.deliverables} onChange={items => setContent({ ...content, deliverables: items })} placeholder="Deliverable" />
               ) : (
                 <>
-                  <BulletList items={content.deliverables.length > 0 ? content.deliverables : [
-                    'Application architecture design',
-                    'UI/UX interface design',
-                    'Development of agreed features',
-                    'Testing and bug resolution',
-                    'Deployment support',
-                    'Documentation for core functionality',
-                  ]} />
+                  <BulletList items={content.deliverables} />
                   <p className="text-xs text-muted-foreground mt-4 italic">
                     Specific features and technical specifications will be confirmed prior to development.
                   </p>
@@ -544,6 +491,17 @@ const Proposal = () => {
                   <p className="text-3xl font-bold text-primary">{formatCurrency(content.investmentAmount)}</p>
                 )}
               </div>
+
+              {/* Budget context note */}
+              {content.investmentNote && (
+                <div className="bg-secondary/30 rounded-lg p-3">
+                  {editing ? (
+                    <Input value={content.investmentNote} onChange={e => setContent({ ...content, investmentNote: e.target.value })} className="text-xs" />
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">{content.investmentNote}</p>
+                  )}
+                </div>
+              )}
 
               <div>
                 <p className="text-sm font-bold text-foreground mb-3">Payment Structure</p>

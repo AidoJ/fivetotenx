@@ -796,64 +796,175 @@ const Admin = () => {
       const dd = deepDives.find(d => d.assessment_id === lead.id);
       const leadInterviews = interviews.filter(i => i.assessment_id === lead.id);
       const formData = lead.form_data as any;
+      const bName = lead.business_name || 'your business';
+      const industry = lead.industry || formData?.industry || '';
 
       // Calculate fixed investment from ROI midpoint
       const buildMid = roi?.pricing ? Math.round((roi.pricing.buildCostLow + roi.pricing.buildCostHigh) / 2) : 0;
 
-      // Auto-populate features from deep dive + assessment
+      // ── Build rich Project Overview from ALL sources ──
+      const overviewParts: string[] = [];
+      overviewParts.push(`Thank you for the opportunity to work with ${bName}.`);
+      
+      const dataSources = ['ROI assessment'];
+      if (dd) dataSources.push('deep dive questionnaire');
+      if (leadInterviews.length > 0) dataSources.push(`client interview${leadInterviews.length > 1 ? 's' : ''}`);
+      overviewParts.push(`\nBased on the information gathered during the ${dataSources.join(', ')}, this proposal outlines the development of a custom application and automation solution${industry ? ` for the ${industry} sector` : ''}.`);
+
+      if (dd?.pain_points) {
+        overviewParts.push(`\nKey challenges identified during discovery:\n${dd.pain_points}`);
+      }
+      if (dd?.primary_goals && dd.primary_goals.length > 0) {
+        overviewParts.push(`\nPrimary objectives:\n${dd.primary_goals.map(g => `• ${g}`).join('\n')}`);
+      }
+      // Include interview insights in overview
+      if (leadInterviews.length > 0) {
+        const interviewInsights = leadInterviews
+          .filter(i => i.content || i.transcript)
+          .map(i => {
+            const text = i.content || i.transcript || '';
+            return text.length > 200 ? text.substring(0, 200) + '...' : text;
+          });
+        if (interviewInsights.length > 0) {
+          overviewParts.push(`\nKey points from client conversations:\n${interviewInsights.map(t => `• ${t}`).join('\n')}`);
+        }
+      }
+      overviewParts.push(`\nThe objective is to deliver a scalable digital platform that supports the ongoing growth and efficiency of ${bName}.`);
+
+      // ── Proposed Solution narrative ──
+      const solutionParts: string[] = [];
+      solutionParts.push(`Based on the discovery process, the proposed solution addresses ${bName}'s core needs:`);
+      if (dd?.pain_points) {
+        solutionParts.push(`\nThe application will directly tackle the identified pain points by automating manual processes and providing streamlined digital workflows.`);
+      }
+      if (dd?.current_tools) {
+        solutionParts.push(`\nCurrently, ${bName} uses: ${dd.current_tools}. The new system will either replace or integrate with these tools to create a unified platform.`);
+      }
+      if (dd?.current_website) {
+        solutionParts.push(`\nExisting web presence (${dd.current_website}) will be considered in the solution architecture.`);
+      }
+      if (dd?.competitors) {
+        solutionParts.push(`\nCompetitive landscape noted: ${dd.competitors}. The solution will be designed to provide a competitive advantage in this market.`);
+      }
+      if (formData?.lostSalesReasons && formData.lostSalesReasons.length > 0) {
+        solutionParts.push(`\nThe application will specifically address the following friction points that currently contribute to lost sales:\n${formData.lostSalesReasons.map((r: string) => `• ${r}`).join('\n')}`);
+      }
+
+      // ── App Features from deep dive must-have + nice-to-have + assessment ──
       const appFeatures: string[] = [];
       if (dd?.must_have_features) {
         dd.must_have_features.split(/[,\n]/).filter(Boolean).forEach(f => appFeatures.push(f.trim()));
       }
+      if (dd?.nice_to_have_features) {
+        dd.nice_to_have_features.split(/[,\n]/).filter(Boolean).forEach(f => appFeatures.push(`${f.trim()} (nice-to-have)`));
+      }
+      // Add features implied by assessment data
+      if (formData?.currentFeatures) {
+        const missing = (formData.currentFeatures as string[]).filter((f: string) => 
+          !appFeatures.some(af => af.toLowerCase().includes(f.toLowerCase()))
+        );
+        missing.forEach(f => appFeatures.push(f));
+      }
       if (appFeatures.length === 0) {
-        appFeatures.push('Mobile or web-based interface', 'Secure database architecture', 'User authentication and permissions', 'Customer or staff dashboards', 'Workflow automation', 'Reporting and analytics');
+        // Only use generic defaults if we truly have no data
+        appFeatures.push(
+          'Custom web/mobile application interface',
+          'Secure database architecture',
+          'User authentication and permissions',
+          'Customer or staff dashboards',
+          'Workflow automation',
+          'Reporting and analytics'
+        );
       }
 
-      const integrations = dd?.required_integrations || ['CRM platforms', 'Payment systems', 'Scheduling platforms'];
+      // ── Integrations from deep dive + assessment ──
+      const integrations: string[] = [];
+      if (dd?.required_integrations && dd.required_integrations.length > 0) {
+        dd.required_integrations.forEach(i => integrations.push(i));
+      }
+      if (dd?.current_tools) {
+        // Extract tool names that might need integration
+        const toolNames = dd.current_tools.split(/[,\n;]/).map(t => t.trim()).filter(Boolean);
+        toolNames.forEach(t => {
+          if (!integrations.some(i => i.toLowerCase().includes(t.toLowerCase()))) {
+            integrations.push(`${t} (existing tool — integrate or migrate)`);
+          }
+        });
+      }
+      if (integrations.length === 0) {
+        integrations.push('CRM platforms', 'Payment systems', 'Scheduling platforms', 'API-based services');
+      }
 
-      // Build expected impact from ROI data
+      // ── UX Design informed by pain points ──
+      let uxDesign = 'Creation of an intuitive user interface designed to reduce friction for users, simplify operational processes, and improve engagement and retention.';
+      if (dd?.pain_points) {
+        uxDesign += `\n\nThe UX design will specifically address the usability challenges identified: ${dd.pain_points.substring(0, 200)}${dd.pain_points.length > 200 ? '...' : ''}.`;
+      }
+      if (formData?.lostSalesReasons?.includes('Poor mobile experience')) {
+        uxDesign += '\n\nMobile-first design is a priority given the identified impact of poor mobile experience on conversions.';
+      }
+
+      // ── Expected Impact with real numbers from ROI ──
       const expectedImpact: string[] = [];
-      if (roi?.conversionImpact) expectedImpact.push(`Improved conversion rates — projected ${formatCurrency(roi.conversionImpact)} annual impact`);
-      if (roi?.retentionImpact) expectedImpact.push(`Improved customer retention — projected ${formatCurrency(roi.retentionImpact)} annual impact`);
-      if (roi?.efficiencyImpact) expectedImpact.push(`Operational time savings — projected ${formatCurrency(roi.efficiencyImpact)} annual impact`);
-      if (roi?.lostSalesRecovery) expectedImpact.push(`Lost sales recovery — projected ${formatCurrency(roi.lostSalesRecovery)} annual impact`);
+      if (roi?.revenueLift) expectedImpact.push(`Revenue lift from improved conversion — projected ${formatCurrency(roi.revenueLift)}/year`);
+      if (roi?.operationalSavings) expectedImpact.push(`Operational savings from automation — projected ${formatCurrency(roi.operationalSavings)}/year (${Math.round(roi.weeklySavingsHours || 0)} hrs/week saved)`);
+      if (roi?.retentionImprovement) expectedImpact.push(`Customer retention improvement — projected ${formatCurrency(roi.retentionImprovement)}/year`);
+      if (roi?.lostSalesRecovery) expectedImpact.push(`Lost sales recovery — projected ${formatCurrency(roi.lostSalesRecovery)}/year`);
+      if (roi?.noShowRecovery) expectedImpact.push(`No-show recovery — projected ${formatCurrency(roi.noShowRecovery)}/year`);
+      if (roi?.upsellLift) expectedImpact.push(`Upsell/cross-sell lift — projected ${formatCurrency(roi.upsellLift)}/year`);
+      if (roi?.marketingEfficiency) expectedImpact.push(`Marketing efficiency gains — projected ${formatCurrency(roi.marketingEfficiency)}/year`);
       if (expectedImpact.length === 0) {
         expectedImpact.push('Operational time savings', 'Improved conversion rates', 'Improved customer retention', 'Reduced administrative overhead', 'Increased scalability');
       }
 
-      // Build project overview from all data sources
-      let projectOverview = `Thank you for the opportunity to work with ${lead.business_name || 'your business'}.\n\nBased on the information provided during the ROI assessment, deep dive questionnaire${leadInterviews.length > 0 ? ', and client interview' + (leadInterviews.length > 1 ? 's' : '') : ''}, this proposal outlines the development of a custom application and automation solution designed to:\n\n`;
-      if (dd?.pain_points) {
-        projectOverview += `Key challenges identified:\n${dd.pain_points}\n\n`;
-      }
-      projectOverview += `The objective is to deliver a scalable digital platform that supports the ongoing growth and efficiency of your business.`;
-
-      // Timeline from deep dive
-      const timelinePhases = [
-        { phase: 'Discovery & Specification', duration: '1–2 weeks', desc: 'Finalising technical scope and architecture.' },
-        { phase: 'Design & Development', duration: dd?.timeline || '4–8 weeks', desc: 'Building the application and integrations.' },
-        { phase: 'Testing & Refinement', duration: '1–2 weeks', desc: 'User testing and bug resolution.' },
-        { phase: 'Deployment', duration: '1 week', desc: 'Launch and implementation.' },
+      // ── Deliverables ──
+      const deliverables = [
+        'Application architecture design',
+        'UI/UX interface design',
+        'Development of agreed features',
+        ...(integrations.length > 0 ? ['System integration development and testing'] : []),
+        'Testing and bug resolution',
+        'Deployment support',
+        'Documentation for core functionality',
+        ...(formData?.lostSalesReasons?.length > 0 ? ['Conversion optimisation implementation'] : []),
       ];
 
+      // ── Timeline using deep dive timeline + decision timeline ──
+      let devDuration = '4–8 weeks';
+      if (dd?.timeline) {
+        devDuration = dd.timeline;
+      }
+      const timelinePhases = [
+        { phase: 'Discovery & Specification', duration: '1–2 weeks', desc: 'Finalising technical scope, architecture, and detailed feature specifications.' },
+        { phase: 'Design & Development', duration: devDuration, desc: `Building the application, integrations${integrations.length > 0 ? ` (including ${integrations.slice(0, 2).join(', ')})` : ''}, and core features.` },
+        { phase: 'Testing & Refinement', duration: '1–2 weeks', desc: 'User acceptance testing, bug resolution, and performance optimisation.' },
+        { phase: 'Deployment & Handover', duration: '1 week', desc: 'Launch, hosting configuration, documentation, and training.' },
+      ];
+
+      // ── Deployment support ──
+      let deploymentSupport = 'Assistance with application deployment, hosting configuration, launch support, and initial user onboarding.';
+      if (dd?.decision_timeline) {
+        deploymentSupport += `\n\nNote: Client has indicated a decision timeline of "${dd.decision_timeline}". Project scheduling will accommodate this.`;
+      }
+
+      // ── Budget context note ──
+      let investmentNote = '';
+      if (dd?.budget_comfort) {
+        investmentNote = `Client budget indication: ${dd.budget_comfort}. `;
+      }
+
       const proposalData = {
-        projectOverview,
-        proposedSolution: '',
+        projectOverview: overviewParts.join('\n'),
+        proposedSolution: solutionParts.join('\n'),
         appFeatures,
         integrations,
-        uxDesign: 'Creation of an intuitive user interface designed to reduce friction for users, simplify operational processes, and improve engagement and retention.',
-        deploymentSupport: 'Assistance with application deployment, hosting configuration, and launch support.',
+        uxDesign,
+        deploymentSupport,
         expectedImpact,
-        deliverables: [
-          'Application architecture design',
-          'UI/UX interface design',
-          'Development of agreed features',
-          'Testing and bug resolution',
-          'Deployment support',
-          'Documentation for core functionality',
-        ],
+        deliverables,
         timelinePhases,
         investmentAmount: buildMid,
+        investmentNote,
         paymentStructure: [
           { label: 'Deposit', percentage: 40, description: 'Payable upon acceptance of this proposal to commence work.' },
           { label: 'Development Milestone', percentage: 30, description: 'Payable at agreed development milestone.' },
@@ -862,8 +973,8 @@ const Admin = () => {
         clientResponsibilities: [
           'Provide accurate business information during intake',
           'Supply required content, assets, and documentation',
-          'Nominate a primary project contact',
-          'Provide timely approvals and feedback',
+          `Nominate a primary project contact${dd?.decision_maker_name ? ` (nominated: ${dd.decision_maker_name}${dd.decision_maker_role ? `, ${dd.decision_maker_role}` : ''})` : ''}`,
+          'Provide timely approvals and feedback within 5 business days',
           'Ensure they hold rights to any materials supplied',
         ],
         variations: 'Requests for additional features or changes to scope after development has begun may require revised timelines and additional development costs. All variations will be confirmed with the Client before work proceeds.',
@@ -884,7 +995,7 @@ const Admin = () => {
       }).select().single();
       if (error) throw error;
       setProposals(prev => [...prev, data as ProposalRecord]);
-      toast({ title: 'Proposal Draft Created ✅', description: 'Auto-populated from assessment, deep dive & interviews. Opening for editing...' });
+      toast({ title: 'Proposal Draft Created ✅', description: 'Synthesised from assessment, deep dive & interviews. Opening for review and editing...' });
       window.open(`${window.location.origin}/proposal/${data.id}`, '_blank');
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Failed to create proposal.', variant: 'destructive' });
