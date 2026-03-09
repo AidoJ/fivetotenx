@@ -221,13 +221,15 @@ const LeadNotes = ({ assessmentId, notes, onAdd }: {
 
 /* ─────────── Lead Card ─────────── */
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, deepDive, notes, onAddNote }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onSendProposal }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
+  onUpdateFollowUp: (id: string, days: number) => void;
   deepDive: DeepDiveSubmission | null;
   notes: LeadNote[];
   onAddNote: (assessmentId: string, content: string, noteType: string) => Promise<void>;
+  onSendProposal: (lead: Assessment) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
