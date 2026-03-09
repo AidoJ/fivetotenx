@@ -311,11 +311,10 @@ const Proposal = () => {
             <div className="bg-card border border-border rounded-lg p-6 space-y-4">
               {editing ? (
                 <Textarea value={content.projectOverview} onChange={e => setContent({ ...content, projectOverview: e.target.value })}
-                  placeholder={`Based on the information provided during the intake and discovery process, this proposal outlines the development of a custom application and automation solution for ${businessName}...`}
-                  className="text-sm min-h-[120px]" />
+                  className="text-sm min-h-[200px]" />
               ) : (
                 <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {content.projectOverview || `Thank you for the opportunity to work with ${businessName}.\n\nBased on the information provided during the intake and discovery process, this proposal outlines the development of a custom application and automation solution designed to:\n\n• Streamline operational workflows\n• Improve customer experience\n• Reduce manual administration\n• Enable automation and system integration\n• Unlock measurable business efficiencies and revenue opportunities\n\nThe objective is to deliver a scalable digital platform that supports the ongoing growth and efficiency of your business.`}
+                  {content.projectOverview || 'No project overview generated. Please re-prepare this proposal from the admin dashboard.'}
                 </div>
               )}
               {/* ROI summary stats */}
