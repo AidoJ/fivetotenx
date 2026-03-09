@@ -857,9 +857,11 @@ const Admin = () => {
                           onMove={handleMove}
                           onSendDeepDive={handleSendDeepDive}
                           onUpdateFollowUp={handleUpdateFollowUp}
+                          onPrepareProposal={handlePrepareProposal}
                           onSendProposal={handleSendProposal}
                           onUpdateProposalFollowUp={handleUpdateProposalFollowUp}
                           deepDive={getDeepDive(lead.id)}
+                          proposal={getProposal(lead.id)}
                           notes={leadNotes}
                           onAddNote={handleAddNote}
                         />
