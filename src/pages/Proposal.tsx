@@ -130,10 +130,18 @@ const Proposal = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check URL param for admin mode (set when opened from admin dashboard)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === '1') {
+      setIsAdmin(true);
+    }
+    // Also check Supabase auth session
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAdmin(!!session);
+      if (session) setIsAdmin(true);
     });
-    supabase.auth.getSession().then(({ data: { session } }) => setIsAdmin(!!session));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setIsAdmin(true);
+    });
     return () => subscription.unsubscribe();
   }, []);
 
