@@ -612,15 +612,45 @@ const Admin = () => {
 
   const handleSendProposal = async (lead: Assessment) => {
     try {
-      const { error } = await supabase.functions.invoke('send-proposal', {
+      const res = await supabase.functions.invoke('send-proposal', {
         body: { assessmentId: lead.id },
       });
-      if (error) throw error;
-      await supabase.from('roi_assessments').update({ pipeline_stage: 'proposal' as any }).eq('id', lead.id);
-      setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'proposal' as PipelineStage } : l));
+      if (res.error) throw res.error;
+      const proposalId = res.data?.proposalId;
+      const now = new Date().toISOString();
+      const followUpDays = (lead as any).proposal_follow_up_days || 3;
+      const followUpAt = new Date(Date.now() + followUpDays * 24 * 60 * 60 * 1000).toISOString();
+      await supabase.from('roi_assessments').update({
+        pipeline_stage: 'proposal' as any,
+        proposal_sent_at: now,
+        proposal_follow_up_scheduled_at: followUpAt,
+        proposal_follow_up_days: followUpDays,
+      }).eq('id', lead.id);
+      setLeads(prev => prev.map(l => l.id === lead.id ? {
+        ...l,
+        pipeline_stage: 'proposal' as PipelineStage,
+        proposal_sent_at: now,
+        proposal_follow_up_scheduled_at: followUpAt,
+        proposal_follow_up_days: followUpDays,
+      } as any : l));
       toast({ title: 'Proposal Sent ✅', description: `Proposal sent to ${lead.contact_email}` });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to send proposal.', variant: 'destructive' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to send proposal.', variant: 'destructive' });
+    }
+  };
+
+  const handleUpdateProposalFollowUp = async (id: string, days: number) => {
+    const followUpAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    const { error } = await supabase.from('roi_assessments').update({
+      proposal_follow_up_days: days,
+      proposal_follow_up_scheduled_at: followUpAt,
+      proposal_follow_up_sent: false,
+    }).eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, proposal_follow_up_days: days, proposal_follow_up_scheduled_at: followUpAt, proposal_follow_up_sent: false } as any : l));
+      toast({ title: 'Follow-up updated', description: `Proposal reminder set for ${days} days` });
     }
   };
 
