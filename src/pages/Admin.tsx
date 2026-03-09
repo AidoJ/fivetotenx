@@ -996,7 +996,7 @@ const Admin = () => {
       if (error) throw error;
       setProposals(prev => [...prev, data as ProposalRecord]);
       toast({ title: 'Proposal Draft Created ✅', description: 'Synthesised from assessment, deep dive & interviews. Opening for review and editing...' });
-      window.open(`${window.location.origin}/proposal/${data.id}`, '_blank');
+      window.open(`${window.location.origin}/proposal/${data.id}?admin=1`, '_blank');
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Failed to create proposal.', variant: 'destructive' });
     }
