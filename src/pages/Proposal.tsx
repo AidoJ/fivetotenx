@@ -409,13 +409,12 @@ const Proposal = () => {
                 <EditableList items={content.expectedImpact} onChange={items => setContent({ ...content, expectedImpact: items })} placeholder="Impact area" />
               ) : (
                 <>
-                  <BulletList items={content.expectedImpact.length > 0 ? content.expectedImpact : [
-                    'Operational time savings',
-                    'Improved conversion rates',
-                    'Improved customer retention',
-                    'Reduced administrative overhead',
-                    'Increased scalability',
-                  ]} />
+                  <BulletList items={content.expectedImpact} />
+                  {roi?.totalAnnualImpact && (
+                    <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                      <p className="text-sm font-semibold text-foreground">Total Projected Annual Impact: <span className="text-primary">{formatCurrency(roi.totalAnnualImpact)}</span></p>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground mt-4 italic">
                     These projections are indicative only and rely on the accuracy of data provided during intake.
                   </p>
@@ -432,14 +431,7 @@ const Proposal = () => {
                 <EditableList items={content.deliverables} onChange={items => setContent({ ...content, deliverables: items })} placeholder="Deliverable" />
               ) : (
                 <>
-                  <BulletList items={content.deliverables.length > 0 ? content.deliverables : [
-                    'Application architecture design',
-                    'UI/UX interface design',
-                    'Development of agreed features',
-                    'Testing and bug resolution',
-                    'Deployment support',
-                    'Documentation for core functionality',
-                  ]} />
+                  <BulletList items={content.deliverables} />
                   <p className="text-xs text-muted-foreground mt-4 italic">
                     Specific features and technical specifications will be confirmed prior to development.
                   </p>
