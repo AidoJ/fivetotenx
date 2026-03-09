@@ -287,27 +287,70 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
 
       {/* On-site & email actions for qualified leads */}
       {lead.is_qualified && (
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {canSendDeepDive && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {canSendDeepDive && (
+              <div className="flex flex-col items-start">
+                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                  onClick={(e) => { e.stopPropagation(); onSendDeepDive(lead); }}>
+                  <Send className="w-3 h-3" /> {lead.invite_sent ? 'Resend Invite' : 'Email Invite'}
+                </Button>
+                {lead.invite_sent && lead.invite_sent_at && (
+                  <span className="text-[9px] text-muted-foreground ml-0.5 mt-0.5">
+                    Sent {formatDate(lead.invite_sent_at)}
+                  </span>
+                )}
+              </div>
+            )}
             <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-              onClick={(e) => { e.stopPropagation(); onSendDeepDive(lead); }}>
-              <Send className="w-3 h-3" /> Email Invite
+              onClick={() => window.open(deepDiveUrl, '_blank')}>
+              <ExternalLink className="w-3 h-3" /> Open
             </Button>
-          )}
-          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-            onClick={() => window.open(deepDiveUrl, '_blank')}>
-            <ExternalLink className="w-3 h-3" /> Open
-          </Button>
-          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-            onClick={handleCopy}>
-            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            {copied ? 'Copied' : 'Copy Link'}
-          </Button>
-          {deepDive && (
-            <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
-              onClick={() => setShowDeepDive(!showDeepDive)}>
-              <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+              onClick={handleCopy}>
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied ? 'Copied' : 'Copy Link'}
             </Button>
+            {deepDive && (
+              <>
+                <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                  onClick={() => setShowDeepDive(!showDeepDive)}>
+                  <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+                </Button>
+                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                  onClick={() => onSendProposal(lead)}>
+                  <FileText className="w-3 h-3" /> Send Proposal
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Follow-up scheduler - shown for deep_dive_sent stage */}
+          {(lead.pipeline_stage === 'deep_dive_sent') && (
+            <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">Follow up in</span>
+              <Input
+                type="number"
+                min={1}
+                max={30}
+                defaultValue={lead.follow_up_days || 2}
+                className="h-6 w-14 text-[10px] text-center"
+                onBlur={(e) => {
+                  const days = parseInt(e.target.value) || 2;
+                  onUpdateFollowUp(lead.id, days);
+                }}
+              />
+              <span className="text-[10px] text-muted-foreground">days</span>
+              {lead.follow_up_scheduled_at && (
+                <span className="text-[9px] text-muted-foreground ml-1">
+                  (reminder: {formatDate(lead.follow_up_scheduled_at)})
+                </span>
+              )}
+              {lead.follow_up_sent && (
+                <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
+              )}
+            </div>
           )}
         </div>
       )}
