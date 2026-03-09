@@ -27,15 +27,15 @@ serve(async (req) => {
       .eq('template_key', 'follow-up-reminder')
       .single();
 
-    // Find qualified leads that haven't completed deep dive and were qualified > 48h ago
-    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    // Find leads with scheduled follow-ups that are due and not yet sent
+    const now = new Date().toISOString();
 
     const { data: staleLeads, error } = await supabase
       .from('roi_assessments')
-      .select('id, contact_name, contact_email, business_name, qualified_at')
-      .eq('pipeline_stage', 'qualified')
-      .eq('is_qualified', true)
-      .lt('qualified_at', cutoff);
+      .select('id, contact_name, contact_email, business_name, qualified_at, follow_up_days')
+      .eq('pipeline_stage', 'deep_dive_sent')
+      .eq('follow_up_sent', false)
+      .lt('follow_up_scheduled_at', now);
 
     if (error) throw error;
 
