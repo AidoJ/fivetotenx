@@ -103,7 +103,7 @@ serve(async (req) => {
           sent++;
           await supabase
             .from('roi_assessments')
-            .update({ pipeline_stage: 'deep_dive_sent', invite_sent: true })
+            .update({ follow_up_sent: true })
             .eq('id', lead.id);
         }
       } catch (e) {
