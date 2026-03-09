@@ -324,40 +324,47 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
               {copied ? 'Copied' : 'Copy Link'}
             </Button>
             {deepDive && (
-              <>
-                <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
-                  onClick={() => setShowDeepDive(!showDeepDive)}>
-                  <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
-                </Button>
-                {/* Prepare / Edit / Send Proposal */}
-                {deepDive && (
-                  <div className="flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-1.5">
-                      {!proposal ? (
-                        <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                          onClick={() => onPrepareProposal(lead)}>
-                          <FileText className="w-3 h-3" /> Prepare Proposal
-                        </Button>
-                      ) : (
-                        <>
-                          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                            onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
-                            <Pencil className="w-3 h-3" /> Edit Proposal
-                          </Button>
-                          <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
-                            onClick={() => onSendProposal(lead)}>
-                            <Send className="w-3 h-3" /> {(lead as any).proposal_sent_at ? 'Resend Proposal' : 'Send Proposal'}
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                    {(lead as any).proposal_sent_at && (
-                      <span className="text-[9px] text-muted-foreground ml-0.5">
-                        Sent {formatDate((lead as any).proposal_sent_at)}
-                      </span>
-                    )}
-                  </div>
+              <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => setShowDeepDive(!showDeepDive)}>
+                <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+              </Button>
+            )}
+          </div>
+
+          {/* Proposal actions - only when deep dive exists */}
+          {deepDive && (
+            <div className="flex flex-col items-start gap-1">
+              <div className="flex items-center gap-1.5">
+                {!proposal ? (
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                    onClick={() => onPrepareProposal(lead)}>
+                    <FileText className="w-3 h-3" /> Prepare Proposal
+                  </Button>
+                ) : (
+                  <>
+                    <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                      onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
+                      <Pencil className="w-3 h-3" /> Edit Proposal
+                    </Button>
+                    <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
+                      onClick={() => onSendProposal(lead)}>
+                      <Send className="w-3 h-3" /> {(lead as any).proposal_sent_at ? 'Resend Proposal' : 'Send Proposal'}
+                    </Button>
+                  </>
                 )}
+              </div>
+              {(lead as any).proposal_sent_at && (
+                <span className="text-[9px] text-muted-foreground ml-0.5">
+                  Sent {formatDate((lead as any).proposal_sent_at)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Follow-up scheduler - shown for deep_dive_sent stage */}
+          {lead.pipeline_stage === 'deep_dive_sent' && (
+            <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
+              <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Follow up in</span>
               <Input
                 type="number"
@@ -383,7 +390,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
           )}
 
           {/* Follow-up scheduler - shown for proposal stage */}
-          {(lead.pipeline_stage === 'proposal') && (
+          {lead.pipeline_stage === 'proposal' && (
             <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Proposal follow up in</span>
