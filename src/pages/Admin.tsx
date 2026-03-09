@@ -221,13 +221,15 @@ const LeadNotes = ({ assessmentId, notes, onAdd }: {
 
 /* ─────────── Lead Card ─────────── */
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, deepDive, notes, onAddNote }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onSendProposal }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
+  onUpdateFollowUp: (id: string, days: number) => void;
   deepDive: DeepDiveSubmission | null;
   notes: LeadNote[];
   onAddNote: (assessmentId: string, content: string, noteType: string) => Promise<void>;
+  onSendProposal: (lead: Assessment) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
@@ -285,27 +287,70 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, deepDive, notes, onAddNote }: 
 
       {/* On-site & email actions for qualified leads */}
       {lead.is_qualified && (
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {canSendDeepDive && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {canSendDeepDive && (
+              <div className="flex flex-col items-start">
+                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                  onClick={(e) => { e.stopPropagation(); onSendDeepDive(lead); }}>
+                  <Send className="w-3 h-3" /> {lead.invite_sent ? 'Resend Invite' : 'Email Invite'}
+                </Button>
+                {lead.invite_sent && lead.invite_sent_at && (
+                  <span className="text-[9px] text-muted-foreground ml-0.5 mt-0.5">
+                    Sent {formatDate(lead.invite_sent_at)}
+                  </span>
+                )}
+              </div>
+            )}
             <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-              onClick={(e) => { e.stopPropagation(); onSendDeepDive(lead); }}>
-              <Send className="w-3 h-3" /> Email Invite
+              onClick={() => window.open(deepDiveUrl, '_blank')}>
+              <ExternalLink className="w-3 h-3" /> Open
             </Button>
-          )}
-          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-            onClick={() => window.open(deepDiveUrl, '_blank')}>
-            <ExternalLink className="w-3 h-3" /> Open
-          </Button>
-          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-            onClick={handleCopy}>
-            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            {copied ? 'Copied' : 'Copy Link'}
-          </Button>
-          {deepDive && (
-            <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
-              onClick={() => setShowDeepDive(!showDeepDive)}>
-              <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+              onClick={handleCopy}>
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied ? 'Copied' : 'Copy Link'}
             </Button>
+            {deepDive && (
+              <>
+                <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                  onClick={() => setShowDeepDive(!showDeepDive)}>
+                  <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+                </Button>
+                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                  onClick={() => onSendProposal(lead)}>
+                  <FileText className="w-3 h-3" /> Send Proposal
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Follow-up scheduler - shown for deep_dive_sent stage */}
+          {(lead.pipeline_stage === 'deep_dive_sent') && (
+            <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">Follow up in</span>
+              <Input
+                type="number"
+                min={1}
+                max={30}
+                defaultValue={lead.follow_up_days || 2}
+                className="h-6 w-14 text-[10px] text-center"
+                onBlur={(e) => {
+                  const days = parseInt(e.target.value) || 2;
+                  onUpdateFollowUp(lead.id, days);
+                }}
+              />
+              <span className="text-[10px] text-muted-foreground">days</span>
+              {lead.follow_up_scheduled_at && (
+                <span className="text-[9px] text-muted-foreground ml-1">
+                  (reminder: {formatDate(lead.follow_up_scheduled_at)})
+                </span>
+              )}
+              {lead.follow_up_sent && (
+                <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -528,11 +573,54 @@ const Admin = () => {
         body: { contactName: lead.contact_name, contactEmail: lead.contact_email, businessName: lead.business_name, assessmentId: lead.id },
       });
       if (error) throw error;
-      await supabase.from('roi_assessments').update({ pipeline_stage: 'deep_dive_sent' as any, invite_sent: true }).eq('id', lead.id);
-      setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'deep_dive_sent' as PipelineStage, invite_sent: true } : l));
+      const now = new Date().toISOString();
+      const followUpDays = lead.follow_up_days || 2;
+      const followUpAt = new Date(Date.now() + followUpDays * 24 * 60 * 60 * 1000).toISOString();
+      await supabase.from('roi_assessments').update({
+        pipeline_stage: 'deep_dive_sent' as any,
+        invite_sent: true,
+        invite_sent_at: now,
+        follow_up_scheduled_at: followUpAt,
+      }).eq('id', lead.id);
+      setLeads(prev => prev.map(l => l.id === lead.id ? {
+        ...l,
+        pipeline_stage: 'deep_dive_sent' as PipelineStage,
+        invite_sent: true,
+        invite_sent_at: now,
+        follow_up_scheduled_at: followUpAt,
+      } : l));
       toast({ title: 'Deep Dive Sent ✅', description: `Invite sent to ${lead.contact_email}` });
     } catch {
       toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
+    }
+  };
+
+  const handleUpdateFollowUp = async (id: string, days: number) => {
+    const followUpAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    const { error } = await supabase.from('roi_assessments').update({
+      follow_up_days: days,
+      follow_up_scheduled_at: followUpAt,
+      follow_up_sent: false,
+    }).eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, follow_up_days: days, follow_up_scheduled_at: followUpAt, follow_up_sent: false } : l));
+      toast({ title: 'Follow-up updated', description: `Reminder set for ${days} days` });
+    }
+  };
+
+  const handleSendProposal = async (lead: Assessment) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-proposal', {
+        body: { assessmentId: lead.id },
+      });
+      if (error) throw error;
+      await supabase.from('roi_assessments').update({ pipeline_stage: 'proposal' as any }).eq('id', lead.id);
+      setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'proposal' as PipelineStage } : l));
+      toast({ title: 'Proposal Sent ✅', description: `Proposal sent to ${lead.contact_email}` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to send proposal.', variant: 'destructive' });
     }
   };
 
@@ -631,6 +719,8 @@ const Admin = () => {
                           lead={lead}
                           onMove={handleMove}
                           onSendDeepDive={handleSendDeepDive}
+                          onUpdateFollowUp={handleUpdateFollowUp}
+                          onSendProposal={handleSendProposal}
                           deepDive={getDeepDive(lead.id)}
                           notes={leadNotes}
                           onAddNote={handleAddNote}

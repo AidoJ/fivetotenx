@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import BusinessCards from "./pages/BusinessCards";
 import DeepDive from "./pages/DeepDive";
 import Admin from "./pages/Admin";
+import Proposal from "./pages/Proposal";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/cards" element={<BusinessCards />} />
           <Route path="/deep-dive" element={<DeepDive />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/proposal/:id" element={<Proposal />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
