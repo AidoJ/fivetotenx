@@ -345,20 +345,25 @@ const Proposal = () => {
           <section className="mb-10">
             <SectionTitle icon={Wrench} number={2} title="Proposed Solution" />
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
+              {/* Solution narrative */}
+              {(content.proposedSolution || editing) && (
+                <div>
+                  {editing ? (
+                    <Textarea value={content.proposedSolution} onChange={e => setContent({ ...content, proposedSolution: e.target.value })}
+                      className="text-sm min-h-[120px]" />
+                  ) : (
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap mb-4">{content.proposedSolution}</p>
+                  )}
+                </div>
+              )}
+
               {/* Application Features */}
               <div>
                 <h3 className="text-sm font-bold text-foreground mb-2">Application Development</h3>
                 {editing ? (
                   <EditableList items={content.appFeatures} onChange={items => setContent({ ...content, appFeatures: items })} placeholder="Feature description" />
                 ) : (
-                  <BulletList items={content.appFeatures.length > 0 ? content.appFeatures : [
-                    'Mobile or web-based interface',
-                    'Secure database architecture',
-                    'User authentication and permissions',
-                    'Customer or staff dashboards',
-                    'Workflow automation',
-                    'Reporting and analytics',
-                  ]} />
+                  <BulletList items={content.appFeatures} />
                 )}
               </div>
 
@@ -368,13 +373,7 @@ const Proposal = () => {
                 {editing ? (
                   <EditableList items={content.integrations} onChange={items => setContent({ ...content, integrations: items })} placeholder="Integration" />
                 ) : (
-                  <BulletList items={content.integrations.length > 0 ? content.integrations : (deepDive?.required_integrations || [
-                    'CRM platforms',
-                    'Payment systems',
-                    'Scheduling platforms',
-                    'Marketing automation tools',
-                    'API-based services',
-                  ])} />
+                  <BulletList items={content.integrations} />
                 )}
               </div>
 
@@ -383,11 +382,9 @@ const Proposal = () => {
                 <h3 className="text-sm font-bold text-foreground mb-2">User Experience Design</h3>
                 {editing ? (
                   <Textarea value={content.uxDesign} onChange={e => setContent({ ...content, uxDesign: e.target.value })}
-                    placeholder="Creation of an intuitive user interface..." className="text-sm min-h-[60px]" />
+                    className="text-sm min-h-[80px]" />
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {content.uxDesign || 'Creation of an intuitive user interface designed to reduce friction for users, simplify operational processes, and improve engagement and retention.'}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{content.uxDesign}</p>
                 )}
               </div>
 
@@ -396,48 +393,11 @@ const Proposal = () => {
                 <h3 className="text-sm font-bold text-foreground mb-2">Deployment Support</h3>
                 {editing ? (
                   <Textarea value={content.deploymentSupport} onChange={e => setContent({ ...content, deploymentSupport: e.target.value })}
-                    placeholder="Assistance with application deployment..." className="text-sm min-h-[60px]" />
+                    className="text-sm min-h-[80px]" />
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {content.deploymentSupport || 'Assistance with application deployment, hosting configuration, and launch support.'}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{content.deploymentSupport}</p>
                 )}
               </div>
-
-              {/* Deep Dive insights */}
-              {deepDive && !editing && (
-                <div className="border-t border-border pt-4 space-y-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">From Discovery</p>
-                  {deepDive.pain_points && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-1">Key Challenges Identified</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.pain_points}</p>
-                    </div>
-                  )}
-                  {deepDive.primary_goals && deepDive.primary_goals.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-2">Primary Goals</p>
-                      <div className="flex flex-wrap gap-2">
-                        {deepDive.primary_goals.map((g, i) => (
-                          <span key={i} className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">{g}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {deepDive.must_have_features && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-1">Must-Have Features</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.must_have_features}</p>
-                    </div>
-                  )}
-                  {deepDive.nice_to_have_features && (
-                    <div>
-                      <p className="text-xs font-medium text-foreground mb-1">Nice-to-Have Features</p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{deepDive.nice_to_have_features}</p>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </section>
 
