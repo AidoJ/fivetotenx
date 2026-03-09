@@ -460,6 +460,8 @@ const ROI_REPORT_INFO = {
 /* ─────────── Main Admin ─────────── */
 
 const Admin = () => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [leads, setLeads] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
@@ -467,6 +469,18 @@ const Admin = () => {
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchLeads = async () => {
     const [leadsRes, deepDivesRes, notesRes] = await Promise.all([
