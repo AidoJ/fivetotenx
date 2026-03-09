@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
-  MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil
+  MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil,
+  Mic, Upload, Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +60,18 @@ interface LeadNote {
   assessment_id: string;
   note_type: string;
   content: string;
+  created_at: string;
+}
+
+interface ClientInterview {
+  id: string;
+  assessment_id: string;
+  interview_type: string;
+  title: string;
+  content: string | null;
+  audio_file_url: string | null;
+  transcript: string | null;
+  interviewed_at: string;
   created_at: string;
 }
 
@@ -143,6 +156,110 @@ const DeepDiveViewer = ({ submission }: { submission: DeepDiveSubmission }) => (
     </div>
   </motion.div>
 );
+
+/* ─────────── Client Interview Section ─────────── */
+
+const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete }: {
+  assessmentId: string;
+  interviews: ClientInterview[];
+  onAdd: (assessmentId: string, title: string, content: string, audioFile?: File) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}) => {
+  const [showForm, setShowForm] = useState(false);
+  const [title, setTitle] = useState('Client Interview');
+  const [notes, setNotes] = useState('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [adding, setAdding] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const filtered = interviews.filter(i => i.assessment_id === assessmentId);
+
+  const handleAdd = async () => {
+    if (!notes.trim() && !audioFile) return;
+    setAdding(true);
+    await onAdd(assessmentId, title, notes.trim(), audioFile || undefined);
+    setTitle('Client Interview');
+    setNotes('');
+    setAudioFile(null);
+    setShowForm(false);
+    setAdding(false);
+  };
+
+  return (
+    <div className="space-y-2 border-t border-border pt-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Mic className="w-4 h-4 text-primary" />
+          <h4 className="text-xs font-bold text-foreground">Client Interviews</h4>
+          {filtered.length > 0 && (
+            <Badge variant="outline" className="text-[9px] h-4">{filtered.length}</Badge>
+          )}
+        </div>
+        <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1" onClick={() => setShowForm(!showForm)}>
+          <Plus className="w-3 h-3" /> Add Interview
+        </Button>
+      </div>
+
+      {/* Existing interviews */}
+      {filtered.length > 0 && (
+        <div className="space-y-2 max-h-60 overflow-y-auto">
+          {filtered.map(interview => (
+            <div key={interview.id} className="bg-secondary/50 rounded-lg p-2.5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-semibold text-foreground">{interview.title}</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] text-muted-foreground">{formatDate(interview.interviewed_at)}</span>
+                  <Button size="sm" variant="ghost" className="h-5 w-5 p-0 text-destructive" onClick={() => onDelete(interview.id)}>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+              {interview.content && (
+                <p className="text-[11px] text-foreground whitespace-pre-wrap">{interview.content}</p>
+              )}
+              {interview.audio_file_url && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[8px] h-4 px-1 gap-1"><Mic className="w-2.5 h-2.5" /> Audio</Badge>
+                  <audio controls className="h-6 flex-1" style={{ maxWidth: '200px' }}>
+                    <source src={interview.audio_file_url} />
+                  </audio>
+                </div>
+              )}
+              {interview.transcript && (
+                <div className="bg-card rounded p-2 border border-border">
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Transcript</p>
+                  <p className="text-[11px] text-foreground whitespace-pre-wrap max-h-32 overflow-y-auto">{interview.transcript}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add form */}
+      <AnimatePresence>
+        {showForm && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            className="space-y-2 bg-secondary/30 rounded-lg p-2.5">
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Interview title" className="h-7 text-[10px]" />
+            <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Interview notes, observations, key points discussed..." className="text-[10px] min-h-[60px]" />
+            <div className="flex items-center gap-2">
+              <input ref={fileInputRef} type="file" accept="audio/*" className="hidden" onChange={e => setAudioFile(e.target.files?.[0] || null)} />
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-3 h-3" /> {audioFile ? audioFile.name.slice(0, 20) : 'Upload Audio'}
+              </Button>
+              <div className="flex-1" />
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button size="sm" className="h-6 text-[10px] px-2 gap-1" onClick={handleAdd} disabled={adding || (!notes.trim() && !audioFile)}>
+                {adding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 /* ─────────── Lead Notes ─────────── */
 
@@ -230,7 +347,7 @@ interface ProposalRecord {
   accepted_at: string | null;
 }
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -242,6 +359,9 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   onSendProposal: (lead: Assessment) => void;
   onUpdateProposalFollowUp: (id: string, days: number) => void;
   proposal: ProposalRecord | null;
+  interviews: ClientInterview[];
+  onAddInterview: (assessmentId: string, title: string, content: string, audioFile?: File) => Promise<void>;
+  onDeleteInterview: (id: string) => Promise<void>;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
@@ -331,7 +451,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
             )}
           </div>
 
-          {/* Proposal actions - only when deep dive exists */}
+          {/* Proposal actions */}
           {deepDive && (
             <div className="flex flex-col items-start gap-1">
               <div className="flex items-center gap-1.5">
@@ -361,27 +481,17 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
             </div>
           )}
 
-          {/* Follow-up scheduler - shown for deep_dive_sent stage */}
+          {/* Follow-up scheduler - deep_dive_sent */}
           {lead.pipeline_stage === 'deep_dive_sent' && (
             <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Follow up in</span>
-              <Input
-                type="number"
-                min={1}
-                max={30}
-                defaultValue={lead.follow_up_days || 2}
+              <Input type="number" min={1} max={30} defaultValue={lead.follow_up_days || 2}
                 className="h-6 w-14 text-[10px] text-center"
-                onBlur={(e) => {
-                  const days = parseInt(e.target.value) || 2;
-                  onUpdateFollowUp(lead.id, days);
-                }}
-              />
+                onBlur={(e) => onUpdateFollowUp(lead.id, parseInt(e.target.value) || 2)} />
               <span className="text-[10px] text-muted-foreground">days</span>
               {lead.follow_up_scheduled_at && (
-                <span className="text-[9px] text-muted-foreground ml-1">
-                  (reminder: {formatDate(lead.follow_up_scheduled_at)})
-                </span>
+                <span className="text-[9px] text-muted-foreground ml-1">(reminder: {formatDate(lead.follow_up_scheduled_at)})</span>
               )}
               {lead.follow_up_sent && (
                 <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
@@ -389,27 +499,17 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
             </div>
           )}
 
-          {/* Follow-up scheduler - shown for proposal stage */}
+          {/* Follow-up scheduler - proposal */}
           {lead.pipeline_stage === 'proposal' && (
             <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Proposal follow up in</span>
-              <Input
-                type="number"
-                min={1}
-                max={30}
-                defaultValue={(lead as any).proposal_follow_up_days || 3}
+              <Input type="number" min={1} max={30} defaultValue={(lead as any).proposal_follow_up_days || 3}
                 className="h-6 w-14 text-[10px] text-center"
-                onBlur={(e) => {
-                  const days = parseInt(e.target.value) || 3;
-                  onUpdateProposalFollowUp(lead.id, days);
-                }}
-              />
+                onBlur={(e) => onUpdateProposalFollowUp(lead.id, parseInt(e.target.value) || 3)} />
               <span className="text-[10px] text-muted-foreground">days</span>
               {(lead as any).proposal_follow_up_scheduled_at && (
-                <span className="text-[9px] text-muted-foreground ml-1">
-                  (reminder: {formatDate((lead as any).proposal_follow_up_scheduled_at)})
-                </span>
+                <span className="text-[9px] text-muted-foreground ml-1">(reminder: {formatDate((lead as any).proposal_follow_up_scheduled_at)})</span>
               )}
               {(lead as any).proposal_follow_up_sent && (
                 <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
@@ -424,7 +524,17 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
         {showDeepDive && deepDive && <DeepDiveViewer submission={deepDive} />}
       </AnimatePresence>
 
-      {/* Notes section - always visible */}
+      {/* Client Interviews - shown for qualified leads */}
+      {lead.is_qualified && (
+        <ClientInterviewSection
+          assessmentId={lead.id}
+          interviews={interviews}
+          onAdd={onAddInterview}
+          onDelete={onDeleteInterview}
+        />
+      )}
+
+      {/* Notes section */}
       <LeadNotes assessmentId={lead.id} notes={notes} onAdd={onAddNote} />
 
       {expanded && (
@@ -463,7 +573,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   );
 };
 
-/* ─────────── Template Editor (unchanged) ─────────── */
+/* ─────────── Template Editor ─────────── */
 
 const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave: (t: EmailTemplate) => Promise<void> }) => {
   const [editing, setEditing] = useState({ ...template });
@@ -578,6 +688,7 @@ const Admin = () => {
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
+  const [interviews, setInterviews] = useState<ClientInterview[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -593,11 +704,12 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes, proposalsRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
       supabase.from('proposals').select('*').order('created_at', { ascending: false }),
+      supabase.from('client_interviews').select('*').order('interviewed_at', { ascending: true }),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
@@ -606,6 +718,7 @@ const Admin = () => {
     if (!deepDivesRes.error) setDeepDives((deepDivesRes.data as DeepDiveSubmission[]) || []);
     if (!notesRes.error) setLeadNotes((notesRes.data as LeadNote[]) || []);
     if (!proposalsRes.error) setProposals((proposalsRes.data as ProposalRecord[]) || []);
+    if (!interviewsRes.error) setInterviews((interviewsRes.data as ClientInterview[]) || []);
 
     setLoading(false);
   };
@@ -679,33 +792,99 @@ const Admin = () => {
 
   const handlePrepareProposal = async (lead: Assessment) => {
     try {
-      // Create draft proposal in DB
+      const roi = lead.roi_results as any;
+      const dd = deepDives.find(d => d.assessment_id === lead.id);
+      const leadInterviews = interviews.filter(i => i.assessment_id === lead.id);
+      const formData = lead.form_data as any;
+
+      // Calculate fixed investment from ROI midpoint
+      const buildMid = roi?.pricing ? Math.round((roi.pricing.buildCostLow + roi.pricing.buildCostHigh) / 2) : 0;
+
+      // Auto-populate features from deep dive + assessment
+      const appFeatures: string[] = [];
+      if (dd?.must_have_features) {
+        dd.must_have_features.split(/[,\n]/).filter(Boolean).forEach(f => appFeatures.push(f.trim()));
+      }
+      if (appFeatures.length === 0) {
+        appFeatures.push('Mobile or web-based interface', 'Secure database architecture', 'User authentication and permissions', 'Customer or staff dashboards', 'Workflow automation', 'Reporting and analytics');
+      }
+
+      const integrations = dd?.required_integrations || ['CRM platforms', 'Payment systems', 'Scheduling platforms'];
+
+      // Build expected impact from ROI data
+      const expectedImpact: string[] = [];
+      if (roi?.conversionImpact) expectedImpact.push(`Improved conversion rates — projected ${formatCurrency(roi.conversionImpact)} annual impact`);
+      if (roi?.retentionImpact) expectedImpact.push(`Improved customer retention — projected ${formatCurrency(roi.retentionImpact)} annual impact`);
+      if (roi?.efficiencyImpact) expectedImpact.push(`Operational time savings — projected ${formatCurrency(roi.efficiencyImpact)} annual impact`);
+      if (roi?.lostSalesRecovery) expectedImpact.push(`Lost sales recovery — projected ${formatCurrency(roi.lostSalesRecovery)} annual impact`);
+      if (expectedImpact.length === 0) {
+        expectedImpact.push('Operational time savings', 'Improved conversion rates', 'Improved customer retention', 'Reduced administrative overhead', 'Increased scalability');
+      }
+
+      // Build project overview from all data sources
+      let projectOverview = `Thank you for the opportunity to work with ${lead.business_name || 'your business'}.\n\nBased on the information provided during the ROI assessment, deep dive questionnaire${leadInterviews.length > 0 ? ', and client interview' + (leadInterviews.length > 1 ? 's' : '') : ''}, this proposal outlines the development of a custom application and automation solution designed to:\n\n`;
+      if (dd?.pain_points) {
+        projectOverview += `Key challenges identified:\n${dd.pain_points}\n\n`;
+      }
+      projectOverview += `The objective is to deliver a scalable digital platform that supports the ongoing growth and efficiency of your business.`;
+
+      // Timeline from deep dive
+      const timelinePhases = [
+        { phase: 'Discovery & Specification', duration: '1–2 weeks', desc: 'Finalising technical scope and architecture.' },
+        { phase: 'Design & Development', duration: dd?.timeline || '4–8 weeks', desc: 'Building the application and integrations.' },
+        { phase: 'Testing & Refinement', duration: '1–2 weeks', desc: 'User testing and bug resolution.' },
+        { phase: 'Deployment', duration: '1 week', desc: 'Launch and implementation.' },
+      ];
+
       const proposalData = {
-        executiveSummary: '',
-        scopeNotes: '',
-        investmentNotes: '',
-        timelinePhases: [
-          { phase: 'Discovery & Planning', duration: '1–2 weeks', desc: 'Finalize scope, wireframes, and technical architecture' },
-          { phase: 'Design & Prototyping', duration: '1–2 weeks', desc: 'UI/UX design, interactive prototypes, and feedback rounds' },
-          { phase: 'Development', duration: '4–8 weeks', desc: 'Core feature build, integrations, and iterative testing' },
-          { phase: 'Launch & Support', duration: '1–2 weeks', desc: 'Final QA, deployment, training, and handoff' },
+        projectOverview,
+        proposedSolution: '',
+        appFeatures,
+        integrations,
+        uxDesign: 'Creation of an intuitive user interface designed to reduce friction for users, simplify operational processes, and improve engagement and retention.',
+        deploymentSupport: 'Assistance with application deployment, hosting configuration, and launch support.',
+        expectedImpact,
+        deliverables: [
+          'Application architecture design',
+          'UI/UX interface design',
+          'Development of agreed features',
+          'Testing and bug resolution',
+          'Deployment support',
+          'Documentation for core functionality',
         ],
-        terms: [
-          'This proposal is valid for 30 days from the date of issue.',
-          'Payment terms: 50% upfront, 25% at midpoint, 25% at launch.',
-          'All work includes 30 days of post-launch support and bug fixes.',
-          'Client owns all custom code and assets produced during the project.',
-          'Scope changes after acceptance may affect timeline and pricing.',
+        timelinePhases,
+        investmentAmount: buildMid,
+        paymentStructure: [
+          { label: 'Deposit', percentage: 40, description: 'Payable upon acceptance of this proposal to commence work.' },
+          { label: 'Development Milestone', percentage: 30, description: 'Payable at agreed development milestone.' },
+          { label: 'Completion', percentage: 30, description: 'Prior to deployment or delivery of the final application.' },
         ],
+        clientResponsibilities: [
+          'Provide accurate business information during intake',
+          'Supply required content, assets, and documentation',
+          'Nominate a primary project contact',
+          'Provide timely approvals and feedback',
+          'Ensure they hold rights to any materials supplied',
+        ],
+        variations: 'Requests for additional features or changes to scope after development has begun may require revised timelines and additional development costs. All variations will be confirmed with the Client before work proceeds.',
+        thirdPartyServices: 'Applications may rely on external services including hosting providers, payment systems, messaging services, or APIs. The Developer is not responsible for outages of third-party platforms, changes to third-party pricing, or service disruptions outside the Developer\'s control. The Client may be required to maintain accounts with these services.',
+        intellectualProperty: 'Upon full payment of the project, the Client will own the custom application code developed specifically for this project. The Developer retains ownership of proprietary frameworks, reusable code libraries, and development tools. These may be used in future projects.',
+        confidentiality: 'Both parties agree to maintain confidentiality regarding business operations, technical systems, financial information, and customer data. This obligation continues after the completion of the project.',
+        dataProtection: 'Where personal information is involved, both parties agree to comply with the obligations of the Privacy Act 1988. The Client is responsible for ensuring their business complies with relevant privacy obligations including obtaining user consent where required and maintaining a privacy policy where applicable.',
+        limitationOfLiability: 'To the maximum extent permitted by law, the Developer\'s liability is limited to the value of the services provided under this agreement. The Developer will not be liable for loss of profits, business interruption, or indirect or consequential losses. Nothing in this agreement excludes rights under the Australian Consumer Law.',
+        roiDisclaimer: 'Any revenue forecasts, automation savings calculations, or return-on-investment projections provided during the intake or proposal process are indicative only. Actual business outcomes depend on many variables including market conditions, marketing activity, internal processes, and user adoption. The Developer does not guarantee financial outcomes.',
+        termination: 'Either party may terminate this agreement if the other party materially breaches the agreement and does not remedy the breach within 14 days. If the project is terminated, work completed to date will be invoiced and all outstanding invoices become payable immediately.',
+        governingLaw: 'This agreement is governed by the laws of Australia under the Competition and Consumer Act 2010 and relevant State or Territory legislation.',
         customSections: [],
       };
+
       const { data, error } = await supabase.from('proposals').insert({
         assessment_id: lead.id,
-        proposal_data: proposalData,
+        proposal_data: JSON.parse(JSON.stringify(proposalData)),
       }).select().single();
       if (error) throw error;
       setProposals(prev => [...prev, data as ProposalRecord]);
-      toast({ title: 'Proposal Draft Created ✅', description: 'Opening for editing...' });
+      toast({ title: 'Proposal Draft Created ✅', description: 'Auto-populated from assessment, deep dive & interviews. Opening for editing...' });
       window.open(`${window.location.origin}/proposal/${data.id}`, '_blank');
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Failed to create proposal.', variant: 'destructive' });
@@ -771,6 +950,48 @@ const Admin = () => {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else if (data) {
       setLeadNotes(prev => [...prev, data as LeadNote]);
+    }
+  };
+
+  const handleAddInterview = async (assessmentId: string, title: string, content: string, audioFile?: File) => {
+    let audioUrl: string | null = null;
+
+    if (audioFile) {
+      const fileName = `${assessmentId}/${Date.now()}-${audioFile.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('interview-audio')
+        .upload(fileName, audioFile);
+      if (uploadErr) {
+        toast({ title: 'Error uploading audio', description: uploadErr.message, variant: 'destructive' });
+        return;
+      }
+      const { data: urlData } = supabase.storage.from('interview-audio').getPublicUrl(fileName);
+      audioUrl = urlData.publicUrl;
+    }
+
+    const { data, error } = await supabase.from('client_interviews').insert([{
+      assessment_id: assessmentId,
+      interview_type: audioFile ? 'audio' : 'text',
+      title,
+      content: content || null,
+      audio_file_url: audioUrl,
+    }]).select().single();
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else if (data) {
+      setInterviews(prev => [...prev, data as ClientInterview]);
+      toast({ title: 'Interview saved ✅' });
+    }
+  };
+
+  const handleDeleteInterview = async (id: string) => {
+    const { error } = await supabase.from('client_interviews').delete().eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setInterviews(prev => prev.filter(i => i.id !== id));
+      toast({ title: 'Interview deleted' });
     }
   };
 
@@ -864,6 +1085,9 @@ const Admin = () => {
                           proposal={getProposal(lead.id)}
                           notes={leadNotes}
                           onAddNote={handleAddNote}
+                          interviews={interviews}
+                          onAddInterview={handleAddInterview}
+                          onDeleteInterview={handleDeleteInterview}
                         />
                       ))}
                     </div>
