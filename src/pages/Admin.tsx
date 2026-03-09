@@ -677,13 +677,52 @@ const Admin = () => {
     }
   };
 
+  const handlePrepareProposal = async (lead: Assessment) => {
+    try {
+      // Create draft proposal in DB
+      const proposalData = {
+        executiveSummary: '',
+        scopeNotes: '',
+        investmentNotes: '',
+        timelinePhases: [
+          { phase: 'Discovery & Planning', duration: '1–2 weeks', desc: 'Finalize scope, wireframes, and technical architecture' },
+          { phase: 'Design & Prototyping', duration: '1–2 weeks', desc: 'UI/UX design, interactive prototypes, and feedback rounds' },
+          { phase: 'Development', duration: '4–8 weeks', desc: 'Core feature build, integrations, and iterative testing' },
+          { phase: 'Launch & Support', duration: '1–2 weeks', desc: 'Final QA, deployment, training, and handoff' },
+        ],
+        terms: [
+          'This proposal is valid for 30 days from the date of issue.',
+          'Payment terms: 50% upfront, 25% at midpoint, 25% at launch.',
+          'All work includes 30 days of post-launch support and bug fixes.',
+          'Client owns all custom code and assets produced during the project.',
+          'Scope changes after acceptance may affect timeline and pricing.',
+        ],
+        customSections: [],
+      };
+      const { data, error } = await supabase.from('proposals').insert({
+        assessment_id: lead.id,
+        proposal_data: proposalData,
+      }).select().single();
+      if (error) throw error;
+      setProposals(prev => [...prev, data as ProposalRecord]);
+      toast({ title: 'Proposal Draft Created ✅', description: 'Opening for editing...' });
+      window.open(`${window.location.origin}/proposal/${data.id}`, '_blank');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to create proposal.', variant: 'destructive' });
+    }
+  };
+
   const handleSendProposal = async (lead: Assessment) => {
+    const existingProposal = proposals.find(p => p.assessment_id === lead.id);
+    if (!existingProposal) {
+      toast({ title: 'Error', description: 'Please prepare the proposal first.', variant: 'destructive' });
+      return;
+    }
     try {
       const res = await supabase.functions.invoke('send-proposal', {
-        body: { assessmentId: lead.id },
+        body: { assessmentId: lead.id, proposalId: existingProposal.id },
       });
       if (res.error) throw res.error;
-      const proposalId = res.data?.proposalId;
       const now = new Date().toISOString();
       const followUpDays = (lead as any).proposal_follow_up_days || 3;
       const followUpAt = new Date(Date.now() + followUpDays * 24 * 60 * 60 * 1000).toISOString();
