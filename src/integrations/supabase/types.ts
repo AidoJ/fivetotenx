@@ -211,6 +211,10 @@ export type Database = {
           invite_sent_at: string | null
           is_qualified: boolean
           pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
+          proposal_follow_up_days: number | null
+          proposal_follow_up_scheduled_at: string | null
+          proposal_follow_up_sent: boolean | null
+          proposal_sent_at: string | null
           qualified_at: string | null
           report_sent: boolean | null
           roi_results: Json
@@ -231,6 +235,10 @@ export type Database = {
           invite_sent_at?: string | null
           is_qualified?: boolean
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
+          proposal_follow_up_days?: number | null
+          proposal_follow_up_scheduled_at?: string | null
+          proposal_follow_up_sent?: boolean | null
+          proposal_sent_at?: string | null
           qualified_at?: string | null
           report_sent?: boolean | null
           roi_results?: Json
@@ -251,6 +259,10 @@ export type Database = {
           invite_sent_at?: string | null
           is_qualified?: boolean
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
+          proposal_follow_up_days?: number | null
+          proposal_follow_up_scheduled_at?: string | null
+          proposal_follow_up_sent?: boolean | null
+          proposal_sent_at?: string | null
           qualified_at?: string | null
           report_sent?: boolean | null
           roi_results?: Json
