@@ -573,6 +573,14 @@ const Admin = () => {
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
   const qualifiedCount = leads.filter(l => l.is_qualified).length;
 
+  if (authLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+
+  if (!session) {
+    return <AdminLogin onSuccess={() => {}} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -584,7 +592,11 @@ const Admin = () => {
               <p className="text-xs text-muted-foreground">{leads.length} leads · {qualifiedCount} qualified · {formatCurrency(totalImpact)} total pipeline</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchLeads}>Refresh</Button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{session.user.email}</span>
+            <Button variant="outline" size="sm" onClick={fetchLeads}>Refresh</Button>
+            <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Sign Out</Button>
+          </div>
         </div>
       </header>
 
