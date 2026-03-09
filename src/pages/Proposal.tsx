@@ -492,6 +492,17 @@ const Proposal = () => {
                 )}
               </div>
 
+              {/* Budget context note */}
+              {content.investmentNote && (
+                <div className="bg-secondary/30 rounded-lg p-3">
+                  {editing ? (
+                    <Input value={content.investmentNote} onChange={e => setContent({ ...content, investmentNote: e.target.value })} className="text-xs" />
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">{content.investmentNote}</p>
+                  )}
+                </div>
+              )}
+
               <div>
                 <p className="text-sm font-bold text-foreground mb-3">Payment Structure</p>
                 <div className="space-y-3">
