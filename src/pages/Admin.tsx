@@ -792,6 +792,7 @@ const Admin = () => {
   };
 
   const getDeepDive = (assessmentId: string) => deepDives.find(d => d.assessment_id === assessmentId) || null;
+  const getProposal = (assessmentId: string) => proposals.find(p => p.assessment_id === assessmentId) || null;
 
   const grouped = STAGES.map(stage => ({ ...stage, leads: leads.filter(l => l.pipeline_stage === stage.key) }));
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
