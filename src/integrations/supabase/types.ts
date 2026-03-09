@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_interviews: {
+        Row: {
+          assessment_id: string
+          audio_file_url: string | null
+          content: string | null
+          created_at: string
+          id: string
+          interview_type: string
+          interviewed_at: string
+          title: string
+          transcript: string | null
+        }
+        Insert: {
+          assessment_id: string
+          audio_file_url?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          interview_type?: string
+          interviewed_at?: string
+          title?: string
+          transcript?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          audio_file_url?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          interview_type?: string
+          interviewed_at?: string
+          title?: string
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_interviews_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deep_dive_submissions: {
         Row: {
           additional_notes: string | null
