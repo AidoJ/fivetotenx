@@ -1,0 +1,1 @@
+CREATE POLICY "Service can insert proposals" ON public.proposals FOR INSERT WITH CHECK (true);
