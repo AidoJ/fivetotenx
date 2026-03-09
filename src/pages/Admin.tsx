@@ -506,7 +506,7 @@ const Admin = () => {
     setTemplatesLoading(false);
   };
 
-  useEffect(() => { fetchLeads(); }, []);
+  useEffect(() => { if (session) fetchLeads(); }, [session]);
 
   const handleMove = async (id: string, newStage: PipelineStage) => {
     const updates: any = { pipeline_stage: newStage };
