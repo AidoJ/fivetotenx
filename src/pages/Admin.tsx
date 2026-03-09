@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
+import AdminLogin from '@/components/AdminLogin';
+import type { Session } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
@@ -458,6 +460,8 @@ const ROI_REPORT_INFO = {
 /* ─────────── Main Admin ─────────── */
 
 const Admin = () => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [leads, setLeads] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
@@ -465,6 +469,18 @@ const Admin = () => {
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchLeads = async () => {
     const [leadsRes, deepDivesRes, notesRes] = await Promise.all([
@@ -490,7 +506,7 @@ const Admin = () => {
     setTemplatesLoading(false);
   };
 
-  useEffect(() => { fetchLeads(); }, []);
+  useEffect(() => { if (session) fetchLeads(); }, [session]);
 
   const handleMove = async (id: string, newStage: PipelineStage) => {
     const updates: any = { pipeline_stage: newStage };
@@ -557,6 +573,14 @@ const Admin = () => {
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
   const qualifiedCount = leads.filter(l => l.is_qualified).length;
 
+  if (authLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+
+  if (!session) {
+    return <AdminLogin onSuccess={() => {}} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -568,7 +592,11 @@ const Admin = () => {
               <p className="text-xs text-muted-foreground">{leads.length} leads · {qualifiedCount} qualified · {formatCurrency(totalImpact)} total pipeline</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchLeads}>Refresh</Button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{session.user.email}</span>
+            <Button variant="outline" size="sm" onClick={fetchLeads}>Refresh</Button>
+            <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Sign Out</Button>
+          </div>
         </div>
       </header>
 
