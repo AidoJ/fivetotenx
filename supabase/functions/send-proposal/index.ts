@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { assessmentId } = await req.json();
+    const { assessmentId, proposalId } = await req.json();
     if (!assessmentId) throw new Error('assessmentId is required');
 
     // Fetch assessment
@@ -30,62 +30,50 @@ Deno.serve(async (req) => {
       .single();
     if (assessErr || !assessment) throw new Error('Assessment not found');
 
-    // Fetch deep dive
-    const { data: deepDive } = await supabase
-      .from('deep_dive_submissions')
+    // Find proposal - either by proposalId or by assessment
+    let proposal;
+    if (proposalId) {
+      const { data } = await supabase.from('proposals').select('*').eq('id', proposalId).single();
+      proposal = data;
+    } else {
+      const { data } = await supabase.from('proposals').select('*').eq('assessment_id', assessmentId).order('created_at', { ascending: false }).limit(1).single();
+      proposal = data;
+    }
+    if (!proposal) throw new Error('Proposal not found. Please prepare the proposal first.');
+
+    // Load email template from DB
+    const { data: template } = await supabase
+      .from('email_templates')
       .select('*')
-      .eq('assessment_id', assessmentId)
+      .eq('template_key', 'proposal-email')
       .single();
 
     const roi = assessment.roi_results || {};
-
-    // Create proposal record
-    const proposalData = {
-      executiveSummary: '',
-      scopeNotes: '',
-      investmentNotes: '',
-      timelinePhases: [
-        { phase: 'Discovery & Planning', duration: '1–2 weeks', desc: 'Finalize scope, wireframes, and technical architecture' },
-        { phase: 'Design & Prototyping', duration: '1–2 weeks', desc: 'UI/UX design, interactive prototypes, and feedback rounds' },
-        { phase: 'Development', duration: '4–8 weeks', desc: 'Core feature build, integrations, and iterative testing' },
-        { phase: 'Launch & Support', duration: '1–2 weeks', desc: 'Final QA, deployment, training, and handoff' },
-      ],
-      terms: [
-        'This proposal is valid for 30 days from the date of issue.',
-        'Payment terms: 50% upfront, 25% at midpoint, 25% at launch.',
-        'All work includes 30 days of post-launch support and bug fixes.',
-        'Client owns all custom code and assets produced during the project.',
-        'Scope changes after acceptance may affect timeline and pricing.',
-      ],
-      customSections: [],
-      deepDiveSummary: deepDive ? {
-        painPoints: deepDive.pain_points,
-        primaryGoals: deepDive.primary_goals,
-        mustHaveFeatures: deepDive.must_have_features,
-        timeline: deepDive.timeline,
-        budgetComfort: deepDive.budget_comfort,
-      } : null,
-    };
-
-    const { data: proposal, error: propErr } = await supabase
-      .from('proposals')
-      .insert({
-        assessment_id: assessmentId,
-        proposal_data: proposalData,
-      })
-      .select()
-      .single();
-
-    if (propErr) throw propErr;
-
     const proposalUrl = `https://5to10x.app/proposal/${proposal.id}`;
     const contactName = assessment.contact_name || '';
     const businessName = assessment.business_name || 'your business';
     const buildRange = roi.pricing
       ? `$${Math.round(roi.pricing.buildCostLow).toLocaleString()} – $${Math.round(roi.pricing.buildCostHigh).toLocaleString()}`
-      : 'TBD';
+      : 'Custom';
 
-    const emailHtml = `<!DOCTYPE html>
+    let emailHtml: string;
+    let subject: string;
+    let fromField: string;
+
+    if (template) {
+      emailHtml = template.html_body
+        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{businessName\}\}/g, businessName)
+        .replace(/\{\{proposalUrl\}\}/g, proposalUrl)
+        .replace(/\{\{buildRange\}\}/g, buildRange);
+      subject = template.subject
+        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{businessName\}\}/g, businessName);
+      fromField = `${template.from_name} <${template.from_email}>`;
+    } else {
+      subject = `${contactName}, your custom app proposal for ${businessName} is ready`;
+      fromField = '5to10X <grow@5to10x.app>';
+      emailHtml = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
 <body style="margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif;">
@@ -142,6 +130,7 @@ Deno.serve(async (req) => {
   </table>
 </body>
 </html>`;
+    }
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -150,9 +139,9 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: '5to10X <grow@5to10x.app>',
+        from: fromField,
         to: [assessment.contact_email],
-        subject: `${contactName}, your custom app proposal for ${businessName} is ready`,
+        subject,
         html: emailHtml,
       }),
     });
