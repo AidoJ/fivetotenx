@@ -110,6 +110,7 @@ const DeepDive = () => {
   const [businessName, setBusinessName] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [investmentAmount, setInvestmentAmount] = useState('');
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<DeepDiveForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
