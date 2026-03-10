@@ -141,6 +141,12 @@ const DeepDive = () => {
       setBusinessName(data.business_name || '');
       setContactName(data.contact_name || '');
       setContactEmail(data.contact_email || '');
+      // Extract investment amount from ROI results
+      const roiResults = data.roi_results as any;
+      if (roiResults?.pricing?.buildCostLow && roiResults?.pricing?.buildCostHigh) {
+        const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+        setInvestmentAmount(`${fmt(roiResults.pricing.buildCostLow)} – ${fmt(roiResults.pricing.buildCostHigh)}`);
+      }
       setLoading(false);
     };
     fetchAssessment();
