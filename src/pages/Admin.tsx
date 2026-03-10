@@ -1093,6 +1093,27 @@ const Admin = () => {
     } else if (data) {
       setInterviews(prev => [...prev, data as ClientInterview]);
       toast({ title: 'Interview saved ✅' });
+
+      // Auto-transcribe if audio was uploaded
+      if (audioUrl && data) {
+        toast({ title: 'Transcribing audio...', description: 'This may take a moment.' });
+        try {
+          const { data: transcribeResult, error: transcribeError } = await supabase.functions.invoke('transcribe-audio', {
+            body: { interviewId: data.id, audioUrl },
+          });
+          if (transcribeError) throw transcribeError;
+          if (transcribeResult?.error) throw new Error(transcribeResult.error);
+          
+          // Update local state with transcript
+          setInterviews(prev => prev.map(i => 
+            i.id === data.id ? { ...i, transcript: transcribeResult.transcript } : i
+          ));
+          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved and ready for proposal use.' });
+        } catch (err: any) {
+          console.error('Transcription failed:', err);
+          toast({ title: 'Transcription failed', description: err.message || 'You can still use the audio file manually.', variant: 'destructive' });
+        }
+      }
     }
   };
 
