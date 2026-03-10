@@ -752,11 +752,11 @@ const CoFoundersSection = () => {
             className="rounded-2xl border border-border bg-card overflow-hidden"
             style={{ boxShadow: 'var(--shadow-card)' }}>
             
-              <div className="aspect-square relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1e3a5f, #4338ca)' }}>
+              <div className="relative overflow-hidden flex items-center justify-center py-6" style={{ background: 'linear-gradient(135deg, #1e3a5f, #4338ca)' }}>
                 <img
                 src={founder.image}
                 alt={founder.name}
-                className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
+                className="w-1/4 h-auto rounded-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
               
               </div>
               <div className="p-6 space-y-3">
