@@ -143,7 +143,7 @@ const ShiftSection = () =>
         </p>
         <div className="rounded-2xl p-8 inline-block" style={{ backgroundImage: 'var(--gradient-primary)' }}>
           <p className="text-white text-lg md:text-xl font-display font-bold">
-            Those that don't risk being left behind by competitors who move faster, operate smarter, and scale more efficiently.
+            Businesses that don’t embrace the AI wave risk being overtaken by competitors who are moving faster, making better decisions, and operating far more efficiently.
           </p>
         </div>
       </motion.div>
@@ -715,19 +715,19 @@ const FreeTrainingSection = () => {
 
 const CoFoundersSection = () => {
   const founders = [
-    {
-      name: 'Eoghan Leonard',
-      role: 'Technical Co-Founder',
-      image: headshotEoghan,
-      bio: 'Eoghan has deep experience across Snowflake, dbt, Salesforce, and Fivetran, and has spent his career solving the kinds of data problems that quietly slow businesses down and keep owners up at night. His focus is on helping growing businesses move from scattered spreadsheets and disconnected systems to data that is clear, reliable, and easy to use when making important decisions.\n\nHe specialises in building modern data platforms that simply work. Rather than just installing tools, Eoghan designs practical systems that bring together information from across the business — sales, operations, finance, and marketing — so owners and managers can see what\'s really happening without spending hours chasing numbers.\n\nHis client work includes companies such as David Jones, Isuzu, and Xero, where he has helped solve complex data challenges and turn raw information into insights that support better decisions.\n\nAcross every project, his approach stays the same: understand the business first, then build the technology to support it. The goal is simple — create data systems that run quietly in the background so business owners can spend less time worrying about reports and more time focusing on growth.',
-    },
-    {
-      name: 'Aidan Leonard',
-      role: 'Business Co-Founder',
-      image: headshotAidan,
-      bio: 'Aidan is a business transformation advisor with 30+ years of experience helping organisations improve performance through smarter strategy, operational design, and data-driven decision making.\n\nHaving held senior and executive roles with organisations including Cable & Wireless, Ericsson, Almarai, Construction Skills Queensland, Civil Contractors Federation, and Orbus3, Aidan has spent his career working at the intersection of business strategy, operational efficiency, and technology transformation.\n\nHe has a deep passion for adapting cutting-edge technology to practical business challenges, helping organisations simplify complex workflows and unlock new opportunities for growth.\n\nToday Aidan works closely with SME leaders, advising them on how to modernise their operations and build businesses that run more efficiently. His work focuses on delivering practical improvements that create immediate impact — reducing operational costs, implementing analytics that improve project margins, scaling efficiently as demand grows, and designing workflow systems that cut administrative workload in half.\n\nAidan\'s philosophy is simple: when businesses combine clear strategy with the right technology and efficient workflows, growth becomes far easier to achieve.',
-    },
-  ];
+  {
+    name: 'Eoghan Leonard',
+    role: 'Technical Co-Founder',
+    image: headshotEoghan,
+    bio: 'Eoghan has deep experience across Snowflake, dbt, Salesforce, and Fivetran, and has spent his career solving the kinds of data problems that quietly slow businesses down and keep owners up at night. His focus is on helping growing businesses move from scattered spreadsheets and disconnected systems to data that is clear, reliable, and easy to use when making important decisions.\n\nHe specialises in building modern data platforms that simply work. Rather than just installing tools, Eoghan designs practical systems that bring together information from across the business — sales, operations, finance, and marketing — so owners and managers can see what\'s really happening without spending hours chasing numbers.\n\nHis client work includes companies such as David Jones, Isuzu, and Xero, where he has helped solve complex data challenges and turn raw information into insights that support better decisions.\n\nAcross every project, his approach stays the same: understand the business first, then build the technology to support it. The goal is simple — create data systems that run quietly in the background so business owners can spend less time worrying about reports and more time focusing on growth.'
+  },
+  {
+    name: 'Aidan Leonard',
+    role: 'Business Co-Founder',
+    image: headshotAidan,
+    bio: 'Aidan is a business transformation advisor with 30+ years of experience helping organisations improve performance through smarter strategy, operational design, and data-driven decision making.\n\nHaving held senior and executive roles with organisations including Cable & Wireless, Ericsson, Almarai, Construction Skills Queensland, Civil Contractors Federation, and Orbus3, Aidan has spent his career working at the intersection of business strategy, operational efficiency, and technology transformation.\n\nHe has a deep passion for adapting cutting-edge technology to practical business challenges, helping organisations simplify complex workflows and unlock new opportunities for growth.\n\nToday Aidan works closely with SME leaders, advising them on how to modernise their operations and build businesses that run more efficiently. His work focuses on delivering practical improvements that create immediate impact — reducing operational costs, implementing analytics that improve project margins, scaling efficiently as demand grows, and designing workflow systems that cut administrative workload in half.\n\nAidan\'s philosophy is simple: when businesses combine clear strategy with the right technology and efficient workflows, growth becomes far easier to achieve.'
+  }];
+
 
   return (
     <section className="bg-background px-4 py-20 md:py-28">
@@ -745,19 +745,19 @@ const CoFoundersSection = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {founders.map((founder, i) => (
-            <motion.div
-              key={founder.name}
-              {...stagger(0.2 * i)}
-              className="rounded-2xl border border-border bg-card overflow-hidden"
-              style={{ boxShadow: 'var(--shadow-card)' }}
-            >
+          {founders.map((founder, i) =>
+          <motion.div
+            key={founder.name}
+            {...stagger(0.2 * i)}
+            className="rounded-2xl border border-border bg-card overflow-hidden"
+            style={{ boxShadow: 'var(--shadow-card)' }}>
+            
               <div className="aspect-square relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1e3a5f, #4338ca)' }}>
                 <img
-                  src={founder.image}
-                  alt={founder.name}
-                  className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"
-                />
+                src={founder.image}
+                alt={founder.name}
+                className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
+              
               </div>
               <div className="p-6 space-y-3">
                 <div>
@@ -767,17 +767,17 @@ const CoFoundersSection = () => {
                   </p>
                 </div>
                 <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
-                  {founder.bio.split('\n\n').map((paragraph, idx) => (
-                    <p key={idx}>{paragraph}</p>
-                  ))}
+                  {founder.bio.split('\n\n').map((paragraph, idx) =>
+                <p key={idx}>{paragraph}</p>
+                )}
                 </div>
               </div>
             </motion.div>
-          ))}
+          )}
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
