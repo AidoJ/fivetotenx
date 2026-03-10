@@ -739,8 +739,8 @@ const CoFoundersSection = () => {
               Co-Founders
             </span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A developer and advisor team that understands both the technology and the business behind it.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">A father-and-son team passionate about helping business owners simplify their systems and run leaner, more effective businesses.
+
           </p>
         </motion.div>
 
