@@ -124,7 +124,7 @@ const DeepDive = () => {
     const fetchAssessment = async () => {
       const { data, error } = await supabase
         .from('roi_assessments')
-        .select('business_name, contact_name, contact_email, is_qualified')
+        .select('business_name, contact_name, contact_email, is_qualified, roi_results')
         .eq('id', assessmentId)
         .single();
 
