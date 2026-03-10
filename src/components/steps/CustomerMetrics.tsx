@@ -1,75 +1,175 @@
+import { useState } from 'react';
 import { FormData } from '@/lib/formTypes';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   data: FormData;
   onChange: (data: Partial<FormData>) => void;
 }
 
+interface ToggleFieldProps {
+  label: string;
+  description?: string;
+  id: string;
+  placeholder: string;
+  value: string;
+  known: boolean;
+  onToggle: (known: boolean) => void;
+  onChange: (value: string) => void;
+}
+
+const ToggleField = ({ label, description, id, placeholder, value, known, onToggle, onChange }: ToggleFieldProps) => (
+  <div className="space-y-2 rounded-lg border border-border bg-secondary/30 p-4">
+    <div className="flex items-center justify-between gap-2">
+      <Label htmlFor={id} className="text-sm font-medium">{label}</Label>
+      <div className="flex gap-1">
+        <Button
+          type="button"
+          size="sm"
+          variant={known ? 'default' : 'outline'}
+          className="h-7 px-3 text-xs"
+          onClick={() => onToggle(true)}
+        >
+          Yes
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={!known ? 'default' : 'outline'}
+          className="h-7 px-3 text-xs"
+          onClick={() => {
+            onToggle(false);
+            onChange('');
+          }}
+        >
+          No
+        </Button>
+      </div>
+    </div>
+    {description && <p className="text-xs text-muted-foreground">{description}</p>}
+    {known && (
+      <Input
+        id={id}
+        type="number"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1"
+      />
+    )}
+  </div>
+);
+
 const CustomerMetrics = ({ data, onChange }: Props) => {
   const isService = data.businessType === 'service' || data.businessType === 'hybrid';
   const isProduct = data.businessType === 'product' || data.businessType === 'hybrid';
+
+  const [known, setKnown] = useState<Record<string, boolean>>({
+    monthlyVisitors: !!data.monthlyVisitors,
+    monthlyLeads: !!data.monthlyLeads,
+    conversionRate: !!data.conversionRate,
+    monthlyNewCustomers: !!data.monthlyNewCustomers,
+    noShowRate: !!data.noShowRate,
+    monthlyMarketingSpend: !!data.monthlyMarketingSpend,
+    customerAcquisitionCost: !!data.customerAcquisitionCost,
+    upsellRevenuePercent: !!data.upsellRevenuePercent,
+  });
+
+  const toggle = (field: string, value: boolean) => {
+    setKnown((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground mb-1">Customer & Sales Metrics</h2>
-        <p className="text-muted-foreground text-sm">These numbers let us calculate the immediate value an app delivers.</p>
+        <p className="text-muted-foreground text-sm">
+          Do you know the following marketing data? Toggle <strong>Yes</strong> and enter the value, or <strong>No</strong> to skip.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <Label htmlFor="visitors">Monthly Website Visitors</Label>
-          <Input id="visitors" type="number" placeholder="e.g. 1000"
-            value={data.monthlyVisitors} onChange={(e) => onChange({ monthlyVisitors: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="leads">Monthly Leads / Enquiries</Label>
-          <Input id="leads" type="number" placeholder="e.g. 50"
-            value={data.monthlyLeads} onChange={(e) => onChange({ monthlyLeads: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="conversion">Lead-to-Sale Conversion Rate (%)</Label>
-          <Input id="conversion" type="number" placeholder="e.g. 5"
-            value={data.conversionRate} onChange={(e) => onChange({ conversionRate: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="newCustomers">Monthly New Customers</Label>
-          <Input id="newCustomers" type="number" placeholder="e.g. 25"
-            value={data.monthlyNewCustomers} onChange={(e) => onChange({ monthlyNewCustomers: e.target.value })} />
-        </div>
-      </div>
-
-      {/* Conditional fields based on business type */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ToggleField
+          label="Monthly Website Visitors"
+          id="visitors"
+          placeholder="e.g. 1000"
+          value={data.monthlyVisitors}
+          known={known.monthlyVisitors}
+          onToggle={(v) => toggle('monthlyVisitors', v)}
+          onChange={(v) => onChange({ monthlyVisitors: v })}
+        />
+        <ToggleField
+          label="Monthly Leads / Enquiries"
+          id="leads"
+          placeholder="e.g. 50"
+          value={data.monthlyLeads}
+          known={known.monthlyLeads}
+          onToggle={(v) => toggle('monthlyLeads', v)}
+          onChange={(v) => onChange({ monthlyLeads: v })}
+        />
+        <ToggleField
+          label="Lead-to-Sale Conversion Rate (%)"
+          id="conversion"
+          placeholder="e.g. 5"
+          value={data.conversionRate}
+          known={known.conversionRate}
+          onToggle={(v) => toggle('conversionRate', v)}
+          onChange={(v) => onChange({ conversionRate: v })}
+        />
+        <ToggleField
+          label="Monthly New Customers"
+          id="newCustomers"
+          placeholder="e.g. 25"
+          value={data.monthlyNewCustomers}
+          known={known.monthlyNewCustomers}
+          onToggle={(v) => toggle('monthlyNewCustomers', v)}
+          onChange={(v) => onChange({ monthlyNewCustomers: v })}
+        />
         {isService && (
-          <div className="space-y-2">
-            <Label htmlFor="noShowRate">No-Show / Cancellation Rate (%)</Label>
-            <Input id="noShowRate" type="number" placeholder="e.g. 15"
-              value={data.noShowRate} onChange={(e) => onChange({ noShowRate: e.target.value })} />
-            <p className="text-xs text-muted-foreground">% of bookings that don't show up</p>
-          </div>
+          <ToggleField
+            label="No-Show / Cancellation Rate (%)"
+            description="% of bookings that don't show up"
+            id="noShowRate"
+            placeholder="e.g. 15"
+            value={data.noShowRate}
+            known={known.noShowRate}
+            onToggle={(v) => toggle('noShowRate', v)}
+            onChange={(v) => onChange({ noShowRate: v })}
+          />
         )}
+        <ToggleField
+          label="Monthly Marketing Spend ($)"
+          id="marketingSpend"
+          placeholder="e.g. 2000"
+          value={data.monthlyMarketingSpend}
+          known={known.monthlyMarketingSpend}
+          onToggle={(v) => toggle('monthlyMarketingSpend', v)}
+          onChange={(v) => onChange({ monthlyMarketingSpend: v })}
+        />
+        <ToggleField
+          label="Customer Acquisition Cost ($)"
+          description="How much it costs to win one new customer"
+          id="cac"
+          placeholder="e.g. 50"
+          value={data.customerAcquisitionCost}
+          known={known.customerAcquisitionCost}
+          onToggle={(v) => toggle('customerAcquisitionCost', v)}
+          onChange={(v) => onChange({ customerAcquisitionCost: v })}
+        />
         {isProduct && (
-          <div className="space-y-2">
-            <Label htmlFor="upsellPercent">Upsell / Cross-sell Revenue (%)</Label>
-            <Input id="upsellPercent" type="number" placeholder="e.g. 20"
-              value={data.upsellRevenuePercent} onChange={(e) => onChange({ upsellRevenuePercent: e.target.value })} />
-            <p className="text-xs text-muted-foreground">% of revenue from add-on / cross-sell products</p>
-          </div>
+          <ToggleField
+            label="Upsell / Cross-sell Revenue (%)"
+            description="% of revenue from add-on / cross-sell products"
+            id="upsellPercent"
+            placeholder="e.g. 20"
+            value={data.upsellRevenuePercent}
+            known={known.upsellRevenuePercent}
+            onToggle={(v) => toggle('upsellRevenuePercent', v)}
+            onChange={(v) => onChange({ upsellRevenuePercent: v })}
+          />
         )}
-        <div className="space-y-2">
-          <Label htmlFor="marketingSpend">Monthly Marketing Spend ($)</Label>
-          <Input id="marketingSpend" type="number" placeholder="e.g. 2000"
-            value={data.monthlyMarketingSpend} onChange={(e) => onChange({ monthlyMarketingSpend: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="cac">Customer Acquisition Cost ($)</Label>
-          <Input id="cac" type="number" placeholder="e.g. 50"
-            value={data.customerAcquisitionCost} onChange={(e) => onChange({ customerAcquisitionCost: e.target.value })} />
-          <p className="text-xs text-muted-foreground">How much it costs to win one new customer</p>
-        </div>
       </div>
 
       <div className="pt-2">
