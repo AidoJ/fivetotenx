@@ -282,7 +282,7 @@ const Proposal = () => {
         }
       `}</style>
 
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-background text-foreground [--muted-foreground:230_20%_25%]">
         <div className="max-w-3xl mx-auto px-8 py-12">
 
           {/* Header */}
