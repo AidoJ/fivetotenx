@@ -391,7 +391,7 @@ const DeepDive = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>How do you feel about the investment range?</Label>
+                    <Label>How do you feel about the investment amount of {investmentAmount || 'the estimated range'}?</Label>
                     <Select value={form.budgetComfort} onValueChange={(v) => updateField('budgetComfort', v)}>
                       <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                       <SelectContent>
