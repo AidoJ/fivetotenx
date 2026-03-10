@@ -110,6 +110,7 @@ const DeepDive = () => {
   const [businessName, setBusinessName] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [investmentAmount, setInvestmentAmount] = useState('');
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<DeepDiveForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
@@ -123,7 +124,7 @@ const DeepDive = () => {
     const fetchAssessment = async () => {
       const { data, error } = await supabase
         .from('roi_assessments')
-        .select('business_name, contact_name, contact_email, is_qualified')
+        .select('business_name, contact_name, contact_email, is_qualified, roi_results')
         .eq('id', assessmentId)
         .single();
 
@@ -140,6 +141,12 @@ const DeepDive = () => {
       setBusinessName(data.business_name || '');
       setContactName(data.contact_name || '');
       setContactEmail(data.contact_email || '');
+      // Extract investment amount from ROI results
+      const roiResults = data.roi_results as any;
+      if (roiResults?.pricing?.buildCostLow && roiResults?.pricing?.buildCostHigh) {
+        const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
+        setInvestmentAmount(`${fmt(roiResults.pricing.buildCostLow)} – ${fmt(roiResults.pricing.buildCostHigh)}`);
+      }
       setLoading(false);
     };
     fetchAssessment();
@@ -384,7 +391,7 @@ const DeepDive = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>How do you feel about the investment range?</Label>
+                    <Label>How do you feel about the investment amount of {investmentAmount || 'the estimated range'}?</Label>
                     <Select value={form.budgetComfort} onValueChange={(v) => updateField('budgetComfort', v)}>
                       <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                       <SelectContent>
