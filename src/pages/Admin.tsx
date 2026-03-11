@@ -9,7 +9,7 @@ import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
   MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil,
-  Mic, Upload, Trash2
+  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +18,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import logo from '@/assets/logo-5to10x-color.png';
+import PipelineDashboard from '@/components/admin/PipelineDashboard';
+import AdminTasks from '@/components/admin/AdminTasks';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -61,6 +63,17 @@ interface LeadNote {
   note_type: string;
   content: string;
   created_at: string;
+}
+
+interface AdminTask {
+  id: string;
+  action: string;
+  status: string;
+  due_date: string | null;
+  owner: string;
+  assessment_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ClientInterview {
@@ -689,6 +702,7 @@ const Admin = () => {
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const [interviews, setInterviews] = useState<ClientInterview[]>([]);
+  const [tasks, setTasks] = useState<AdminTask[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -704,12 +718,13 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
       supabase.from('proposals').select('*').order('created_at', { ascending: false }),
       supabase.from('client_interviews').select('*').order('interviewed_at', { ascending: true }),
+      supabase.from('admin_tasks' as any).select('*').order('created_at', { ascending: false }),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
@@ -719,6 +734,7 @@ const Admin = () => {
     if (!notesRes.error) setLeadNotes((notesRes.data as LeadNote[]) || []);
     if (!proposalsRes.error) setProposals((proposalsRes.data as ProposalRecord[]) || []);
     if (!interviewsRes.error) setInterviews((interviewsRes.data as ClientInterview[]) || []);
+    if (!tasksRes.error) setTasks((tasksRes.data as unknown as AdminTask[]) || []);
 
     setLoading(false);
   };
@@ -1179,11 +1195,17 @@ const Admin = () => {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-4">
-        <Tabs defaultValue="pipeline" className="space-y-4" onValueChange={(v) => { if (v === 'emails' && templates.length === 0) fetchTemplates(); }}>
+        <Tabs defaultValue="dashboard" className="space-y-4" onValueChange={(v) => { if (v === 'emails' && templates.length === 0) fetchTemplates(); }}>
           <TabsList>
+            <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2"><ListTodo className="w-4 h-4" />Tasks</TabsTrigger>
             <TabsTrigger value="emails" className="gap-2"><FileText className="w-4 h-4" />Email Templates</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <PipelineDashboard leads={leads} />
+          </TabsContent>
 
           <TabsContent value="pipeline">
             {loading ? (
@@ -1227,6 +1249,10 @@ const Admin = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="tasks">
+            <AdminTasks tasks={tasks} setTasks={setTasks} />
           </TabsContent>
 
           <TabsContent value="emails">

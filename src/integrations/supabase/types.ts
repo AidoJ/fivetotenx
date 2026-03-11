@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_tasks: {
+        Row: {
+          action: string
+          assessment_id: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          owner: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          assessment_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          owner?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          assessment_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          owner?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_tasks_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_interviews: {
         Row: {
           assessment_id: string
