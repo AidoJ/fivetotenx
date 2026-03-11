@@ -808,6 +808,29 @@ const Admin = () => {
     }
   };
 
+  const handleSendReminder = async (lead: Assessment) => {
+    const stage = lead.pipeline_stage;
+    const validStages = ['qualified', 'deep_dive_sent', 'proposal'];
+    if (!validStages.includes(stage)) {
+      toast({ title: 'No reminder available', description: `No reminder template for the "${stage}" stage.`, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Sending reminder...', description: `Sending nudge email to ${lead.contact_email}` });
+    try {
+      const { data, error } = await supabase.functions.invoke('send-stage-reminder', {
+        body: { assessmentId: lead.id },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: 'Reminder sent ✅', description: `Nudge email sent to ${lead.contact_name}` });
+      } else {
+        throw new Error(data?.error || 'Unknown error');
+      }
+    } catch (err: any) {
+      toast({ title: 'Failed to send reminder', description: err.message, variant: 'destructive' });
+    }
+  };
+
   const handlePrepareProposal = async (lead: Assessment) => {
     try {
       const roi = lead.roi_results as any;
