@@ -534,7 +534,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
           )}
 
           {/* Send Reminder with scheduling controls */}
-          {['qualified', 'deep_dive_sent', 'proposal'].includes(lead.pipeline_stage) && (
+          {['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
             <div className="space-y-1.5 bg-amber-500/5 border border-amber-500/20 rounded-md p-2">
               <div className="flex items-center gap-1.5">
                 <AlertCircle className="w-3 h-3 text-amber-600" />
