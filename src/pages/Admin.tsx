@@ -63,6 +63,17 @@ interface LeadNote {
   created_at: string;
 }
 
+interface AdminTask {
+  id: string;
+  action: string;
+  status: string;
+  due_date: string | null;
+  owner: string;
+  assessment_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface ClientInterview {
   id: string;
   assessment_id: string;
