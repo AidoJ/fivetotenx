@@ -360,7 +360,7 @@ interface ProposalRecord {
   accepted_at: string | null;
 }
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -375,6 +375,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   interviews: ClientInterview[];
   onAddInterview: (assessmentId: string, title: string, content: string, audioFile?: File) => Promise<void>;
   onDeleteInterview: (id: string) => Promise<void>;
+  onSendReminder: (lead: Assessment) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
@@ -528,6 +529,14 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
                 <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
               )}
             </div>
+          )}
+
+          {/* Send Reminder */}
+          {['qualified', 'deep_dive_sent', 'proposal'].includes(lead.pipeline_stage) && (
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
+              onClick={() => onSendReminder(lead)}>
+              <AlertCircle className="w-3 h-3" /> Send Reminder
+            </Button>
           )}
         </div>
       )}
@@ -805,6 +814,29 @@ const Admin = () => {
     } else {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, follow_up_days: days, follow_up_scheduled_at: followUpAt, follow_up_sent: false } : l));
       toast({ title: 'Follow-up updated', description: `Reminder set for ${days} days` });
+    }
+  };
+
+  const handleSendReminder = async (lead: Assessment) => {
+    const stage = lead.pipeline_stage;
+    const validStages = ['qualified', 'deep_dive_sent', 'proposal'];
+    if (!validStages.includes(stage)) {
+      toast({ title: 'No reminder available', description: `No reminder template for the "${stage}" stage.`, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Sending reminder...', description: `Sending nudge email to ${lead.contact_email}` });
+    try {
+      const { data, error } = await supabase.functions.invoke('send-stage-reminder', {
+        body: { assessmentId: lead.id },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: 'Reminder sent ✅', description: `Nudge email sent to ${lead.contact_name}` });
+      } else {
+        throw new Error(data?.error || 'Unknown error');
+      }
+    } catch (err: any) {
+      toast({ title: 'Failed to send reminder', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -1252,6 +1284,7 @@ const Admin = () => {
                           interviews={interviews}
                           onAddInterview={handleAddInterview}
                           onDeleteInterview={handleDeleteInterview}
+                          onSendReminder={handleSendReminder}
                         />
                       ))}
                     </div>
