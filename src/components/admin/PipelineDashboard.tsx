@@ -10,6 +10,7 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'qualified', label: 'Qualified' },
   { key: 'deep_dive_sent', label: 'Deep Dive Sent' },
   { key: 'deep_dive_complete', label: 'Deep Dive Done' },
+  { key: 'discovery_call' as PipelineStage, label: 'Discovery Call' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'signed', label: 'Signed ✅' },
 ];

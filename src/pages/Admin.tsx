@@ -204,7 +204,7 @@ const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete }: {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Mic className="w-4 h-4 text-primary" />
-          <h4 className="text-xs font-bold text-foreground">Client Interviews</h4>
+          <h4 className="text-xs font-bold text-foreground">Discovery Calls</h4>
           {filtered.length > 0 && (
             <Badge variant="outline" className="text-[9px] h-4">{filtered.length}</Badge>
           )}
