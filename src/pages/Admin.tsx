@@ -860,7 +860,7 @@ const Admin = () => {
 
   const handleSendReminder = async (lead: Assessment) => {
     const stage = lead.pipeline_stage;
-    const validStages = ['qualified', 'deep_dive_sent', 'proposal'];
+    const validStages = ['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'];
     if (!validStages.includes(stage)) {
       toast({ title: 'No reminder available', description: `No reminder template for the "${stage}" stage.`, variant: 'destructive' });
       return;
