@@ -376,6 +376,7 @@ export type Database = {
         | "qualified"
         | "deep_dive_sent"
         | "deep_dive_complete"
+        | "discovery_call"
         | "proposal"
         | "signed"
     }
@@ -510,6 +511,7 @@ export const Constants = {
         "qualified",
         "deep_dive_sent",
         "deep_dive_complete",
+        "discovery_call",
         "proposal",
         "signed",
       ],
