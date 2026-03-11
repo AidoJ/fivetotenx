@@ -718,12 +718,13 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
       supabase.from('proposals').select('*').order('created_at', { ascending: false }),
       supabase.from('client_interviews').select('*').order('interviewed_at', { ascending: true }),
+      supabase.from('admin_tasks' as any).select('*').order('created_at', { ascending: false }),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
