@@ -834,6 +834,22 @@ const Admin = () => {
     }
   };
 
+  const handleScheduleReminder = async (id: string, days: number | null, scheduledAt: string | null) => {
+    const updates: any = { stage_reminder_sent: false };
+    if (scheduledAt) {
+      updates.stage_reminder_scheduled_at = scheduledAt;
+    } else if (days) {
+      updates.stage_reminder_days = days;
+      updates.stage_reminder_scheduled_at = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    }
+    const { error } = await supabase.from('roi_assessments').update(updates).eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+      toast({ title: 'Reminder scheduled', description: scheduledAt ? `Set for ${formatDate(scheduledAt)}` : `Auto-send in ${days} days` });
+    }
+
   const handleUpdateFollowUp = async (id: string, days: number) => {
     const followUpAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
     const { error } = await supabase.from('roi_assessments').update({
