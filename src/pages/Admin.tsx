@@ -1195,11 +1195,17 @@ const Admin = () => {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-4">
-        <Tabs defaultValue="pipeline" className="space-y-4" onValueChange={(v) => { if (v === 'emails' && templates.length === 0) fetchTemplates(); }}>
+        <Tabs defaultValue="dashboard" className="space-y-4" onValueChange={(v) => { if (v === 'emails' && templates.length === 0) fetchTemplates(); }}>
           <TabsList>
+            <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2"><ListTodo className="w-4 h-4" />Tasks</TabsTrigger>
             <TabsTrigger value="emails" className="gap-2"><FileText className="w-4 h-4" />Email Templates</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <PipelineDashboard leads={leads} />
+          </TabsContent>
 
           <TabsContent value="pipeline">
             {loading ? (
