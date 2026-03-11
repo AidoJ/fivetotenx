@@ -570,8 +570,8 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
         {showDeepDive && deepDive && <DeepDiveViewer submission={deepDive} />}
       </AnimatePresence>
 
-      {/* Client Interviews - shown for qualified leads */}
-      {lead.is_qualified && (
+      {/* Discovery Calls - shown for discovery_call stage and beyond */}
+      {['discovery_call', 'proposal', 'signed'].includes(lead.pipeline_stage as string) && (
         <ClientInterviewSection
           assessmentId={lead.id}
           interviews={interviews}
