@@ -1276,6 +1276,7 @@ const Admin = () => {
                           interviews={interviews}
                           onAddInterview={handleAddInterview}
                           onDeleteInterview={handleDeleteInterview}
+                          onSendReminder={handleSendReminder}
                         />
                       ))}
                     </div>
