@@ -48,9 +48,10 @@ const slaBgColors = {
 
 interface PipelineDashboardProps {
   leads: Assessment[];
+  onStageClick?: (stage: PipelineStage) => void;
 }
 
-const PipelineDashboard = ({ leads }: PipelineDashboardProps) => {
+const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
   const grouped = STAGES.map(stage => {
     const stageLeads = leads.filter(l => l.pipeline_stage === stage.key);
     const slaBreakdown = { green: 0, amber: 0, red: 0 };
