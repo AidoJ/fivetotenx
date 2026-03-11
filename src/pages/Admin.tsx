@@ -696,6 +696,8 @@ const Admin = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [leads, setLeads] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [pipelineFilter, setPipelineFilter] = useState<PipelineStage | null>(null);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
@@ -1195,7 +1197,7 @@ const Admin = () => {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-4">
-        <Tabs defaultValue="dashboard" className="space-y-4" onValueChange={(v) => { if (v === 'emails' && templates.length === 0) fetchTemplates(); }}>
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setPipelineFilter(null); if (v === 'emails' && templates.length === 0) fetchTemplates(); }} className="space-y-4">
           <TabsList>
             <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
@@ -1204,10 +1206,18 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <PipelineDashboard leads={leads} />
+            <PipelineDashboard leads={leads} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
           </TabsContent>
 
           <TabsContent value="pipeline">
+            {pipelineFilter && (
+              <div className="flex items-center gap-2 mb-4">
+                <Badge variant="secondary" className="gap-1.5 text-sm">
+                  Filtered: {STAGES.find(s => s.key === pipelineFilter)?.label}
+                  <button onClick={() => setPipelineFilter(null)} className="ml-1 hover:text-destructive">✕</button>
+                </Badge>
+              </div>
+            )}
             {loading ? (
               <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
             ) : leads.length === 0 ? (
@@ -1218,7 +1228,7 @@ const Admin = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                {grouped.map(stage => (
+                {(pipelineFilter ? grouped.filter(s => s.key === pipelineFilter) : grouped).map(stage => (
                   <div key={stage.key} className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h2 className="text-sm font-display font-bold text-foreground">{stage.label}</h2>

@@ -48,9 +48,10 @@ const slaBgColors = {
 
 interface PipelineDashboardProps {
   leads: Assessment[];
+  onStageClick?: (stage: PipelineStage) => void;
 }
 
-const PipelineDashboard = ({ leads }: PipelineDashboardProps) => {
+const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
   const grouped = STAGES.map(stage => {
     const stageLeads = leads.filter(l => l.pipeline_stage === stage.key);
     const slaBreakdown = { green: 0, amber: 0, red: 0 };
@@ -104,7 +105,7 @@ const PipelineDashboard = ({ leads }: PipelineDashboardProps) => {
         {grouped.map(stage => {
           const worstSla = stage.slaBreakdown.red > 0 ? 'red' : stage.slaBreakdown.amber > 0 ? 'amber' : 'green';
           return (
-            <div key={stage.key} className={`rounded-xl border-2 p-4 space-y-3 ${slaBgColors[worstSla]}`}>
+            <div key={stage.key} onClick={() => onStageClick?.(stage.key)} className={`rounded-xl border-2 p-4 space-y-3 cursor-pointer hover:scale-[1.02] transition-transform ${slaBgColors[worstSla]}`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-foreground">{stage.label}</h3>
                 <span className="text-2xl font-bold text-foreground">{stage.leads.length}</span>
