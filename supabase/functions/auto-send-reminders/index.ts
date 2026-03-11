@@ -9,6 +9,7 @@ const corsHeaders = {
 const STAGE_TEMPLATE_MAP: Record<string, string> = {
   qualified: 'reminder-qualified',
   deep_dive_sent: 'reminder-deep-dive-sent',
+  discovery_call: 'reminder-discovery-call',
   proposal: 'reminder-proposal',
 };
 
@@ -32,7 +33,7 @@ serve(async (req) => {
     const { data: dueLeads, error } = await supabase
       .from('roi_assessments')
       .select('*')
-      .in('pipeline_stage', ['qualified', 'deep_dive_sent', 'proposal'])
+      .in('pipeline_stage', ['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'])
       .eq('stage_reminder_sent', false)
       .not('stage_reminder_scheduled_at', 'is', null)
       .lt('stage_reminder_scheduled_at', now);

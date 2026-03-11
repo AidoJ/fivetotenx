@@ -93,6 +93,7 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'qualified', label: 'Qualified' },
   { key: 'deep_dive_sent', label: 'Deep Dive Sent' },
   { key: 'deep_dive_complete', label: 'Deep Dive Done' },
+  { key: 'discovery_call' as PipelineStage, label: 'Discovery Call' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'signed', label: 'Signed ✅' },
 ];
@@ -203,7 +204,7 @@ const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete }: {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Mic className="w-4 h-4 text-primary" />
-          <h4 className="text-xs font-bold text-foreground">Client Interviews</h4>
+          <h4 className="text-xs font-bold text-foreground">Discovery Calls</h4>
           {filtered.length > 0 && (
             <Badge variant="outline" className="text-[9px] h-4">{filtered.length}</Badge>
           )}
@@ -533,7 +534,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
           )}
 
           {/* Send Reminder with scheduling controls */}
-          {['qualified', 'deep_dive_sent', 'proposal'].includes(lead.pipeline_stage) && (
+          {['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
             <div className="space-y-1.5 bg-amber-500/5 border border-amber-500/20 rounded-md p-2">
               <div className="flex items-center gap-1.5">
                 <AlertCircle className="w-3 h-3 text-amber-600" />
@@ -569,8 +570,8 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
         {showDeepDive && deepDive && <DeepDiveViewer submission={deepDive} />}
       </AnimatePresence>
 
-      {/* Client Interviews - shown for qualified leads */}
-      {lead.is_qualified && (
+      {/* Discovery Calls - shown for discovery_call stage and beyond */}
+      {['discovery_call', 'proposal', 'signed'].includes(lead.pipeline_stage as string) && (
         <ClientInterviewSection
           assessmentId={lead.id}
           interviews={interviews}
@@ -859,7 +860,7 @@ const Admin = () => {
 
   const handleSendReminder = async (lead: Assessment) => {
     const stage = lead.pipeline_stage;
-    const validStages = ['qualified', 'deep_dive_sent', 'proposal'];
+    const validStages = ['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'];
     if (!validStages.includes(stage)) {
       toast({ title: 'No reminder available', description: `No reminder template for the "${stage}" stage.`, variant: 'destructive' });
       return;

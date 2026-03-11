@@ -1,0 +1,1 @@
+ALTER TYPE public.pipeline_stage ADD VALUE 'discovery_call' AFTER 'deep_dive_complete';
