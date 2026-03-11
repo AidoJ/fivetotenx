@@ -532,12 +532,43 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
             </div>
           )}
 
-          {/* Send Reminder */}
+          {/* Send Reminder with scheduling controls */}
           {['qualified', 'deep_dive_sent', 'proposal'].includes(lead.pipeline_stage) && (
-            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
-              onClick={() => onSendReminder(lead)}>
-              <AlertCircle className="w-3 h-3" /> Send Reminder
-            </Button>
+            <div className="space-y-1.5 bg-amber-500/5 border border-amber-500/20 rounded-md p-2">
+              <div className="flex items-center gap-1.5">
+                <AlertCircle className="w-3 h-3 text-amber-600" />
+                <span className="text-[10px] font-semibold text-amber-700">Stage Reminder</span>
+                {(lead as any).stage_reminder_sent && (
+                  <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] text-muted-foreground">Auto-send in</span>
+                <Input type="number" min={1} max={30}
+                  defaultValue={(lead as any).stage_reminder_days || 3}
+                  className="h-6 w-14 text-[10px] text-center"
+                  onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 3, null)} />
+                <span className="text-[10px] text-muted-foreground">days</span>
+                <span className="text-[10px] text-muted-foreground mx-1">or</span>
+                <Input type="datetime-local"
+                  defaultValue={(lead as any).stage_reminder_scheduled_at ? new Date((lead as any).stage_reminder_scheduled_at).toISOString().slice(0, 16) : ''}
+                  className="h-6 text-[10px] w-[160px]"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      onScheduleReminder(lead.id, null, new Date(e.target.value).toISOString());
+                    }
+                  }} />
+              </div>
+              {(lead as any).stage_reminder_scheduled_at && !(lead as any).stage_reminder_sent && (
+                <span className="text-[9px] text-amber-600">
+                  Scheduled: {formatDate((lead as any).stage_reminder_scheduled_at)}
+                </span>
+              )}
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
+                onClick={() => onSendReminder(lead)}>
+                <Send className="w-3 h-3" /> Send Now
+              </Button>
+            </div>
           )}
         </div>
       )}
