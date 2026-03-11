@@ -1195,7 +1195,7 @@ const Admin = () => {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-4">
-        <Tabs defaultValue="dashboard" className="space-y-4" onValueChange={(v) => { if (v === 'emails' && templates.length === 0) fetchTemplates(); }}>
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setPipelineFilter(null); if (v === 'emails' && templates.length === 0) fetchTemplates(); }} className="space-y-4">
           <TabsList>
             <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
@@ -1204,7 +1204,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <PipelineDashboard leads={leads} />
+            <PipelineDashboard leads={leads} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
           </TabsContent>
 
           <TabsContent value="pipeline">
