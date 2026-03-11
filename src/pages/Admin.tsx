@@ -18,6 +18,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import logo from '@/assets/logo-5to10x-color.png';
+import PipelineDashboard from '@/components/admin/PipelineDashboard';
+import AdminTasks from '@/components/admin/AdminTasks';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
