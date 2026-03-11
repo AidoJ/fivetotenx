@@ -847,7 +847,7 @@ const Admin = () => {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
-      toast({ title: 'Reminder scheduled', description: scheduledAt ? `Set for ${formatDate(scheduledAt)}` : `Auto-send in ${days} days` });
+      toast({ title: 'Reminder scheduled', description: scheduledAt ? `Set for ${formatDate(scheduledAt)}` : `Auto-send in ${days} hours` });
     }
   };
 
