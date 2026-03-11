@@ -530,6 +530,14 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
               )}
             </div>
           )}
+
+          {/* Send Reminder */}
+          {['qualified', 'deep_dive_sent', 'proposal'].includes(lead.pipeline_stage) && (
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
+              onClick={() => onSendReminder(lead)}>
+              <AlertCircle className="w-3 h-3" /> Send Reminder
+            </Button>
+          )}
         </div>
       )}
 
