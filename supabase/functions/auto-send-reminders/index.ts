@@ -9,6 +9,7 @@ const corsHeaders = {
 const STAGE_TEMPLATE_MAP: Record<string, string> = {
   qualified: 'reminder-qualified',
   deep_dive_sent: 'reminder-deep-dive-sent',
+  discovery_call: 'reminder-discovery-call',
   proposal: 'reminder-proposal',
 };
 
