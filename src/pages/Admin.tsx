@@ -544,11 +544,11 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] text-muted-foreground">Auto-send in</span>
-                <Input type="number" min={1} max={30}
-                  defaultValue={(lead as any).stage_reminder_days || 3}
+                <Input type="number" min={1} max={720}
+                  defaultValue={(lead as any).stage_reminder_days || 72}
                   className="h-6 w-14 text-[10px] text-center"
-                  onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 3, null)} />
-                <span className="text-[10px] text-muted-foreground">days</span>
+                  onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
+                <span className="text-[10px] text-muted-foreground">hours</span>
                 <span className="text-[10px] text-muted-foreground mx-1">or</span>
                 <Input type="datetime-local"
                   defaultValue={(lead as any).stage_reminder_scheduled_at ? new Date((lead as any).stage_reminder_scheduled_at).toISOString().slice(0, 16) : ''}
@@ -840,14 +840,14 @@ const Admin = () => {
       updates.stage_reminder_scheduled_at = scheduledAt;
     } else if (days) {
       updates.stage_reminder_days = days;
-      updates.stage_reminder_scheduled_at = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+      updates.stage_reminder_scheduled_at = new Date(Date.now() + days * 60 * 60 * 1000).toISOString();
     }
     const { error } = await supabase.from('roi_assessments').update(updates).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
-      toast({ title: 'Reminder scheduled', description: scheduledAt ? `Set for ${formatDate(scheduledAt)}` : `Auto-send in ${days} days` });
+      toast({ title: 'Reminder scheduled', description: scheduledAt ? `Set for ${formatDate(scheduledAt)}` : `Auto-send in ${days} hours` });
     }
   };
 
