@@ -105,7 +105,7 @@ const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
         {grouped.map(stage => {
           const worstSla = stage.slaBreakdown.red > 0 ? 'red' : stage.slaBreakdown.amber > 0 ? 'amber' : 'green';
           return (
-            <div key={stage.key} className={`rounded-xl border-2 p-4 space-y-3 ${slaBgColors[worstSla]}`}>
+            <div key={stage.key} onClick={() => onStageClick?.(stage.key)} className={`rounded-xl border-2 p-4 space-y-3 cursor-pointer hover:scale-[1.02] transition-transform ${slaBgColors[worstSla]}`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-foreground">{stage.label}</h3>
                 <span className="text-2xl font-bold text-foreground">{stage.leads.length}</span>

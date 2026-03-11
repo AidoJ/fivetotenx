@@ -696,6 +696,8 @@ const Admin = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [leads, setLeads] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [pipelineFilter, setPipelineFilter] = useState<PipelineStage | null>(null);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
