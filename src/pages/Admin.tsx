@@ -849,6 +849,7 @@ const Admin = () => {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
       toast({ title: 'Reminder scheduled', description: scheduledAt ? `Set for ${formatDate(scheduledAt)}` : `Auto-send in ${days} days` });
     }
+  };
 
   const handleUpdateFollowUp = async (id: string, days: number) => {
     const followUpAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
