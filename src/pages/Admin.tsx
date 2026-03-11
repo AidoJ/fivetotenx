@@ -702,6 +702,7 @@ const Admin = () => {
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const [interviews, setInterviews] = useState<ClientInterview[]>([]);
+  const [tasks, setTasks] = useState<AdminTask[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
