@@ -1251,6 +1251,10 @@ const Admin = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="tasks">
+            <AdminTasks tasks={tasks} setTasks={setTasks} />
+          </TabsContent>
+
           <TabsContent value="emails">
             <div className="space-y-6">
               <div>
