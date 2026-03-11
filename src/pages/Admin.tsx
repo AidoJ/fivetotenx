@@ -734,7 +734,7 @@ const Admin = () => {
     if (!notesRes.error) setLeadNotes((notesRes.data as LeadNote[]) || []);
     if (!proposalsRes.error) setProposals((proposalsRes.data as ProposalRecord[]) || []);
     if (!interviewsRes.error) setInterviews((interviewsRes.data as ClientInterview[]) || []);
-    if (!tasksRes.error) setTasks((tasksRes.data as AdminTask[]) || []);
+    if (!tasksRes.error) setTasks((tasksRes.data as unknown as AdminTask[]) || []);
 
     setLoading(false);
   };
