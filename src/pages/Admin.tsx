@@ -544,11 +544,11 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] text-muted-foreground">Auto-send in</span>
-                <Input type="number" min={1} max={30}
-                  defaultValue={(lead as any).stage_reminder_days || 3}
+                <Input type="number" min={1} max={720}
+                  defaultValue={(lead as any).stage_reminder_days || 72}
                   className="h-6 w-14 text-[10px] text-center"
-                  onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 3, null)} />
-                <span className="text-[10px] text-muted-foreground">days</span>
+                  onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
+                <span className="text-[10px] text-muted-foreground">hours</span>
                 <span className="text-[10px] text-muted-foreground mx-1">or</span>
                 <Input type="datetime-local"
                   defaultValue={(lead as any).stage_reminder_scheduled_at ? new Date((lead as any).stage_reminder_scheduled_at).toISOString().slice(0, 16) : ''}
