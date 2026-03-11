@@ -549,15 +549,6 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
                   className="h-6 w-14 text-[10px] text-center"
                   onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
                 <span className="text-[10px] text-muted-foreground">hours</span>
-                <span className="text-[10px] text-muted-foreground mx-1">or</span>
-                <Input type="datetime-local"
-                  defaultValue={(lead as any).stage_reminder_scheduled_at ? new Date((lead as any).stage_reminder_scheduled_at).toISOString().slice(0, 16) : ''}
-                  className="h-6 text-[10px] w-[160px]"
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      onScheduleReminder(lead.id, null, new Date(e.target.value).toISOString());
-                    }
-                  }} />
               </div>
               {(lead as any).stage_reminder_scheduled_at && !(lead as any).stage_reminder_sent && (
                 <span className="text-[9px] text-amber-600">
