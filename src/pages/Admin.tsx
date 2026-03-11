@@ -840,7 +840,7 @@ const Admin = () => {
       updates.stage_reminder_scheduled_at = scheduledAt;
     } else if (days) {
       updates.stage_reminder_days = days;
-      updates.stage_reminder_scheduled_at = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+      updates.stage_reminder_scheduled_at = new Date(Date.now() + days * 60 * 60 * 1000).toISOString();
     }
     const { error } = await supabase.from('roi_assessments').update(updates).eq('id', id);
     if (error) {
