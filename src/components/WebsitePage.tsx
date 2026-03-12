@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowRight, Zap, TrendingUp, BarChart3, CheckCircle, X,
   Clock, Users, Cog, Rocket, Shield, Eye, Link2,
