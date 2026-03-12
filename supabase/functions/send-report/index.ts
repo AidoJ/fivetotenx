@@ -386,9 +386,15 @@ serve(async (req) => {
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
                     <strong>The cost of inaction is real:</strong> every month of delay represents approximately <strong>${fmt(results.totalAnnualImpact / 12)}</strong> in unrealised value. That's not a scare tactic — it's simply what the numbers show.
                   </p>
+                  ${isQualified ? `
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
-                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is a brief strategy call to map out your app's features and timeline.
+                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is the <strong>Deep Dive questionnaire</strong> — a quick 5-minute form to scope the perfect solution. Check your inbox for the invite, or click the link above.
                   </p>
+                  ` : `
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
+                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. Reply to this email to start the conversation.
+                  </p>
+                  `}
                 </td>
               </tr>
 
