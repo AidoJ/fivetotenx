@@ -1514,6 +1514,7 @@ const Admin = () => {
                           onSendDiscoveryInvite={handleSendDiscoveryInvite}
                           onMarkDiscoveryReady={handleMarkDiscoveryReady}
                           onUpdateDiscoveryAnswers={handleUpdateDiscoveryAnswers}
+                          onUpdateChecklist={handleUpdateChecklist}
                         />
                       ))}
                     </div>
