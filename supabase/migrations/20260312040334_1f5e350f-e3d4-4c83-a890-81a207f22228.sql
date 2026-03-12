@@ -1,0 +1,1 @@
+ALTER TABLE public.roi_assessments ADD COLUMN discovery_checklist jsonb DEFAULT '{}'::jsonb;
