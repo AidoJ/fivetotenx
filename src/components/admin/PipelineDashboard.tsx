@@ -58,7 +58,7 @@ const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
     const stageLeads = leads.filter(l => l.pipeline_stage === stage.key);
     const slaBreakdown = { green: 0, amber: 0, red: 0 };
     stageLeads.forEach(l => {
-      if (stage.key === 'signed') {
+      if (stage.key === 'signed' || stage.key === ('build_refinement' as PipelineStage)) {
         slaBreakdown.green++;
       } else {
         slaBreakdown[getSlaStatus(l)]++;
