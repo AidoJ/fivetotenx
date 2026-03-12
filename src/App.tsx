@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import BusinessCards from "./pages/BusinessCards";
 import DeepDive from "./pages/DeepDive";
 import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
@@ -20,7 +19,6 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/cards" element={<BusinessCards />} />
           <Route path="/deep-dive" element={<DeepDive />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/proposal/:id" element={<Proposal />} />
