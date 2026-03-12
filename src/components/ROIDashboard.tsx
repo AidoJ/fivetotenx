@@ -41,13 +41,9 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
   const [assessmentId, setAssessmentId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleSendReport = async (includeZoom: boolean) => {
+  const handleSendReport = async (_includeZoom: boolean) => {
     if (!formData.contactEmail || !formData.contactName) {
       toast({ title: 'Missing info', description: 'Name and email are required to send the report.', variant: 'destructive' });
-      return;
-    }
-    if (includeZoom && !zoomLink) {
-      toast({ title: 'Missing Zoom link', description: 'Please enter a Zoom link before sending the invite.', variant: 'destructive' });
       return;
     }
 
