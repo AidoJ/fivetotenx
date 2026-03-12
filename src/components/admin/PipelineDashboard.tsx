@@ -115,7 +115,7 @@ const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
               {stage.leads.length > 0 && (
                 <div className="space-y-1.5">
                   {stage.leads.map(lead => {
-                    const sla = stage.key === 'signed' ? 'green' : getSlaStatus(lead);
+                    const sla = (stage.key === 'signed' || stage.key === ('build_refinement' as PipelineStage)) ? 'green' : getSlaStatus(lead);
                     return (
                       <div key={lead.id} className="flex items-center gap-2 text-[11px]">
                         <span className={`w-2 h-2 rounded-full ${slaColors[sla]} shrink-0`} />
