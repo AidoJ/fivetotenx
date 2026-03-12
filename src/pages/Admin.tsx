@@ -9,7 +9,7 @@ import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
   MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil,
-  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo
+  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
