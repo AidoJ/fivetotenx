@@ -96,7 +96,13 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'discovery_call' as PipelineStage, label: 'Discovery Call' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'signed', label: 'Signed ✅' },
+  { key: 'build_refinement' as PipelineStage, label: 'Build Refinement' },
 ];
+
+const CALENDLY_URL = 'https://calendly.com/aidan-rejuvenators/discovery';
+
+// Stage index helper for comparing pipeline progression
+const stageIndex = (stage: string) => STAGES.findIndex(s => s.key === stage);
 
 const formatCurrency = (v: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
