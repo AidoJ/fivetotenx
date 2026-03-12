@@ -13,6 +13,7 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'discovery_call' as PipelineStage, label: 'Discovery Call' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'signed', label: 'Signed ✅' },
+  { key: 'build_refinement' as PipelineStage, label: 'Build Refinement' },
 ];
 
 const getSlaStatus = (lead: Assessment): 'green' | 'amber' | 'red' => {
@@ -57,7 +58,7 @@ const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
     const stageLeads = leads.filter(l => l.pipeline_stage === stage.key);
     const slaBreakdown = { green: 0, amber: 0, red: 0 };
     stageLeads.forEach(l => {
-      if (stage.key === 'signed') {
+      if (stage.key === 'signed' || stage.key === ('build_refinement' as PipelineStage)) {
         slaBreakdown.green++;
       } else {
         slaBreakdown[getSlaStatus(l)]++;
@@ -102,7 +103,7 @@ const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
       </div>
 
       {/* Per-stage breakdown */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         {grouped.map(stage => {
           const worstSla = stage.slaBreakdown.red > 0 ? 'red' : stage.slaBreakdown.amber > 0 ? 'amber' : 'green';
           return (
@@ -114,7 +115,7 @@ const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
               {stage.leads.length > 0 && (
                 <div className="space-y-1.5">
                   {stage.leads.map(lead => {
-                    const sla = stage.key === 'signed' ? 'green' : getSlaStatus(lead);
+                    const sla = (stage.key === 'signed' || stage.key === ('build_refinement' as PipelineStage)) ? 'green' : getSlaStatus(lead);
                     return (
                       <div key={lead.id} className="flex items-center gap-2 text-[11px]">
                         <span className={`w-2 h-2 rounded-full ${slaColors[sla]} shrink-0`} />

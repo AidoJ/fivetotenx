@@ -24,5 +24,8 @@ verify_jwt = false
 [functions.send-stage-reminder]
 verify_jwt = false
 
+[functions.send-discovery-invite]
+verify_jwt = false
+
 [functions.auto-send-reminders]
 verify_jwt = false

@@ -286,6 +286,7 @@ export type Database = {
           contact_name: string
           contact_phone: string | null
           created_at: string
+          discovery_ready: boolean | null
           follow_up_days: number | null
           follow_up_scheduled_at: string | null
           follow_up_sent: boolean | null
@@ -313,6 +314,7 @@ export type Database = {
           contact_name: string
           contact_phone?: string | null
           created_at?: string
+          discovery_ready?: boolean | null
           follow_up_days?: number | null
           follow_up_scheduled_at?: string | null
           follow_up_sent?: boolean | null
@@ -340,6 +342,7 @@ export type Database = {
           contact_name?: string
           contact_phone?: string | null
           created_at?: string
+          discovery_ready?: boolean | null
           follow_up_days?: number | null
           follow_up_scheduled_at?: string | null
           follow_up_sent?: boolean | null
@@ -379,6 +382,7 @@ export type Database = {
         | "discovery_call"
         | "proposal"
         | "signed"
+        | "build_refinement"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -514,6 +518,7 @@ export const Constants = {
         "discovery_call",
         "proposal",
         "signed",
+        "build_refinement",
       ],
     },
   },
