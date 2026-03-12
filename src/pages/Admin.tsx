@@ -117,6 +117,81 @@ const formatCurrency = (v: number) =>
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+/* ─────────── Calendly Webhook Setup Component ─────────── */
+
+const CalendlyWebhookSetup = () => {
+  const [token, setToken] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ success?: boolean; message?: string; error?: string } | null>(null);
+  const { toast } = useToast();
+
+  const handleRegister = async () => {
+    if (!token.trim()) {
+      toast({ title: 'Token Required', description: 'Please paste your Calendly Personal Access Token', variant: 'destructive' });
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('register-calendly-webhook', {
+        body: { calendlyToken: token.trim() },
+      });
+
+      if (error) throw error;
+      
+      if (data?.success) {
+        setResult({ success: true, message: data.message });
+        toast({ title: 'Success!', description: data.message });
+      } else {
+        setResult({ success: false, error: data?.error || 'Unknown error' });
+        toast({ title: 'Registration Failed', description: data?.error, variant: 'destructive' });
+      }
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to register webhook';
+      setResult({ success: false, error: msg });
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs">Calendly Personal Access Token</Label>
+        <Input
+          type="password"
+          placeholder="Paste your token here..."
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          className="text-xs"
+        />
+        <p className="text-[10px] text-muted-foreground">
+          Get your token from <a href="https://calendly.com/integrations/api_webhooks" target="_blank" rel="noopener" className="text-primary hover:underline">Calendly API & Webhooks</a>
+        </p>
+      </div>
+
+      <Button
+        onClick={handleRegister}
+        disabled={loading || !token.trim()}
+        className="w-full"
+        size="sm"
+      >
+        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
+        {loading ? 'Registering...' : 'Register Webhook'}
+      </Button>
+
+      {result && (
+        <div className={`p-3 rounded-lg text-xs ${result.success ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+          {result.success ? result.message : result.error}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ─────────── Deep Dive Viewer ─────────── */
 
 const DeepDiveField = ({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: any }) => {
