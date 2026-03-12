@@ -1314,7 +1314,16 @@ const Admin = () => {
           setInterviews(prev => prev.map(i => 
             i.id === data.id ? { ...i, transcript: transcribeResult.transcript } : i
           ));
-          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved and ready for proposal use.' });
+          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved. Extracting discovery answers...' });
+          
+          // The transcribe function auto-triggers extraction. Refresh answers after a delay.
+          setTimeout(async () => {
+            const { data: refreshed } = await supabase.from('roi_assessments').select('discovery_answers').eq('id', assessmentId).single();
+            if (refreshed?.discovery_answers) {
+              handleUpdateDiscoveryAnswers(assessmentId, refreshed.discovery_answers);
+              toast({ title: 'Discovery answers extracted ✅', description: 'AI-extracted answers are ready for review.' });
+            }
+          }, 15000);
         } catch (err: any) {
           console.error('Transcription failed:', err);
           toast({ title: 'Transcription failed', description: err.message || 'You can still use the audio file manually.', variant: 'destructive' });
