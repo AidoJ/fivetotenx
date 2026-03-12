@@ -186,20 +186,31 @@ const DeepDiveViewer = ({ submission }: { submission: DeepDiveSubmission }) => (
 
 /* ─────────── Client Interview Section ─────────── */
 
-const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete }: {
+const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete, onToggleComplete, onUpdateZoomLink }: {
   assessmentId: string;
   interviews: ClientInterview[];
   onAdd: (assessmentId: string, title: string, content: string, audioFile?: File) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onToggleComplete: (id: string, completed: boolean) => Promise<void>;
+  onUpdateZoomLink: (id: string, zoomLink: string) => Promise<void>;
 }) => {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('Client Interview');
   const [notes, setNotes] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
+  const [editingZoom, setEditingZoom] = useState<string | null>(null);
+  const [zoomInput, setZoomInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = interviews.filter(i => i.assessment_id === assessmentId);
+
+  // Sort: scheduled (upcoming) first, then by date
+  const sorted = [...filtered].sort((a, b) => {
+    if (a.scheduled_at && !b.scheduled_at) return -1;
+    if (!a.scheduled_at && b.scheduled_at) return 1;
+    return new Date(b.interviewed_at).getTime() - new Date(a.interviewed_at).getTime();
+  });
 
   const handleAdd = async () => {
     if (!notes.trim() && !audioFile) return;
@@ -228,19 +239,67 @@ const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete }: {
       </div>
 
       {/* Existing interviews */}
-      {filtered.length > 0 && (
+      {sorted.length > 0 && (
         <div className="space-y-2 max-h-60 overflow-y-auto">
-          {filtered.map(interview => (
-            <div key={interview.id} className="bg-secondary/50 rounded-lg p-2.5 space-y-1.5">
+          {sorted.map(interview => (
+            <div key={interview.id} className={`rounded-lg p-2.5 space-y-1.5 border ${interview.call_completed ? 'bg-primary/5 border-primary/20' : interview.scheduled_at ? 'bg-amber-500/5 border-amber-500/20' : 'bg-secondary/50 border-transparent'}`}>
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold text-foreground">{interview.title}</p>
+                <div className="flex items-center gap-2">
+                  {/* Completed checkbox */}
+                  <input
+                    type="checkbox"
+                    checked={!!interview.call_completed}
+                    onChange={(e) => onToggleComplete(interview.id, e.target.checked)}
+                    className="w-3.5 h-3.5 rounded border-border accent-primary cursor-pointer"
+                    title={interview.call_completed ? 'Mark as incomplete' : 'Mark as completed'}
+                  />
+                  <p className={`text-[11px] font-semibold ${interview.call_completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                    {interview.title}
+                  </p>
+                  {interview.interview_type === 'scheduled' && !interview.call_completed && (
+                    <Badge variant="outline" className="text-[8px] h-4 px-1 bg-amber-500/10 text-amber-700 border-amber-500/20">Scheduled</Badge>
+                  )}
+                  {interview.call_completed && (
+                    <Badge variant="outline" className="text-[8px] h-4 px-1 bg-primary/10 text-primary border-primary/20">Done ✓</Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] text-muted-foreground">{formatDate(interview.interviewed_at)}</span>
+                  <span className="text-[9px] text-muted-foreground">
+                    {interview.scheduled_at ? formatDate(interview.scheduled_at) : formatDate(interview.interviewed_at)}
+                  </span>
                   <Button size="sm" variant="ghost" className="h-5 w-5 p-0 text-destructive" onClick={() => onDelete(interview.id)}>
                     <Trash2 className="w-3 h-3" />
                   </Button>
                 </div>
               </div>
+
+              {/* Zoom link */}
+              {interview.zoom_link && editingZoom !== interview.id && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[8px] h-4 px-1 gap-1 bg-blue-500/10 text-blue-700 border-blue-500/20">
+                    <ExternalLink className="w-2.5 h-2.5" /> Zoom
+                  </Badge>
+                  <a href={interview.zoom_link} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline truncate max-w-[180px]">
+                    {interview.zoom_link.replace('https://', '')}
+                  </a>
+                  <Button size="sm" variant="ghost" className="h-4 w-4 p-0" onClick={() => { setEditingZoom(interview.id); setZoomInput(interview.zoom_link || ''); }}>
+                    <Pencil className="w-2.5 h-2.5" />
+                  </Button>
+                </div>
+              )}
+              {!interview.zoom_link && editingZoom !== interview.id && (
+                <Button size="sm" variant="ghost" className="h-5 text-[9px] px-1 gap-1 text-muted-foreground" onClick={() => { setEditingZoom(interview.id); setZoomInput(''); }}>
+                  <Plus className="w-2.5 h-2.5" /> Add Zoom Link
+                </Button>
+              )}
+              {editingZoom === interview.id && (
+                <div className="flex items-center gap-1">
+                  <Input value={zoomInput} onChange={e => setZoomInput(e.target.value)} placeholder="https://zoom.us/j/..." className="h-6 text-[10px] flex-1" />
+                  <Button size="sm" className="h-6 text-[9px] px-2" onClick={() => { onUpdateZoomLink(interview.id, zoomInput); setEditingZoom(null); }}>Save</Button>
+                  <Button size="sm" variant="ghost" className="h-6 text-[9px] px-1" onClick={() => setEditingZoom(null)}>✕</Button>
+                </div>
+              )}
+
               {interview.content && (
                 <p className="text-[11px] text-foreground whitespace-pre-wrap">{interview.content}</p>
               )}
