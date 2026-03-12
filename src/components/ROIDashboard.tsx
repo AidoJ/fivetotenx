@@ -36,7 +36,6 @@ const ResultCard = ({ icon: Icon, label, value, color, delay }: {
 );
 
 const ROIDashboard = ({ results, formData, onReset }: Props) => {
-  const [zoomLink, setZoomLink] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [assessmentId, setAssessmentId] = useState<string | null>(null);
