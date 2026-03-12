@@ -5,15 +5,15 @@ import { Users, AlertCircle } from 'lucide-react';
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
 
-const STAGES: { key: PipelineStage; label: string }[] = [
-  { key: 'assessment', label: 'Assessment' },
-  { key: 'qualified', label: 'Qualified' },
-  { key: 'deep_dive_sent', label: 'Deep Dive Sent' },
-  { key: 'deep_dive_complete', label: 'Deep Dive Done' },
-  { key: 'discovery_call' as PipelineStage, label: 'Discovery Call' },
-  { key: 'proposal', label: 'Proposal' },
-  { key: 'signed', label: 'Signed ✅' },
-  { key: 'build_refinement' as PipelineStage, label: 'Build Refinement' },
+const STAGES: { key: PipelineStage; label: string; num: number }[] = [
+  { key: 'assessment', label: 'Assessment', num: 1 },
+  { key: 'qualified', label: 'Qualified', num: 2 },
+  { key: 'deep_dive_sent', label: 'Deep Dive Sent', num: 3 },
+  { key: 'deep_dive_complete', label: 'Deep Dive Done', num: 4 },
+  { key: 'discovery_call' as PipelineStage, label: 'Discovery Call', num: 5 },
+  { key: 'proposal', label: 'Proposal', num: 6 },
+  { key: 'signed', label: 'Signed ✅', num: 7 },
+  { key: 'build_refinement' as PipelineStage, label: 'Build Refinement', num: 8 },
 ];
 
 const getSlaStatus = (lead: Assessment): 'green' | 'amber' | 'red' => {
