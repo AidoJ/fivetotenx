@@ -287,6 +287,7 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           discovery_answers: Json | null
+          discovery_checklist: Json | null
           discovery_ready: boolean | null
           follow_up_days: number | null
           follow_up_scheduled_at: string | null
@@ -316,6 +317,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           discovery_answers?: Json | null
+          discovery_checklist?: Json | null
           discovery_ready?: boolean | null
           follow_up_days?: number | null
           follow_up_scheduled_at?: string | null
@@ -345,6 +347,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           discovery_answers?: Json | null
+          discovery_checklist?: Json | null
           discovery_ready?: boolean | null
           follow_up_days?: number | null
           follow_up_scheduled_at?: string | null

@@ -9,7 +9,7 @@ import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
   MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil,
-  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain
+  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain, ClipboardCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,8 @@ import logo from '@/assets/logo-5to10x-color.png';
 import PipelineDashboard from '@/components/admin/PipelineDashboard';
 import AdminTasks from '@/components/admin/AdminTasks';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
+import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
+import CallGuide from '@/components/admin/CallGuide';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -368,7 +370,7 @@ interface ProposalRecord {
   accepted_at: string | null;
 }
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers, onUpdateChecklist }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -388,6 +390,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   onSendDiscoveryInvite: (lead: Assessment) => void;
   onMarkDiscoveryReady: (id: string, ready: boolean) => void;
   onUpdateDiscoveryAnswers: (id: string, answers: any) => void;
+  onUpdateChecklist: (id: string, checklist: Record<string, boolean>) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
@@ -686,11 +689,19 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
             onDelete={onDeleteInterview}
           />
           {['discovery_call', 'proposal'].includes(lead.pipeline_stage as string) && (
-            <DiscoveryAnswersViewer
-              assessmentId={lead.id}
-              answers={(lead.discovery_answers && typeof lead.discovery_answers === 'object' && !Array.isArray(lead.discovery_answers)) ? lead.discovery_answers as any : null}
-              onUpdate={(answers) => onUpdateDiscoveryAnswers(lead.id, answers)}
-            />
+            <>
+              <DiscoveryChecklist
+                assessmentId={lead.id}
+                checklist={(lead as any).discovery_checklist && typeof (lead as any).discovery_checklist === 'object' && !Array.isArray((lead as any).discovery_checklist) ? (lead as any).discovery_checklist as Record<string, boolean> : null}
+                onUpdate={(checklist) => onUpdateChecklist(lead.id, checklist)}
+                compact={true}
+              />
+              <DiscoveryAnswersViewer
+                assessmentId={lead.id}
+                answers={(lead.discovery_answers && typeof lead.discovery_answers === 'object' && !Array.isArray(lead.discovery_answers)) ? lead.discovery_answers as any : null}
+                onUpdate={(answers) => onUpdateDiscoveryAnswers(lead.id, answers)}
+              />
+            </>
           )}
         </>
       )}
@@ -1371,6 +1382,10 @@ const Admin = () => {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_answers: answers } : l));
   };
 
+  const handleUpdateChecklist = (id: string, checklist: Record<string, boolean>) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_checklist: checklist } : l));
+  };
+
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
     const updates: any = { discovery_ready: ready };
     if (ready) {
@@ -1442,6 +1457,7 @@ const Admin = () => {
           <TabsList>
             <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
+            <TabsTrigger value="call-guide" className="gap-2"><ClipboardCheck className="w-4 h-4" />Call Guide</TabsTrigger>
             <TabsTrigger value="tasks" className="gap-2"><ListTodo className="w-4 h-4" />Tasks</TabsTrigger>
             <TabsTrigger value="emails" className="gap-2"><FileText className="w-4 h-4" />Email Templates</TabsTrigger>
           </TabsList>
@@ -1498,6 +1514,7 @@ const Admin = () => {
                           onSendDiscoveryInvite={handleSendDiscoveryInvite}
                           onMarkDiscoveryReady={handleMarkDiscoveryReady}
                           onUpdateDiscoveryAnswers={handleUpdateDiscoveryAnswers}
+                          onUpdateChecklist={handleUpdateChecklist}
                         />
                       ))}
                     </div>
@@ -1505,6 +1522,10 @@ const Admin = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="call-guide">
+            <CallGuide leads={leads as any} onUpdateChecklist={handleUpdateChecklist} />
           </TabsContent>
 
           <TabsContent value="tasks">
