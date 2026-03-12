@@ -21,6 +21,8 @@ import logo from '@/assets/logo-5to10x-color.png';
 import PipelineDashboard from '@/components/admin/PipelineDashboard';
 import AdminTasks from '@/components/admin/AdminTasks';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
+import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
+import CallGuide from '@/components/admin/CallGuide';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
