@@ -103,7 +103,7 @@ const PipelineDashboard = ({ leads, onStageClick }: PipelineDashboardProps) => {
       </div>
 
       {/* Per-stage breakdown */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         {grouped.map(stage => {
           const worstSla = stage.slaBreakdown.red > 0 ? 'red' : stage.slaBreakdown.amber > 0 ? 'amber' : 'green';
           return (
