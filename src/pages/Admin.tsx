@@ -89,6 +89,10 @@ interface ClientInterview {
   transcript: string | null;
   interviewed_at: string;
   created_at: string;
+  zoom_link: string | null;
+  call_completed: boolean;
+  calendly_event_id: string | null;
+  scheduled_at: string | null;
 }
 
 const STAGES: { key: PipelineStage; label: string }[] = [
