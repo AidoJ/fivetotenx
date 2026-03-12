@@ -1653,6 +1653,32 @@ const Admin = () => {
               )}
             </div>
           </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-display font-bold text-foreground">Integrations</h2>
+                <p className="text-sm text-muted-foreground">Configure third-party service connections.</p>
+              </div>
+
+              <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-display font-bold text-foreground flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      Calendly Webhook
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Register your webhook to auto-populate bookings when clients schedule discovery calls.
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="text-[10px]">Setup Required</Badge>
+                </div>
+
+                <CalendlyWebhookSetup />
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
