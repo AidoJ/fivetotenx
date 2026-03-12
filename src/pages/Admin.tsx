@@ -1453,6 +1453,25 @@ const Admin = () => {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_checklist: checklist } : l));
   };
 
+  const handleToggleComplete = async (interviewId: string, completed: boolean) => {
+    const { error } = await supabase.from('client_interviews').update({ call_completed: completed }).eq('id', interviewId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setInterviews(prev => prev.map(i => i.id === interviewId ? { ...i, call_completed: completed } : i));
+    }
+  };
+
+  const handleUpdateZoomLink = async (interviewId: string, zoomLink: string) => {
+    const { error } = await supabase.from('client_interviews').update({ zoom_link: zoomLink || null }).eq('id', interviewId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setInterviews(prev => prev.map(i => i.id === interviewId ? { ...i, zoom_link: zoomLink || null } : i));
+      toast({ title: 'Zoom link saved ✅' });
+    }
+  };
+
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
     const updates: any = { discovery_ready: ready };
     if (ready) {
