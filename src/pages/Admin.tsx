@@ -9,7 +9,7 @@ import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
   MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil,
-  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo
+  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import logo from '@/assets/logo-5to10x-color.png';
 import PipelineDashboard from '@/components/admin/PipelineDashboard';
 import AdminTasks from '@/components/admin/AdminTasks';
+import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -367,7 +368,7 @@ interface ProposalRecord {
   accepted_at: string | null;
 }
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -386,6 +387,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   onScheduleReminder: (id: string, days: number | null, scheduledAt: string | null) => void;
   onSendDiscoveryInvite: (lead: Assessment) => void;
   onMarkDiscoveryReady: (id: string, ready: boolean) => void;
+  onUpdateDiscoveryAnswers: (id: string, answers: any) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
@@ -676,12 +678,21 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
 
       {/* Discovery Calls / Build Refinement Calls */}
       {['discovery_call', 'proposal', 'signed', 'build_refinement'].includes(lead.pipeline_stage as string) && (
-        <ClientInterviewSection
-          assessmentId={lead.id}
-          interviews={interviews}
-          onAdd={onAddInterview}
-          onDelete={onDeleteInterview}
-        />
+        <>
+          <ClientInterviewSection
+            assessmentId={lead.id}
+            interviews={interviews}
+            onAdd={onAddInterview}
+            onDelete={onDeleteInterview}
+          />
+          {['discovery_call', 'proposal'].includes(lead.pipeline_stage as string) && (
+            <DiscoveryAnswersViewer
+              assessmentId={lead.id}
+              answers={(lead.discovery_answers && typeof lead.discovery_answers === 'object' && !Array.isArray(lead.discovery_answers)) ? lead.discovery_answers as any : null}
+              onUpdate={(answers) => onUpdateDiscoveryAnswers(lead.id, answers)}
+            />
+          )}
+        </>
       )}
 
       {/* Notes section */}
@@ -1303,7 +1314,16 @@ const Admin = () => {
           setInterviews(prev => prev.map(i => 
             i.id === data.id ? { ...i, transcript: transcribeResult.transcript } : i
           ));
-          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved and ready for proposal use.' });
+          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved. Extracting discovery answers...' });
+          
+          // The transcribe function auto-triggers extraction. Refresh answers after a delay.
+          setTimeout(async () => {
+            const { data: refreshed } = await supabase.from('roi_assessments').select('discovery_answers').eq('id', assessmentId).single();
+            if (refreshed?.discovery_answers) {
+              handleUpdateDiscoveryAnswers(assessmentId, refreshed.discovery_answers);
+              toast({ title: 'Discovery answers extracted ✅', description: 'AI-extracted answers are ready for review.' });
+            }
+          }, 15000);
         } catch (err: any) {
           console.error('Transcription failed:', err);
           toast({ title: 'Transcription failed', description: err.message || 'You can still use the audio file manually.', variant: 'destructive' });
@@ -1345,6 +1365,10 @@ const Admin = () => {
     } catch {
       toast({ title: 'Error', description: 'Failed to send discovery invite.', variant: 'destructive' });
     }
+  };
+
+  const handleUpdateDiscoveryAnswers = (id: string, answers: any) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_answers: answers } : l));
   };
 
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
@@ -1473,6 +1497,7 @@ const Admin = () => {
                           onScheduleReminder={handleScheduleReminder}
                           onSendDiscoveryInvite={handleSendDiscoveryInvite}
                           onMarkDiscoveryReady={handleMarkDiscoveryReady}
+                          onUpdateDiscoveryAnswers={handleUpdateDiscoveryAnswers}
                         />
                       ))}
                     </div>

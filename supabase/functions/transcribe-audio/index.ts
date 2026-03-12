@@ -112,6 +112,27 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
       throw new Error(`Failed to save transcript: ${updateError.message}`);
     }
 
+    // Get the assessment_id for this interview to trigger extraction
+    const { data: interview } = await supabase
+      .from('client_interviews')
+      .select('assessment_id')
+      .eq('id', interviewId)
+      .single();
+
+    // Auto-trigger discovery answer extraction (fire and forget)
+    if (interview?.assessment_id) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      fetch(`${supabaseUrl}/functions/v1/extract-discovery-answers`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ assessmentId: interview.assessment_id }),
+      }).catch(err => console.error('Auto-extraction trigger failed:', err));
+    }
+
     return new Response(JSON.stringify({ success: true, transcript }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
