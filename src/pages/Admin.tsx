@@ -689,11 +689,19 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
             onDelete={onDeleteInterview}
           />
           {['discovery_call', 'proposal'].includes(lead.pipeline_stage as string) && (
-            <DiscoveryAnswersViewer
-              assessmentId={lead.id}
-              answers={(lead.discovery_answers && typeof lead.discovery_answers === 'object' && !Array.isArray(lead.discovery_answers)) ? lead.discovery_answers as any : null}
-              onUpdate={(answers) => onUpdateDiscoveryAnswers(lead.id, answers)}
-            />
+            <>
+              <DiscoveryChecklist
+                assessmentId={lead.id}
+                checklist={(lead as any).discovery_checklist && typeof (lead as any).discovery_checklist === 'object' && !Array.isArray((lead as any).discovery_checklist) ? (lead as any).discovery_checklist as Record<string, boolean> : null}
+                onUpdate={(checklist) => onUpdateChecklist(lead.id, checklist)}
+                compact={true}
+              />
+              <DiscoveryAnswersViewer
+                assessmentId={lead.id}
+                answers={(lead.discovery_answers && typeof lead.discovery_answers === 'object' && !Array.isArray(lead.discovery_answers)) ? lead.discovery_answers as any : null}
+                onUpdate={(answers) => onUpdateDiscoveryAnswers(lead.id, answers)}
+              />
+            </>
           )}
         </>
       )}
