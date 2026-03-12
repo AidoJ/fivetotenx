@@ -1431,6 +1431,8 @@ const Admin = () => {
                           onDeleteInterview={handleDeleteInterview}
                           onSendReminder={handleSendReminder}
                           onScheduleReminder={handleScheduleReminder}
+                          onSendDiscoveryInvite={handleSendDiscoveryInvite}
+                          onMarkDiscoveryReady={handleMarkDiscoveryReady}
                         />
                       ))}
                     </div>
