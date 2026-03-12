@@ -465,6 +465,45 @@ serve(async (req) => {
       } catch (adminErr) {
         console.error('Admin notification failed (non-blocking):', adminErr);
       }
+      }
+
+      // Auto-send Deep Dive invite to qualified leads
+      if (assessmentId) {
+        try {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+          const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+          
+          await fetch(`${supabaseUrl}/functions/v1/send-deep-dive-invite`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseAnonKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contactName,
+              contactEmail,
+              businessName,
+              assessmentId,
+            }),
+          });
+
+          // Update pipeline stage to deep_dive_sent
+          const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+          const supabase = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+          const now = new Date().toISOString();
+          const followUpAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
+          await supabase.from('roi_assessments').update({
+            pipeline_stage: 'deep_dive_sent',
+            invite_sent: true,
+            invite_sent_at: now,
+            follow_up_scheduled_at: followUpAt,
+          }).eq('id', assessmentId);
+
+          console.log('Auto-sent Deep Dive invite to qualified lead:', contactEmail);
+        } catch (ddErr) {
+          console.error('Auto Deep Dive invite failed (non-blocking):', ddErr);
+        }
+      }
     }
 
     console.log('Email sent successfully:', resendData);
