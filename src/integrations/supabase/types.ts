@@ -384,6 +384,33 @@ export type Database = {
         }
         Relationships: []
       }
+      training_registrations: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          email: string
+          id: string
+          industry: string | null
+          name: string
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          industry?: string | null
+          name: string
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
