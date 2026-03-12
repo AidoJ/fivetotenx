@@ -1006,6 +1006,7 @@ const Admin = () => {
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const [interviews, setInterviews] = useState<ClientInterview[]>([]);
   const [tasks, setTasks] = useState<AdminTask[]>([]);
+  const [trainingRegs, setTrainingRegs] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
