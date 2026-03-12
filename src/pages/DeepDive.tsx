@@ -243,7 +243,7 @@ const DeepDive = () => {
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground">Thank You, {contactName}!</h1>
           <p className="text-muted-foreground">
-            Your deep dive questionnaire has been submitted. Our team will review your responses and prepare a tailored proposal for <strong>{businessName}</strong>.
+            Your deep dive questionnaire has been submitted. Our team will review your responses and once completed send you an invite to join a Discovery call which is the final step to refine your requirements. Once that is completed we will then give you a thorough report and proposal for your consideration.
           </p>
           <p className="text-sm text-muted-foreground">We'll be in touch within 24–48 hours.</p>
         </motion.div>
