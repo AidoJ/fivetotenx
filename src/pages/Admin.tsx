@@ -1382,6 +1382,10 @@ const Admin = () => {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_answers: answers } : l));
   };
 
+  const handleUpdateChecklist = (id: string, checklist: Record<string, boolean>) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_checklist: checklist } : l));
+  };
+
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
     const updates: any = { discovery_ready: ready };
     if (ready) {
