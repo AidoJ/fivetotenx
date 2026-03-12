@@ -1601,6 +1601,8 @@ const Admin = () => {
                           onMarkDiscoveryReady={handleMarkDiscoveryReady}
                           onUpdateDiscoveryAnswers={handleUpdateDiscoveryAnswers}
                           onUpdateChecklist={handleUpdateChecklist}
+                          onToggleComplete={handleToggleComplete}
+                          onUpdateZoomLink={handleUpdateZoomLink}
                         />
                       ))}
                     </div>
