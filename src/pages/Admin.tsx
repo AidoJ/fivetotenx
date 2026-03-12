@@ -1457,6 +1457,7 @@ const Admin = () => {
           <TabsList>
             <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
+            <TabsTrigger value="call-guide" className="gap-2"><ClipboardCheck className="w-4 h-4" />Call Guide</TabsTrigger>
             <TabsTrigger value="tasks" className="gap-2"><ListTodo className="w-4 h-4" />Tasks</TabsTrigger>
             <TabsTrigger value="emails" className="gap-2"><FileText className="w-4 h-4" />Email Templates</TabsTrigger>
           </TabsList>
