@@ -1362,7 +1362,7 @@ const Admin = () => {
     }
   };
 
-
+  const handleSaveTemplate = async (updated: EmailTemplate) => {
     const { error } = await supabase.from('email_templates')
       .update({
         subject: updated.subject,
