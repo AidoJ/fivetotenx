@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contactName, contactEmail, businessName, results, zoomLink, formData, assessmentId, isQualified } = await req.json();
+    const { contactName, contactEmail, businessName, results, formData, assessmentId, isQualified } = await req.json();
 
     if (!contactEmail || !contactName) {
       return new Response(JSON.stringify({ error: 'Name and email are required' }), {
@@ -75,19 +75,7 @@ serve(async (req) => {
       `;
     }
 
-    const zoomSection = zoomLink
-      ? `
-        <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
-          <tr>
-            <td style="padding: 24px 32px; background: #1e3a5f; border-radius: 12px; text-align: center;">
-              <p style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 8px;">🎥 Your Strategy Session Is Booked</p>
-              <p style="color: #b0c4de; font-size: 14px; margin: 0 0 16px;">Let's walk through these numbers together and map out your implementation roadmap.</p>
-              <a href="${zoomLink}" style="display: inline-block; padding: 12px 32px; background: #3b82f6; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Join Strategy Session</a>
-            </td>
-          </tr>
-        </table>
-      `
-      : '';
+    // Zoom section removed — no longer used
 
     // Deep Dive CTA for qualified leads
     const deepDiveBaseUrl = 'https://5to10x.app';
@@ -381,8 +369,9 @@ serve(async (req) => {
               <!-- Deep Dive CTA -->
               ${deepDiveSection}
 
-              <!-- Zoom section -->
-              ${zoomSection ? `<tr><td style="padding: 0 32px;">${zoomSection}</td></tr>` : ''}
+
+              <!-- Deep Dive CTA -->
+              ${deepDiveSection}
 
               <!-- CLOSING -->
               <tr>
@@ -397,9 +386,15 @@ serve(async (req) => {
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
                     <strong>The cost of inaction is real:</strong> every month of delay represents approximately <strong>${fmt(results.totalAnnualImpact / 12)}</strong> in unrealised value. That's not a scare tactic — it's simply what the numbers show.
                   </p>
+                  ${isQualified ? `
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
-                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is a brief strategy call to map out your app's features and timeline.
+                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is the <strong>Deep Dive questionnaire</strong> — a quick 5-minute form to scope the perfect solution. Check your inbox for the invite, or click the link above.
                   </p>
+                  ` : `
+                  <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
+                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. Reply to this email to start the conversation.
+                  </p>
+                  `}
                 </td>
               </tr>
 
@@ -469,6 +464,45 @@ serve(async (req) => {
         });
       } catch (adminErr) {
         console.error('Admin notification failed (non-blocking):', adminErr);
+      }
+      }
+
+      // Auto-send Deep Dive invite to qualified leads
+      if (assessmentId) {
+        try {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+          const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+          
+          await fetch(`${supabaseUrl}/functions/v1/send-deep-dive-invite`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseAnonKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contactName,
+              contactEmail,
+              businessName,
+              assessmentId,
+            }),
+          });
+
+          // Update pipeline stage to deep_dive_sent
+          const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+          const supabase = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+          const now = new Date().toISOString();
+          const followUpAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
+          await supabase.from('roi_assessments').update({
+            pipeline_stage: 'deep_dive_sent',
+            invite_sent: true,
+            invite_sent_at: now,
+            follow_up_scheduled_at: followUpAt,
+          }).eq('id', assessmentId);
+
+          console.log('Auto-sent Deep Dive invite to qualified lead:', contactEmail);
+        } catch (ddErr) {
+          console.error('Auto Deep Dive invite failed (non-blocking):', ddErr);
+        }
       }
     }
 

@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ROIResults, FormData } from '@/lib/formTypes';
-import { TrendingUp, Clock, Users, DollarSign, ArrowRight, Send, Video, Loader2, CheckCircle, ShieldAlert, ShoppingBag, Megaphone, Sparkles } from 'lucide-react';
+import { TrendingUp, Clock, Users, ArrowRight, Send, Loader2, CheckCircle, ShieldAlert, ShoppingBag, Megaphone, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import PricingSection from '@/components/dashboard/PricingSection';
@@ -36,19 +34,14 @@ const ResultCard = ({ icon: Icon, label, value, color, delay }: {
 );
 
 const ROIDashboard = ({ results, formData, onReset }: Props) => {
-  const [zoomLink, setZoomLink] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [assessmentId, setAssessmentId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleSendReport = async (includeZoom: boolean) => {
+  const handleSendReport = async (_includeZoom: boolean) => {
     if (!formData.contactEmail || !formData.contactName) {
       toast({ title: 'Missing info', description: 'Name and email are required to send the report.', variant: 'destructive' });
-      return;
-    }
-    if (includeZoom && !zoomLink) {
-      toast({ title: 'Missing Zoom link', description: 'Please enter a Zoom link before sending the invite.', variant: 'destructive' });
       return;
     }
 
@@ -63,7 +56,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         form_data: JSON.parse(JSON.stringify(formData)),
         roi_results: JSON.parse(JSON.stringify(results)),
         report_sent: true,
-        invite_sent: includeZoom,
+        invite_sent: false,
         is_qualified: results.pricing.isQualified,
         pipeline_stage: results.pricing.isQualified ? 'qualified' : 'assessment',
         qualified_at: results.pricing.isQualified ? new Date().toISOString() : null,
@@ -77,7 +70,6 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           businessName: formData.businessName,
           results,
           formData,
-          zoomLink: includeZoom ? zoomLink : null,
           assessmentId: insertedRow?.id || null,
           isQualified: results.pricing.isQualified,
         },
@@ -216,7 +208,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         </div>
       </motion.div>
 
-      {/* Send Report & Zoom Invite */}
+      {/* Send Report */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -228,23 +220,9 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           Send Report to {formData.contactName || 'Client'}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Send this ROI report to <strong>{formData.contactEmail}</strong>. Optionally include a Zoom training session invite.
+          Send this ROI report to <strong>{formData.contactEmail}</strong>.
+          {results.pricing.isQualified && ' Qualified leads will automatically receive a Deep Dive invitation.'}
         </p>
-
-        <div className="space-y-2">
-          <Label htmlFor="zoomLink" className="flex items-center gap-2">
-            <Video className="w-4 h-4 text-primary" />
-            Zoom Training Link (optional)
-          </Label>
-          <Input
-            id="zoomLink"
-            type="url"
-            placeholder="https://zoom.us/j/your-meeting-id"
-            value={zoomLink}
-            onChange={(e) => setZoomLink(e.target.value)}
-            disabled={sent}
-          />
-        </div>
 
         {sent ? (
           <div className="flex items-center gap-2 text-primary font-medium">
@@ -252,16 +230,10 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
             Report sent successfully!
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={() => handleSendReport(false)} disabled={sending} className="gap-2">
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              Send Report Only
-            </Button>
-            <Button onClick={() => handleSendReport(true)} disabled={sending || !zoomLink} variant="outline" className="gap-2">
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-              Send Report + Zoom Invite
-            </Button>
-          </div>
+          <Button onClick={() => handleSendReport(false)} disabled={sending} className="gap-2">
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            Send Report
+          </Button>
         )}
       </motion.div>
 

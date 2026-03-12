@@ -9,7 +9,7 @@ import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
   MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil,
-  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain, ClipboardCheck
+  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain, ClipboardCheck, GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1006,6 +1006,7 @@ const Admin = () => {
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const [interviews, setInterviews] = useState<ClientInterview[]>([]);
   const [tasks, setTasks] = useState<AdminTask[]>([]);
+  const [trainingRegs, setTrainingRegs] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -1021,13 +1022,14 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes, trainingRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
       supabase.from('proposals').select('*').order('created_at', { ascending: false }),
       supabase.from('client_interviews').select('*').order('interviewed_at', { ascending: true }),
       supabase.from('admin_tasks' as any).select('*').order('created_at', { ascending: false }),
+      supabase.from('training_registrations' as any).select('*').order('created_at', { ascending: false }),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
@@ -1038,6 +1040,7 @@ const Admin = () => {
     if (!proposalsRes.error) setProposals((proposalsRes.data as ProposalRecord[]) || []);
     if (!interviewsRes.error) setInterviews((interviewsRes.data as ClientInterview[]) || []);
     if (!tasksRes.error) setTasks((tasksRes.data as unknown as AdminTask[]) || []);
+    if (!trainingRes.error) setTrainingRegs(trainingRes.data || []);
 
     setLoading(false);
   };
@@ -1622,6 +1625,7 @@ const Admin = () => {
             <TabsTrigger value="tasks" className="gap-2"><ListTodo className="w-4 h-4" />Tasks</TabsTrigger>
             <TabsTrigger value="emails" className="gap-2"><FileText className="w-4 h-4" />Email Templates</TabsTrigger>
             <TabsTrigger value="settings" className="gap-2"><Wrench className="w-4 h-4" />Settings</TabsTrigger>
+            <TabsTrigger value="training" className="gap-2"><GraduationCap className="w-4 h-4" />Training</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard">
@@ -1752,6 +1756,49 @@ const Admin = () => {
 
                 <CalendlyWebhookSetup />
               </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="training">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-display font-bold text-foreground">Training Registrations</h2>
+                <p className="text-sm text-muted-foreground">{trainingRegs.length} registration{trainingRegs.length !== 1 ? 's' : ''} from the website free training form.</p>
+              </div>
+
+              {trainingRegs.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground">
+                  <GraduationCap className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium">No registrations yet</p>
+                  <p className="text-sm">Registrations will appear here when people sign up via the website.</p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/30">
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Name</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Email</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Business</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Industry</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Registered</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {trainingRegs.map((reg: any) => (
+                        <tr key={reg.id} className="border-b border-border hover:bg-secondary/20 transition-colors">
+                          <td className="px-4 py-3 text-foreground font-medium">{reg.name}</td>
+                          <td className="px-4 py-3">
+                            <a href={`mailto:${reg.email}`} className="text-primary hover:underline">{reg.email}</a>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{reg.business_name || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{reg.industry || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(reg.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

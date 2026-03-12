@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowRight, Zap, TrendingUp, BarChart3, CheckCircle, X,
   Clock, Users, Cog, Rocket, Shield, Eye, Link2,
@@ -621,6 +622,28 @@ const ZeroRiskSection = () =>
 
 const FreeTrainingSection = () => {
   const [formState, setFormState] = useState({ name: '', email: '', business: '', industry: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formState.name || !formState.email) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('training_registrations' as any).insert([{
+        name: formState.name,
+        email: formState.email,
+        business_name: formState.business || null,
+        industry: formState.industry || null,
+      }]);
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Training registration error:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
@@ -654,63 +677,70 @@ const FreeTrainingSection = () => {
           </motion.div>
 
           <motion.div {...stagger(0.3)} className="rounded-2xl border p-8" style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
-            <h3 className="font-display font-bold text-lg mb-6" style={{ color: 'hsl(0 0% 95%)' }}>
-              Register for the Free Training
-            </h3>
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Name</Label>
-                <Input
-                  value={formState.name}
-                  onChange={(e) => setFormState((s) => ({ ...s, name: e.target.value }))}
-                  className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
-                  placeholder="Your name" />
-                
+            {submitted ? (
+              <div className="text-center py-8 space-y-4">
+                <CheckCircle className="w-12 h-12 mx-auto" style={{ color: 'hsl(260 65% 70%)' }} />
+                <h3 className="font-display font-bold text-lg" style={{ color: 'hsl(0 0% 95%)' }}>You're Registered!</h3>
+                <p className="text-sm" style={{ color: 'hsl(220 20% 72%)' }}>We'll be in touch with session details shortly.</p>
               </div>
-              <div>
-                <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Email</Label>
-                <Input
-                  type="email"
-                  value={formState.email}
-                  onChange={(e) => setFormState((s) => ({ ...s, email: e.target.value }))}
-                  className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
-                  placeholder="you@business.com" />
-                
-              </div>
-              <div>
-                <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Business Name</Label>
-                <Input
-                  value={formState.business}
-                  onChange={(e) => setFormState((s) => ({ ...s, business: e.target.value }))}
-                  className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
-                  placeholder="Your business" />
-                
-              </div>
-              <div>
-                <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Industry</Label>
-                <Input
-                  value={formState.industry}
-                  onChange={(e) => setFormState((s) => ({ ...s, industry: e.target.value }))}
-                  className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
-                  placeholder="e.g. Health & Wellness" />
-                
-              </div>
-              <Button
-                type="submit"
-                className="w-full py-5 text-base font-semibold rounded-xl"
-                style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
-                
-                Register My Spot
-              </Button>
-              <p className="text-xs text-center" style={{ color: 'hsl(220 15% 50%)' }}>
-                Limited session sizes so we can answer questions and explore real examples.
-              </p>
-            </form>
+            ) : (
+              <>
+                <h3 className="font-display font-bold text-lg mb-6" style={{ color: 'hsl(0 0% 95%)' }}>
+                  Register for the Free Training
+                </h3>
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div>
+                    <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Name</Label>
+                    <Input
+                      value={formState.name}
+                      onChange={(e) => setFormState((s) => ({ ...s, name: e.target.value }))}
+                      className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                      placeholder="Your name"
+                      required />
+                  </div>
+                  <div>
+                    <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Email</Label>
+                    <Input
+                      type="email"
+                      value={formState.email}
+                      onChange={(e) => setFormState((s) => ({ ...s, email: e.target.value }))}
+                      className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                      placeholder="you@business.com"
+                      required />
+                  </div>
+                  <div>
+                    <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Business Name</Label>
+                    <Input
+                      value={formState.business}
+                      onChange={(e) => setFormState((s) => ({ ...s, business: e.target.value }))}
+                      className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                      placeholder="Your business" />
+                  </div>
+                  <div>
+                    <Label className="text-sm" style={{ color: 'hsl(220 20% 75%)' }}>Industry</Label>
+                    <Input
+                      value={formState.industry}
+                      onChange={(e) => setFormState((s) => ({ ...s, industry: e.target.value }))}
+                      className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                      placeholder="e.g. Health & Wellness" />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full py-5 text-base font-semibold rounded-xl"
+                    style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
+                    {submitting ? 'Registering...' : 'Register My Spot'}
+                  </Button>
+                  <p className="text-xs text-center" style={{ color: 'hsl(220 15% 50%)' }}>
+                    Limited session sizes so we can answer questions and explore real examples.
+                  </p>
+                </form>
+              </>
+            )}
           </motion.div>
         </div>
       </div>
     </section>);
-
 };
 
 const CoFoundersSection = () => {
