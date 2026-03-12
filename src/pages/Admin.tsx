@@ -750,6 +750,8 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
             interviews={interviews}
             onAdd={onAddInterview}
             onDelete={onDeleteInterview}
+            onToggleComplete={onToggleComplete}
+            onUpdateZoomLink={onUpdateZoomLink}
           />
           {['discovery_call', 'proposal'].includes(lead.pipeline_stage as string) && (
             <>
