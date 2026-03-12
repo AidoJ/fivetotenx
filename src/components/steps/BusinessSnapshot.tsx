@@ -69,9 +69,32 @@ const BusinessSnapshot = ({ data, onChange }: Props) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="staff">Number of Staff</Label>
+        <Label htmlFor="staff">Total Number of Staff</Label>
         <Input id="staff" type="number" placeholder="e.g. 12"
         value={data.numberOfStaff} onChange={(e) => onChange({ numberOfStaff: e.target.value })} />
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="staffFT">Full-Time</Label>
+          <Input id="staffFT" type="number" placeholder="e.g. 5"
+          value={data.staffFullTime} onChange={(e) => onChange({ staffFullTime: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="staffPT">Part-Time</Label>
+          <Input id="staffPT" type="number" placeholder="e.g. 3"
+          value={data.staffPartTime} onChange={(e) => onChange({ staffPartTime: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="staffCasual">Casual</Label>
+          <Input id="staffCasual" type="number" placeholder="e.g. 2"
+          value={data.staffCasual} onChange={(e) => onChange({ staffCasual: e.target.value })} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="staffSub">Subcontractors</Label>
+          <Input id="staffSub" type="number" placeholder="e.g. 2"
+          value={data.staffSubcontractors} onChange={(e) => onChange({ staffSubcontractors: e.target.value })} />
+        </div>
       </div>
 
       <div className="space-y-3">
