@@ -59,35 +59,47 @@ export type Database = {
         Row: {
           assessment_id: string
           audio_file_url: string | null
+          calendly_event_id: string | null
+          call_completed: boolean | null
           content: string | null
           created_at: string
           id: string
           interview_type: string
           interviewed_at: string
+          scheduled_at: string | null
           title: string
           transcript: string | null
+          zoom_link: string | null
         }
         Insert: {
           assessment_id: string
           audio_file_url?: string | null
+          calendly_event_id?: string | null
+          call_completed?: boolean | null
           content?: string | null
           created_at?: string
           id?: string
           interview_type?: string
           interviewed_at?: string
+          scheduled_at?: string | null
           title?: string
           transcript?: string | null
+          zoom_link?: string | null
         }
         Update: {
           assessment_id?: string
           audio_file_url?: string | null
+          calendly_event_id?: string | null
+          call_completed?: boolean | null
           content?: string | null
           created_at?: string
           id?: string
           interview_type?: string
           interviewed_at?: string
+          scheduled_at?: string | null
           title?: string
           transcript?: string | null
+          zoom_link?: string | null
         }
         Relationships: [
           {
