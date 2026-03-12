@@ -84,7 +84,7 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
     const updated = { ...answers, [key]: { ...answers[key], answer: editValue, confidence: 'high' as const } };
     const { error } = await supabase
       .from('roi_assessments')
-      .update({ discovery_answers: updated })
+      .update({ discovery_answers: JSON.parse(JSON.stringify(updated)) })
       .eq('id', assessmentId);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
