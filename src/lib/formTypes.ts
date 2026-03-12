@@ -9,6 +9,10 @@ export interface FormData {
   industry: string;
   businessType: BusinessType;
   numberOfStaff: string;
+  staffFullTime: string;
+  staffPartTime: string;
+  staffCasual: string;
+  staffSubcontractors: string;
   monthlyRevenue: string;
 
   // Section 2
@@ -143,6 +147,10 @@ export const initialFormData: FormData = {
   industry: '',
   businessType: 'service',
   numberOfStaff: '',
+  staffFullTime: '',
+  staffPartTime: '',
+  staffCasual: '',
+  staffSubcontractors: '',
   monthlyRevenue: '',
   monthlyVisitors: '',
   monthlyLeads: '',
