@@ -1758,6 +1758,49 @@ const Admin = () => {
               </div>
             </div>
           </TabsContent>
+          <TabsContent value="training">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-display font-bold text-foreground">Training Registrations</h2>
+                <p className="text-sm text-muted-foreground">{trainingRegs.length} registration{trainingRegs.length !== 1 ? 's' : ''} from the website free training form.</p>
+              </div>
+
+              {trainingRegs.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground">
+                  <GraduationCap className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium">No registrations yet</p>
+                  <p className="text-sm">Registrations will appear here when people sign up via the website.</p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/30">
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Name</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Email</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Business</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Industry</th>
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Registered</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {trainingRegs.map((reg: any) => (
+                        <tr key={reg.id} className="border-b border-border hover:bg-secondary/20 transition-colors">
+                          <td className="px-4 py-3 text-foreground font-medium">{reg.name}</td>
+                          <td className="px-4 py-3">
+                            <a href={`mailto:${reg.email}`} className="text-primary hover:underline">{reg.email}</a>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{reg.business_name || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{reg.industry || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(reg.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
