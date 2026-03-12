@@ -1358,6 +1358,10 @@ const Admin = () => {
     }
   };
 
+  const handleUpdateDiscoveryAnswers = (id: string, answers: any) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_answers: answers } : l));
+  };
+
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
     const updates: any = { discovery_ready: ready };
     if (ready) {
