@@ -13,6 +13,7 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'discovery_call' as PipelineStage, label: 'Discovery Call' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'signed', label: 'Signed ✅' },
+  { key: 'build_refinement' as PipelineStage, label: 'Build Refinement' },
 ];
 
 const getSlaStatus = (lead: Assessment): 'green' | 'amber' | 'red' => {
