@@ -1524,6 +1524,10 @@ const Admin = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="call-guide">
+            <CallGuide leads={leads as any} onUpdateChecklist={handleUpdateChecklist} />
+          </TabsContent>
+
           <TabsContent value="tasks">
             <AdminTasks tasks={tasks} setTasks={setTasks} />
           </TabsContent>
