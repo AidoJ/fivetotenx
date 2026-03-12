@@ -369,8 +369,9 @@ serve(async (req) => {
               <!-- Deep Dive CTA -->
               ${deepDiveSection}
 
-              <!-- Zoom section -->
-              ${zoomSection ? `<tr><td style="padding: 0 32px;">${zoomSection}</td></tr>` : ''}
+
+              <!-- Deep Dive CTA -->
+              ${deepDiveSection}
 
               <!-- CLOSING -->
               <tr>
