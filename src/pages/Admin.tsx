@@ -1322,7 +1322,47 @@ const Admin = () => {
     }
   };
 
-  const handleSaveTemplate = async (updated: EmailTemplate) => {
+  const handleSendDiscoveryInvite = async (lead: Assessment) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-discovery-invite', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          assessmentId: lead.id,
+          calendlyUrl: CALENDLY_URL,
+        },
+      });
+      if (error) throw error;
+      // Move to discovery_call stage if not already there
+      if (lead.pipeline_stage === 'deep_dive_complete') {
+        await supabase.from('roi_assessments').update({
+          pipeline_stage: 'discovery_call' as any,
+        }).eq('id', lead.id);
+        setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'discovery_call' as PipelineStage } : l));
+      }
+      toast({ title: 'Discovery Invite Sent ✅', description: `Calendly booking link sent to ${lead.contact_email}` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to send discovery invite.', variant: 'destructive' });
+    }
+  };
+
+  const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
+    const updates: any = { discovery_ready: ready };
+    if (ready) {
+      // Auto-move to proposal stage
+      updates.pipeline_stage = 'proposal';
+    }
+    const { error } = await supabase.from('roi_assessments').update(updates).eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+      toast({ title: ready ? 'Discovery marked complete ✅' : 'Discovery reopened', description: ready ? 'Lead moved to Proposal stage.' : 'Lead returned to Discovery Call.' });
+    }
+  };
+
+
     const { error } = await supabase.from('email_templates')
       .update({
         subject: updated.subject,
