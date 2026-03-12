@@ -678,12 +678,21 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
 
       {/* Discovery Calls / Build Refinement Calls */}
       {['discovery_call', 'proposal', 'signed', 'build_refinement'].includes(lead.pipeline_stage as string) && (
-        <ClientInterviewSection
-          assessmentId={lead.id}
-          interviews={interviews}
-          onAdd={onAddInterview}
-          onDelete={onDeleteInterview}
-        />
+        <>
+          <ClientInterviewSection
+            assessmentId={lead.id}
+            interviews={interviews}
+            onAdd={onAddInterview}
+            onDelete={onDeleteInterview}
+          />
+          {['discovery_call', 'proposal'].includes(lead.pipeline_stage as string) && (
+            <DiscoveryAnswersViewer
+              assessmentId={lead.id}
+              answers={(lead.discovery_answers && typeof lead.discovery_answers === 'object' && !Array.isArray(lead.discovery_answers)) ? lead.discovery_answers as any : null}
+              onUpdate={(answers) => onUpdateDiscoveryAnswers(lead.id, answers)}
+            />
+          )}
+        </>
       )}
 
       {/* Notes section */}
