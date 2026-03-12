@@ -1539,7 +1539,7 @@ const Admin = () => {
       </header>
 
       <main className="max-w-[1600px] mx-auto p-4">
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setPipelineFilter(null); if (v === 'emails' && templates.length === 0) fetchTemplates(); if (v === 'settings' && emailTemplates.length === 0) fetchEmailTemplates(); }} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setPipelineFilter(null); if (v === 'emails' && templates.length === 0) fetchTemplates(); }} className="space-y-4">
           <TabsList>
             <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
             <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
