@@ -465,7 +465,6 @@ serve(async (req) => {
       } catch (adminErr) {
         console.error('Admin notification failed (non-blocking):', adminErr);
       }
-      }
 
       // Auto-send Deep Dive invite to qualified leads
       if (assessmentId) {
