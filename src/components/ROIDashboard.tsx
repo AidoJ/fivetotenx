@@ -58,7 +58,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         form_data: JSON.parse(JSON.stringify(formData)),
         roi_results: JSON.parse(JSON.stringify(results)),
         report_sent: true,
-        invite_sent: includeZoom,
+        invite_sent: false,
         is_qualified: results.pricing.isQualified,
         pipeline_stage: results.pricing.isQualified ? 'qualified' : 'assessment',
         qualified_at: results.pricing.isQualified ? new Date().toISOString() : null,
