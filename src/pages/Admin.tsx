@@ -391,9 +391,10 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   const [showDeepDive, setShowDeepDive] = useState(false);
   const [copied, setCopied] = useState(false);
   const roi = lead.roi_results as any;
-  const currentIdx = STAGES.findIndex(s => s.key === lead.pipeline_stage);
-  const canSendDeepDive = lead.is_qualified && (lead.pipeline_stage === 'qualified' || lead.pipeline_stage === 'deep_dive_sent');
+  const currentIdx = stageIndex(lead.pipeline_stage);
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
+  const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
+  const isDiscoveryReady = (lead as any).discovery_ready === true;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(deepDiveUrl);
@@ -432,6 +433,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
         {formatDate(lead.created_at)}
       </div>
 
+      {/* Status badges */}
       <div className="flex items-center gap-2 flex-wrap">
         {lead.is_qualified && (
           <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary border-0">Qualified</Badge>
@@ -439,48 +441,145 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
         {deepDive && (
           <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-700 border-0">Deep Dive ✓</Badge>
         )}
+        {hasInterviews && (
+          <Badge variant="secondary" className="text-[10px] bg-blue-500/10 text-blue-700 border-0">
+            Discovery {isDiscoveryReady ? '✓' : `(${interviews.filter(i => i.assessment_id === lead.id).length})`}
+          </Badge>
+        )}
+        {isDiscoveryReady && (
+          <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-700 border-0">Ready for Proposal</Badge>
+        )}
       </div>
 
-      {/* On-site & email actions for qualified leads */}
-      {lead.is_qualified && (
-        <div className="space-y-2">
+      {/* ═══════ STAGE-SPECIFIC ACTIONS ═══════ */}
+      <div className="space-y-2">
+
+        {/* ASSESSMENT → Qualify */}
+        {lead.pipeline_stage === 'assessment' && !lead.is_qualified && (
+          <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
+            onClick={() => onMove(lead.id, 'qualified')}>
+            <Check className="w-3 h-3" /> Qualify Lead
+          </Button>
+        )}
+
+        {/* QUALIFIED → Send Deep Dive Invite */}
+        {lead.pipeline_stage === 'qualified' && (
           <div className="flex items-center gap-1.5 flex-wrap">
-            {canSendDeepDive && (
-              <div className="flex flex-col items-start">
+            <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
+              onClick={(e) => { e.stopPropagation(); onSendDeepDive(lead); }}>
+              <Send className="w-3 h-3" /> {lead.invite_sent ? 'Resend Deep Dive Invite' : 'Send Deep Dive Invite'}
+            </Button>
+            {lead.invite_sent && lead.invite_sent_at && (
+              <span className="text-[9px] text-muted-foreground">Sent {formatDate(lead.invite_sent_at)}</span>
+            )}
+          </div>
+        )}
+
+        {/* DEEP DIVE SENT → Copy link, open, follow-up */}
+        {lead.pipeline_stage === 'deep_dive_sent' && (
+          <>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => window.open(deepDiveUrl, '_blank')}>
+                <ExternalLink className="w-3 h-3" /> Open Deep Dive
+              </Button>
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1" onClick={handleCopy}>
+                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                {copied ? 'Copied' : 'Copy Link'}
+              </Button>
+              {lead.invite_sent && (
                 <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                   onClick={(e) => { e.stopPropagation(); onSendDeepDive(lead); }}>
-                  <Send className="w-3 h-3" /> {lead.invite_sent ? 'Resend Invite' : 'Email Invite'}
+                  <Send className="w-3 h-3" /> Resend Invite
                 </Button>
-                {lead.invite_sent && lead.invite_sent_at && (
-                  <span className="text-[9px] text-muted-foreground ml-0.5 mt-0.5">
-                    Sent {formatDate(lead.invite_sent_at)}
-                  </span>
-                )}
-              </div>
-            )}
-            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-              onClick={() => window.open(deepDiveUrl, '_blank')}>
-              <ExternalLink className="w-3 h-3" /> Open
-            </Button>
-            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-              onClick={handleCopy}>
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              {copied ? 'Copied' : 'Copy Link'}
-            </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">Follow up in</span>
+              <Input type="number" min={1} max={30} defaultValue={lead.follow_up_days || 2}
+                className="h-6 w-14 text-[10px] text-center"
+                onBlur={(e) => onUpdateFollowUp(lead.id, parseInt(e.target.value) || 2)} />
+              <span className="text-[10px] text-muted-foreground">days</span>
+              {lead.follow_up_sent && (
+                <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* DEEP DIVE COMPLETE → View responses + Send Discovery Call Invite */}
+        {lead.pipeline_stage === 'deep_dive_complete' && (
+          <>
             {deepDive && (
               <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
                 onClick={() => setShowDeepDive(!showDeepDive)}>
-                <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Responses
+                <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Deep Dive
               </Button>
             )}
-          </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => onSendDiscoveryInvite(lead)}>
+                <Send className="w-3 h-3" /> Send Discovery Call Invite
+              </Button>
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => window.open(CALENDLY_URL, '_blank')}>
+                <ExternalLink className="w-3 h-3" /> Open Calendly
+              </Button>
+            </div>
+          </>
+        )}
 
-          {/* Proposal actions */}
-          {deepDive && (
+        {/* DISCOVERY CALL → Add calls, view deep dive, mark ready, Calendly */}
+        {lead.pipeline_stage === 'discovery_call' && (
+          <>
+            {deepDive && (
+              <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => setShowDeepDive(!showDeepDive)}>
+                <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Deep Dive
+              </Button>
+            )}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => window.open(CALENDLY_URL, '_blank')}>
+                <ExternalLink className="w-3 h-3" /> Book Another Call
+              </Button>
+              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => onSendDiscoveryInvite(lead)}>
+                <Send className="w-3 h-3" /> Send Booking Link
+              </Button>
+            </div>
+            {!isDiscoveryReady ? (
+              <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => onMarkDiscoveryReady(lead.id, true)}
+                disabled={!hasInterviews}>
+                <Check className="w-3 h-3" /> Mark Discovery Complete
+              </Button>
+            ) : (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-700 border-0">Discovery Complete ✓</Badge>
+                <Button size="sm" variant="ghost" className="h-5 text-[9px] px-1 text-muted-foreground"
+                  onClick={() => onMarkDiscoveryReady(lead.id, false)}>
+                  Undo
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* PROPOSAL → Prepare/Edit/Send */}
+        {lead.pipeline_stage === 'proposal' && (
+          <>
+            {deepDive && (
+              <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => setShowDeepDive(!showDeepDive)}>
+                <ClipboardList className="w-3 h-3" /> {showDeepDive ? 'Hide' : 'View'} Deep Dive
+              </Button>
+            )}
             <div className="flex flex-col items-start gap-1">
               <div className="flex items-center gap-1.5">
                 {!proposal ? (
-                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                  <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
                     onClick={() => onPrepareProposal(lead)}>
                     <FileText className="w-3 h-3" /> Prepare Proposal
                   </Button>
@@ -492,94 +591,91 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
                     </Button>
                     <Button size="sm" variant="default" className="h-6 text-[10px] px-2 gap-1"
                       onClick={() => onSendProposal(lead)}>
-                      <Send className="w-3 h-3" /> {(lead as any).proposal_sent_at ? 'Resend Proposal' : 'Send Proposal'}
+                      <Send className="w-3 h-3" /> {lead.proposal_sent_at ? 'Resend Proposal' : 'Send Proposal'}
                     </Button>
                   </>
                 )}
               </div>
-              {(lead as any).proposal_sent_at && (
+              {lead.proposal_sent_at && (
                 <span className="text-[9px] text-muted-foreground ml-0.5">
-                  Sent {formatDate((lead as any).proposal_sent_at)}
+                  Sent {formatDate(lead.proposal_sent_at)}
                 </span>
               )}
             </div>
-          )}
-
-          {/* Follow-up scheduler - deep_dive_sent */}
-          {lead.pipeline_stage === 'deep_dive_sent' && (
-            <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
-              <Clock className="w-3 h-3 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Follow up in</span>
-              <Input type="number" min={1} max={30} defaultValue={lead.follow_up_days || 2}
-                className="h-6 w-14 text-[10px] text-center"
-                onBlur={(e) => onUpdateFollowUp(lead.id, parseInt(e.target.value) || 2)} />
-              <span className="text-[10px] text-muted-foreground">days</span>
-              {lead.follow_up_scheduled_at && (
-                <span className="text-[9px] text-muted-foreground ml-1">(reminder: {formatDate(lead.follow_up_scheduled_at)})</span>
-              )}
-              {lead.follow_up_sent && (
-                <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
-              )}
-            </div>
-          )}
-
-          {/* Follow-up scheduler - proposal */}
-          {lead.pipeline_stage === 'proposal' && (
             <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Proposal follow up in</span>
-              <Input type="number" min={1} max={30} defaultValue={(lead as any).proposal_follow_up_days || 3}
+              <Input type="number" min={1} max={30} defaultValue={lead.proposal_follow_up_days || 3}
                 className="h-6 w-14 text-[10px] text-center"
                 onBlur={(e) => onUpdateProposalFollowUp(lead.id, parseInt(e.target.value) || 3)} />
               <span className="text-[10px] text-muted-foreground">days</span>
-              {(lead as any).proposal_follow_up_scheduled_at && (
-                <span className="text-[9px] text-muted-foreground ml-1">(reminder: {formatDate((lead as any).proposal_follow_up_scheduled_at)})</span>
-              )}
-              {(lead as any).proposal_follow_up_sent && (
+              {lead.proposal_follow_up_sent && (
                 <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
               )}
             </div>
-          )}
+          </>
+        )}
 
-          {/* Send Reminder with scheduling controls */}
-          {['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
-            <div className="space-y-1.5 bg-amber-500/5 border border-amber-500/20 rounded-md p-2">
-              <div className="flex items-center gap-1.5">
-                <AlertCircle className="w-3 h-3 text-amber-600" />
-                <span className="text-[10px] font-semibold text-amber-700">Stage Reminder</span>
-                {(lead as any).stage_reminder_sent && (
-                  <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] text-muted-foreground">Auto-send in</span>
-                <Input type="number" min={1} max={720}
-                  defaultValue={(lead as any).stage_reminder_days || 72}
-                  className="h-6 w-14 text-[10px] text-center"
-                  onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
-                <span className="text-[10px] text-muted-foreground">hours</span>
-              </div>
-              {(lead as any).stage_reminder_scheduled_at && !(lead as any).stage_reminder_sent && (
-                <span className="text-[9px] text-amber-600">
-                  Scheduled: {formatDate((lead as any).stage_reminder_scheduled_at)}
-                </span>
+        {/* SIGNED → View proposal */}
+        {lead.pipeline_stage === 'signed' && proposal && (
+          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+            onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
+            <Eye className="w-3 h-3" /> View Proposal
+          </Button>
+        )}
+
+        {/* BUILD REFINEMENT → Calendly + record calls */}
+        {lead.pipeline_stage === ('build_refinement' as PipelineStage) && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+              onClick={() => window.open(CALENDLY_URL, '_blank')}>
+              <ExternalLink className="w-3 h-3" /> Schedule Refinement Call
+            </Button>
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+              onClick={() => onSendDiscoveryInvite(lead)}>
+              <Send className="w-3 h-3" /> Send Booking Link
+            </Button>
+          </div>
+        )}
+
+        {/* Stage Reminder */}
+        {['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
+          <div className="space-y-1.5 bg-amber-500/5 border border-amber-500/20 rounded-md p-2">
+            <div className="flex items-center gap-1.5">
+              <AlertCircle className="w-3 h-3 text-amber-600" />
+              <span className="text-[10px] font-semibold text-amber-700">Stage Reminder</span>
+              {(lead as any).stage_reminder_sent && (
+                <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
               )}
-              <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
-                onClick={() => onSendReminder(lead)}>
-                <Send className="w-3 h-3" /> Send Now
-              </Button>
             </div>
-          )}
-        </div>
-      )}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] text-muted-foreground">Auto-send in</span>
+              <Input type="number" min={1} max={720}
+                defaultValue={(lead as any).stage_reminder_days || 72}
+                className="h-6 w-14 text-[10px] text-center"
+                onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
+              <span className="text-[10px] text-muted-foreground">hours</span>
+            </div>
+            {(lead as any).stage_reminder_scheduled_at && !(lead as any).stage_reminder_sent && (
+              <span className="text-[9px] text-amber-600">
+                Scheduled: {formatDate((lead as any).stage_reminder_scheduled_at)}
+              </span>
+            )}
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
+              onClick={() => onSendReminder(lead)}>
+              <Send className="w-3 h-3" /> Send Now
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Deep Dive Responses */}
       <AnimatePresence>
         {showDeepDive && deepDive && <DeepDiveViewer submission={deepDive} />}
       </AnimatePresence>
 
-      {/* Discovery Calls - shown for discovery_call stage and beyond */}
-      {['discovery_call', 'proposal', 'signed'].includes(lead.pipeline_stage as string) && (
+      {/* Discovery Calls / Build Refinement Calls */}
+      {['discovery_call', 'proposal', 'signed', 'build_refinement'].includes(lead.pipeline_stage as string) && (
         <ClientInterviewSection
           assessmentId={lead.id}
           interviews={interviews}
