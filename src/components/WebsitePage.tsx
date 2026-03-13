@@ -899,6 +899,7 @@ const WebsitePage = ({ onStartAssessment }: Props) =>
     <ZeroRiskSection />
     <FreeTrainingSection />
     <CoFoundersSection />
+    <NewsSection />
     <CTASection onStartAssessment={onStartAssessment} />
     <ContactSection />
     <FooterSection />
