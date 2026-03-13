@@ -8,24 +8,45 @@ import { useToast } from '@/hooks/use-toast';
 import { ChevronDown, ChevronUp, ClipboardCheck, Save, Loader2 } from 'lucide-react';
 
 export const DISCOVERY_QUESTIONS: Record<string, { label: string; category: string; question: string }> = {
-  operations_workflows: { label: 'Daily/weekly workflows', category: 'Operations', question: 'What are the main daily/weekly workflows and processes in the business?' },
-  operations_bottlenecks: { label: 'Bottlenecks & time-wasters', category: 'Operations', question: 'What are the biggest bottlenecks or time-wasters in current operations?' },
-  operations_seasonal: { label: 'Seasonal patterns', category: 'Operations', question: 'Are there seasonal patterns or peak periods that affect operations?' },
-  systems_crm_pos: { label: 'CRM/POS systems in use', category: 'Systems', question: 'What CRM, POS, or core business systems are currently in use?' },
-  systems_data_migration: { label: 'Data migration needs', category: 'Systems', question: 'Is there existing data that needs to be migrated to the new system?' },
-  systems_pain_points: { label: 'Current system pain points', category: 'Systems', question: 'What doesn\'t work well with current systems/tools?' },
-  users_internal_roles: { label: 'Internal user roles', category: 'Users', question: 'What internal user roles will need access to the system?' },
-  users_customer_portal: { label: 'Customer portal needs', category: 'Users', question: 'Do customers need their own portal or self-service features?' },
-  users_tech_proficiency: { label: 'Team tech proficiency', category: 'Users', question: 'What is the general technical proficiency of the team?' },
-  revenue_success_metrics: { label: 'Success metrics / KPIs', category: 'Revenue', question: 'What does success look like? What specific metrics or KPIs should improve?' },
-  revenue_new_streams: { label: 'New revenue streams', category: 'Revenue', question: 'Are there new revenue streams or services the platform should enable?' },
-  revenue_pricing_model: { label: 'Pricing/billing model', category: 'Revenue', question: 'Is there a specific pricing or billing model the system needs to support?' },
-  compliance_regulations: { label: 'Industry regulations', category: 'Compliance', question: 'Are there industry-specific regulations or compliance requirements?' },
-  compliance_data_residency: { label: 'Data residency requirements', category: 'Compliance', question: 'Are there data residency or privacy requirements?' },
-  logistics_decision_makers: { label: 'Key decision-makers', category: 'Logistics', question: 'Who are the key decision-makers and stakeholders for this project?' },
-  logistics_hard_deadlines: { label: 'Hard deadlines', category: 'Logistics', question: 'Are there any hard deadlines or launch dates to work towards?' },
-  logistics_support_expectations: { label: 'Post-launch support expectations', category: 'Logistics', question: 'What ongoing support and maintenance expectations are there post-launch?' },
-  logistics_budget_constraints: { label: 'Budget constraints', category: 'Logistics', question: 'Are there specific budget constraints or approval processes?' },
+  // 1. Business Operations & Workflows
+  operations_customer_journey: { label: 'Customer journey breakdown', category: 'Operations', question: 'Walk me through your current customer journey from first contact to payment — where does it break down?' },
+  operations_biggest_bottleneck: { label: 'Biggest bottleneck', category: 'Operations', question: 'What\'s your biggest bottleneck right now that costs you the most time or money?' },
+  operations_seasonal: { label: 'Seasonal patterns', category: 'Operations', question: 'Are there any seasonal patterns that affect staffing, bookings, or revenue?' },
+  
+  // 2. Technology & Systems
+  systems_current_tools: { label: 'Current daily tools', category: 'Systems', question: 'What software/tools do you currently use daily (CRM, POS, accounting, scheduling)?' },
+  systems_integrations: { label: 'Required integrations', category: 'Systems', question: 'Which of those would you absolutely need the app to integrate with?' },
+  systems_data_migration: { label: 'Data migration needs', category: 'Systems', question: 'Do you have existing data (customer lists, product catalogues) that needs migrating?' },
+  
+  // 3. Users & Roles
+  users_internal_roles: { label: 'Internal users & permissions', category: 'Users', question: 'Who will use the app internally? (Admin, staff, managers — what permissions differ?)' },
+  users_customer_portal: { label: 'Customer portal needs', category: 'Users', question: 'Will customers/clients need their own login or portal?' },
+  users_tech_proficiency: { label: 'Staff tech proficiency', category: 'Users', question: 'How tech-savvy are your staff? Do we need to design for simplicity?' },
+  
+  // 4. Revenue & Growth Priorities
+  revenue_one_problem: { label: 'Primary problem to solve', category: 'Revenue', question: 'If this app could solve only ONE problem perfectly, what would it be?' },
+  revenue_success_metrics: { label: 'Success metrics (6-12 months)', category: 'Revenue', question: 'What does success look like 6 months after launch? 12 months?' },
+  revenue_new_streams: { label: 'Desired new revenue streams', category: 'Revenue', question: 'Are there revenue streams you\'ve wanted to add but couldn\'t without the right tech?' },
+  
+  // 5. Content & Branding
+  content_brand_guidelines: { label: 'Brand assets & guidelines', category: 'Content', question: 'Do you have existing brand guidelines, logo files, and colour palettes?' },
+  content_management: { label: 'Content management responsibility', category: 'Content', question: 'Who will manage ongoing content (product updates, blog, promotions)?' },
+  content_multilingual: { label: 'Multi-language needs', category: 'Content', question: 'Do you need multi-language support?' },
+  
+  // 6. Compliance & Security
+  compliance_regulations: { label: 'Industry regulations', category: 'Compliance', question: 'Are there industry regulations you need to comply with (e.g. health records, financial data)?' },
+  compliance_data_residency: { label: 'Data residency requirements', category: 'Compliance', question: 'Do you need specific data residency (AU-only hosting)?' },
+  compliance_payment: { label: 'Payment processing preferences', category: 'Compliance', question: 'Payment processing preferences (Stripe, Square, existing provider)?' },
+  
+  // 7. Budget & Decision-Making
+  logistics_decision_makers: { label: 'Additional decision-makers', category: 'Logistics', question: 'Beyond the decision-maker identified in the deep dive, who else needs to sign off?' },
+  logistics_hard_deadlines: { label: 'Hard deadlines', category: 'Logistics', question: 'Is there a hard deadline driving this project (e.g. busy season, funding round)?' },
+  logistics_phased_rollout: { label: 'Phased vs full rollout', category: 'Logistics', question: 'What\'s your comfort level with a phased rollout vs. a full launch?' },
+  
+  // 8. Support & Maintenance
+  support_post_launch: { label: 'Post-launch support level', category: 'Support', question: 'What level of post-launch support do you expect (self-service vs. managed)?' },
+  support_updates: { label: 'Feature update frequency', category: 'Support', question: 'How often do you anticipate needing feature updates or changes?' },
+  support_training: { label: 'Staff training needs', category: 'Support', question: 'Do you need training sessions for staff?' },
 };
 
 type ChecklistState = Record<string, boolean>;
