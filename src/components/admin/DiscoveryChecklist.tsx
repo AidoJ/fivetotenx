@@ -191,13 +191,8 @@ const DiscoveryChecklist = ({ assessmentId, checklist, onUpdate, compact = false
                     />
                     <div className="flex-1">
                       <span className={`text-sm leading-tight block ${state[key] ? 'text-muted-foreground line-through' : 'text-foreground font-medium'}`}>
-                        {DISCOVERY_QUESTIONS[key].label}
+                        {DISCOVERY_QUESTIONS[key].question}
                       </span>
-                      {showQuestions && (
-                        <span className="text-xs text-muted-foreground mt-0.5 block">
-                          {DISCOVERY_QUESTIONS[key].question}
-                        </span>
-                      )}
                     </div>
                   </label>
                 ))}
