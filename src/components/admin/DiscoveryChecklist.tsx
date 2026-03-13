@@ -140,7 +140,7 @@ const DiscoveryChecklist = ({ assessmentId, checklist, onUpdate, compact = false
                         className="mt-0.5"
                       />
                       <span className={`text-[11px] leading-tight ${state[key] ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                        {DISCOVERY_QUESTIONS[key].label}
+                        {DISCOVERY_QUESTIONS[key].question}
                       </span>
                     </label>
                   ))}
