@@ -1846,6 +1846,9 @@ const Admin = () => {
               </div>
             </div>
           </TabsContent>
+          <TabsContent value="scoping">
+            <ScopingQuestionEditor />
+          </TabsContent>
           <TabsContent value="training">
             <div className="space-y-6">
               <div>
