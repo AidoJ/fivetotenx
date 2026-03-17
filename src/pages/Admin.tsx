@@ -1687,6 +1687,7 @@ const Admin = () => {
                           onUpdateChecklist={handleUpdateChecklist}
                           onToggleComplete={handleToggleComplete}
                           onUpdateZoomLink={handleUpdateZoomLink}
+                          scopingResponse={getScopingResponse(lead.id)}
                         />
                       ))}
                     </div>
