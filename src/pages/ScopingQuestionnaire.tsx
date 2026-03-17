@@ -318,8 +318,9 @@ const ScopingQuestionnaire = () => {
                 const Icon = ICON_MAP[cat.icon] || Sparkles;
                 const isActive = i === activeCategoryIndex;
                 const isSkipped = skippedCategories.includes(cat.id);
-                const allAnswered = cat.questions.every(q => responses[q.id] !== undefined);
-                const answeredCount = cat.questions.filter(q => responses[q.id] !== undefined).length;
+                const catQuestions = questionsForCategory(cat.id);
+                const allAnswered = catQuestions.every(q => responses[q.id] !== undefined);
+                const answeredCount = catQuestions.filter(q => responses[q.id] !== undefined).length;
                 const isPast = i < activeCategoryIndex;
                 return (
                   <button
