@@ -508,7 +508,7 @@ interface ProposalRecord {
   accepted_at: string | null;
 }
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers, onUpdateChecklist, onToggleComplete, onUpdateZoomLink }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers, onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -531,6 +531,7 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   onUpdateChecklist: (id: string, checklist: Record<string, boolean>) => void;
   onToggleComplete: (id: string, completed: boolean) => Promise<void>;
   onUpdateZoomLink: (id: string, zoomLink: string) => Promise<void>;
+  scopingResponse: any;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
