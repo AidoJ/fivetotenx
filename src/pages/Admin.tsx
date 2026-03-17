@@ -551,6 +551,12 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyScoping = async () => {
+    await navigator.clipboard.writeText(scopingUrl);
+    setCopiedScoping(true);
+    setTimeout(() => setCopiedScoping(false), 2000);
+  };
+
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       className="rounded-lg border border-border bg-card p-4 space-y-3 shadow-sm">
