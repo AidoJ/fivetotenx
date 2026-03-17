@@ -356,7 +356,7 @@ const ScopingQuestionnaire = () => {
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs font-medium truncate ${isSkipped ? 'line-through' : ''}`}>{cat.label}</p>
                       {!isActive && !isSkipped && (
-                        <p className="text-[10px] opacity-70">{answeredCount}/{cat.questions.length}</p>
+                        <p className="text-[10px] opacity-70">{answeredCount}/{catQuestions.length}</p>
                       )}
                     </div>
                     {isActive && (
