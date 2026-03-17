@@ -18,6 +18,8 @@ export interface IndustryQuestionBank {
   id: string;
   label: string;
   description: string;
+  examples: string[];
+  available: boolean; // false = greyed out, questionnaire not yet built
   categories: QuestionCategory[];
 }
 
@@ -358,21 +360,91 @@ const professionalServicesCategories: QuestionCategory[] = [
 // ─── MASTER REGISTRY ────────────────────────────────────────
 export const INDUSTRY_QUESTION_BANKS: IndustryQuestionBank[] = [
   {
-    id: 'health-beauty',
-    label: 'Health & Beauty Services',
-    description: 'Salons, spas, wellness centres, massage, aesthetics, personal care',
+    id: 'health-wellness',
+    label: 'Health & Wellness',
+    description: 'Businesses focused on personal care, treatment, and wellbeing',
+    examples: ['Massage therapists', 'Physiotherapists', 'Chiropractors', 'Acupuncturists', 'Beauty salons & skin clinics', 'Personal trainers & yoga studios'],
+    available: true,
     categories: healthBeautyCategories,
   },
   {
-    id: 'building-trades',
-    label: 'Building & Trades',
-    description: 'Construction, plumbing, electrical, landscaping, maintenance services',
+    id: 'trades-field-services',
+    label: 'Trades & Field Services',
+    description: 'Mobile or on-site service providers with scheduling/logistics needs',
+    examples: ['Electricians', 'Plumbers', 'Builders & renovators', 'HVAC technicians', 'Landscapers & gardeners', 'Cleaning services'],
+    available: true,
     categories: buildingTradesCategories,
   },
   {
     id: 'professional-services',
     label: 'Professional Services',
-    description: 'Consulting, legal, accounting, agencies, advisory firms',
+    description: 'Knowledge-based, client-facing advisory services',
+    examples: ['Accountants', 'Lawyers', 'Financial planners', 'Business consultants', 'Marketing agencies', 'Mortgage brokers'],
+    available: true,
     categories: professionalServicesCategories,
+  },
+  {
+    id: 'hospitality-tourism',
+    label: 'Hospitality & Tourism',
+    description: 'Customer experience-driven, booking-heavy businesses',
+    examples: ['Hotels & resorts', 'Airbnb/property managers', 'Tour operators', 'Event planners', 'Spas & retreat centres'],
+    available: false,
+    categories: [],
+  },
+  {
+    id: 'fitness-recreation',
+    label: 'Fitness & Recreation',
+    description: 'Membership, class-based, or activity-driven businesses',
+    examples: ['Gyms & fitness centres', 'Martial arts schools', 'Dance studios', 'Sports coaching businesses', 'Outdoor adventure companies'],
+    available: false,
+    categories: [],
+  },
+  {
+    id: 'retail-ecommerce',
+    label: 'Retail & E-commerce',
+    description: 'Product-based businesses with online/offline sales',
+    examples: ['Boutique stores', 'Health food shops', 'Beauty product brands', 'Specialty retailers', 'Subscription box businesses'],
+    available: false,
+    categories: [],
+  },
+  {
+    id: 'education-coaching',
+    label: 'Education & Coaching',
+    description: 'Learning, development, and transformation-focused services',
+    examples: ['Online course creators', 'Business coaches', 'Life coaches', 'Tutoring services', 'Training organisations'],
+    available: false,
+    categories: [],
+  },
+  {
+    id: 'property-real-estate',
+    label: 'Property & Real Estate',
+    description: 'Asset management and transaction-based businesses',
+    examples: ['Real estate agencies', 'Property managers', 'Buyers agents', 'Commercial leasing firms', 'Short-term rental managers'],
+    available: false,
+    categories: [],
+  },
+  {
+    id: 'automotive-services',
+    label: 'Automotive Services',
+    description: 'Service, maintenance, and booking-driven vehicle businesses',
+    examples: ['Mechanics', 'Mobile car detailers', 'Auto electricians', 'Tyre services', 'Fleet servicing companies'],
+    available: false,
+    categories: [],
+  },
+  {
+    id: 'events-creative',
+    label: 'Events & Creative Services',
+    description: 'Project-based, creative, and client-experience businesses',
+    examples: ['Photographers & videographers', 'Wedding planners', 'Stylists & makeup artists', 'DJs & entertainers', 'Event production companies'],
+    available: false,
+    categories: [],
+  },
+  {
+    id: 'home-personal-services',
+    label: 'Home & Personal Services',
+    description: 'Recurring or convenience-based consumer services',
+    examples: ['Home cleaning', 'NDIS providers', 'Pet grooming & boarding', 'Pool maintenance', 'Handyman services'],
+    available: false,
+    categories: [],
   },
 ];
