@@ -113,6 +113,9 @@ const ScopingQuestionnaire = () => {
   const totalCategories = categories.length;
   const progressPercent = totalCategories > 0 ? ((activeCategoryIndex) / totalCategories) * 100 : 0;
 
+  // Helper to get questions for a category
+  const questionsForCategory = (catId: string) => allQuestions.filter(q => q.category_id === catId);
+
   const handleYes = (q: DBQuestion) => {
     setDetailDialog({ question: q, open: true });
     setDetailText(responses[q.id]?.details || '');
@@ -315,8 +318,9 @@ const ScopingQuestionnaire = () => {
                 const Icon = ICON_MAP[cat.icon] || Sparkles;
                 const isActive = i === activeCategoryIndex;
                 const isSkipped = skippedCategories.includes(cat.id);
-                const allAnswered = cat.questions.every(q => responses[q.id] !== undefined);
-                const answeredCount = cat.questions.filter(q => responses[q.id] !== undefined).length;
+                const catQuestions = questionsForCategory(cat.id);
+                const allAnswered = catQuestions.every(q => responses[q.id] !== undefined);
+                const answeredCount = catQuestions.filter(q => responses[q.id] !== undefined).length;
                 const isPast = i < activeCategoryIndex;
                 return (
                   <button
@@ -352,7 +356,7 @@ const ScopingQuestionnaire = () => {
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs font-medium truncate ${isSkipped ? 'line-through' : ''}`}>{cat.label}</p>
                       {!isActive && !isSkipped && (
-                        <p className="text-[10px] opacity-70">{answeredCount}/{cat.questions.length}</p>
+                        <p className="text-[10px] opacity-70">{answeredCount}/{catQuestions.length}</p>
                       )}
                     </div>
                     {isActive && (
@@ -376,7 +380,7 @@ const ScopingQuestionnaire = () => {
           <div className="md:hidden w-full mb-4">
             <div className="flex items-center gap-1">
               {categories.map((cat, i) => {
-                const allAnswered = cat.questions.every(q => responses[q.id] !== undefined);
+                const allAnswered = questionsForCategory(cat.id).every(q => responses[q.id] !== undefined);
                 const isSkipped = skippedCategories.includes(cat.id);
                 return (
                   <button
@@ -498,7 +502,7 @@ const ScopingQuestionnaire = () => {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-foreground">{detailDialog?.question.question}</DialogTitle>
-            <DialogDescription>{detailDialog?.question.detailPrompt}</DialogDescription>
+            <DialogDescription>{detailDialog?.question.detail_prompt}</DialogDescription>
           </DialogHeader>
           <Textarea
             value={detailText}
