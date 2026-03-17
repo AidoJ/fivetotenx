@@ -287,7 +287,7 @@ const ScopingQuestionnaire = () => {
 
   // ── QUESTIONNAIRE FLOW ──
   const CategoryIcon = ICON_MAP[activeCategory?.icon || 'Sparkles'] || Sparkles;
-  const categoryQuestions = activeCategory?.questions || [];
+  const categoryQuestions = allQuestions.filter(q => q.category_id === activeCategory?.id).sort((a, b) => a.sort_order - b.sort_order);
   const answeredInCategory = categoryQuestions.filter(q => responses[q.id] !== undefined).length;
   const isCategoryComplete = answeredInCategory === categoryQuestions.length;
   const isLastCategory = activeCategoryIndex === totalCategories - 1;
