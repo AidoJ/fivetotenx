@@ -384,6 +384,115 @@ export type Database = {
         }
         Relationships: []
       }
+      scoping_categories: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          industry_id: string
+          label: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          industry_id: string
+          label: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          industry_id?: string
+          label?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scoping_categories_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "scoping_industries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scoping_industries: {
+        Row: {
+          available: boolean
+          created_at: string
+          description: string
+          examples: string[] | null
+          id: string
+          label: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          description?: string
+          examples?: string[] | null
+          id?: string
+          label: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          description?: string
+          examples?: string[] | null
+          id?: string
+          label?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scoping_questions: {
+        Row: {
+          category_id: string
+          created_at: string
+          detail_prompt: string
+          id: string
+          question: string
+          sort_order: number
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          detail_prompt?: string
+          id?: string
+          question: string
+          sort_order?: number
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          detail_prompt?: string
+          id?: string
+          question?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scoping_questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "scoping_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scoping_responses: {
         Row: {
           assessment_id: string

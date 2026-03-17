@@ -12,21 +12,42 @@ import {
 import {
   Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare, UserCircle,
   Plug, Shield, Rocket, CheckCircle, Loader2, ArrowRight, ArrowLeft, SkipForward,
-  Hammer, Briefcase, Check, X,
+  Hammer, Briefcase, Check, X, Lock,
 } from 'lucide-react';
 import logo from '@/assets/logo-5to10x-color.png';
-import {
-  INDUSTRY_QUESTION_BANKS,
-  type IndustryQuestionBank,
-  type QuestionCategory,
-  type ScopingQuestion,
-} from '@/lib/scopingQuestions';
 
 // Icon map for dynamic rendering
 const ICON_MAP: Record<string, React.ElementType> = {
   Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare,
   UserCircle, Plug, Shield, Rocket, Hammer, Briefcase,
 };
+
+interface DBIndustry {
+  id: string;
+  slug: string;
+  label: string;
+  description: string;
+  examples: string[];
+  available: boolean;
+  sort_order: number;
+}
+
+interface DBCategory {
+  id: string;
+  industry_id: string;
+  slug: string;
+  label: string;
+  icon: string;
+  sort_order: number;
+}
+
+interface DBQuestion {
+  id: string;
+  category_id: string;
+  question: string;
+  detail_prompt: string;
+  sort_order: number;
+}
 
 const ScopingQuestionnaire = () => {
   const [searchParams] = useSearchParams();
@@ -38,8 +59,13 @@ const ScopingQuestionnaire = () => {
   const [businessName, setBusinessName] = useState('');
   const [contactName, setContactName] = useState('');
 
+  // DB data
+  const [allIndustries, setAllIndustries] = useState<DBIndustry[]>([]);
+  const [allCategories, setAllCategories] = useState<DBCategory[]>([]);
+  const [allQuestions, setAllQuestions] = useState<DBQuestion[]>([]);
+
   // Flow state
-  const [selectedIndustry, setSelectedIndustry] = useState<IndustryQuestionBank | null>(null);
+  const [selectedIndustryId, setSelectedIndustryId] = useState<string | null>(null);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, { answer: boolean; details: string }>>({});
   const [skippedCategories, setSkippedCategories] = useState<string[]>([]);
@@ -47,47 +73,52 @@ const ScopingQuestionnaire = () => {
   const [submitted, setSubmitted] = useState(false);
 
   // Detail dialog state
-  const [detailDialog, setDetailDialog] = useState<{ question: ScopingQuestion; open: boolean } | null>(null);
+  const [detailDialog, setDetailDialog] = useState<{ question: DBQuestion; open: boolean } | null>(null);
   const [detailText, setDetailText] = useState('');
 
   useEffect(() => {
-    if (!assessmentId) { setLoading(false); return; }
-    const fetch = async () => {
-      const { data, error } = await supabase
-        .from('roi_assessments')
-        .select('business_name, contact_name, industry')
-        .eq('id', assessmentId)
-        .single();
-      if (error || !data) {
-        toast({ title: 'Invalid link', description: 'Assessment not found.', variant: 'destructive' });
-        setLoading(false);
-        return;
-      }
-      setBusinessName(data.business_name || '');
-      setContactName(data.contact_name || '');
-      // Auto-select industry if we know it
-      if (data.industry) {
-        const match = INDUSTRY_QUESTION_BANKS.find(b =>
-          b.id === data.industry || b.label.toLowerCase().includes((data.industry || '').toLowerCase())
-        );
-        if (match) setSelectedIndustry(match);
+    const loadAll = async () => {
+      // Load industries, categories, questions from DB
+      const [indRes, catRes, qRes] = await Promise.all([
+        supabase.from('scoping_industries' as any).select('*').order('sort_order'),
+        supabase.from('scoping_categories' as any).select('*').order('sort_order'),
+        supabase.from('scoping_questions' as any).select('*').order('sort_order'),
+      ]);
+      if (!indRes.error) setAllIndustries(indRes.data as any || []);
+      if (!catRes.error) setAllCategories(catRes.data as any || []);
+      if (!qRes.error) setAllQuestions(qRes.data as any || []);
+
+      // Load assessment data
+      if (assessmentId) {
+        const { data, error } = await supabase
+          .from('roi_assessments')
+          .select('business_name, contact_name, industry')
+          .eq('id', assessmentId)
+          .single();
+        if (error || !data) {
+          toast({ title: 'Invalid link', description: 'Assessment not found.', variant: 'destructive' });
+        } else {
+          setBusinessName(data.business_name || '');
+          setContactName(data.contact_name || '');
+        }
       }
       setLoading(false);
     };
-    fetch();
+    loadAll();
   }, [assessmentId, toast]);
 
-  const categories = selectedIndustry?.categories || [];
+  const selectedIndustry = allIndustries.find(i => i.id === selectedIndustryId) || null;
+  const categories = allCategories.filter(c => c.industry_id === selectedIndustryId).sort((a, b) => a.sort_order - b.sort_order);
   const activeCategory = categories[activeCategoryIndex];
   const totalCategories = categories.length;
   const progressPercent = totalCategories > 0 ? ((activeCategoryIndex) / totalCategories) * 100 : 0;
 
-  const handleYes = (q: ScopingQuestion) => {
+  const handleYes = (q: DBQuestion) => {
     setDetailDialog({ question: q, open: true });
     setDetailText(responses[q.id]?.details || '');
   };
 
-  const handleNo = (q: ScopingQuestion) => {
+  const handleNo = (q: DBQuestion) => {
     setResponses(prev => ({ ...prev, [q.id]: { answer: false, details: '' } }));
   };
 
@@ -126,7 +157,7 @@ const ScopingQuestionnaire = () => {
     try {
       const { error } = await supabase.from('scoping_responses' as any).insert([{
         assessment_id: assessmentId,
-        industry: selectedIndustry.id,
+        industry: selectedIndustry?.slug || selectedIndustryId,
         responses: JSON.parse(JSON.stringify(responses)),
         skipped_categories: skippedCategories,
         completed: true,
@@ -206,23 +237,48 @@ const ScopingQuestionnaire = () => {
               This helps us ask the right questions for your specific business type.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {INDUSTRY_QUESTION_BANKS.map(bank => (
-              <motion.button
-                key={bank.id}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedIndustry(bank)}
-                className="rounded-xl border-2 border-border bg-card p-6 text-left space-y-3 hover:border-primary transition-colors"
-              >
-                <h3 className="font-bold text-foreground text-lg">{bank.label}</h3>
-                <p className="text-sm text-muted-foreground">{bank.description}</p>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                  {bank.categories.length} sections
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </motion.button>
-            ))}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {allIndustries.map(ind => {
+              const catCount = allCategories.filter(c => c.industry_id === ind.id).length;
+              return (
+                <motion.button
+                  key={ind.id}
+                  whileHover={ind.available ? { scale: 1.03 } : {}}
+                  whileTap={ind.available ? { scale: 0.98 } : {}}
+                  onClick={() => ind.available && setSelectedIndustryId(ind.id)}
+                  disabled={!ind.available}
+                  className={`rounded-xl border-2 p-5 text-left space-y-2 transition-colors ${
+                    ind.available
+                      ? 'border-border bg-card hover:border-primary cursor-pointer'
+                      : 'border-border bg-muted/30 opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className={`font-bold text-lg ${ind.available ? 'text-foreground' : 'text-muted-foreground'}`}>{ind.label}</h3>
+                    {!ind.available && <Lock className="w-4 h-4 text-muted-foreground" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{ind.description}</p>
+                  {ind.examples && ind.examples.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {ind.examples.slice(0, 4).map((ex, i) => (
+                        <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{ex}</span>
+                      ))}
+                      {ind.examples.length > 4 && (
+                        <span className="text-[10px] px-1.5 py-0.5 text-muted-foreground">+{ind.examples.length - 4} more</span>
+                      )}
+                    </div>
+                  )}
+                  {ind.available && (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                      {catCount} sections <ArrowRight className="w-3 h-3" />
+                    </span>
+                  )}
+                  {!ind.available && (
+                    <span className="text-[10px] font-medium text-muted-foreground italic">Coming soon</span>
+                  )}
+                </motion.button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -231,7 +287,7 @@ const ScopingQuestionnaire = () => {
 
   // ── QUESTIONNAIRE FLOW ──
   const CategoryIcon = ICON_MAP[activeCategory?.icon || 'Sparkles'] || Sparkles;
-  const categoryQuestions = activeCategory?.questions || [];
+  const categoryQuestions = allQuestions.filter(q => q.category_id === activeCategory?.id).sort((a, b) => a.sort_order - b.sort_order);
   const answeredInCategory = categoryQuestions.filter(q => responses[q.id] !== undefined).length;
   const isCategoryComplete = answeredInCategory === categoryQuestions.length;
   const isLastCategory = activeCategoryIndex === totalCategories - 1;
@@ -244,7 +300,7 @@ const ScopingQuestionnaire = () => {
           <img src={logo} alt="5to10x" className="h-8" />
           <div className="text-right">
             <p className="text-sm font-medium text-foreground">{businessName}</p>
-            <p className="text-xs text-muted-foreground">{selectedIndustry.label} — Scoping</p>
+            <p className="text-xs text-muted-foreground">{selectedIndustry?.label} — Scoping</p>
           </div>
         </div>
       </div>
