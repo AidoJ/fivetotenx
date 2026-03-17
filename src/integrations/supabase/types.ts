@@ -384,6 +384,47 @@ export type Database = {
         }
         Relationships: []
       }
+      scoping_responses: {
+        Row: {
+          assessment_id: string
+          completed: boolean | null
+          created_at: string
+          id: string
+          industry: string
+          responses: Json
+          skipped_categories: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          industry: string
+          responses?: Json
+          skipped_categories?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          industry?: string
+          responses?: Json
+          skipped_categories?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scoping_responses_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_registrations: {
         Row: {
           business_name: string | null
