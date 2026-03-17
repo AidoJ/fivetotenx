@@ -263,12 +263,9 @@ const ScopingQuestionnaire = () => {
                   <p className="text-xs text-muted-foreground">{ind.description}</p>
                   {ind.examples && ind.examples.length > 0 && (
                     <div className="flex flex-wrap gap-1 pt-1">
-                      {ind.examples.slice(0, 4).map((ex, i) => (
+                      {ind.examples.map((ex, i) => (
                         <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{ex}</span>
                       ))}
-                      {ind.examples.length > 4 && (
-                        <span className="text-[10px] px-1.5 py-0.5 text-muted-foreground">+{ind.examples.length - 4} more</span>
-                      )}
                     </div>
                   )}
                   {ind.available && (
