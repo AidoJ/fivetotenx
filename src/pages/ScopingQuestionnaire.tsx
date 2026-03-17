@@ -249,43 +249,104 @@ const ScopingQuestionnaire = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-        {/* Progress bar */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Section {activeCategoryIndex + 1} of {totalCategories}</span>
-            <span>{Math.round(progressPercent)}% complete</span>
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="flex gap-6">
+          {/* Waterfall sidebar */}
+          <div className="hidden md:block w-56 shrink-0">
+            <div className="sticky top-8 space-y-1">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Project Scope</p>
+              {categories.map((cat, i) => {
+                const Icon = ICON_MAP[cat.icon] || Sparkles;
+                const isActive = i === activeCategoryIndex;
+                const isSkipped = skippedCategories.includes(cat.id);
+                const allAnswered = cat.questions.every(q => responses[q.id] !== undefined);
+                const answeredCount = cat.questions.filter(q => responses[q.id] !== undefined).length;
+                const isPast = i < activeCategoryIndex;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategoryIndex(i)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all group relative ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : isSkipped
+                        ? 'bg-muted/50 text-muted-foreground'
+                        : allAnswered
+                        ? 'bg-primary/10 text-primary hover:bg-primary/15'
+                        : 'text-muted-foreground hover:bg-secondary'
+                    }`}
+                  >
+                    {/* Vertical connector line */}
+                    {i < categories.length - 1 && (
+                      <span className={`absolute left-[22px] top-full w-0.5 h-1 ${
+                        isPast || allAnswered ? 'bg-primary/30' : 'bg-border'
+                      }`} />
+                    )}
+                    <span className={`flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold shrink-0 ${
+                      isActive
+                        ? 'bg-primary-foreground/20 text-primary-foreground'
+                        : allAnswered
+                        ? 'bg-primary text-primary-foreground'
+                        : isSkipped
+                        ? 'bg-muted text-muted-foreground'
+                        : 'bg-secondary text-muted-foreground'
+                    }`}>
+                      {allAnswered ? <Check className="w-3 h-3" /> : isSkipped ? '–' : i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-medium truncate ${isSkipped ? 'line-through' : ''}`}>{cat.label}</p>
+                      {!isActive && !isSkipped && (
+                        <p className="text-[10px] opacity-70">{answeredCount}/{cat.questions.length}</p>
+                      )}
+                    </div>
+                    {isActive && (
+                      <ArrowRight className="w-3 h-3 shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+              {/* Overall progress */}
+              <div className="pt-3 mt-3 border-t border-border">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
+                  <span>Overall</span>
+                  <span>{Math.round(progressPercent)}%</span>
+                </div>
+                <Progress value={progressPercent} className="h-1.5" />
+              </div>
+            </div>
           </div>
-          <Progress value={progressPercent} className="h-2" />
-        </div>
 
-        {/* Category tabs (scrollable) */}
-        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((cat, i) => {
-            const Icon = ICON_MAP[cat.icon] || Sparkles;
-            const isActive = i === activeCategoryIndex;
-            const isSkipped = skippedCategories.includes(cat.id);
-            const allAnswered = cat.questions.every(q => responses[q.id] !== undefined);
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategoryIndex(i)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : isSkipped
-                    ? 'bg-muted text-muted-foreground line-through'
-                    : allAnswered
-                    ? 'bg-primary/15 text-primary'
-                    : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
+          {/* Mobile progress indicator */}
+          <div className="md:hidden w-full mb-4">
+            <div className="flex items-center gap-1">
+              {categories.map((cat, i) => {
+                const allAnswered = cat.questions.every(q => responses[q.id] !== undefined);
+                const isSkipped = skippedCategories.includes(cat.id);
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategoryIndex(i)}
+                    className={`flex-1 h-2 rounded-full transition-all ${
+                      i === activeCategoryIndex
+                        ? 'bg-primary'
+                        : allAnswered
+                        ? 'bg-primary/40'
+                        : isSkipped
+                        ? 'bg-muted'
+                        : 'bg-secondary'
+                    }`}
+                    title={cat.label}
+                  />
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+              Section {activeCategoryIndex + 1} of {totalCategories} — {activeCategory?.label}
+            </p>
+          </div>
+
+          {/* Main content */}
+          <div className="flex-1 min-w-0 space-y-6">
 
         {/* Active category content */}
         <AnimatePresence mode="wait">
