@@ -746,6 +746,21 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
         {/* PROPOSAL → Prepare/Edit/Send */}
         {lead.pipeline_stage === 'proposal' && (
           <>
+            {scopingResponse && (
+              <Button size="sm" variant={showScoping ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => setShowScoping(!showScoping)}>
+                <ClipboardCheck className="w-3 h-3" /> {showScoping ? 'Hide' : 'View'} Scoping
+              </Button>
+            )}
+            {!scopingResponse && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                  onClick={handleCopyScoping}>
+                  {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copiedScoping ? 'Copied!' : 'Copy Scoping Link'}
+                </Button>
+              </div>
+            )}
             {deepDive && (
               <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
                 onClick={() => setShowDeepDive(!showDeepDive)}>
