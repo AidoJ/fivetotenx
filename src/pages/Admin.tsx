@@ -508,7 +508,7 @@ interface ProposalRecord {
   accepted_at: string | null;
 }
 
-const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers, onUpdateChecklist, onToggleComplete, onUpdateZoomLink }: {
+const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote, onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal, interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder, onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers, onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse }: {
   lead: Assessment;
   onMove: (id: string, stage: PipelineStage) => void;
   onSendDeepDive: (lead: Assessment) => void;
@@ -531,13 +531,17 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
   onUpdateChecklist: (id: string, checklist: Record<string, boolean>) => void;
   onToggleComplete: (id: string, completed: boolean) => Promise<void>;
   onUpdateZoomLink: (id: string, zoomLink: string) => Promise<void>;
+  scopingResponse: any;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
+  const [showScoping, setShowScoping] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedScoping, setCopiedScoping] = useState(false);
   const roi = lead.roi_results as any;
   const currentIdx = stageIndex(lead.pipeline_stage);
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
+  const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
   const isDiscoveryReady = (lead as any).discovery_ready === true;
 
@@ -545,6 +549,12 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
     await navigator.clipboard.writeText(deepDiveUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyScoping = async () => {
+    await navigator.clipboard.writeText(scopingUrl);
+    setCopiedScoping(true);
+    setTimeout(() => setCopiedScoping(false), 2000);
   };
 
   return (
@@ -708,13 +718,49 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
                   Undo
                 </Button>
               </div>
-            )}
+             )}
+            {/* Scoping Questionnaire Link */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {scopingResponse ? (
+                <Button size="sm" variant={showScoping ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                  onClick={() => setShowScoping(!showScoping)}>
+                  <ClipboardCheck className="w-3 h-3" /> {showScoping ? 'Hide' : 'View'} Scoping
+                </Button>
+              ) : (
+                <>
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                    onClick={handleCopyScoping}>
+                    {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copiedScoping ? 'Copied!' : 'Copy Scoping Link'}
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                    onClick={() => window.open(scopingUrl, '_blank')}>
+                    <ExternalLink className="w-3 h-3" /> Open Scoping
+                  </Button>
+                </>
+              )}
+            </div>
           </>
         )}
 
         {/* PROPOSAL → Prepare/Edit/Send */}
         {lead.pipeline_stage === 'proposal' && (
           <>
+            {scopingResponse && (
+              <Button size="sm" variant={showScoping ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
+                onClick={() => setShowScoping(!showScoping)}>
+                <ClipboardCheck className="w-3 h-3" /> {showScoping ? 'Hide' : 'View'} Scoping
+              </Button>
+            )}
+            {!scopingResponse && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                  onClick={handleCopyScoping}>
+                  {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copiedScoping ? 'Copied!' : 'Copy Scoping Link'}
+                </Button>
+              </div>
+            )}
             {deepDive && (
               <Button size="sm" variant={showDeepDive ? 'default' : 'outline'} className="h-6 text-[10px] px-2 gap-1"
                 onClick={() => setShowDeepDive(!showDeepDive)}>
@@ -817,6 +863,41 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
       {/* Deep Dive Responses */}
       <AnimatePresence>
         {showDeepDive && deepDive && <DeepDiveViewer submission={deepDive} />}
+      </AnimatePresence>
+
+      {/* Scoping Questionnaire Responses */}
+      <AnimatePresence>
+        {showScoping && scopingResponse && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            className="space-y-3 border-t border-border pt-3">
+            <div className="flex items-center gap-2">
+              <ClipboardCheck className="w-4 h-4 text-primary" />
+              <h4 className="text-xs font-bold text-foreground">Scoping Questionnaire</h4>
+              <Badge variant="outline" className="text-[8px] h-4">{scopingResponse.industry}</Badge>
+              <span className="text-[10px] text-muted-foreground">Submitted {formatDate(scopingResponse.created_at)}</span>
+            </div>
+            {scopingResponse.skipped_categories?.length > 0 && (
+              <p className="text-[10px] text-muted-foreground">
+                Skipped: {scopingResponse.skipped_categories.join(', ')}
+              </p>
+            )}
+            <div className="space-y-2 bg-secondary/50 rounded-lg p-3 max-h-80 overflow-y-auto">
+              {Object.entries(scopingResponse.responses as Record<string, { answer: boolean; details: string }>).map(([qId, resp]) => (
+                <div key={qId} className={`flex items-start gap-2 text-[11px] p-2 rounded-md ${resp.answer ? 'bg-primary/5 border border-primary/20' : 'bg-card border border-border'}`}>
+                  <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold ${resp.answer ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                    {resp.answer ? '✓' : '✕'}
+                  </span>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">{qId}</p>
+                    {resp.answer && resp.details && (
+                      <p className="text-muted-foreground mt-0.5 whitespace-pre-wrap">{resp.details}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Discovery Calls / Build Refinement Calls */}
@@ -1002,6 +1083,7 @@ const Admin = () => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
+  const [scopingResponses, setScopingResponses] = useState<any[]>([]);
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const [interviews, setInterviews] = useState<ClientInterview[]>([]);
@@ -1022,7 +1104,7 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes, trainingRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes, trainingRes, scopingRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
@@ -1030,6 +1112,7 @@ const Admin = () => {
       supabase.from('client_interviews').select('*').order('interviewed_at', { ascending: true }),
       supabase.from('admin_tasks' as any).select('*').order('created_at', { ascending: false }),
       supabase.from('training_registrations' as any).select('*').order('created_at', { ascending: false }),
+      supabase.from('scoping_responses' as any).select('*').order('created_at', { ascending: false }),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
@@ -1041,6 +1124,7 @@ const Admin = () => {
     if (!interviewsRes.error) setInterviews((interviewsRes.data as ClientInterview[]) || []);
     if (!tasksRes.error) setTasks((tasksRes.data as unknown as AdminTask[]) || []);
     if (!trainingRes.error) setTrainingRegs(trainingRes.data || []);
+    if (!scopingRes.error) setScopingResponses(scopingRes.data || []);
 
     setLoading(false);
   };
@@ -1584,6 +1668,7 @@ const Admin = () => {
 
   const getDeepDive = (assessmentId: string) => deepDives.find(d => d.assessment_id === assessmentId) || null;
   const getProposal = (assessmentId: string) => proposals.find(p => p.assessment_id === assessmentId) || null;
+  const getScopingResponse = (assessmentId: string) => scopingResponses.find((s: any) => s.assessment_id === assessmentId) || null;
 
   const grouped = STAGES.map(stage => ({ ...stage, leads: leads.filter(l => l.pipeline_stage === stage.key) }));
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
@@ -1683,6 +1768,7 @@ const Admin = () => {
                           onUpdateChecklist={handleUpdateChecklist}
                           onToggleComplete={handleToggleComplete}
                           onUpdateZoomLink={handleUpdateZoomLink}
+                          scopingResponse={getScopingResponse(lead.id)}
                         />
                       ))}
                     </div>
