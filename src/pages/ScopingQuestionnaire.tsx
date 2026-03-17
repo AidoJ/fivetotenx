@@ -113,12 +113,12 @@ const ScopingQuestionnaire = () => {
   const totalCategories = categories.length;
   const progressPercent = totalCategories > 0 ? ((activeCategoryIndex) / totalCategories) * 100 : 0;
 
-  const handleYes = (q: ScopingQuestion) => {
+  const handleYes = (q: DBQuestion) => {
     setDetailDialog({ question: q, open: true });
     setDetailText(responses[q.id]?.details || '');
   };
 
-  const handleNo = (q: ScopingQuestion) => {
+  const handleNo = (q: DBQuestion) => {
     setResponses(prev => ({ ...prev, [q.id]: { answer: false, details: '' } }));
   };
 
