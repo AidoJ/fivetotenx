@@ -23,6 +23,7 @@ import AdminTasks from '@/components/admin/AdminTasks';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
 import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
 import CallGuide from '@/components/admin/CallGuide';
+import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
