@@ -1043,6 +1043,7 @@ const Admin = () => {
     if (!interviewsRes.error) setInterviews((interviewsRes.data as ClientInterview[]) || []);
     if (!tasksRes.error) setTasks((tasksRes.data as unknown as AdminTask[]) || []);
     if (!trainingRes.error) setTrainingRegs(trainingRes.data || []);
+    if (!scopingRes.error) setScopingResponses(scopingRes.data || []);
 
     setLoading(false);
   };
