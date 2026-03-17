@@ -18,6 +18,8 @@ export interface IndustryQuestionBank {
   id: string;
   label: string;
   description: string;
+  examples: string[];
+  available: boolean; // false = greyed out, questionnaire not yet built
   categories: QuestionCategory[];
 }
 
