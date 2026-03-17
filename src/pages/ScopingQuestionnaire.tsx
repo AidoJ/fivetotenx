@@ -300,7 +300,7 @@ const ScopingQuestionnaire = () => {
           <img src={logo} alt="5to10x" className="h-8" />
           <div className="text-right">
             <p className="text-sm font-medium text-foreground">{businessName}</p>
-            <p className="text-xs text-muted-foreground">{selectedIndustry.label} — Scoping</p>
+            <p className="text-xs text-muted-foreground">{selectedIndustry?.label} — Scoping</p>
           </div>
         </div>
       </div>
