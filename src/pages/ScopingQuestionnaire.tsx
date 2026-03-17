@@ -380,7 +380,7 @@ const ScopingQuestionnaire = () => {
           <div className="md:hidden w-full mb-4">
             <div className="flex items-center gap-1">
               {categories.map((cat, i) => {
-                const allAnswered = cat.questions.every(q => responses[q.id] !== undefined);
+                const allAnswered = questionsForCategory(cat.id).every(q => responses[q.id] !== undefined);
                 const isSkipped = skippedCategories.includes(cat.id);
                 return (
                   <button
