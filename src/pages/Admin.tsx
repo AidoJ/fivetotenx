@@ -1002,6 +1002,7 @@ const Admin = () => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
+  const [scopingResponses, setScopingResponses] = useState<any[]>([]);
   const [leadNotes, setLeadNotes] = useState<LeadNote[]>([]);
   const [proposals, setProposals] = useState<ProposalRecord[]>([]);
   const [interviews, setInterviews] = useState<ClientInterview[]>([]);
