@@ -535,10 +535,13 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showDeepDive, setShowDeepDive] = useState(false);
+  const [showScoping, setShowScoping] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedScoping, setCopiedScoping] = useState(false);
   const roi = lead.roi_results as any;
   const currentIdx = stageIndex(lead.pipeline_stage);
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
+  const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
   const isDiscoveryReady = (lead as any).discovery_ready === true;
 
