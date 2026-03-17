@@ -433,6 +433,8 @@ const ScopingQuestionnaire = () => {
             </div>
           </motion.div>
         </AnimatePresence>
+          </div>
+        </div>
       </div>
 
       {/* Detail dialog */}
