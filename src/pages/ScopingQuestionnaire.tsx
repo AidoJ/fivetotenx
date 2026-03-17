@@ -157,7 +157,7 @@ const ScopingQuestionnaire = () => {
     try {
       const { error } = await supabase.from('scoping_responses' as any).insert([{
         assessment_id: assessmentId,
-        industry: selectedIndustry.id,
+        industry: selectedIndustry?.slug || selectedIndustryId,
         responses: JSON.parse(JSON.stringify(responses)),
         skipped_categories: skippedCategories,
         completed: true,
