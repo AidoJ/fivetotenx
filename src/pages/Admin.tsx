@@ -865,6 +865,41 @@ const LeadCard = ({ lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, no
         {showDeepDive && deepDive && <DeepDiveViewer submission={deepDive} />}
       </AnimatePresence>
 
+      {/* Scoping Questionnaire Responses */}
+      <AnimatePresence>
+        {showScoping && scopingResponse && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            className="space-y-3 border-t border-border pt-3">
+            <div className="flex items-center gap-2">
+              <ClipboardCheck className="w-4 h-4 text-primary" />
+              <h4 className="text-xs font-bold text-foreground">Scoping Questionnaire</h4>
+              <Badge variant="outline" className="text-[8px] h-4">{scopingResponse.industry}</Badge>
+              <span className="text-[10px] text-muted-foreground">Submitted {formatDate(scopingResponse.created_at)}</span>
+            </div>
+            {scopingResponse.skipped_categories?.length > 0 && (
+              <p className="text-[10px] text-muted-foreground">
+                Skipped: {scopingResponse.skipped_categories.join(', ')}
+              </p>
+            )}
+            <div className="space-y-2 bg-secondary/50 rounded-lg p-3 max-h-80 overflow-y-auto">
+              {Object.entries(scopingResponse.responses as Record<string, { answer: boolean; details: string }>).map(([qId, resp]) => (
+                <div key={qId} className={`flex items-start gap-2 text-[11px] p-2 rounded-md ${resp.answer ? 'bg-primary/5 border border-primary/20' : 'bg-card border border-border'}`}>
+                  <span className={`shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold ${resp.answer ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                    {resp.answer ? '✓' : '✕'}
+                  </span>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">{qId}</p>
+                    {resp.answer && resp.details && (
+                      <p className="text-muted-foreground mt-0.5 whitespace-pre-wrap">{resp.details}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Discovery Calls / Build Refinement Calls */}
       {['discovery_call', 'proposal', 'signed', 'build_refinement'].includes(lead.pipeline_stage as string) && (
         <>
