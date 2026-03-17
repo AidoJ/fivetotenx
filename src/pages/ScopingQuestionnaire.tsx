@@ -502,7 +502,7 @@ const ScopingQuestionnaire = () => {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-foreground">{detailDialog?.question.question}</DialogTitle>
-            <DialogDescription>{detailDialog?.question.detailPrompt}</DialogDescription>
+            <DialogDescription>{detailDialog?.question.detail_prompt}</DialogDescription>
           </DialogHeader>
           <Textarea
             value={detailText}
