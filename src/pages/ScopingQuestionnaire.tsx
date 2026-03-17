@@ -237,23 +237,48 @@ const ScopingQuestionnaire = () => {
               This helps us ask the right questions for your specific business type.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {INDUSTRY_QUESTION_BANKS.map(bank => (
-              <motion.button
-                key={bank.id}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedIndustry(bank)}
-                className="rounded-xl border-2 border-border bg-card p-6 text-left space-y-3 hover:border-primary transition-colors"
-              >
-                <h3 className="font-bold text-foreground text-lg">{bank.label}</h3>
-                <p className="text-sm text-muted-foreground">{bank.description}</p>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                  {bank.categories.length} sections
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </motion.button>
-            ))}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {allIndustries.map(ind => {
+              const catCount = allCategories.filter(c => c.industry_id === ind.id).length;
+              return (
+                <motion.button
+                  key={ind.id}
+                  whileHover={ind.available ? { scale: 1.03 } : {}}
+                  whileTap={ind.available ? { scale: 0.98 } : {}}
+                  onClick={() => ind.available && setSelectedIndustryId(ind.id)}
+                  disabled={!ind.available}
+                  className={`rounded-xl border-2 p-5 text-left space-y-2 transition-colors ${
+                    ind.available
+                      ? 'border-border bg-card hover:border-primary cursor-pointer'
+                      : 'border-border bg-muted/30 opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className={`font-bold text-lg ${ind.available ? 'text-foreground' : 'text-muted-foreground'}`}>{ind.label}</h3>
+                    {!ind.available && <Lock className="w-4 h-4 text-muted-foreground" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{ind.description}</p>
+                  {ind.examples && ind.examples.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {ind.examples.slice(0, 4).map((ex, i) => (
+                        <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">{ex}</span>
+                      ))}
+                      {ind.examples.length > 4 && (
+                        <span className="text-[10px] px-1.5 py-0.5 text-muted-foreground">+{ind.examples.length - 4} more</span>
+                      )}
+                    </div>
+                  )}
+                  {ind.available && (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                      {catCount} sections <ArrowRight className="w-3 h-3" />
+                    </span>
+                  )}
+                  {!ind.available && (
+                    <span className="text-[10px] font-medium text-muted-foreground italic">Coming soon</span>
+                  )}
+                </motion.button>
+              );
+            })}
           </div>
         </div>
       </div>
