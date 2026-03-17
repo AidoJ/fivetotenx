@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import DeepDive from "./pages/DeepDive";
 import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
+import ScopingQuestionnaire from "./pages/ScopingQuestionnaire";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/deep-dive" element={<DeepDive />} />
+          <Route path="/scoping" element={<ScopingQuestionnaire />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/proposal/:id" element={<Proposal />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
