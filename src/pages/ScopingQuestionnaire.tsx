@@ -12,21 +12,42 @@ import {
 import {
   Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare, UserCircle,
   Plug, Shield, Rocket, CheckCircle, Loader2, ArrowRight, ArrowLeft, SkipForward,
-  Hammer, Briefcase, Check, X,
+  Hammer, Briefcase, Check, X, Lock,
 } from 'lucide-react';
 import logo from '@/assets/logo-5to10x-color.png';
-import {
-  INDUSTRY_QUESTION_BANKS,
-  type IndustryQuestionBank,
-  type QuestionCategory,
-  type ScopingQuestion,
-} from '@/lib/scopingQuestions';
 
 // Icon map for dynamic rendering
 const ICON_MAP: Record<string, React.ElementType> = {
   Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare,
   UserCircle, Plug, Shield, Rocket, Hammer, Briefcase,
 };
+
+interface DBIndustry {
+  id: string;
+  slug: string;
+  label: string;
+  description: string;
+  examples: string[];
+  available: boolean;
+  sort_order: number;
+}
+
+interface DBCategory {
+  id: string;
+  industry_id: string;
+  slug: string;
+  label: string;
+  icon: string;
+  sort_order: number;
+}
+
+interface DBQuestion {
+  id: string;
+  category_id: string;
+  question: string;
+  detail_prompt: string;
+  sort_order: number;
+}
 
 const ScopingQuestionnaire = () => {
   const [searchParams] = useSearchParams();
@@ -38,8 +59,13 @@ const ScopingQuestionnaire = () => {
   const [businessName, setBusinessName] = useState('');
   const [contactName, setContactName] = useState('');
 
+  // DB data
+  const [allIndustries, setAllIndustries] = useState<DBIndustry[]>([]);
+  const [allCategories, setAllCategories] = useState<DBCategory[]>([]);
+  const [allQuestions, setAllQuestions] = useState<DBQuestion[]>([]);
+
   // Flow state
-  const [selectedIndustry, setSelectedIndustry] = useState<IndustryQuestionBank | null>(null);
+  const [selectedIndustryId, setSelectedIndustryId] = useState<string | null>(null);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, { answer: boolean; details: string }>>({});
   const [skippedCategories, setSkippedCategories] = useState<string[]>([]);
@@ -47,37 +73,42 @@ const ScopingQuestionnaire = () => {
   const [submitted, setSubmitted] = useState(false);
 
   // Detail dialog state
-  const [detailDialog, setDetailDialog] = useState<{ question: ScopingQuestion; open: boolean } | null>(null);
+  const [detailDialog, setDetailDialog] = useState<{ question: DBQuestion; open: boolean } | null>(null);
   const [detailText, setDetailText] = useState('');
 
   useEffect(() => {
-    if (!assessmentId) { setLoading(false); return; }
-    const fetch = async () => {
-      const { data, error } = await supabase
-        .from('roi_assessments')
-        .select('business_name, contact_name, industry')
-        .eq('id', assessmentId)
-        .single();
-      if (error || !data) {
-        toast({ title: 'Invalid link', description: 'Assessment not found.', variant: 'destructive' });
-        setLoading(false);
-        return;
-      }
-      setBusinessName(data.business_name || '');
-      setContactName(data.contact_name || '');
-      // Auto-select industry if we know it
-      if (data.industry) {
-        const match = INDUSTRY_QUESTION_BANKS.find(b =>
-          b.id === data.industry || b.label.toLowerCase().includes((data.industry || '').toLowerCase())
-        );
-        if (match) setSelectedIndustry(match);
+    const loadAll = async () => {
+      // Load industries, categories, questions from DB
+      const [indRes, catRes, qRes] = await Promise.all([
+        supabase.from('scoping_industries' as any).select('*').order('sort_order'),
+        supabase.from('scoping_categories' as any).select('*').order('sort_order'),
+        supabase.from('scoping_questions' as any).select('*').order('sort_order'),
+      ]);
+      if (!indRes.error) setAllIndustries(indRes.data as any || []);
+      if (!catRes.error) setAllCategories(catRes.data as any || []);
+      if (!qRes.error) setAllQuestions(qRes.data as any || []);
+
+      // Load assessment data
+      if (assessmentId) {
+        const { data, error } = await supabase
+          .from('roi_assessments')
+          .select('business_name, contact_name, industry')
+          .eq('id', assessmentId)
+          .single();
+        if (error || !data) {
+          toast({ title: 'Invalid link', description: 'Assessment not found.', variant: 'destructive' });
+        } else {
+          setBusinessName(data.business_name || '');
+          setContactName(data.contact_name || '');
+        }
       }
       setLoading(false);
     };
-    fetch();
+    loadAll();
   }, [assessmentId, toast]);
 
-  const categories = selectedIndustry?.categories || [];
+  const selectedIndustry = allIndustries.find(i => i.id === selectedIndustryId) || null;
+  const categories = allCategories.filter(c => c.industry_id === selectedIndustryId).sort((a, b) => a.sort_order - b.sort_order);
   const activeCategory = categories[activeCategoryIndex];
   const totalCategories = categories.length;
   const progressPercent = totalCategories > 0 ? ((activeCategoryIndex) / totalCategories) * 100 : 0;
