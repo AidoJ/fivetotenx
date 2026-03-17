@@ -113,6 +113,9 @@ const ScopingQuestionnaire = () => {
   const totalCategories = categories.length;
   const progressPercent = totalCategories > 0 ? ((activeCategoryIndex) / totalCategories) * 100 : 0;
 
+  // Helper to get questions for a category
+  const questionsForCategory = (catId: string) => allQuestions.filter(q => q.category_id === catId);
+
   const handleYes = (q: DBQuestion) => {
     setDetailDialog({ question: q, open: true });
     setDetailText(responses[q.id]?.details || '');
