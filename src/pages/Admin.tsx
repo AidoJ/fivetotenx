@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import logo from '@/assets/logo-5to10x-color.webp';
 import PipelineDashboard from '@/components/admin/PipelineDashboard';
 import AdminTasks from '@/components/admin/AdminTasks';
+import LeadCard from '@/components/admin/LeadCard';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
 import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
 import CallGuide from '@/components/admin/CallGuide';
