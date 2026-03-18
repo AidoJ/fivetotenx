@@ -1211,7 +1211,22 @@ const Admin = () => {
   const getProposal = (assessmentId: string) => proposals.find(p => p.assessment_id === assessmentId) || null;
   const getScopingResponse = (assessmentId: string) => scopingResponses.find((s: any) => s.assessment_id === assessmentId) || null;
 
-  const grouped = STAGES.map(stage => ({ ...stage, leads: leads.filter(l => l.pipeline_stage === stage.key) }));
+  // Mirror dashboard's 6 consolidated stages
+  const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
+    { id: 'assessment', label: 'Assessment', icon: ClipboardList, stages: ['assessment', 'qualified'] },
+    { id: 'deep_dive', label: 'Deep Dive', icon: Send, stages: ['deep_dive_sent', 'deep_dive_complete'] },
+    { id: 'discovery', label: 'Discovery', icon: Phone, stages: ['discovery_call'] },
+    { id: 'scoping', label: 'Scoping', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
+    { id: 'proposal', label: 'Proposals', icon: FileText, stages: ['proposal'] },
+    { id: 'build', label: 'Build', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
+  ];
+
+  const grouped = PIPELINE_GROUPS.map(group => ({
+    ...group,
+    leads: group.filter
+      ? leads.filter(group.filter)
+      : leads.filter(l => group.stages.includes(l.pipeline_stage)),
+  }));
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
   const qualifiedCount = leads.filter(l => l.is_qualified).length;
 
