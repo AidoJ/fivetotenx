@@ -1716,7 +1716,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <PipelineDashboard leads={leads} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
+            <PipelineDashboard leads={leads} deepDives={deepDives} interviews={interviews} proposals={proposals} scopingResponses={scopingResponses} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
           </TabsContent>
 
           <TabsContent value="pipeline">
