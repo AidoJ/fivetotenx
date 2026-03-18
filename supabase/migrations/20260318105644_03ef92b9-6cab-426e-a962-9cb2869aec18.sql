@@ -1,0 +1,1 @@
+UPDATE roi_assessments SET pipeline_stage = 'discovery_call' WHERE id = 'aec163c5-4be4-4a92-900e-b29b4420b05c';
