@@ -500,6 +500,15 @@ const LeadNotes = ({ assessmentId, notes, onAdd }: {
   );
 };
 
+interface ProposalRecord {
+  id: string;
+  assessment_id: string;
+  proposal_data: any;
+  sent_at: string;
+  accepted: boolean;
+  accepted_at: string | null;
+}
+
 /* ─────────── Template Editor ─────────── */
 
 const TemplateEditor = ({ template, onSave }: { template: EmailTemplate; onSave: (t: EmailTemplate) => Promise<void> }) => {
