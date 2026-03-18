@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles, Building2, Target, Wrench, Users, Send } from 'lucide-react';
-import logo from '@/assets/logo-5to10x-color.png';
+import logo from '@/assets/logo-5to10x-color.webp';
 
 const GOAL_OPTIONS = [
   'Increase revenue / sales',

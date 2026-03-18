@@ -14,7 +14,7 @@ import {
   Plug, Shield, Rocket, CheckCircle, Loader2, ArrowRight, ArrowLeft, SkipForward,
   Hammer, Briefcase, Check, X, Lock,
 } from 'lucide-react';
-import logo from '@/assets/logo-5to10x-color.png';
+import logo from '@/assets/logo-5to10x-color.webp';
 
 // Icon map for dynamic rendering
 const ICON_MAP: Record<string, React.ElementType> = {

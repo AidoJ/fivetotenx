@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Lock } from 'lucide-react';
-import logo from '@/assets/logo-5to10x-color.png';
+import logo from '@/assets/logo-5to10x-color.webp';
 
 const AdminLogin = ({ onSuccess }: { onSuccess: () => void }) => {
   const [email, setEmail] = useState('');
