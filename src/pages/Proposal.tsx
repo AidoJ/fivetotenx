@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import logo from '@/assets/logo-5to10x-color.png';
+import logo from '@/assets/logo-5to10x-color.webp';
 
 interface ProposalData {
   id: string;

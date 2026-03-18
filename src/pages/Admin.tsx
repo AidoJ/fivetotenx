@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import logo from '@/assets/logo-5to10x-color.png';
+import logo from '@/assets/logo-5to10x-color.webp';
 import PipelineDashboard from '@/components/admin/PipelineDashboard';
 import AdminTasks from '@/components/admin/AdminTasks';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
