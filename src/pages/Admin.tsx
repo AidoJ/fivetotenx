@@ -105,6 +105,7 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'proposal', label: 'Proposal' },
   { key: 'signed', label: 'Signed ✅' },
   { key: 'build_refinement' as PipelineStage, label: 'Build Refinement' },
+  { key: 'completed' as PipelineStage, label: 'Completed ✅' },
 ];
 
 const CALENDLY_URL = 'https://calendly.com/aidan-rejuvenators/discovery';
