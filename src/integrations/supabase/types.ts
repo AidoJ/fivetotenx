@@ -318,6 +318,8 @@ export type Database = {
           qualified_at: string | null
           report_sent: boolean | null
           roi_results: Json
+          scoping_sent: boolean | null
+          scoping_sent_at: string | null
           stage_reminder_days: number | null
           stage_reminder_scheduled_at: string | null
           stage_reminder_sent: boolean | null
@@ -348,6 +350,8 @@ export type Database = {
           qualified_at?: string | null
           report_sent?: boolean | null
           roi_results?: Json
+          scoping_sent?: boolean | null
+          scoping_sent_at?: string | null
           stage_reminder_days?: number | null
           stage_reminder_scheduled_at?: string | null
           stage_reminder_sent?: boolean | null
@@ -378,6 +382,8 @@ export type Database = {
           qualified_at?: string | null
           report_sent?: boolean | null
           roi_results?: Json
+          scoping_sent?: boolean | null
+          scoping_sent_at?: string | null
           stage_reminder_days?: number | null
           stage_reminder_scheduled_at?: string | null
           stage_reminder_sent?: boolean | null
@@ -578,6 +584,7 @@ export type Database = {
         | "proposal"
         | "signed"
         | "build_refinement"
+        | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -714,6 +721,7 @@ export const Constants = {
         "proposal",
         "signed",
         "build_refinement",
+        "completed",
       ],
     },
   },
