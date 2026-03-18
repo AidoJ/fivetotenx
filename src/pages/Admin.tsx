@@ -1278,7 +1278,7 @@ const Admin = () => {
             {pipelineFilter && (
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary" className="gap-1.5 text-sm">
-                  Filtered: {STAGES.find(s => s.key === pipelineFilter)?.label}
+                 Filtered: {PIPELINE_GROUPS.find(g => g.id === pipelineFilter)?.label || STAGES.find(s => s.key === pipelineFilter)?.label}
                   <button onClick={() => setPipelineFilter(null)} className="ml-1 hover:text-destructive">✕</button>
                 </Badge>
               </div>
