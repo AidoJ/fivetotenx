@@ -1271,7 +1271,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <PipelineDashboard leads={leads} deepDives={deepDives} interviews={interviews} proposals={proposals} scopingResponses={scopingResponses} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
+            <PipelineDashboard leads={leads} deepDives={deepDives} interviews={interviews} proposals={proposals} scopingResponses={scopingResponses} onStageClick={(stage) => { const groupId = PIPELINE_GROUPS.find(g => g.stages.includes(stage))?.id || stage; setPipelineFilter(groupId); setActiveTab('pipeline'); }} />
           </TabsContent>
 
           <TabsContent value="pipeline">
