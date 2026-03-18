@@ -1292,9 +1292,9 @@ const Admin = () => {
                 <p className="text-sm">Leads will appear here after assessments are completed.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
-                {(pipelineFilter ? grouped.filter(s => s.key === pipelineFilter) : grouped).map(stage => (
-                  <div key={stage.key} className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                {(pipelineFilter ? grouped.filter(s => s.id === pipelineFilter) : grouped).map(stage => (
+                  <div key={stage.id} className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h2 className="text-sm font-display font-bold text-foreground">{stage.label}</h2>
                       <Badge variant="outline" className="text-[10px]">{stage.leads.length}</Badge>
