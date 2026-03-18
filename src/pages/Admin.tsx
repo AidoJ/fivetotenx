@@ -105,6 +105,7 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'proposal', label: 'Proposal' },
   { key: 'signed', label: 'Signed ✅' },
   { key: 'build_refinement' as PipelineStage, label: 'Build Refinement' },
+  { key: 'completed' as PipelineStage, label: 'Completed ✅' },
 ];
 
 const CALENDLY_URL = 'https://calendly.com/aidan-rejuvenators/discovery';
@@ -1716,7 +1717,7 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <PipelineDashboard leads={leads} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
+            <PipelineDashboard leads={leads} deepDives={deepDives} interviews={interviews} proposals={proposals} scopingResponses={scopingResponses} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
           </TabsContent>
 
           <TabsContent value="pipeline">
