@@ -620,7 +620,7 @@ const Admin = () => {
   const [leads, setLeads] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [pipelineFilter, setPipelineFilter] = useState<PipelineStage | null>(null);
+  const [pipelineFilter, setPipelineFilter] = useState<string | null>(null);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
@@ -1211,7 +1211,22 @@ const Admin = () => {
   const getProposal = (assessmentId: string) => proposals.find(p => p.assessment_id === assessmentId) || null;
   const getScopingResponse = (assessmentId: string) => scopingResponses.find((s: any) => s.assessment_id === assessmentId) || null;
 
-  const grouped = STAGES.map(stage => ({ ...stage, leads: leads.filter(l => l.pipeline_stage === stage.key) }));
+  // Mirror dashboard's 6 consolidated stages
+  const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
+    { id: 'assessment', label: 'Assessment', icon: ClipboardList, stages: ['assessment', 'qualified'] },
+    { id: 'deep_dive', label: 'Deep Dive', icon: Send, stages: ['deep_dive_sent', 'deep_dive_complete'] },
+    { id: 'discovery', label: 'Discovery', icon: Phone, stages: ['discovery_call'] },
+    { id: 'scoping', label: 'Scoping', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
+    { id: 'proposal', label: 'Proposals', icon: FileText, stages: ['proposal'] },
+    { id: 'build', label: 'Build', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
+  ];
+
+  const grouped = PIPELINE_GROUPS.map(group => ({
+    ...group,
+    leads: group.filter
+      ? leads.filter(group.filter)
+      : leads.filter(l => group.stages.includes(l.pipeline_stage)),
+  }));
   const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
   const qualifiedCount = leads.filter(l => l.is_qualified).length;
 
@@ -1256,14 +1271,14 @@ const Admin = () => {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <PipelineDashboard leads={leads} deepDives={deepDives} interviews={interviews} proposals={proposals} scopingResponses={scopingResponses} onStageClick={(stage) => { setPipelineFilter(stage); setActiveTab('pipeline'); }} />
+            <PipelineDashboard leads={leads} deepDives={deepDives} interviews={interviews} proposals={proposals} scopingResponses={scopingResponses} onStageClick={(stage) => { const groupId = PIPELINE_GROUPS.find(g => g.stages.includes(stage))?.id || stage; setPipelineFilter(groupId); setActiveTab('pipeline'); }} />
           </TabsContent>
 
           <TabsContent value="pipeline">
             {pipelineFilter && (
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary" className="gap-1.5 text-sm">
-                  Filtered: {STAGES.find(s => s.key === pipelineFilter)?.label}
+                 Filtered: {PIPELINE_GROUPS.find(g => g.id === pipelineFilter)?.label || STAGES.find(s => s.key === pipelineFilter)?.label}
                   <button onClick={() => setPipelineFilter(null)} className="ml-1 hover:text-destructive">✕</button>
                 </Badge>
               </div>
@@ -1277,9 +1292,9 @@ const Admin = () => {
                 <p className="text-sm">Leads will appear here after assessments are completed.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
-                {(pipelineFilter ? grouped.filter(s => s.key === pipelineFilter) : grouped).map(stage => (
-                  <div key={stage.key} className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                {(pipelineFilter ? grouped.filter(s => s.id === pipelineFilter) : grouped).map(stage => (
+                  <div key={stage.id} className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h2 className="text-sm font-display font-bold text-foreground">{stage.label}</h2>
                       <Badge variant="outline" className="text-[10px]">{stage.leads.length}</Badge>
