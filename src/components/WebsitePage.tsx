@@ -351,9 +351,9 @@ const HiddenCostSection = () => {
                 <span className="text-sm font-bold" style={{ color: '#643AA4' }}>{t.minutes} min</span>
               </div>
             )}
-            <div className="flex items-center justify-between rounded-lg border-2 border-destructive/30 bg-destructive/5 p-4 mt-4">
+            <div className="flex items-center justify-between rounded-lg border-2 p-4 mt-4" style={{ borderColor: '#643AA433', background: '#643AA40D' }}>
               <span className="text-sm font-semibold text-foreground">Total per day</span>
-              <span className="text-lg font-bold text-destructive">75 min</span>
+              <span className="text-lg font-bold" style={{ color: '#643AA4' }}>75 min</span>
             </div>
           </motion.div>
 
