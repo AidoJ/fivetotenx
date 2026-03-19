@@ -1,7 +1,7 @@
 import { Tables } from '@/integrations/supabase/types';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Radar, MessageCircle, Puzzle, FileText, Rocket,
+  Radar, MessageCircle, Puzzle, FileText, Wrench, FlaskConical,
   ArrowRight, TrendingDown, Users, Zap
 } from 'lucide-react';
 
@@ -67,12 +67,13 @@ const slaColors = {
   red: 'bg-red-500',
 };
 
-// Phase accent colors (cool → warm progression) — now 5 phases
+// Phase accent colors (cool → warm progression) — now 6 phases
 const phaseAccents = [
   { bg: 'from-blue-500/10 to-indigo-500/10', border: 'border-blue-500/30', text: 'text-blue-600', icon: 'bg-blue-500/15 text-blue-600' },
   { bg: 'from-violet-500/10 to-purple-500/10', border: 'border-violet-500/30', text: 'text-violet-600', icon: 'bg-violet-500/15 text-violet-600' },
   { bg: 'from-pink-500/10 to-rose-500/10', border: 'border-pink-500/30', text: 'text-pink-600', icon: 'bg-pink-500/15 text-pink-600' },
   { bg: 'from-orange-500/10 to-amber-500/10', border: 'border-orange-500/30', text: 'text-orange-600', icon: 'bg-orange-500/15 text-orange-600' },
+  { bg: 'from-lime-500/10 to-emerald-500/10', border: 'border-lime-500/30', text: 'text-lime-600', icon: 'bg-lime-500/15 text-lime-600' },
   { bg: 'from-emerald-500/10 to-green-500/10', border: 'border-emerald-500/30', text: 'text-emerald-600', icon: 'bg-emerald-500/15 text-emerald-600' },
 ];
 
@@ -167,18 +168,30 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       question: 'Clear scope. Clear cost. Clear outcome.',
     },
     {
-      id: 'build_launch',
-      label: 'Build & Launch™',
+      id: 'build',
+      label: 'Build™',
       subtitle: 'Phase 5 — Build',
-      icon: Rocket,
-      stages: ['signed', 'build_refinement' as PipelineStage, 'completed' as PipelineStage],
-      leads: leads.filter(l => l.pipeline_stage === 'signed' || l.pipeline_stage === ('build_refinement' as PipelineStage) || l.pipeline_stage === ('completed' as PipelineStage)),
+      icon: Wrench,
+      stages: ['signed', 'build_refinement' as PipelineStage],
+      leads: leads.filter(l => l.pipeline_stage === 'signed' || l.pipeline_stage === ('build_refinement' as PipelineStage)),
       metrics: [
         { label: 'Approved', value: buildApproved },
         { label: 'Building', value: buildInProgress, color: 'text-blue-500' },
+      ],
+      nextAction: 'Move to Testing',
+      question: 'Your solution takes shape.',
+    },
+    {
+      id: 'go_live',
+      label: 'Go Live™',
+      subtitle: 'Phase 6 — Test • Train • Launch',
+      icon: FlaskConical,
+      stages: ['completed' as PipelineStage],
+      leads: leads.filter(l => l.pipeline_stage === ('completed' as PipelineStage)),
+      metrics: [
         { label: 'Gone Live', value: buildCompleted, color: 'text-green-500' },
       ],
-      question: 'Less admin. More time. Smoother operations.',
+      question: 'Confident, ready, and running.',
     },
   ];
 
@@ -288,13 +301,13 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         </div>
       </div>
 
-      {/* 5 Phase Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+      {/* 6 Phase Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         {cards.map((card, index) => {
           const Icon = card.icon;
           const cardLeads = card.leads;
           const accent = phaseAccents[index];
-          const isTerminal = card.id === 'build_launch';
+          const isTerminal = card.id === 'go_live';
           const worstSla = cardLeads.some(l => getSlaStatus(l) === 'red') ? 'red' : cardLeads.some(l => getSlaStatus(l) === 'amber') ? 'amber' : 'green';
 
           return (

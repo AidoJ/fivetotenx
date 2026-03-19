@@ -24,8 +24,8 @@ const PIPELINE_STEPS: { key: string; label: string; short: string }[] = [
   { key: 'discovery_call', label: 'Straight Talk™', short: 'TALK' },
   { key: 'proposal', label: 'Green Light™', short: 'GREEN' },
   { key: 'signed', label: 'Signed', short: 'SIGNED' },
-  { key: 'build_refinement', label: 'Build & Launch™', short: 'BUILD' },
-  { key: 'completed', label: 'Complete', short: 'DONE' },
+  { key: 'build_refinement', label: 'Build™', short: 'BUILD' },
+  { key: 'completed', label: 'Go Live™', short: 'LIVE' },
 ];
 
 const stageIdx = (stage: string) => PIPELINE_STEPS.findIndex(s => s.key === stage);
@@ -114,7 +114,7 @@ const getNextAction = (
   if (stage === 'signed')
     return { label: 'Start Build', icon: Check, action: 'move_build' };
   if (stage === 'build_refinement')
-    return { label: 'Mark Complete', icon: Check, action: 'move_completed' };
+    return { label: 'Mark Go Live', icon: Check, action: 'move_completed' };
   return null;
 };
 
@@ -129,7 +129,7 @@ const CompletionChips = ({
     { label: 'Talked', done: isDiscoveryReady },
     { label: 'Game Plan', done: !!scopingResponse?.completed },
     { label: 'Green Light', done: !!proposal },
-    { label: 'Live', done: ['signed', 'build_refinement', 'completed'].includes(lead.pipeline_stage) },
+    { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
   ];
   return (
     <div className="flex items-center gap-1 flex-wrap">
@@ -256,10 +256,10 @@ const LeadCard = ({
     { key: 'assessment', label: 'Reality Check' },
     { key: 'qualified', label: 'Qualified' },
     { key: 'discovery_call' as PipelineStage, label: 'Straight Talk' },
-    { key: 'proposal', label: 'Clarity' },
-    { key: 'signed', label: 'Activated' },
+    { key: 'proposal', label: 'Green Light' },
+    { key: 'signed', label: 'Signed' },
     { key: 'build_refinement' as PipelineStage, label: 'Build' },
-    { key: 'completed' as PipelineStage, label: 'Completed' },
+    { key: 'completed' as PipelineStage, label: 'Go Live' },
   ];
 
   return (

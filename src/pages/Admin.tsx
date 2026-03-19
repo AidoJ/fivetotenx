@@ -103,8 +103,8 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'discovery_call' as PipelineStage, label: 'Straight Talk™' },
   { key: 'proposal', label: 'Green Light™' },
   { key: 'signed', label: 'Signed ✅' },
-  { key: 'build_refinement' as PipelineStage, label: 'Build & Launch™' },
-  { key: 'completed' as PipelineStage, label: 'Completed ✅' },
+  { key: 'build_refinement' as PipelineStage, label: 'Build™' },
+  { key: 'completed' as PipelineStage, label: 'Go Live™ ✅' },
 ];
 
 const CALENDLY_URL = 'https://calendly.com/aidan-rejuvenators/discovery';
@@ -1192,7 +1192,8 @@ const Admin = () => {
     { id: 'discovery', label: 'Straight Talk™', icon: Phone, stages: ['discovery_call'] },
     { id: 'scoping', label: 'Game Plan™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
     { id: 'proposal', label: 'Green Light™', icon: FileText, stages: ['proposal'] },
-    { id: 'build', label: 'Build & Launch™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
+    { id: 'build', label: 'Build™', icon: Wrench, stages: ['signed', 'build_refinement'] },
+    { id: 'go_live', label: 'Go Live™', icon: Check, stages: ['completed'] },
   ];
 
   const grouped = PIPELINE_GROUPS.map(group => ({

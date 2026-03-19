@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { Compass, MessageCircle, Puzzle, CheckCircle, Rocket, ArrowRight, Sparkles } from 'lucide-react';
+import { Compass, MessageCircle, Puzzle, CheckCircle, Wrench, FlaskConical, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const phases = [
@@ -45,13 +45,23 @@ const phases = [
     accent: 'from-orange-500 to-amber-500',
   },
   {
-    icon: Rocket,
-    emoji: '🚀',
-    label: 'Build & Launch™',
+    icon: Wrench,
+    emoji: '🛠️',
+    label: 'Build™',
     phase: 'Phase 5 — Build',
-    description: 'We build and launch your system.',
-    bullets: ['Fast turnaround', 'Real working solution', 'Designed for your business'],
-    outcome: 'Less admin. More time. Smoother operations',
+    description: 'We develop your system around your actual workflow.',
+    bullets: ['Core features built', 'Integrations connected', 'Working version ready'],
+    outcome: 'Your solution takes shape',
+    accent: 'from-lime-500 to-emerald-500',
+  },
+  {
+    icon: FlaskConical,
+    emoji: '🧪',
+    label: 'Test, Handover & Go Live™',
+    phase: 'Phase 6 — Test • Train • Launch',
+    description: 'We make sure everything works — and your team is ready to use it from day one.',
+    bullets: ['Real-world testing', 'Final refinements', 'Team walkthroughs and training', 'System deployed into your live environment'],
+    outcome: 'You\'re confident, your team is ready, and everything is running',
     accent: 'from-emerald-500 to-green-500',
   },
 ];
