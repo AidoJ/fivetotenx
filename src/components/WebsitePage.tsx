@@ -437,7 +437,7 @@ const SelfAssessmentSection = () => {
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 !answers[i] ? 'bg-muted text-foreground' : 'text-white/40'}`
                 }
-                style={!answers[i] ? {} : { background: 'hsl(260 30% 20%)' }}
+                style={!answers[i] ? {} : { background: '#E0436A33' }}
                 onClick={(e) => {e.stopPropagation();const next = [...answers];next[i] = false;setAnswers(next);}}>
                 
                   No
