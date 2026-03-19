@@ -107,6 +107,9 @@ const LandingPage = ({ onStart }: Props) => {
         </motion.div>
       </section>
 
+      {/* Clarity Engine Section */}
+      <ClarityEngineSection onStart={onStart} />
+
       {/* Features Section */}
       <section className="bg-background px-4 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
