@@ -626,34 +626,34 @@ const ZeroRiskSection = () =>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-              The $1,000 Good Faith Deposit
+              The $1,000 Commitment Deposit
             </h3>
             <p className="text-muted-foreground leading-relaxed">
-              We ask for a <strong className="text-foreground">fully refundable $1,000 deposit</strong> to begin. It's not a fee — it's a filter. It ensures we're both serious about creating something valuable.
+              We build fast — often delivering a working MVP in 1–2 weeks. To make that happen, we need you <strong className="text-foreground">fully engaged</strong> in the discovery and build process. Timely feedback, quick decisions, and real collaboration.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              If the finished system doesn't deliver the value we promised, you get every cent back. No questions, no conditions, no fine print.
+              The <strong className="text-foreground">fully refundable $1,000 deposit</strong> ensures we both have skin in the game. It's your commitment to showing up — and ours to delivering something worth showing up for.
             </p>
           </div>
           <div className="space-y-5">
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <span className="text-foreground text-sm"><strong>100% refundable</strong> — if you don't see the value, you walk away whole</span>
+              <span className="text-foreground text-sm"><strong>Keeps momentum</strong> — your engagement drives a faster, better result for everyone</span>
             </div>
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <span className="text-foreground text-sm"><strong>Applied to your project</strong> — if you proceed, it comes off the total</span>
+              <span className="text-foreground text-sm"><strong>100% refundable</strong> — if the MVP doesn't deliver, you get every cent back</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <span className="text-foreground text-sm"><strong>Applied to your project</strong> — if you proceed, it comes straight off the total</span>
             </div>
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <span className="text-foreground text-sm"><strong>Working system first</strong> — you never pay for promises, only proven results</span>
             </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <span className="text-foreground text-sm"><strong>1–2 week turnaround</strong> — your MVP is built and demoed before any commitment</span>
-            </div>
             <p className="text-xs text-muted-foreground italic pt-2">
-              We've never had a client ask for a refund. But the option is always there.
+              We've never had a client disengage — or ask for a refund. But both options are always there.
             </p>
           </div>
         </div>
