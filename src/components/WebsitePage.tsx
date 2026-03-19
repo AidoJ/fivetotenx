@@ -268,14 +268,14 @@ const RapidDeploySection = () => {
 
 const IntegrationsSection = () => {
   const integrations = [
-  { name: 'Google', category: 'Calendar & Workspace', emoji: '📅' },
-  { name: 'Xero', category: 'Accounting', emoji: '📊' },
-  { name: 'Stripe', category: 'Payments', emoji: '💳' },
-  { name: 'Twilio', category: 'Communications', emoji: '📱' },
-  { name: 'Resend', category: 'Email', emoji: '✉️' },
-  { name: 'ChatGPT', category: 'AI Assistant', emoji: '🤖' },
-  { name: 'Claude', category: 'AI Assistant', emoji: '🧠' },
-  { name: 'Supabase', category: 'Backend & Data', emoji: '🗄️' },
+  { name: 'Google', category: 'Calendar & Workspace', logo: logoGoogle },
+  { name: 'Xero', category: 'Accounting', logo: logoXero },
+  { name: 'Stripe', category: 'Payments', logo: logoStripe },
+  { name: 'Twilio', category: 'Communications', logo: logoTwilio },
+  { name: 'Resend', category: 'Email', logo: logoResend },
+  { name: 'ChatGPT', category: 'AI Assistant', logo: logoChatGPT },
+  { name: 'Claude', category: 'AI Assistant', logo: logoClaude },
+  { name: 'Supabase', category: 'Backend & Data', logo: logoSupabase },
   ];
 
 
@@ -302,8 +302,8 @@ const IntegrationsSection = () => {
             className="rounded-xl border p-6 text-center flex flex-col items-center gap-3"
             style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
             
-              <div className="w-20 h-20 rounded-2xl bg-background/10 flex items-center justify-center text-4xl">
-                {int.emoji}
+              <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center p-3">
+                <img src={int.logo} alt={int.name} className="max-h-14 max-w-14 object-contain" />
               </div>
               <span className="text-base font-bold" style={{ color: 'hsl(0 0% 93%)' }}>{int.name}</span>
               <span className="text-xs" style={{ color: 'hsl(220 20% 60%)' }}>{int.category}</span>
