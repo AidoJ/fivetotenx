@@ -101,7 +101,7 @@ const NewsSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           {FEED_LABELS.map((label, i) => {
             const feed = feeds[i];
             const color = SCREEN_COLORS[i];
@@ -113,25 +113,25 @@ const NewsSection = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="rounded-2xl overflow-hidden"
+                className="rounded-xl overflow-hidden"
                 style={{
                   background: 'hsl(230 20% 8%)',
-                  border: `2px solid ${color}`,
-                  boxShadow: `0 0 20px ${color}40, inset 0 1px 0 hsl(0 0% 100% / 0.05)`,
+                  border: `1px solid ${color}60`,
+                  boxShadow: `0 0 12px ${color}20`,
                 }}
               >
                 {/* TV header bar */}
                 <div
-                  className="flex items-center gap-2 px-4 py-2.5"
-                  style={{ background: `${color}20`, borderBottom: `1px solid ${color}40` }}
+                  className="flex items-center gap-2 px-3 py-1.5"
+                  style={{ background: `${color}15`, borderBottom: `1px solid ${color}30` }}
                 >
                   <div
-                    className="w-2.5 h-2.5 rounded-full animate-pulse"
+                    className="w-2 h-2 rounded-full animate-pulse"
                     style={{ background: color }}
                   />
-                  <Rss className="w-3.5 h-3.5" style={{ color }} />
+                  <Rss className="w-3 h-3" style={{ color }} />
                   <span
-                    className="text-xs font-display font-bold tracking-wider uppercase"
+                    className="text-[10px] font-display font-bold tracking-wider uppercase"
                     style={{ color }}
                   >
                     {label}
@@ -139,7 +139,7 @@ const NewsSection = () => {
                 </div>
 
                 {/* Content area */}
-                <div className="p-4 space-y-2 min-h-[200px]">
+                <div className="p-3 space-y-1.5 min-h-[140px]">
                   {loading ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map((n) => (
