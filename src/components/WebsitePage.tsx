@@ -260,16 +260,20 @@ const RapidDeploySection = () => {
 
 const IntegrationsSection = () => {
   const integrations = [
-  { name: 'Stripe', category: 'Payments', logo: '💳' },
-  { name: 'EmailJS', category: 'Communications', logo: '📧' },
-  { name: 'Resend', category: 'Communications', logo: '✉️' },
-  { name: 'Twilio', category: 'Communications', logo: '📱' },
-  { name: 'Supabase', category: 'Backend & Data', logo: '🗄️' }];
+  { name: 'Google', category: 'Calendar & Workspace', emoji: '📅' },
+  { name: 'Xero', category: 'Accounting', emoji: '📊' },
+  { name: 'Stripe', category: 'Payments', emoji: '💳' },
+  { name: 'Twilio', category: 'Communications', emoji: '📱' },
+  { name: 'Resend', category: 'Email', emoji: '✉️' },
+  { name: 'ChatGPT', category: 'AI Assistant', emoji: '🤖' },
+  { name: 'Claude', category: 'AI Assistant', emoji: '🧠' },
+  { name: 'Supabase', category: 'Backend & Data', emoji: '🗄️' },
+  ];
 
 
   return (
     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             Built to Integrate With the Tools{' '}
@@ -282,19 +286,18 @@ const IntegrationsSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-12">
           {integrations.map((int, i) =>
           <motion.div
             key={int.name}
-            {...stagger(0.1 * i)}
+            {...stagger(0.08 * i)}
             className="rounded-xl border p-6 text-center flex flex-col items-center gap-3"
             style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
             
-              {/* Placeholder for real logo */}
-              <div className="w-16 h-16 rounded-xl bg-background/10 flex items-center justify-center text-3xl">
-                {int.logo}
+              <div className="w-20 h-20 rounded-2xl bg-background/10 flex items-center justify-center text-4xl">
+                {int.emoji}
               </div>
-              <span className="text-sm font-semibold" style={{ color: 'hsl(0 0% 90%)' }}>{int.name}</span>
+              <span className="text-base font-bold" style={{ color: 'hsl(0 0% 93%)' }}>{int.name}</span>
               <span className="text-xs" style={{ color: 'hsl(220 20% 60%)' }}>{int.category}</span>
             </motion.div>
           )}

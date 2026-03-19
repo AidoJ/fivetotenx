@@ -62,7 +62,7 @@ const phases = [
     description: 'We develop your system around your actual workflow.',
     bullets: ['Core features built', 'Integrations connected', 'Working version ready'],
     outcome: 'Your solution takes shape',
-    color: PHASE_COLORS.lime,
+    color: PHASE_COLORS.gold,
   },
   {
     icon: FlaskConical,
@@ -72,7 +72,7 @@ const phases = [
     description: 'We make sure everything works — and your team is ready to use it from day one.',
     bullets: ['Real-world testing', 'Final refinements', 'Team walkthroughs and training', 'System deployed into your live environment'],
     outcome: 'You\'re confident, your team is ready, and everything is running',
-    color: PHASE_COLORS.green,
+    color: PHASE_COLORS.lime,
   },
 ];
 
