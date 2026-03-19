@@ -716,7 +716,7 @@ const Admin = () => {
         invite_sent_at: now,
         follow_up_scheduled_at: followUpAt,
       } : l));
-      toast({ title: 'Deep Dive Sent ✅', description: `Invite sent to ${lead.contact_email}` });
+      toast({ title: 'Pattern Map Sent ✅', description: `Invite sent to ${lead.contact_email}` });
     } catch {
       toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
     }
