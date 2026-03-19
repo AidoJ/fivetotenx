@@ -184,14 +184,14 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
 
   // Funnel data — streamlined 8-step funnel
   const funnelSteps = [
-    { label: 'Signals Captured', value: totalAssessments },
+    { label: 'Reality Checked', value: totalAssessments },
     { label: 'Qualified', value: qualifiedCount },
-    { label: 'Dialogue Booked', value: discoveryBookedCount },
-    { label: 'Aligned', value: discoveryCompletedCount },
-    { label: 'Blueprint Sent', value: scopingSentCount },
-    { label: 'Blueprint Done', value: scopingCompleteCount },
-    { label: 'Clarity Sent', value: proposalSentCount },
-    { label: 'Activated', value: signedCount },
+    { label: 'Talk Booked', value: discoveryBookedCount },
+    { label: 'Agreed', value: discoveryCompletedCount },
+    { label: 'Game Plan Sent', value: scopingSentCount },
+    { label: 'Game Plan Done', value: scopingCompleteCount },
+    { label: 'Green Light Sent', value: proposalSentCount },
+    { label: 'Gone Live', value: signedCount },
   ];
   const maxFunnel = Math.max(...funnelSteps.map(s => s.value), 1);
 
