@@ -445,7 +445,7 @@ const LeadCard = ({
                   {lead.pipeline_stage === 'signed' && proposal && (
                     <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                       onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
-                      <Eye className="w-3 h-3" /> View Proposal
+                      <Eye className="w-3 h-3" /> View Clarity Doc
                     </Button>
                   )}
 
