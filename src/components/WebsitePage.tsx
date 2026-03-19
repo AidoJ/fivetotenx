@@ -410,8 +410,8 @@ const SelfAssessmentSection = () => {
             key={i}
             className="rounded-xl border p-5 flex items-center justify-between gap-4 cursor-pointer transition-all"
             style={{
-              borderColor: answers[i] ? '#2258B4' : 'hsl(260 30% 25%)',
-              background: answers[i] ? '#2258B422' : 'hsl(260 30% 12%)'
+              borderColor: answers[i] ? '#E0436A' : '#E0436A44',
+              background: answers[i] ? '#E0436A22' : '#E0436A11'
             }}
             onClick={() => {
               const next = [...answers];
