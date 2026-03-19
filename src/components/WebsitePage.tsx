@@ -91,7 +91,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         onClick={onStartAssessment}
         size="lg"
         className="text-sm sm:text-base md:text-lg px-6 md:px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 whitespace-normal"
-        style={{ background: '#2258B4', color: 'white', border: 'none', boxShadow: '0 0 30px #2258B433' }}>
+        style={{ background: '#1789CE', color: 'white', border: 'none', boxShadow: '0 0 30px #1789CE33' }}>
         
             <span className="flex items-center gap-2 text-center">
               Discover Your Hidden Efficiency
@@ -130,7 +130,7 @@ const ShiftSection = () =>
           className="rounded-xl border border-border bg-card p-4 text-center"
           style={{ boxShadow: 'var(--shadow-card)' }}>
           
-              <X className="w-5 h-5 text-destructive mx-auto mb-2" />
+              <X className="w-8 h-8 mx-auto mb-2" strokeWidth={3} style={{ color: '#C42D64' }} />
               <span className="text-sm font-medium text-foreground">{item}</span>
             </motion.div>
         )}
@@ -141,7 +141,7 @@ const ShiftSection = () =>
         <p className="text-lg text-foreground font-semibold">
           …can now be handled automatically by simple, intelligent business apps.
         </p>
-        <div className="rounded-2xl p-8 inline-block" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+        <div className="rounded-2xl p-8 inline-block" style={{ background: '#643AA4' }}>
           <p className="text-white text-lg md:text-xl font-display font-bold">
             Businesses that don’t embrace the AI wave risk being overtaken by competitors who are moving faster, making better decisions, and operating far more efficiently.
           </p>
@@ -162,17 +162,17 @@ const WhatWeDoSection = () => {
 
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
+    <section className="bg-background px-4 py-20 md:py-28">
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
-           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
+           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
             What{' '}
             <span style={{ color: '#643AA4' }}>
               5to10x
             </span>{' '}
             Does
           </h2>
-          <p className="text-lg max-w-3xl mx-auto leading-relaxed" style={{ color: 'hsl(220 20% 72%)' }}>
+          <p className="text-lg max-w-3xl mx-auto leading-relaxed text-muted-foreground">
             We analyse how your business actually runs — the real workflows behind the scenes.
             Then we identify where simple technology can remove friction and dramatically improve efficiency.
           </p>
@@ -183,19 +183,19 @@ const WhatWeDoSection = () => {
           <motion.div
             key={cap.text}
             {...stagger(0.1 * i)}
-            className="rounded-xl border p-5 flex items-start gap-4"
-            style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
+            className="rounded-xl border border-border bg-card p-5 flex items-start gap-4"
+            style={{ boxShadow: 'var(--shadow-card)' }}>
             
               <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#2258B4' }}>
                 <cap.icon className="w-5 h-5 text-white" />
               </div>
-              <p className="text-sm font-medium" style={{ color: 'hsl(220 20% 82%)' }}>{cap.text}</p>
+              <p className="text-sm font-medium text-foreground">{cap.text}</p>
             </motion.div>
           )}
         </div>
 
-        <motion.p {...stagger(0.5)} className="text-center mt-8 text-base" style={{ color: 'hsl(220 20% 65%)' }}>
-          Instead of forcing your business to adapt to generic software, we build <strong style={{ color: 'hsl(0 0% 88%)' }}>custom operational apps around your workflow</strong>.
+        <motion.p {...stagger(0.5)} className="text-center mt-8 text-base text-muted-foreground">
+          Instead of forcing your business to adapt to generic software, we build <strong className="text-foreground">custom operational apps around your workflow</strong>.
         </motion.p>
       </div>
     </section>);
@@ -260,16 +260,20 @@ const RapidDeploySection = () => {
 
 const IntegrationsSection = () => {
   const integrations = [
-  { name: 'Stripe', category: 'Payments', logo: '💳' },
-  { name: 'EmailJS', category: 'Communications', logo: '📧' },
-  { name: 'Resend', category: 'Communications', logo: '✉️' },
-  { name: 'Twilio', category: 'Communications', logo: '📱' },
-  { name: 'Supabase', category: 'Backend & Data', logo: '🗄️' }];
+  { name: 'Google', category: 'Calendar & Workspace', emoji: '📅' },
+  { name: 'Xero', category: 'Accounting', emoji: '📊' },
+  { name: 'Stripe', category: 'Payments', emoji: '💳' },
+  { name: 'Twilio', category: 'Communications', emoji: '📱' },
+  { name: 'Resend', category: 'Email', emoji: '✉️' },
+  { name: 'ChatGPT', category: 'AI Assistant', emoji: '🤖' },
+  { name: 'Claude', category: 'AI Assistant', emoji: '🧠' },
+  { name: 'Supabase', category: 'Backend & Data', emoji: '🗄️' },
+  ];
 
 
   return (
     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             Built to Integrate With the Tools{' '}
@@ -282,19 +286,18 @@ const IntegrationsSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-12">
           {integrations.map((int, i) =>
           <motion.div
             key={int.name}
-            {...stagger(0.1 * i)}
+            {...stagger(0.08 * i)}
             className="rounded-xl border p-6 text-center flex flex-col items-center gap-3"
             style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
             
-              {/* Placeholder for real logo */}
-              <div className="w-16 h-16 rounded-xl bg-background/10 flex items-center justify-center text-3xl">
-                {int.logo}
+              <div className="w-20 h-20 rounded-2xl bg-background/10 flex items-center justify-center text-4xl">
+                {int.emoji}
               </div>
-              <span className="text-sm font-semibold" style={{ color: 'hsl(0 0% 90%)' }}>{int.name}</span>
+              <span className="text-base font-bold" style={{ color: 'hsl(0 0% 93%)' }}>{int.name}</span>
               <span className="text-xs" style={{ color: 'hsl(220 20% 60%)' }}>{int.category}</span>
             </motion.div>
           )}
@@ -335,7 +338,7 @@ const HiddenCostSection = () => {
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
             The Hidden Cost of{' '}
-            <span className="text-destructive">Manual Workflows</span>
+            <span style={{ color: '#643AA4' }}>Manual Workflows</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Small inefficiencies across a business add up to huge hidden costs.
@@ -348,12 +351,12 @@ const HiddenCostSection = () => {
             {tasks.map((t, i) =>
             <div key={i} className="flex items-center justify-between rounded-lg border border-border bg-card p-4">
                 <span className="text-sm text-foreground">{t.task}</span>
-                <span className="text-sm font-bold text-destructive">{t.minutes} min</span>
+                <span className="text-sm font-bold" style={{ color: '#643AA4' }}>{t.minutes} min</span>
               </div>
             )}
-            <div className="flex items-center justify-between rounded-lg border-2 border-destructive/30 bg-destructive/5 p-4 mt-4">
+            <div className="flex items-center justify-between rounded-lg border-2 p-4 mt-4" style={{ borderColor: '#643AA433', background: '#643AA40D' }}>
               <span className="text-sm font-semibold text-foreground">Total per day</span>
-              <span className="text-lg font-bold text-destructive">75 min</span>
+              <span className="text-lg font-bold" style={{ color: '#643AA4' }}>75 min</span>
             </div>
           </motion.div>
 
@@ -363,7 +366,7 @@ const HiddenCostSection = () => {
               <p className="text-4xl font-display font-bold text-foreground">20–30 hrs</p>
               <p className="text-muted-foreground">lost per week</p>
             </div>
-            <div className="rounded-2xl p-6 text-center" style={{ background: '#2258B4' }}>
+            <div className="rounded-2xl p-6 text-center" style={{ background: '#643AA4' }}>
               <p className="text-white/80 text-sm mb-1">Over a year, that can represent</p>
               <p className="text-3xl font-display font-bold text-white">Tens of thousands</p>
               <p className="text-white/80 text-sm">in operational cost</p>
@@ -393,9 +396,9 @@ const SelfAssessmentSection = () => {
     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-3xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
+           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             Where Are You{' '}
-            <span style={{ color: '#C42D64' }}>
+            <span style={{ color: '#E0436A' }}>
               Losing Time?
             </span>
           </h2>
@@ -410,8 +413,8 @@ const SelfAssessmentSection = () => {
             key={i}
             className="rounded-xl border p-5 flex items-center justify-between gap-4 cursor-pointer transition-all"
             style={{
-              borderColor: answers[i] ? '#2258B4' : 'hsl(260 30% 25%)',
-              background: answers[i] ? '#2258B422' : 'hsl(260 30% 12%)'
+              borderColor: answers[i] ? '#E0436A' : '#E0436A44',
+              background: answers[i] ? '#E0436A22' : '#E0436A11'
             }}
             onClick={() => {
               const next = [...answers];
@@ -425,7 +428,7 @@ const SelfAssessmentSection = () => {
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 answers[i] ? 'text-white' : 'text-white/40'}`
                 }
-                style={answers[i] ? { background: '#2258B4' } : { background: 'hsl(260 30% 20%)' }}
+                style={answers[i] ? { background: '#E0436A' } : { background: '#E0436A33' }}
                 onClick={(e) => {e.stopPropagation();const next = [...answers];next[i] = true;setAnswers(next);}}>
                 
                   Yes
@@ -434,7 +437,7 @@ const SelfAssessmentSection = () => {
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 !answers[i] ? 'bg-muted text-foreground' : 'text-white/40'}`
                 }
-                style={!answers[i] ? {} : { background: 'hsl(260 30% 20%)' }}
+                style={!answers[i] ? {} : { background: '#E0436A33' }}
                 onClick={(e) => {e.stopPropagation();const next = [...answers];next[i] = false;setAnswers(next);}}>
                 
                   No

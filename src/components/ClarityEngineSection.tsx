@@ -62,7 +62,7 @@ const phases = [
     description: 'We develop your system around your actual workflow.',
     bullets: ['Core features built', 'Integrations connected', 'Working version ready'],
     outcome: 'Your solution takes shape',
-    color: PHASE_COLORS.lime,
+    color: PHASE_COLORS.gold,
   },
   {
     icon: FlaskConical,
@@ -72,7 +72,7 @@ const phases = [
     description: 'We make sure everything works — and your team is ready to use it from day one.',
     bullets: ['Real-world testing', 'Final refinements', 'Team walkthroughs and training', 'System deployed into your live environment'],
     outcome: 'You\'re confident, your team is ready, and everything is running',
-    color: PHASE_COLORS.green,
+    color: PHASE_COLORS.lime,
   },
 ];
 
@@ -212,7 +212,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
         </motion.div>
 
         <motion.h2
-          className="text-4xl md:text-6xl lg:text-7xl font-display font-bold leading-tight"
+          className="text-2xl md:text-3xl lg:text-4xl font-display font-bold leading-tight"
           style={{ color: 'hsl(0 0% 95%)' }}
           initial={{ opacity: 0, y: 30 }}
           animate={headerInView ? { opacity: 1, y: 0 } : {}}
@@ -231,17 +231,18 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
         </motion.h2>
 
         <motion.p
-          className="text-lg md:text-2xl leading-relaxed max-w-2xl mx-auto"
-          style={{ color: 'hsl(220 20% 65%)' }}
+          className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight max-w-3xl mx-auto"
+          style={{ color: 'hsl(0 0% 97%)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={headerInView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.5 }}
         >
-          From messy workflows to a system that just works
+          From messy workflows to a system that{' '}
+          <span style={{ color: PHASE_COLORS.gold }}>just works</span>
         </motion.p>
 
         <motion.p
-          className="text-sm md:text-base leading-relaxed max-w-xl mx-auto"
+          className="text-sm md:text-lg leading-relaxed max-w-xl mx-auto"
           style={{ color: 'hsl(220 20% 50%)' }}
           initial={{ opacity: 0 }}
           animate={headerInView ? { opacity: 1 } : {}}
