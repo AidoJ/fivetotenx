@@ -549,7 +549,7 @@ const ProcessSection = () => {
             
               <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
-              style={{ backgroundImage: 'var(--gradient-primary)' }}>
+              style={{ background: '#643AA4' }}>
               
                 <step.icon className="w-7 h-7 text-white" />
               </div>
