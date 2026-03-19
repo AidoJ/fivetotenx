@@ -534,7 +534,7 @@ const ProcessSection = () => {
         <motion.div {...fadeUp} className="text-center mb-16">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             The 5to10x{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#D88E08' }}>
               Process
             </span>
           </h2>
