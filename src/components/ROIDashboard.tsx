@@ -247,18 +247,10 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           style={{ backgroundImage: 'var(--gradient-primary)' }}
         >
           <Sparkles className="w-8 h-8 text-primary-foreground mx-auto" />
-          <h3 className="text-xl font-display font-bold text-primary-foreground">Ready for Pattern Mapping™?</h3>
+          <h3 className="text-xl font-display font-bold text-primary-foreground">Ready for the Next Step?</h3>
           <p className="text-sm text-primary-foreground/80 max-w-md mx-auto">
-            Your business qualifies for a custom build. Complete the Pattern Mapping™ questionnaire so we can identify your highest-leverage opportunities.
+            Your business qualifies for a custom build. Our team will review your Signal Capture™ data and send you an invitation to schedule your Alignment Dialogue™ — a focused conversation to align vision and priorities.
           </p>
-          <Button
-            variant="secondary"
-            className="gap-2"
-            onClick={() => window.open(`/deep-dive?id=${assessmentId}`, '_blank')}
-          >
-            <ArrowRight className="w-4 h-4" />
-            Start Pattern Mapping™
-          </Button>
         </motion.div>
       )}
 

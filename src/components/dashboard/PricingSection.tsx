@@ -58,7 +58,7 @@ const PricingSection = ({ pricing, totalAnnualImpact }: Props) => {
         {pricing.isQualified && (
           <Badge className="gap-1.5 px-3 py-1 text-xs font-semibold" style={{ backgroundImage: 'var(--gradient-vibrant)', color: 'white', border: 'none' }}>
             <Sparkles className="w-3.5 h-3.5" />
-            Qualified for Deep Dive
+            Qualified for Custom Build
           </Badge>
         )}
       </div>
