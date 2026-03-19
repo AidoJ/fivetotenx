@@ -375,8 +375,7 @@ const LeadCard = ({
                 <div className="space-y-2 py-1">
                   {/* Discovery tools */}
 
-                  {/* Discovery tools */}
-                  {['deep_dive_complete', 'discovery_call'].includes(lead.pipeline_stage) && (
+                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(CALENDLY_URL, '_blank')}>
