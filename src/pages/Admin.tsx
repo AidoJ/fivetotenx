@@ -1192,7 +1192,7 @@ const Admin = () => {
     { id: 'discovery', label: 'Straight Talk™', icon: Phone, stages: ['discovery_call'] },
     { id: 'scoping', label: 'Game Plan™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
     { id: 'proposal', label: 'Green Light™', icon: FileText, stages: ['proposal'] },
-    { id: 'build', label: 'Go Live™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
+    { id: 'build', label: 'Build & Launch™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
   ];
 
   const grouped = PIPELINE_GROUPS.map(group => ({

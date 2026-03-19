@@ -294,7 +294,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
           const Icon = card.icon;
           const cardLeads = card.leads;
           const accent = phaseAccents[index];
-          const isTerminal = card.id === 'build_activate';
+          const isTerminal = card.id === 'build_launch';
           const worstSla = cardLeads.some(l => getSlaStatus(l) === 'red') ? 'red' : cardLeads.some(l => getSlaStatus(l) === 'amber') ? 'amber' : 'green';
 
           return (
