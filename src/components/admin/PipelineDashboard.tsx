@@ -1,7 +1,7 @@
 import { Tables } from '@/integrations/supabase/types';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Radar, MessageCircle, Puzzle, FileText, Rocket,
+  Radar, MessageCircle, Puzzle, FileText, Wrench, FlaskConical,
   ArrowRight, TrendingDown, Users, Zap
 } from 'lucide-react';
 
