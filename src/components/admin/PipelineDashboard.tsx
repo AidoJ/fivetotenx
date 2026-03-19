@@ -1,8 +1,8 @@
 import { Tables } from '@/integrations/supabase/types';
 import { Badge } from '@/components/ui/badge';
 import { 
-  ClipboardList, Phone, FileText, Send, Hammer, CheckCircle2,
-  ArrowRight, TrendingDown, Users, Eye
+  Radar, Search, MessageCircle, Puzzle, FileText, Rocket,
+  ArrowRight, TrendingDown, Users, Zap
 } from 'lucide-react';
 
 type Assessment = Tables<'roi_assessments'>;
@@ -67,18 +67,29 @@ const slaColors = {
   red: 'bg-red-500',
 };
 
+// Phase accent colors (cool → warm progression)
+const phaseAccents = [
+  { bg: 'from-blue-500/10 to-indigo-500/10', border: 'border-blue-500/30', text: 'text-blue-600', icon: 'bg-blue-500/15 text-blue-600' },
+  { bg: 'from-violet-500/10 to-purple-500/10', border: 'border-violet-500/30', text: 'text-violet-600', icon: 'bg-violet-500/15 text-violet-600' },
+  { bg: 'from-purple-500/10 to-pink-500/10', border: 'border-purple-500/30', text: 'text-purple-600', icon: 'bg-purple-500/15 text-purple-600' },
+  { bg: 'from-pink-500/10 to-rose-500/10', border: 'border-pink-500/30', text: 'text-pink-600', icon: 'bg-pink-500/15 text-pink-600' },
+  { bg: 'from-orange-500/10 to-amber-500/10', border: 'border-orange-500/30', text: 'text-orange-600', icon: 'bg-orange-500/15 text-orange-600' },
+  { bg: 'from-emerald-500/10 to-green-500/10', border: 'border-emerald-500/30', text: 'text-emerald-600', icon: 'bg-emerald-500/15 text-emerald-600' },
+];
+
 interface CardConfig {
   id: string;
   label: string;
+  subtitle: string;
   icon: React.ElementType;
   metrics: { label: string; value: number; color?: string }[];
   leads: Assessment[];
   stages: PipelineStage[];
   nextAction?: string;
+  question: string;
 }
 
 const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingResponses, onStageClick }: PipelineDashboardProps) => {
-  // Compute metrics
   const totalAssessments = leads.length;
   const qualifiedCount = leads.filter(l => l.is_qualified).length;
 
@@ -104,92 +115,104 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
 
   const cards: CardConfig[] = [
     {
-      id: 'assessment',
-      label: 'Assessment',
-      icon: ClipboardList,
+      id: 'signal_capture',
+      label: 'Signal Capture™',
+      subtitle: 'Phase 1',
+      icon: Radar,
       stages: ['assessment', 'qualified'],
       leads: leads.filter(l => l.pipeline_stage === 'assessment' || l.pipeline_stage === 'qualified'),
       metrics: [
-        { label: 'Total', value: totalAssessments },
+        { label: 'Signals', value: totalAssessments },
         { label: 'Qualified', value: qualifiedCount, color: 'text-green-500' },
       ],
-      nextAction: 'Qualify & Send Deep Dive',
+      nextAction: 'Qualify & Send Pattern Map',
+      question: 'What\'s beneath the surface?',
     },
     {
-      id: 'deep_dive',
-      label: 'Deep Dive',
-      icon: Send,
+      id: 'pattern_mapping',
+      label: 'Pattern Mapping™',
+      subtitle: 'Phase 2',
+      icon: Search,
       stages: ['deep_dive_sent', 'deep_dive_complete'],
       leads: leads.filter(l => l.pipeline_stage === 'deep_dive_sent' || l.pipeline_stage === 'deep_dive_complete'),
       metrics: [
         { label: 'Sent', value: deepDiveSentCount },
-        { label: 'Completed', value: deepDiveCompleteCount, color: 'text-green-500' },
+        { label: 'Mapped', value: deepDiveCompleteCount, color: 'text-green-500' },
       ],
-      nextAction: 'Schedule Discovery Call',
+      nextAction: 'Schedule Alignment Dialogue',
+      question: 'Where\'s the leakage?',
     },
     {
-      id: 'discovery',
-      label: 'Discovery',
-      icon: Phone,
+      id: 'alignment_dialogue',
+      label: 'Alignment Dialogue™',
+      subtitle: 'Phase 3',
+      icon: MessageCircle,
       stages: ['discovery_call' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === ('discovery_call' as PipelineStage)),
       metrics: [
         { label: 'Booked', value: discoveryBookedCount },
-        { label: 'Completed', value: discoveryCompletedCount, color: 'text-green-500' },
+        { label: 'Aligned', value: discoveryCompletedCount, color: 'text-green-500' },
       ],
-      nextAction: 'Send Scoping Questionnaire',
+      nextAction: 'Send System Blueprint',
+      question: 'What does success look like?',
     },
     {
-      id: 'scoping',
-      label: 'Scoping',
-      icon: Eye,
+      id: 'system_blueprint',
+      label: 'System Blueprint™',
+      subtitle: 'Phase 4',
+      icon: Puzzle,
       stages: ['discovery_call' as PipelineStage, 'proposal'],
       leads: leads.filter(l => (l as any).scoping_sent && !scopingResponses.find(s => s.assessment_id === l.id && s.completed)),
       metrics: [
-        { label: 'Links Sent', value: scopingSentCount },
+        { label: 'Sent', value: scopingSentCount },
         { label: 'Completed', value: scopingCompleteCount, color: 'text-green-500' },
       ],
-      nextAction: 'Generate Proposal',
+      nextAction: 'Generate Commercial Clarity',
+      question: 'How does it work end to end?',
     },
     {
-      id: 'proposal',
-      label: 'Proposals',
+      id: 'commercial_clarity',
+      label: 'Commercial Clarity™',
+      subtitle: 'Phase 5',
       icon: FileText,
       stages: ['proposal'],
       leads: leads.filter(l => l.pipeline_stage === 'proposal'),
       metrics: [
         { label: 'Generated', value: proposalGeneratedCount },
         { label: 'Sent', value: proposalSentCount },
-        { label: 'Signed', value: signedCount, color: 'text-green-500' },
+        { label: 'Activated', value: signedCount, color: 'text-green-500' },
       ],
       nextAction: 'Send & Follow Up',
+      question: 'What\'s the return?',
     },
     {
-      id: 'build',
-      label: 'Build',
-      icon: Hammer,
+      id: 'build_activate',
+      label: 'Build & Activate™',
+      subtitle: 'Phase 6',
+      icon: Rocket,
       stages: ['signed', 'build_refinement' as PipelineStage, 'completed' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === 'signed' || l.pipeline_stage === ('build_refinement' as PipelineStage) || l.pipeline_stage === ('completed' as PipelineStage)),
       metrics: [
         { label: 'Approved', value: buildApproved },
-        { label: 'In Progress', value: buildInProgress, color: 'text-blue-500' },
-        { label: 'Completed', value: buildCompleted, color: 'text-green-500' },
+        { label: 'Building', value: buildInProgress, color: 'text-blue-500' },
+        { label: 'Live', value: buildCompleted, color: 'text-green-500' },
       ],
+      question: 'Let\'s bring it to life.',
     },
   ];
 
   // Funnel data
   const funnelSteps = [
-    { label: 'Assessments', value: totalAssessments },
+    { label: 'Signals Captured', value: totalAssessments },
     { label: 'Qualified', value: qualifiedCount },
-    { label: 'Deep Dive Sent', value: deepDiveSentCount },
-    { label: 'Deep Dive Done', value: deepDiveCompleteCount },
-    { label: 'Discovery Booked', value: discoveryBookedCount },
-    { label: 'Discovery Done', value: discoveryCompletedCount },
-    { label: 'Scoping Sent', value: scopingSentCount },
-    { label: 'Scoping Done', value: scopingCompleteCount },
-    { label: 'Proposals Sent', value: proposalSentCount },
-    { label: 'Signed', value: signedCount },
+    { label: 'Pattern Map Sent', value: deepDiveSentCount },
+    { label: 'Pattern Mapped', value: deepDiveCompleteCount },
+    { label: 'Dialogue Booked', value: discoveryBookedCount },
+    { label: 'Aligned', value: discoveryCompletedCount },
+    { label: 'Blueprint Sent', value: scopingSentCount },
+    { label: 'Blueprint Done', value: scopingCompleteCount },
+    { label: 'Clarity Sent', value: proposalSentCount },
+    { label: 'Activated', value: signedCount },
   ];
   const maxFunnel = Math.max(...funnelSteps.map(s => s.value), 1);
 
@@ -203,43 +226,54 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
 
   return (
     <div className="space-y-6">
-      {/* Top summary: SLA + Total Stats */}
+      {/* Clarity Engine Header */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
+          <Zap className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-foreground font-display">The Clarity Engine™</h2>
+          <p className="text-[11px] text-muted-foreground">From fragmented ideas to engineered growth systems</p>
+        </div>
+      </div>
+
+      {/* Top summary */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <p className="text-3xl font-bold text-foreground">{leads.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">Total Leads</p>
+          <p className="text-xs text-muted-foreground mt-1">Active Signals</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <p className="text-3xl font-bold text-foreground">{signedCount}</p>
-          <p className="text-xs text-muted-foreground mt-1">Won</p>
+          <p className="text-xs text-muted-foreground mt-1">Activated</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <div className="flex items-center justify-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
             <p className="text-3xl font-bold text-foreground">{slaGreen}</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">&lt;24h</p>
+          <p className="text-xs text-muted-foreground mt-1">On Track</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <div className="flex items-center justify-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
             <p className="text-3xl font-bold text-foreground">{slaAmber}</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">24-48h</p>
+          <p className="text-xs text-muted-foreground mt-1">Needs Attention</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <div className="flex items-center justify-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
             <p className="text-3xl font-bold text-foreground">{slaRed}</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">&gt;48h</p>
+          <p className="text-xs text-muted-foreground mt-1">At Risk</p>
         </div>
       </div>
 
       {/* Conversion Funnel */}
       <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="text-xs font-bold text-foreground mb-3 flex items-center gap-2">
-          <TrendingDown className="w-4 h-4 text-primary" /> Conversion Funnel
+          <TrendingDown className="w-4 h-4 text-primary" /> Clarity Engine™ Funnel
         </h3>
         <div className="space-y-2">
           {funnelSteps.map((step, i) => {
@@ -248,7 +282,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
             const convRate = prevValue && prevValue > 0 ? Math.round((step.value / prevValue) * 100) : null;
             return (
               <div key={step.label} className="flex items-center gap-3">
-                <span className="text-[11px] text-muted-foreground w-24 text-right shrink-0">{step.label}</span>
+                <span className="text-[11px] text-muted-foreground w-28 text-right shrink-0">{step.label}</span>
                 <div className="flex-1 h-6 bg-secondary/50 rounded-md overflow-hidden relative">
                   <div
                     className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-md"
@@ -274,27 +308,35 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         </div>
       </div>
 
-      {/* 6 Pipeline Cards */}
+      {/* 6 Phase Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         {cards.map((card, index) => {
           const Icon = card.icon;
           const cardLeads = card.leads;
+          const accent = phaseAccents[index];
+          const isTerminal = card.id === 'build_activate';
           const worstSla = cardLeads.some(l => getSlaStatus(l) === 'red') ? 'red' : cardLeads.some(l => getSlaStatus(l) === 'amber') ? 'amber' : 'green';
-          const isTerminal = card.id === 'build';
-          const borderColor = isTerminal ? 'border-green-500/30' : worstSla === 'red' ? 'border-red-500/30' : worstSla === 'amber' ? 'border-amber-500/30' : 'border-border';
 
           return (
-            <div key={card.id} className="flex items-stretch gap-1">
+            <div key={card.id} className="flex items-stretch gap-1"
+              style={{ animation: `scale-in 0.4s ease-out ${index * 0.08}s both` }}
+            >
               <div
                 onClick={() => card.stages[0] && onStageClick?.(card.stages[0])}
-                className={`flex-1 rounded-xl border-2 ${borderColor} bg-card p-4 space-y-3 cursor-pointer hover:scale-[1.02] transition-transform`}
+                className={`flex-1 rounded-xl border-2 ${isTerminal ? accent.border : worstSla === 'red' ? 'border-red-500/30' : worstSla === 'amber' ? 'border-amber-500/30' : accent.border} bg-gradient-to-br ${accent.bg} p-4 space-y-3 cursor-pointer hover:scale-[1.02] transition-all hover:shadow-lg`}
               >
-                {/* Card Header */}
-                <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                    <Icon className="w-4 h-4 text-primary" />
+                {/* Phase Header */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${accent.icon}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">{card.subtitle}</p>
+                      <h3 className="text-sm font-bold text-foreground leading-tight truncate">{card.label}</h3>
+                    </div>
                   </div>
-                  <h3 className="text-sm font-bold text-foreground">{card.label}</h3>
+                  <p className="text-[10px] italic text-muted-foreground">"{card.question}"</p>
                 </div>
 
                 {/* Metrics */}
@@ -307,9 +349,9 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
                   ))}
                 </div>
 
-                {/* Active leads in this card */}
+                {/* Active leads */}
                 {cardLeads.length > 0 && (
-                  <div className="border-t border-border pt-2 space-y-1 max-h-20 overflow-y-auto">
+                  <div className="border-t border-border/50 pt-2 space-y-1 max-h-20 overflow-y-auto">
                     {cardLeads.slice(0, 4).map(lead => {
                       const sla = isTerminal ? 'green' : getSlaStatus(lead);
                       return (
@@ -328,17 +370,17 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
                   </div>
                 )}
 
-                {/* Next action hint */}
+                {/* Next action */}
                 {card.nextAction && (
                   <div className="pt-1">
-                    <span className="text-[9px] text-primary/70 font-medium flex items-center gap-1">
+                    <span className={`text-[9px] ${accent.text} font-medium flex items-center gap-1`}>
                       <ArrowRight className="w-3 h-3" /> {card.nextAction}
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Arrow between cards (desktop only) */}
+              {/* Arrow between cards */}
               {index < cards.length - 1 && (
                 <div className="hidden xl:flex items-center text-muted-foreground/40">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -353,9 +395,9 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
 
       {/* Legend */}
       <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> Action within 24h</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" /> No action 24-48h</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500" /> No action 48h+</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> On Track</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" /> Needs Attention (24-48h)</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500" /> At Risk (48h+)</span>
       </div>
     </div>
   );

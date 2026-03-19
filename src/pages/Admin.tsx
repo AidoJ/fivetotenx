@@ -98,14 +98,14 @@ interface ClientInterview {
 }
 
 const STAGES: { key: PipelineStage; label: string }[] = [
-  { key: 'assessment', label: 'Assessment' },
+  { key: 'assessment', label: 'Signal Capture™' },
   { key: 'qualified', label: 'Qualified' },
-  { key: 'deep_dive_sent', label: 'Deep Dive Sent' },
-  { key: 'deep_dive_complete', label: 'Deep Dive Done' },
-  { key: 'discovery_call' as PipelineStage, label: 'Discovery Call' },
-  { key: 'proposal', label: 'Proposal' },
-  { key: 'signed', label: 'Signed ✅' },
-  { key: 'build_refinement' as PipelineStage, label: 'Build Refinement' },
+  { key: 'deep_dive_sent', label: 'Pattern Map Sent' },
+  { key: 'deep_dive_complete', label: 'Pattern Map Done' },
+  { key: 'discovery_call' as PipelineStage, label: 'Alignment Dialogue™' },
+  { key: 'proposal', label: 'Commercial Clarity™' },
+  { key: 'signed', label: 'Activated ✅' },
+  { key: 'build_refinement' as PipelineStage, label: 'Build & Activate™' },
   { key: 'completed' as PipelineStage, label: 'Completed ✅' },
 ];
 
