@@ -238,7 +238,7 @@ const DeepDiveViewer = ({ submission }: { submission: DeepDiveSubmission }) => (
   >
     <div className="flex items-center gap-2">
       <ClipboardList className="w-4 h-4 text-primary" />
-      <h4 className="text-xs font-bold text-foreground">Deep Dive Responses</h4>
+      <h4 className="text-xs font-bold text-foreground">Pattern Map Responses</h4>
       <span className="text-[10px] text-muted-foreground">Submitted {formatDate(submission.created_at)}</span>
     </div>
 
