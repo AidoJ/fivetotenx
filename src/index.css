@@ -45,6 +45,17 @@
     --sidebar-border: 230 18% 86%;
     --sidebar-ring: 260 65% 52%;
 
+    /* Logo color palette — blue to green progression */
+    --logo-blue: 205 88% 45%;
+    --logo-deep-blue: 217 68% 42%;
+    --logo-indigo: 225 54% 41%;
+    --logo-purple: 269 47% 44%;
+    --logo-magenta: 340 63% 48%;
+    --logo-orange: 36 93% 42%;
+    --logo-gold: 48 91% 46%;
+    --logo-lime: 85 82% 37%;
+    --logo-green: 114 88% 29%;
+
     --gradient-primary: linear-gradient(135deg, hsl(220 72% 50%), hsl(260 65% 52%), hsl(328 68% 52%));
     --gradient-gold: linear-gradient(135deg, hsl(260 65% 50%), hsl(328 68% 52%), hsl(30 88% 55%));
     --gradient-vibrant: linear-gradient(135deg, hsl(220 72% 50%), hsl(260 65% 52%), hsl(328 68% 52%), hsl(30 88% 55%), hsl(85 65% 48%));
