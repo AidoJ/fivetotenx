@@ -395,7 +395,7 @@ const SelfAssessmentSection = () => {
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             Where Are You{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#C42D64' }}>
               Losing Time?
             </span>
           </h2>
