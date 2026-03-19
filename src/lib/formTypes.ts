@@ -207,6 +207,19 @@ export const CURRENT_FEATURES = [
   'CRM automation',
 ];
 
+export const GOAL_OPTIONS = [
+  'Increase revenue / sales',
+  'Reduce manual admin work',
+  'Improve customer retention',
+  'Better booking / scheduling',
+  'Automate follow-ups & reminders',
+  'Launch loyalty / rewards program',
+  'Mobile app for customers',
+  'Internal staff tools',
+  'E-commerce / online sales',
+  'Data & analytics dashboard',
+];
+
 export const BUSINESS_TYPES: { value: BusinessType; label: string; description: string }[] = [
   { value: 'service', label: 'Service', description: 'Hairdresser, plumber, consultant, gym' },
   { value: 'product', label: 'Product', description: 'Retail, e-commerce, wholesale' },
