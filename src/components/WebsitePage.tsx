@@ -900,9 +900,9 @@ const ContactSection = () =>
         href="mailto:grow@5to10x.app"
         className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105"
         style={{
-          background: 'linear-gradient(135deg, hsl(260 80% 60%), hsl(280 80% 55%))',
+          background: '#2258B4',
           color: '#fff',
-          boxShadow: '0 4px 20px hsl(260 80% 50% / 0.3)'
+          boxShadow: '0 4px 20px #2258B433'
         }}>
         
           <Mail className="w-5 h-5" />
