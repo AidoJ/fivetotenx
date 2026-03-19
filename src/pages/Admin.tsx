@@ -692,32 +692,9 @@ const Admin = () => {
     }
   };
 
-  const handleSendDeepDive = async (lead: Assessment) => {
-    try {
-      const { error } = await supabase.functions.invoke('send-deep-dive-invite', {
-        body: { contactName: lead.contact_name, contactEmail: lead.contact_email, businessName: lead.business_name, assessmentId: lead.id },
-      });
-      if (error) throw error;
-      const now = new Date().toISOString();
-      const followUpDays = lead.follow_up_days || 2;
-      const followUpAt = new Date(Date.now() + followUpDays * 24 * 60 * 60 * 1000).toISOString();
-      await supabase.from('roi_assessments').update({
-        pipeline_stage: 'deep_dive_sent' as any,
-        invite_sent: true,
-        invite_sent_at: now,
-        follow_up_scheduled_at: followUpAt,
-      }).eq('id', lead.id);
-      setLeads(prev => prev.map(l => l.id === lead.id ? {
-        ...l,
-        pipeline_stage: 'deep_dive_sent' as PipelineStage,
-        invite_sent: true,
-        invite_sent_at: now,
-        follow_up_scheduled_at: followUpAt,
-      } : l));
-      toast({ title: 'Pattern Map Sent ✅', description: `Invite sent to ${lead.contact_email}` });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
-    }
+  const handleSendDiscoveryFromQualified = async (lead: Assessment) => {
+    // After removing Pattern Mapping, qualifying now goes straight to Alignment Dialogue
+    handleSendDiscoveryInvite(lead);
   };
 
   const handleScheduleReminder = async (id: string, days: number | null, scheduledAt: string | null) => {
