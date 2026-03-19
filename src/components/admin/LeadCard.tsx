@@ -98,17 +98,17 @@ const getNextAction = (
   if (stage === 'assessment' && !lead.is_qualified)
     return { label: 'Qualify Signal', icon: Check, action: 'qualify' };
   if (stage === 'qualified')
-    return { label: 'Send Alignment Invite', icon: Send, action: 'send_discovery' };
+    return { label: 'Send Straight Talk Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'discovery_call' && !isDiscoveryReady)
-    return { label: 'Mark Alignment Complete', icon: Check, action: 'mark_discovery' };
+    return { label: 'Mark Straight Talk Complete', icon: Check, action: 'mark_discovery' };
   if (stage === 'discovery_call' && isDiscoveryReady && !scopingResponse)
-    return { label: 'Send Blueprint Link', icon: Copy, action: 'copy_scoping' };
+    return { label: 'Send Game Plan Link', icon: Copy, action: 'copy_scoping' };
   if (stage === 'discovery_call' && isDiscoveryReady && scopingResponse)
-    return { label: 'Move to Clarity', icon: FileText, action: 'move_proposal' };
+    return { label: 'Move to Green Light', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
-    return { label: 'Prepare Clarity Doc', icon: FileText, action: 'prepare_proposal' };
+    return { label: 'Prepare Green Light Doc', icon: FileText, action: 'prepare_proposal' };
   if (stage === 'proposal' && proposal && !lead.proposal_sent_at)
-    return { label: 'Send Clarity Doc', icon: Send, action: 'send_proposal' };
+    return { label: 'Send Green Light Doc', icon: Send, action: 'send_proposal' };
   if (stage === 'proposal' && lead.proposal_sent_at)
     return { label: 'Awaiting Signature', icon: Clock, action: 'waiting' };
   if (stage === 'signed')
