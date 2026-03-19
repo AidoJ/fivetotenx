@@ -555,7 +555,7 @@ const ProcessSection = () => {
               </div>
               <div
               className="text-xs font-bold uppercase tracking-wider"
-              style={{ color: 'hsl(260 60% 70%)' }}>
+              style={{ color: '#D88E08' }}>
               
                 Step {step.num}
               </div>
