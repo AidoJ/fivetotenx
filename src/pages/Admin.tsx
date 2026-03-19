@@ -1213,12 +1213,12 @@ const Admin = () => {
 
   // Mirror dashboard's 6 consolidated stages
   const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
-    { id: 'assessment', label: 'Assessment', icon: ClipboardList, stages: ['assessment', 'qualified'] },
-    { id: 'deep_dive', label: 'Deep Dive', icon: Send, stages: ['deep_dive_sent', 'deep_dive_complete'] },
-    { id: 'discovery', label: 'Discovery', icon: Phone, stages: ['discovery_call'] },
-    { id: 'scoping', label: 'Scoping', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
-    { id: 'proposal', label: 'Proposals', icon: FileText, stages: ['proposal'] },
-    { id: 'build', label: 'Build', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
+    { id: 'assessment', label: 'Signal Capture™', icon: ClipboardList, stages: ['assessment', 'qualified'] },
+    { id: 'deep_dive', label: 'Pattern Mapping™', icon: Send, stages: ['deep_dive_sent', 'deep_dive_complete'] },
+    { id: 'discovery', label: 'Alignment Dialogue™', icon: Phone, stages: ['discovery_call'] },
+    { id: 'scoping', label: 'System Blueprint™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
+    { id: 'proposal', label: 'Commercial Clarity™', icon: FileText, stages: ['proposal'] },
+    { id: 'build', label: 'Build & Activate™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
   ];
 
   const grouped = PIPELINE_GROUPS.map(group => ({
