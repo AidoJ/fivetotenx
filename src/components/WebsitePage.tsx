@@ -893,20 +893,28 @@ const FooterSection = () =>
 
 const WebsitePage = ({ onStartAssessment }: Props) =>
 <div className="min-h-screen overflow-x-hidden">
+    {/* 1. TEASER — Hero with CTA */}
     <HeroSection onStartAssessment={onStartAssessment} />
-    <ClarityEngineSection onStart={onStartAssessment} />
-    <ShiftSection />
-    <WhatWeDoSection />
-    <RapidDeploySection />
-    <IntegrationsSection />
+    {/* 2. WHAT — The Problem */}
     <HiddenCostSection />
     <SelfAssessmentSection />
-    <CaseStudiesSection />
-    <ProcessSection />
+    {/* 3. WHY — Why Change Now */}
+    <ShiftSection />
+    {/* 4. HOW — Our Clarity Engine */}
+    <ClarityEngineSection onStart={onStartAssessment} />
+    <WhatWeDoSection />
+    <IntegrationsSection />
+    {/* 5. WHEN — Urgency & Speed */}
+    <RapidDeploySection />
     <ZeroRiskSection />
-    <FreeTrainingSection />
+    {/* 6. WHO — The Founders */}
     <CoFoundersSection />
+    {/* 7. EXAMPLES — Case Studies */}
+    <CaseStudiesSection />
+    {/* 8. LATEST NEWS */}
     <NewsSection />
+    {/* 9. FINAL CTA & CONTACT */}
+    <FreeTrainingSection />
     <CTASection onStartAssessment={onStartAssessment} />
     <ContactSection />
     <FooterSection />
