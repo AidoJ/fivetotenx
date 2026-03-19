@@ -1,7 +1,7 @@
 import { Tables } from '@/integrations/supabase/types';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Radar, Search, MessageCircle, Puzzle, FileText, Rocket,
+  Radar, MessageCircle, Puzzle, FileText, Rocket,
   ArrowRight, TrendingDown, Users, Zap
 } from 'lucide-react';
 
@@ -67,11 +67,10 @@ const slaColors = {
   red: 'bg-red-500',
 };
 
-// Phase accent colors (cool → warm progression)
+// Phase accent colors (cool → warm progression) — now 5 phases
 const phaseAccents = [
   { bg: 'from-blue-500/10 to-indigo-500/10', border: 'border-blue-500/30', text: 'text-blue-600', icon: 'bg-blue-500/15 text-blue-600' },
   { bg: 'from-violet-500/10 to-purple-500/10', border: 'border-violet-500/30', text: 'text-violet-600', icon: 'bg-violet-500/15 text-violet-600' },
-  { bg: 'from-purple-500/10 to-pink-500/10', border: 'border-purple-500/30', text: 'text-purple-600', icon: 'bg-purple-500/15 text-purple-600' },
   { bg: 'from-pink-500/10 to-rose-500/10', border: 'border-pink-500/30', text: 'text-pink-600', icon: 'bg-pink-500/15 text-pink-600' },
   { bg: 'from-orange-500/10 to-amber-500/10', border: 'border-orange-500/30', text: 'text-orange-600', icon: 'bg-orange-500/15 text-orange-600' },
   { bg: 'from-emerald-500/10 to-green-500/10', border: 'border-emerald-500/30', text: 'text-emerald-600', icon: 'bg-emerald-500/15 text-emerald-600' },
@@ -93,10 +92,6 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
   const totalAssessments = leads.length;
   const qualifiedCount = leads.filter(l => l.is_qualified).length;
 
-  const deepDiveSentCount = leads.filter(l => l.invite_sent).length;
-  const deepDiveCompletedIds = new Set(deepDives.map(d => d.assessment_id));
-  const deepDiveCompleteCount = deepDiveCompletedIds.size;
-
   const bookedInterviews = interviews.filter(i => i.scheduled_at);
   const completedInterviews = interviews.filter(i => i.call_completed);
   const discoveryBookedCount = new Set(bookedInterviews.map(i => i.assessment_id)).size;
@@ -117,7 +112,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
     {
       id: 'signal_capture',
       label: 'Signal Capture™',
-      subtitle: 'Phase 1',
+      subtitle: 'Phase 1 — Assess',
       icon: Radar,
       stages: ['assessment', 'qualified'],
       leads: leads.filter(l => l.pipeline_stage === 'assessment' || l.pipeline_stage === 'qualified'),
@@ -125,27 +120,13 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         { label: 'Signals', value: totalAssessments },
         { label: 'Qualified', value: qualifiedCount, color: 'text-green-500' },
       ],
-      nextAction: 'Qualify & Send Pattern Map',
-      question: 'What\'s beneath the surface?',
-    },
-    {
-      id: 'pattern_mapping',
-      label: 'Pattern Mapping™',
-      subtitle: 'Phase 2',
-      icon: Search,
-      stages: ['deep_dive_sent', 'deep_dive_complete'],
-      leads: leads.filter(l => l.pipeline_stage === 'deep_dive_sent' || l.pipeline_stage === 'deep_dive_complete'),
-      metrics: [
-        { label: 'Sent', value: deepDiveSentCount },
-        { label: 'Mapped', value: deepDiveCompleteCount, color: 'text-green-500' },
-      ],
       nextAction: 'Schedule Alignment Dialogue',
-      question: 'Where\'s the leakage?',
+      question: 'What\'s beneath the surface?',
     },
     {
       id: 'alignment_dialogue',
       label: 'Alignment Dialogue™',
-      subtitle: 'Phase 3',
+      subtitle: 'Phase 2 — Discuss',
       icon: MessageCircle,
       stages: ['discovery_call' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === ('discovery_call' as PipelineStage)),
@@ -159,7 +140,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
     {
       id: 'system_blueprint',
       label: 'System Blueprint™',
-      subtitle: 'Phase 4',
+      subtitle: 'Phase 3 — Plan',
       icon: Puzzle,
       stages: ['discovery_call' as PipelineStage, 'proposal'],
       leads: leads.filter(l => (l as any).scoping_sent && !scopingResponses.find(s => s.assessment_id === l.id && s.completed)),
@@ -173,7 +154,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
     {
       id: 'commercial_clarity',
       label: 'Commercial Clarity™',
-      subtitle: 'Phase 5',
+      subtitle: 'Phase 4 — Sign Off',
       icon: FileText,
       stages: ['proposal'],
       leads: leads.filter(l => l.pipeline_stage === 'proposal'),
@@ -188,7 +169,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
     {
       id: 'build_activate',
       label: 'Build & Activate™',
-      subtitle: 'Phase 6',
+      subtitle: 'Phase 5 — Build',
       icon: Rocket,
       stages: ['signed', 'build_refinement' as PipelineStage, 'completed' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === 'signed' || l.pipeline_stage === ('build_refinement' as PipelineStage) || l.pipeline_stage === ('completed' as PipelineStage)),
@@ -201,12 +182,10 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
     },
   ];
 
-  // Funnel data
+  // Funnel data — streamlined 8-step funnel
   const funnelSteps = [
     { label: 'Signals Captured', value: totalAssessments },
     { label: 'Qualified', value: qualifiedCount },
-    { label: 'Pattern Map Sent', value: deepDiveSentCount },
-    { label: 'Pattern Mapped', value: deepDiveCompleteCount },
     { label: 'Dialogue Booked', value: discoveryBookedCount },
     { label: 'Aligned', value: discoveryCompletedCount },
     { label: 'Blueprint Sent', value: scopingSentCount },
@@ -233,7 +212,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         </div>
         <div>
           <h2 className="text-lg font-bold text-foreground font-display">The Clarity Engine™</h2>
-          <p className="text-[11px] text-muted-foreground">From fragmented ideas to engineered growth systems</p>
+          <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build</p>
         </div>
       </div>
 
@@ -308,8 +287,8 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         </div>
       </div>
 
-      {/* 6 Phase Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      {/* 5 Phase Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {cards.map((card, index) => {
           const Icon = card.icon;
           const cardLeads = card.leads;
