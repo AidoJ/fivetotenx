@@ -439,16 +439,6 @@ const LeadCard = ({
                   )}
 
                   {/* Follow-up timers */}
-                  {lead.pipeline_stage === 'deep_dive_sent' && (
-                    <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
-                      <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground">Follow up in</span>
-                      <Input type="number" min={1} max={30} defaultValue={lead.follow_up_days || 2}
-                        className="h-6 w-14 text-[10px] text-center"
-                        onBlur={(e) => onUpdateFollowUp(lead.id, parseInt(e.target.value) || 2)} />
-                      <span className="text-[10px] text-muted-foreground">days</span>
-                    </div>
-                  )}
                   {lead.pipeline_stage === 'proposal' && (
                     <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
                       <Clock className="w-3 h-3 text-muted-foreground" />
