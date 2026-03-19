@@ -255,8 +255,6 @@ const LeadCard = ({
   const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
     { key: 'assessment', label: 'Signal Capture' },
     { key: 'qualified', label: 'Qualified' },
-    { key: 'deep_dive_sent', label: 'PM Sent' },
-    { key: 'deep_dive_complete', label: 'PM Done' },
     { key: 'discovery_call' as PipelineStage, label: 'Alignment' },
     { key: 'proposal', label: 'Clarity' },
     { key: 'signed', label: 'Activated' },
