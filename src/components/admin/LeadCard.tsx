@@ -418,11 +418,11 @@ const LeadCard = ({
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={handleCopyScoping}>
                         {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copiedScoping ? 'Copied!' : 'Scoping Link'}
+                        {copiedScoping ? 'Copied!' : 'Blueprint Link'}
                       </Button>
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(scopingUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Open Scoping
+                        <ExternalLink className="w-3 h-3" /> Open Blueprint
                       </Button>
                     </div>
                   )}
