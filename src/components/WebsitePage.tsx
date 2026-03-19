@@ -183,13 +183,13 @@ const WhatWeDoSection = () => {
           <motion.div
             key={cap.text}
             {...stagger(0.1 * i)}
-            className="rounded-xl border p-5 flex items-start gap-4"
-            style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
+            className="rounded-xl border border-border bg-card p-5 flex items-start gap-4"
+            style={{ boxShadow: 'var(--shadow-card)' }}>
             
               <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#2258B4' }}>
                 <cap.icon className="w-5 h-5 text-white" />
               </div>
-              <p className="text-sm font-medium" style={{ color: 'hsl(220 20% 82%)' }}>{cap.text}</p>
+              <p className="text-sm font-medium text-foreground">{cap.text}</p>
             </motion.div>
           )}
         </div>
