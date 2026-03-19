@@ -607,7 +607,7 @@ const ROI_REPORT_INFO = {
   trigger: 'Sent when assessment is completed and "Send Report" is clicked',
   from: 'grow@5to10x.app',
   subject: 'Strategic Growth Report – {Business Name}',
-  description: 'Full ROI breakdown with business data, coaching, pricing, and Alignment Dialogue CTA. This template is code-managed due to its complexity (dynamic pricing tables, conditional sections). Edit via the send-report edge function.',
+  description: 'Full ROI breakdown with business data, coaching, pricing, and Straight Talk™ CTA. This template is code-managed due to its complexity (dynamic pricing tables, conditional sections). Edit via the send-report edge function.',
 };
 
 /* ─────────── Main Admin ─────────── */
