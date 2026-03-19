@@ -114,7 +114,7 @@ const getNextAction = (
   if (stage === 'proposal' && !proposal)
     return { label: 'Prepare Clarity Doc', icon: FileText, action: 'prepare_proposal' };
   if (stage === 'proposal' && proposal && !lead.proposal_sent_at)
-    return { label: 'Send Proposal', icon: Send, action: 'send_proposal' };
+    return { label: 'Send Clarity Doc', icon: Send, action: 'send_proposal' };
   if (stage === 'proposal' && lead.proposal_sent_at)
     return { label: 'Awaiting Signature', icon: Clock, action: 'waiting' };
   if (stage === 'signed')
