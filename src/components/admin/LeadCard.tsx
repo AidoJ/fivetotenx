@@ -387,7 +387,7 @@ const LeadCard = ({
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(deepDiveUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Deep Dive
+                        <ExternalLink className="w-3 h-3" /> Pattern Map
                       </Button>
                       {lead.pipeline_stage === 'deep_dive_sent' && (
                         <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
