@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  ArrowRight, Zap, TrendingUp, BarChart3, CheckCircle, X,
+  ArrowRight, ArrowLeft, Zap, TrendingUp, BarChart3, CheckCircle, X,
   Clock, Users, Cog, Rocket, Shield, Eye, Link2,
   CreditCard, Mail, MessageSquare, Database, Phone,
   Sparkles, ChevronRight, PlayCircle } from
@@ -20,10 +20,13 @@ import headshotEoghan from '@/assets/headshot-eoghan.png';
 import headshotAidan from '@/assets/headshot-aidan.png';
 import NewsSection from '@/components/NewsSection';
 import ClarityEngineSection from '@/components/ClarityEngineSection';
-
-interface Props {
-  onStartAssessment: () => void;
-}
+import { FormData, initialFormData, calculateROI, ROIResults } from '@/lib/formTypes';
+import StepIndicator from '@/components/StepIndicator';
+import BusinessSnapshot from '@/components/steps/BusinessSnapshot';
+import CustomerMetrics from '@/components/steps/CustomerMetrics';
+import OperationalEfficiency from '@/components/steps/OperationalEfficiency';
+import GrowthOpportunity from '@/components/steps/GrowthOpportunity';
+import ROIDashboard from '@/components/ROIDashboard';
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
