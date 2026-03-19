@@ -47,9 +47,9 @@ serve(async (req) => {
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      subject = `${contactName}, book your Discovery Call with 5to10X`;
+      subject = `${contactName}, book your Alignment Dialogue™ with 5to10X`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Hi ${contactName}, book your Discovery Call here: <a href="${bookingUrl}">${bookingUrl}</a></p>`;
+      emailHtml = `<p>Hi ${contactName}, book your Alignment Dialogue™ here: <a href="${bookingUrl}">${bookingUrl}</a></p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {

@@ -46,9 +46,9 @@ serve(async (req) => {
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
       // Fallback
-      subject = `${contactName}, your custom app proposal starts here — complete the Deep Dive`;
+      subject = `${contactName}, your custom app proposal starts here — complete the Pattern Mapping™`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Hi ${contactName}, please complete your Deep Dive: <a href="${deepDiveUrl}">${deepDiveUrl}</a></p>`;
+      emailHtml = `<p>Hi ${contactName}, please complete your Pattern Mapping™: <a href="${deepDiveUrl}">${deepDiveUrl}</a></p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {
