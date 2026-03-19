@@ -221,7 +221,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         </h3>
         <p className="text-sm text-muted-foreground">
           Send this ROI report to <strong>{formData.contactEmail}</strong>.
-          {results.pricing.isQualified && ' Qualified leads will automatically receive a Deep Dive invitation.'}
+          {results.pricing.isQualified && ' Qualified leads will automatically receive a Pattern Mapping™ invitation.'}
         </p>
 
         {sent ? (
