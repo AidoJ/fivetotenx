@@ -221,7 +221,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         </h3>
         <p className="text-sm text-muted-foreground">
           Send this ROI report to <strong>{formData.contactEmail}</strong>.
-          {results.pricing.isQualified && ' Qualified leads will automatically receive a Deep Dive invitation.'}
+          {results.pricing.isQualified && ' Qualified leads will automatically receive a Pattern Mapping™ invitation.'}
         </p>
 
         {sent ? (
@@ -247,9 +247,9 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           style={{ backgroundImage: 'var(--gradient-primary)' }}
         >
           <Sparkles className="w-8 h-8 text-primary-foreground mx-auto" />
-          <h3 className="text-xl font-display font-bold text-primary-foreground">Ready for the Next Step?</h3>
+          <h3 className="text-xl font-display font-bold text-primary-foreground">Ready for Pattern Mapping™?</h3>
           <p className="text-sm text-primary-foreground/80 max-w-md mx-auto">
-            Your business qualifies for a custom build. Complete the deep dive questionnaire so we can scope the perfect solution.
+            Your business qualifies for a custom build. Complete the Pattern Mapping™ questionnaire so we can identify your highest-leverage opportunities.
           </p>
           <Button
             variant="secondary"
@@ -257,7 +257,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
             onClick={() => window.open(`/deep-dive?id=${assessmentId}`, '_blank')}
           >
             <ArrowRight className="w-4 h-4" />
-            Start Deep Dive
+            Start Pattern Mapping™
           </Button>
         </motion.div>
       )}

@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  ArrowRight, Zap, TrendingUp, BarChart3, CheckCircle, X,
+  ArrowRight, ArrowLeft, Zap, TrendingUp, BarChart3, CheckCircle, X,
   Clock, Users, Cog, Rocket, Shield, Eye, Link2,
   CreditCard, Mail, MessageSquare, Database, Phone,
   Sparkles, ChevronRight, PlayCircle } from
@@ -20,10 +20,13 @@ import headshotEoghan from '@/assets/headshot-eoghan.png';
 import headshotAidan from '@/assets/headshot-aidan.png';
 import NewsSection from '@/components/NewsSection';
 import ClarityEngineSection from '@/components/ClarityEngineSection';
-
-interface Props {
-  onStartAssessment: () => void;
-}
+import { FormData, initialFormData, calculateROI, ROIResults } from '@/lib/formTypes';
+import StepIndicator from '@/components/StepIndicator';
+import BusinessSnapshot from '@/components/steps/BusinessSnapshot';
+import CustomerMetrics from '@/components/steps/CustomerMetrics';
+import OperationalEfficiency from '@/components/steps/OperationalEfficiency';
+import GrowthOpportunity from '@/components/steps/GrowthOpportunity';
+import ROIDashboard from '@/components/ROIDashboard';
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -889,36 +892,143 @@ const FooterSection = () =>
   </footer>;
 
 
+/* ─────────────── Signal Capture Section ─────────────── */
+
+const STEP_LABELS = ['Business', 'Metrics', 'Operations', 'Growth'];
+
+const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTMLDivElement> }) => {
+  const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [results, setResults] = useState<ROIResults | null>(null);
+
+  const handleChange = (partial: Partial<FormData>) => {
+    setFormData((prev) => ({ ...prev, ...partial }));
+  };
+
+  const handleSubmit = () => {
+    const roi = calculateROI(formData);
+    setResults(roi);
+  };
+
+  const handleReset = () => {
+    setFormData(initialFormData);
+    setResults(null);
+    setStep(0);
+  };
+
+  const steps = [
+    <BusinessSnapshot key="s1" data={formData} onChange={handleChange} />,
+    <CustomerMetrics key="s2" data={formData} onChange={handleChange} />,
+    <OperationalEfficiency key="s3" data={formData} onChange={handleChange} />,
+    <GrowthOpportunity key="s4" data={formData} onChange={handleChange} />,
+  ];
+
+  return (
+    <section ref={sectionRef} className="bg-background px-4 py-16 md:py-24">
+      <div className="max-w-3xl mx-auto">
+        <motion.div {...fadeUp} className="text-center mb-10">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary mb-2 inline-block">
+            Signal Capture™ — Phase 1 of the Clarity Engine
+          </span>
+          <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-3">
+            Business Snapshot
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Tell us about your business in 2 minutes. We'll show you exactly where automation could unlock hidden efficiency.
+          </p>
+        </motion.div>
+
+        {results ? (
+          <ROIDashboard results={results} formData={formData} onReset={handleReset} />
+        ) : (
+          <>
+            <StepIndicator currentStep={step} totalSteps={4} labels={STEP_LABELS} />
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.25 }}
+                className="rounded-2xl border border-border bg-card p-6 md:p-8"
+                style={{ boxShadow: 'var(--shadow-card)' }}
+              >
+                {steps[step]}
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="flex justify-between mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setStep((s) => s - 1)}
+                disabled={step === 0}
+                className="gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </Button>
+
+              {step < 3 ? (
+                <Button onClick={() => setStep((s) => s + 1)} className="gap-2">
+                  Next <ArrowRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button onClick={handleSubmit} className="gap-2">
+                  Calculate ROI
+                </Button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  );
+};
+
 /* ─────────────── Main Page ─────────────── */
 
-const WebsitePage = ({ onStartAssessment }: Props) =>
-<div className="min-h-screen overflow-x-hidden">
-    {/* 1. TEASER — Hero with CTA */}
-    <HeroSection onStartAssessment={onStartAssessment} />
-    {/* 2. WHAT — The Problem */}
-    <HiddenCostSection />
-    <SelfAssessmentSection />
-    {/* 3. WHY — Why Change Now */}
-    <ShiftSection />
-    {/* 4. HOW — Our Clarity Engine */}
-    <ClarityEngineSection onStart={onStartAssessment} />
-    <WhatWeDoSection />
-    <IntegrationsSection />
-    {/* 5. WHEN — Urgency & Speed */}
-    <RapidDeploySection />
-    <ZeroRiskSection />
-    {/* 6. WHO — The Founders */}
-    <CoFoundersSection />
-    {/* 7. EXAMPLES — Case Studies */}
-    <CaseStudiesSection />
-    {/* 8. LATEST NEWS */}
-    <NewsSection />
-    {/* 9. FINAL CTA & CONTACT */}
-    <FreeTrainingSection />
-    <CTASection onStartAssessment={onStartAssessment} />
-    <ContactSection />
-    <FooterSection />
-  </div>;
+const WebsitePage = () => {
+  const [showAssessment, setShowAssessment] = useState(false);
+  const signalCaptureRef = useRef<HTMLDivElement>(null);
 
+  const handleStartAssessment = () => {
+    setShowAssessment(true);
+    setTimeout(() => {
+      signalCaptureRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  return (
+    <div className="min-h-screen overflow-x-hidden">
+      {/* 1. TEASER — Hero with CTA */}
+      <HeroSection onStartAssessment={handleStartAssessment} />
+      {/* Signal Capture™ — inline assessment */}
+      {showAssessment && <SignalCaptureSection sectionRef={signalCaptureRef} />}
+      {/* 2. WHAT — The Problem */}
+      <HiddenCostSection />
+      <SelfAssessmentSection />
+      {/* 3. WHY — Why Change Now */}
+      <ShiftSection />
+      {/* 4. HOW — Our Clarity Engine */}
+      <ClarityEngineSection onStart={handleStartAssessment} />
+      <WhatWeDoSection />
+      <IntegrationsSection />
+      {/* 5. WHEN — Urgency & Speed */}
+      <RapidDeploySection />
+      <ZeroRiskSection />
+      {/* 6. WHO — The Founders */}
+      <CoFoundersSection />
+      {/* 7. EXAMPLES — Case Studies */}
+      <CaseStudiesSection />
+      {/* 8. LATEST NEWS */}
+      <NewsSection />
+      {/* 9. FINAL CTA & CONTACT */}
+      <FreeTrainingSection />
+      <CTASection onStartAssessment={handleStartAssessment} />
+      <ContactSection />
+      <FooterSection />
+    </div>
+  );
+};
 
 export default WebsitePage;

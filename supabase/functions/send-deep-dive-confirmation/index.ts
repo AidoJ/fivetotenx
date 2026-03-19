@@ -42,9 +42,9 @@ serve(async (req) => {
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      subject = `We've received your Deep Dive — next steps for ${businessName || 'your project'}`;
+      subject = `We've received your Pattern Mapping™ — next steps for ${businessName || 'your project'}`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Thank you ${contactName}! We've received your Deep Dive for ${businessName}. We'll be in touch within 24-48 hours.</p>`;
+      emailHtml = `<p>Thank you ${contactName}! We've received your Pattern Mapping™ submission for ${businessName}. We'll review your data and be in touch within 24-48 hours with an invite to your Alignment Dialogue™.</p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {
@@ -74,10 +74,10 @@ serve(async (req) => {
       body: JSON.stringify({
         from: '5to10X Pipeline <grow@5to10x.app>',
         to: ['grow@5to10x.app'],
-        subject: `✅ Deep Dive Complete: ${contactName} – ${businessName || 'Unknown'}`,
+        subject: `✅ Pattern Mapping™ Complete: ${contactName} – ${businessName || 'Unknown'}`,
         html: `<div style="font-family: sans-serif; padding: 20px;">
-          <h2>✅ Deep Dive Submitted</h2>
-          <p><strong>${contactName}</strong> from <strong>${businessName || 'Unknown'}</strong> has completed their Deep Dive questionnaire.</p>
+          <h2>✅ Pattern Mapping™ Submitted</h2>
+          <p><strong>${contactName}</strong> from <strong>${businessName || 'Unknown'}</strong> has completed their Pattern Mapping™ questionnaire.</p>
           <p><a href="https://5to10x.app/admin">View in Pipeline →</a></p>
         </div>`,
       }),
