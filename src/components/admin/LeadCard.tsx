@@ -126,7 +126,6 @@ const CompletionChips = ({
 }) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
-    { label: 'Pattern Map', done: !!deepDive },
     { label: 'Aligned', done: isDiscoveryReady },
     { label: 'Blueprint', done: !!scopingResponse?.completed },
     { label: 'Clarity', done: !!proposal },
