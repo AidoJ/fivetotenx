@@ -873,8 +873,8 @@ const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         <Button
         onClick={onStartAssessment}
         size="lg"
-        className="text-lg px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
-        style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
+        className="text-lg px-10 py-6 gap-3 rounded-xl font-semibold transition-all hover:scale-105"
+        style={{ background: '#398C08', color: 'white', border: 'none', boxShadow: '0 0 30px #398C0833' }}>
         
           <Sparkles className="w-5 h-5" />
           Start the Assessment
