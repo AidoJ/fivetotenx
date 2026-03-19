@@ -889,7 +889,7 @@ const ContactSection = () =>
 <section className="px-4 py-20" style={{ background: '#000000' }}>
     <div className="max-w-3xl mx-auto text-center">
       <motion.div {...fadeUp}>
-        <Mail className="w-10 h-10 mx-auto mb-4" style={{ color: 'hsl(260 80% 65%)' }} />
+        <Mail className="w-10 h-10 mx-auto mb-4" style={{ color: '#1789CE' }} />
         <h2 className="text-3xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(220 15% 93%)' }}>
           Get in Touch
         </h2>
