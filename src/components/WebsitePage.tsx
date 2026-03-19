@@ -18,6 +18,14 @@ import creatorsLogo from '@/assets/13creators-logo.png';
 import cellularWellbeingLogo from '@/assets/cellular-wellbeing-logo.png';
 import headshotEoghan from '@/assets/headshot-eoghan.png';
 import headshotAidan from '@/assets/headshot-aidan.png';
+import logoGoogle from '@/assets/logo-google.png';
+import logoXero from '@/assets/logo-xero.png';
+import logoStripe from '@/assets/logo-stripe.png';
+import logoTwilio from '@/assets/logo-twilio.png';
+import logoResend from '@/assets/logo-resend.png';
+import logoChatGPT from '@/assets/logo-chatgpt.png';
+import logoClaude from '@/assets/logo-claude.png';
+import logoSupabase from '@/assets/logo-supabase.png';
 import NewsSection from '@/components/NewsSection';
 import ClarityEngineSection from '@/components/ClarityEngineSection';
 import { FormData, initialFormData, calculateROI, ROIResults } from '@/lib/formTypes';
@@ -186,7 +194,7 @@ const WhatWeDoSection = () => {
             className="rounded-xl border border-border bg-card p-5 flex items-start gap-4"
             style={{ boxShadow: 'var(--shadow-card)' }}>
             
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#2258B4' }}>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#643AA4' }}>
                 <cap.icon className="w-5 h-5 text-white" />
               </div>
               <p className="text-sm font-medium text-foreground">{cap.text}</p>
@@ -260,14 +268,14 @@ const RapidDeploySection = () => {
 
 const IntegrationsSection = () => {
   const integrations = [
-  { name: 'Google', category: 'Calendar & Workspace', emoji: '📅' },
-  { name: 'Xero', category: 'Accounting', emoji: '📊' },
-  { name: 'Stripe', category: 'Payments', emoji: '💳' },
-  { name: 'Twilio', category: 'Communications', emoji: '📱' },
-  { name: 'Resend', category: 'Email', emoji: '✉️' },
-  { name: 'ChatGPT', category: 'AI Assistant', emoji: '🤖' },
-  { name: 'Claude', category: 'AI Assistant', emoji: '🧠' },
-  { name: 'Supabase', category: 'Backend & Data', emoji: '🗄️' },
+  { name: 'Google', category: 'Calendar & Workspace', logo: logoGoogle },
+  { name: 'Xero', category: 'Accounting', logo: logoXero },
+  { name: 'Stripe', category: 'Payments', logo: logoStripe },
+  { name: 'Twilio', category: 'Communications', logo: logoTwilio },
+  { name: 'Resend', category: 'Email', logo: logoResend },
+  { name: 'ChatGPT', category: 'AI Assistant', logo: logoChatGPT },
+  { name: 'Claude', category: 'AI Assistant', logo: logoClaude },
+  { name: 'Supabase', category: 'Backend & Data', logo: logoSupabase },
   ];
 
 
@@ -294,8 +302,8 @@ const IntegrationsSection = () => {
             className="rounded-xl border p-6 text-center flex flex-col items-center gap-3"
             style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
             
-              <div className="w-20 h-20 rounded-2xl bg-background/10 flex items-center justify-center text-4xl">
-                {int.emoji}
+              <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center p-3">
+                <img src={int.logo} alt={int.name} className="max-h-14 max-w-14 object-contain" />
               </div>
               <span className="text-base font-bold" style={{ color: 'hsl(0 0% 93%)' }}>{int.name}</span>
               <span className="text-xs" style={{ color: 'hsl(220 20% 60%)' }}>{int.category}</span>
@@ -698,7 +706,7 @@ const FreeTrainingSection = () => {
             </div>
             <h2 className="text-2xl md:text-3xl font-display font-bold" style={{ color: 'hsl(0 0% 95%)' }}>
               How AI Can Transform Your Business in{' '}
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+              <span style={{ color: '#D88E08' }}>
                 Days — Not Months
               </span>
             </h2>
@@ -736,7 +744,8 @@ const FreeTrainingSection = () => {
                     <Input
                     value={formState.name}
                     onChange={(e) => setFormState((s) => ({ ...s, name: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="Your name"
                     required />
                   </div>
@@ -746,7 +755,8 @@ const FreeTrainingSection = () => {
                     type="email"
                     value={formState.email}
                     onChange={(e) => setFormState((s) => ({ ...s, email: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="you@business.com"
                     required />
                   </div>
@@ -755,7 +765,8 @@ const FreeTrainingSection = () => {
                     <Input
                     value={formState.business}
                     onChange={(e) => setFormState((s) => ({ ...s, business: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="Your business" />
                   </div>
                   <div>
@@ -763,14 +774,15 @@ const FreeTrainingSection = () => {
                     <Input
                     value={formState.industry}
                     onChange={(e) => setFormState((s) => ({ ...s, industry: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="e.g. Health & Wellness" />
                   </div>
                   <Button
                   type="submit"
                   disabled={submitting}
                   className="w-full py-5 text-base font-semibold rounded-xl"
-                  style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
+                  style={{ background: '#D88E08', color: 'white', border: 'none' }}>
                     {submitting ? 'Registering...' : 'Register My Spot'}
                   </Button>
                   <p className="text-xs text-center" style={{ color: 'hsl(220 15% 50%)' }}>
