@@ -21,8 +21,6 @@ type PipelineStage = Assessment['pipeline_stage'];
 const PIPELINE_STEPS: { key: string; label: string; short: string }[] = [
   { key: 'assessment', label: 'Signal Capture™', short: 'SIGNAL' },
   { key: 'qualified', label: 'Qualified', short: 'QUAL' },
-  { key: 'deep_dive_sent', label: 'Pattern Map Sent', short: 'PM SENT' },
-  { key: 'deep_dive_complete', label: 'Pattern Mapped', short: 'PM DONE' },
   { key: 'discovery_call', label: 'Alignment Dialogue™', short: 'ALIGN' },
   { key: 'proposal', label: 'Commercial Clarity™', short: 'CLARITY' },
   { key: 'signed', label: 'Activated', short: 'ACTIVE' },
