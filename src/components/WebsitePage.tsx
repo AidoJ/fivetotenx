@@ -846,7 +846,7 @@ const CoFoundersSection = () => {
               <div className="p-6 space-y-3">
                 <div>
                   <h3 className="text-xl font-display font-bold text-foreground">{founder.name}</h3>
-                  <p className="text-sm font-medium bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>{founder.role}</p>
+                  <p className="text-sm font-medium" style={{ color: '#1789CE' }}>{founder.role}</p>
                 </div>
                 <FounderBio bio={founder.bio} />
               </div>
