@@ -448,8 +448,8 @@ const SelfAssessmentSection = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-2xl p-6 text-center"
-          style={{ backgroundImage: 'var(--gradient-primary)' }}>
+           className="rounded-2xl p-6 text-center"
+           style={{ background: '#398C08' }}>
           
             <CheckCircle className="w-8 h-8 text-white mx-auto mb-3" />
             <p className="text-white font-display font-bold text-lg">
