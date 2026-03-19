@@ -174,6 +174,9 @@ export const initialFormData: FormData = {
   lostSalesReasons: [],
   currentFeatures: [],
   conversionImpactAnswer: '',
+  currentWebsite: '',
+  primaryGoals: [],
+  additionalNotes: '',
 };
 
 export const REVENUE_OPTIONS = [
