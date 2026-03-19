@@ -335,7 +335,7 @@ const HiddenCostSection = () => {
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
             The Hidden Cost of{' '}
-            <span className="text-destructive">Manual Workflows</span>
+            <span style={{ color: '#643AA4' }}>Manual Workflows</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Small inefficiencies across a business add up to huge hidden costs.
