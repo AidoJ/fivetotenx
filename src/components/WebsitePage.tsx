@@ -90,15 +90,12 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
           <Button
         onClick={onStartAssessment}
         size="lg"
-        className="text-sm sm:text-base md:text-lg px-4 md:px-8 py-6 gap-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 flex-col h-auto w-full max-w-lg whitespace-normal"
+        className="text-sm sm:text-base md:text-lg px-6 md:px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 whitespace-normal"
         style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
         
             <span className="flex items-center gap-2 text-center">
-              <Sparkles className="w-5 h-5 shrink-0" />
-              <span>How much efficiency is hiding in your business?</span>
-            </span>
-            <span className="text-xs sm:text-sm font-normal opacity-85 text-center">
-              Click HERE to discover where automation could unlock time, profit and growth.
+              Discover Your Hidden Efficiency
+              <ArrowRight className="w-5 h-5 shrink-0" />
             </span>
           </Button>
           <p className="text-sm" style={{ color: 'hsl(220 15% 55%)' }}>
@@ -896,20 +893,28 @@ const FooterSection = () =>
 
 const WebsitePage = ({ onStartAssessment }: Props) =>
 <div className="min-h-screen overflow-x-hidden">
+    {/* 1. TEASER — Hero with CTA */}
     <HeroSection onStartAssessment={onStartAssessment} />
-    <ClarityEngineSection onStart={onStartAssessment} />
-    <ShiftSection />
-    <WhatWeDoSection />
-    <RapidDeploySection />
-    <IntegrationsSection />
+    {/* 2. WHAT — The Problem */}
     <HiddenCostSection />
     <SelfAssessmentSection />
-    <CaseStudiesSection />
-    <ProcessSection />
+    {/* 3. WHY — Why Change Now */}
+    <ShiftSection />
+    {/* 4. HOW — Our Clarity Engine */}
+    <ClarityEngineSection onStart={onStartAssessment} />
+    <WhatWeDoSection />
+    <IntegrationsSection />
+    {/* 5. WHEN — Urgency & Speed */}
+    <RapidDeploySection />
     <ZeroRiskSection />
-    <FreeTrainingSection />
+    {/* 6. WHO — The Founders */}
     <CoFoundersSection />
+    {/* 7. EXAMPLES — Case Studies */}
+    <CaseStudiesSection />
+    {/* 8. LATEST NEWS */}
     <NewsSection />
+    {/* 9. FINAL CTA & CONTACT */}
+    <FreeTrainingSection />
     <CTASection onStartAssessment={onStartAssessment} />
     <ContactSection />
     <FooterSection />
