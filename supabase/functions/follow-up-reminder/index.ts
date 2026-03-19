@@ -69,10 +69,10 @@ serve(async (req) => {
         emailHtml = `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
             <p>Hi ${lead.contact_name},</p>
-            <p>We noticed you haven't had a chance to complete your Pattern Mapping™ questionnaire for <strong>${lead.business_name || 'your business'}</strong> yet. No worries — we know you're busy!</p>
+            <p>We noticed you haven't had a chance to complete your Game Plan™ questionnaire for <strong>${lead.business_name || 'your business'}</strong> yet. No worries — we know you're busy!</p>
             <p>Your personalised proposal is just a few questions away:</p>
             <p style="text-align:center;margin:24px 0;">
-              <a href="${deepDiveUrl}" style="background:#2563eb;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Complete Pattern Mapping™</a>
+              <a href="${deepDiveUrl}" style="background:#2563eb;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Complete Game Plan™</a>
             </p>
             <p><strong>Need some help?</strong> We're happy to walk you through it on a quick call:</p>
             <ul style="margin:12px 0;">

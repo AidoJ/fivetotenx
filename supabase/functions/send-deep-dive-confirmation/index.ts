@@ -74,10 +74,10 @@ serve(async (req) => {
       body: JSON.stringify({
         from: '5to10X Pipeline <grow@5to10x.app>',
         to: ['grow@5to10x.app'],
-        subject: `✅ Pattern Mapping™ Complete: ${contactName} – ${businessName || 'Unknown'}`,
+        subject: `✅ Game Plan™ Complete: ${contactName} – ${businessName || 'Unknown'}`,
         html: `<div style="font-family: sans-serif; padding: 20px;">
-          <h2>✅ Pattern Mapping™ Submitted</h2>
-          <p><strong>${contactName}</strong> from <strong>${businessName || 'Unknown'}</strong> has completed their Pattern Mapping™ questionnaire.</p>
+          <h2>✅ Game Plan™ Submitted</h2>
+          <p><strong>${contactName}</strong> from <strong>${businessName || 'Unknown'}</strong> has completed their Game Plan™ questionnaire.</p>
           <p><a href="https://5to10x.app/admin">View in Pipeline →</a></p>
         </div>`,
       }),
