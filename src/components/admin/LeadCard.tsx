@@ -19,12 +19,12 @@ type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
 
 const PIPELINE_STEPS: { key: string; label: string; short: string }[] = [
-  { key: 'assessment', label: 'Signal Capture™', short: 'SIGNAL' },
+  { key: 'assessment', label: 'Reality Check™', short: 'CHECK' },
   { key: 'qualified', label: 'Qualified', short: 'QUAL' },
-  { key: 'discovery_call', label: 'Alignment Dialogue™', short: 'ALIGN' },
-  { key: 'proposal', label: 'Commercial Clarity™', short: 'CLARITY' },
-  { key: 'signed', label: 'Activated', short: 'ACTIVE' },
-  { key: 'build_refinement', label: 'Build & Activate™', short: 'BUILD' },
+  { key: 'discovery_call', label: 'Straight Talk™', short: 'TALK' },
+  { key: 'proposal', label: 'Green Light™', short: 'GREEN' },
+  { key: 'signed', label: 'Signed', short: 'SIGNED' },
+  { key: 'build_refinement', label: 'Go Live™', short: 'LIVE' },
   { key: 'completed', label: 'Complete', short: 'DONE' },
 ];
 
