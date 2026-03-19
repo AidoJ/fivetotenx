@@ -466,7 +466,7 @@ serve(async (req) => {
         console.error('Admin notification failed (non-blocking):', adminErr);
       }
 
-      // Auto-send Deep Dive invite to qualified leads
+      // Auto-send Pattern Mapping™ invite to qualified leads
       if (assessmentId) {
         try {
           const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -486,7 +486,7 @@ serve(async (req) => {
             }),
           });
 
-          // Update pipeline stage to deep_dive_sent
+          // Update pipeline stage to deep_dive_sent (Pattern Mapping™ Sent)
           const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
           const supabase = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
           const now = new Date().toISOString();
@@ -498,9 +498,9 @@ serve(async (req) => {
             follow_up_scheduled_at: followUpAt,
           }).eq('id', assessmentId);
 
-          console.log('Auto-sent Deep Dive invite to qualified lead:', contactEmail);
+          console.log('Auto-sent Pattern Mapping™ invite to qualified lead:', contactEmail);
         } catch (ddErr) {
-          console.error('Auto Deep Dive invite failed (non-blocking):', ddErr);
+          console.error('Auto Pattern Mapping™ invite failed (non-blocking):', ddErr);
         }
       }
     }
