@@ -826,7 +826,7 @@ const CoFoundersSection = () => {
         <motion.div {...fadeUp} className="text-center mb-14">
           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
             Meet the{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#2258B4' }}>
               Co-Founders
             </span>
           </h2>
