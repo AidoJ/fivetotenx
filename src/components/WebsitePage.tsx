@@ -744,7 +744,8 @@ const FreeTrainingSection = () => {
                     <Input
                     value={formState.name}
                     onChange={(e) => setFormState((s) => ({ ...s, name: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="Your name"
                     required />
                   </div>
@@ -754,7 +755,8 @@ const FreeTrainingSection = () => {
                     type="email"
                     value={formState.email}
                     onChange={(e) => setFormState((s) => ({ ...s, email: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="you@business.com"
                     required />
                   </div>
@@ -763,7 +765,8 @@ const FreeTrainingSection = () => {
                     <Input
                     value={formState.business}
                     onChange={(e) => setFormState((s) => ({ ...s, business: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="Your business" />
                   </div>
                   <div>
@@ -771,14 +774,15 @@ const FreeTrainingSection = () => {
                     <Input
                     value={formState.industry}
                     onChange={(e) => setFormState((s) => ({ ...s, industry: e.target.value }))}
-                    className="mt-1 bg-background/10 border-white/10 text-white placeholder:text-white/30"
+                    className="mt-1 border text-white placeholder:text-white/50"
+                    style={{ background: 'hsl(260 30% 18%)', borderColor: 'hsl(260 30% 35%)' }}
                     placeholder="e.g. Health & Wellness" />
                   </div>
                   <Button
                   type="submit"
                   disabled={submitting}
                   className="w-full py-5 text-base font-semibold rounded-xl"
-                  style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
+                  style={{ background: '#D88E08', color: 'white', border: 'none' }}>
                     {submitting ? 'Registering...' : 'Register My Spot'}
                   </Button>
                   <p className="text-xs text-center" style={{ color: 'hsl(220 15% 50%)' }}>
