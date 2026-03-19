@@ -301,13 +301,13 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         </div>
       </div>
 
-      {/* 5 Phase Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+      {/* 6 Phase Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         {cards.map((card, index) => {
           const Icon = card.icon;
           const cardLeads = card.leads;
           const accent = phaseAccents[index];
-          const isTerminal = card.id === 'build_launch';
+          const isTerminal = card.id === 'go_live';
           const worstSla = cardLeads.some(l => getSlaStatus(l) === 'red') ? 'red' : cardLeads.some(l => getSlaStatus(l) === 'amber') ? 'amber' : 'green';
 
           return (

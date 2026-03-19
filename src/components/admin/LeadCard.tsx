@@ -256,10 +256,10 @@ const LeadCard = ({
     { key: 'assessment', label: 'Reality Check' },
     { key: 'qualified', label: 'Qualified' },
     { key: 'discovery_call' as PipelineStage, label: 'Straight Talk' },
-    { key: 'proposal', label: 'Clarity' },
-    { key: 'signed', label: 'Activated' },
+    { key: 'proposal', label: 'Green Light' },
+    { key: 'signed', label: 'Signed' },
     { key: 'build_refinement' as PipelineStage, label: 'Build' },
-    { key: 'completed' as PipelineStage, label: 'Completed' },
+    { key: 'completed' as PipelineStage, label: 'Go Live' },
   ];
 
   return (
