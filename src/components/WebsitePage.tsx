@@ -863,7 +863,7 @@ const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       <motion.div {...fadeUp} className="space-y-8">
         <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground">
           Ready to See the Opportunity in{' '}
-          <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+          <span style={{ color: '#398C08' }}>
             Your Business?
           </span>
         </h2>
