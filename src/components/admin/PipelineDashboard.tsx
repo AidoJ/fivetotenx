@@ -213,7 +213,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         </div>
         <div>
           <h2 className="text-lg font-bold text-foreground font-display">The 5to10x Clarity Path™</h2>
-          <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build</p>
+          <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build → Go Live</p>
         </div>
       </div>
 
