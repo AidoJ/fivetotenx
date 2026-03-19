@@ -168,18 +168,30 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       question: 'Clear scope. Clear cost. Clear outcome.',
     },
     {
-      id: 'build_launch',
-      label: 'Build & Launch™',
+      id: 'build',
+      label: 'Build™',
       subtitle: 'Phase 5 — Build',
-      icon: Rocket,
-      stages: ['signed', 'build_refinement' as PipelineStage, 'completed' as PipelineStage],
-      leads: leads.filter(l => l.pipeline_stage === 'signed' || l.pipeline_stage === ('build_refinement' as PipelineStage) || l.pipeline_stage === ('completed' as PipelineStage)),
+      icon: Wrench,
+      stages: ['signed', 'build_refinement' as PipelineStage],
+      leads: leads.filter(l => l.pipeline_stage === 'signed' || l.pipeline_stage === ('build_refinement' as PipelineStage)),
       metrics: [
         { label: 'Approved', value: buildApproved },
         { label: 'Building', value: buildInProgress, color: 'text-blue-500' },
+      ],
+      nextAction: 'Move to Testing',
+      question: 'Your solution takes shape.',
+    },
+    {
+      id: 'go_live',
+      label: 'Go Live™',
+      subtitle: 'Phase 6 — Test • Train • Launch',
+      icon: FlaskConical,
+      stages: ['completed' as PipelineStage],
+      leads: leads.filter(l => l.pipeline_stage === ('completed' as PipelineStage)),
+      metrics: [
         { label: 'Gone Live', value: buildCompleted, color: 'text-green-500' },
       ],
-      question: 'Less admin. More time. Smoother operations.',
+      question: 'Confident, ready, and running.',
     },
   ];
 
