@@ -98,10 +98,6 @@ const getNextAction = (
   if (stage === 'assessment' && !lead.is_qualified)
     return { label: 'Qualify Signal', icon: Check, action: 'qualify' };
   if (stage === 'qualified')
-    return { label: lead.invite_sent ? 'Resend Pattern Map' : 'Send Pattern Map Invite', icon: Send, action: 'send_deep_dive' };
-  if (stage === 'deep_dive_sent')
-    return { label: 'Awaiting Pattern Map', icon: Clock, action: 'waiting' };
-  if (stage === 'deep_dive_complete')
     return { label: 'Send Alignment Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'discovery_call' && !isDiscoveryReady)
     return { label: 'Mark Alignment Complete', icon: Check, action: 'mark_discovery' };
