@@ -42,9 +42,9 @@ serve(async (req) => {
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      subject = `We've received your Pattern Mapping™ — next steps for ${businessName || 'your project'}`;
+      subject = `We've received your Game Plan™ responses — next steps for ${businessName || 'your project'}`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Thank you ${contactName}! We've received your Pattern Mapping™ submission for ${businessName}. We'll review your data and be in touch within 24-48 hours with an invite to your Alignment Dialogue™.</p>`;
+      emailHtml = `<p>Thank you ${contactName}! We've received your Game Plan™ responses for ${businessName}. We'll review your data and be in touch within 24-48 hours with next steps.</p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {
