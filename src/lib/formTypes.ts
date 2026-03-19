@@ -38,9 +38,12 @@ export interface FormData {
   hourlyStaffCost: string;
   lostSalesReasons: string[];
 
-  // Section 4
+  // Section 4 – Growth & Context
   currentFeatures: string[];
   conversionImpactAnswer: string;
+  currentWebsite: string;
+  primaryGoals: string[];
+  additionalNotes: string;
 }
 
 export interface PricingTier {
