@@ -300,13 +300,13 @@ const IntegrationsSection = () => {
             key={int.name}
             {...stagger(0.08 * i)}
             className="rounded-xl border p-6 text-center flex flex-col items-center gap-3"
-            style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
+            style={{ borderColor: 'hsl(0 0% 90%)', background: 'white' }}>
             
-              <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center p-3">
-                <img src={int.logo} alt={int.name} className="max-h-14 max-w-14 object-contain" />
+              <div className="w-24 h-24 rounded-2xl flex items-center justify-center p-3">
+                <img src={int.logo} alt={int.name} className="max-h-[4.5rem] max-w-[4.5rem] object-contain" />
               </div>
-              <span className="text-base font-bold" style={{ color: 'hsl(0 0% 93%)' }}>{int.name}</span>
-              <span className="text-xs" style={{ color: 'hsl(220 20% 60%)' }}>{int.category}</span>
+              <span className="text-base font-bold" style={{ color: 'hsl(0 0% 15%)' }}>{int.name}</span>
+              <span className="text-xs" style={{ color: '#D88E08' }}>{int.category}</span>
             </motion.div>
           )}
         </div>
