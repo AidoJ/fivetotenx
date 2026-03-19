@@ -932,7 +932,7 @@ const FooterSection = () =>
   </footer>;
 
 
-/* ─────────────── Signal Capture Section ─────────────── */
+/* ─────────────── Reality Check Section ─────────────── */
 
 const STEP_LABELS = ['Business', 'Metrics', 'Operations', 'Growth'];
 
