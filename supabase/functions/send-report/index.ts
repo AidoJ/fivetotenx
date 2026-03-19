@@ -77,7 +77,7 @@ serve(async (req) => {
 
     // Zoom section removed — no longer used
 
-    // Deep Dive CTA for qualified leads
+    // Pattern Mapping™ CTA for qualified leads
     const deepDiveBaseUrl = 'https://5to10x.app';
     const deepDiveSection = (isQualified && assessmentId)
       ? `
@@ -87,12 +87,12 @@ serve(async (req) => {
               <tr>
                 <td style="padding: 32px; text-align: center;">
                   <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR A CUSTOM BUILD</p>
-                  <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for the Next Step?</h2>
+                  <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for Pattern Mapping™?</h2>
                   <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 20px; max-width: 480px; margin-left: auto; margin-right: auto;">
-                    Your business qualifies for a custom app build. Complete our 5-minute Deep Dive questionnaire so we can scope the perfect solution for ${businessName || 'your business'}.
+                    Your business qualifies for a custom app build. Complete our 5-minute Pattern Mapping™ questionnaire so we can identify the highest-leverage opportunities for ${businessName || 'your business'}.
                   </p>
                   <a href="${deepDiveBaseUrl}/deep-dive?id=${assessmentId}" style="display: inline-block; padding: 14px 36px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">
-                    Start Deep Dive →
+                    Start Pattern Mapping™ →
                   </a>
                 </td>
               </tr>
