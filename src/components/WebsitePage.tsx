@@ -273,7 +273,7 @@ const IntegrationsSection = () => {
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             Built to Integrate With the Tools{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#D88E08' }}>
               You Already Use
             </span>
           </h2>
