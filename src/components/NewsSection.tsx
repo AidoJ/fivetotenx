@@ -197,7 +197,7 @@ const NewsSection = () => {
                       </a>
                     ))
                   ) : (
-                    <div className="flex items-center justify-center h-full min-h-[160px]">
+                    <div className="flex items-center justify-center h-full min-h-[100px]">
                       <p className="text-xs" style={{ color: 'hsl(220 15% 40%)' }}>
                         No signal — check back soon
                       </p>
