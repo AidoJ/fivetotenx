@@ -194,7 +194,7 @@ const WhatWeDoSection = () => {
             className="rounded-xl border border-border bg-card p-5 flex items-start gap-4"
             style={{ boxShadow: 'var(--shadow-card)' }}>
             
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#2258B4' }}>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#643AA4' }}>
                 <cap.icon className="w-5 h-5 text-white" />
               </div>
               <p className="text-sm font-medium text-foreground">{cap.text}</p>
