@@ -102,15 +102,15 @@ const getNextAction = (
   if (stage === 'qualified')
     return { label: lead.invite_sent ? 'Resend Pattern Map' : 'Send Pattern Map Invite', icon: Send, action: 'send_deep_dive' };
   if (stage === 'deep_dive_sent')
-    return { label: 'Awaiting Deep Dive', icon: Clock, action: 'waiting' };
+    return { label: 'Awaiting Pattern Map', icon: Clock, action: 'waiting' };
   if (stage === 'deep_dive_complete')
-    return { label: 'Send Discovery Invite', icon: Send, action: 'send_discovery' };
+    return { label: 'Send Alignment Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'discovery_call' && !isDiscoveryReady)
-    return { label: 'Mark Discovery Complete', icon: Check, action: 'mark_discovery' };
+    return { label: 'Mark Alignment Complete', icon: Check, action: 'mark_discovery' };
   if (stage === 'discovery_call' && isDiscoveryReady && !scopingResponse)
-    return { label: 'Send Scoping Link', icon: Copy, action: 'copy_scoping' };
+    return { label: 'Send Blueprint Link', icon: Copy, action: 'copy_scoping' };
   if (stage === 'discovery_call' && isDiscoveryReady && scopingResponse)
-    return { label: 'Move to Proposal', icon: FileText, action: 'move_proposal' };
+    return { label: 'Move to Clarity', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
     return { label: 'Prepare Proposal', icon: FileText, action: 'prepare_proposal' };
   if (stage === 'proposal' && proposal && !lead.proposal_sent_at)
