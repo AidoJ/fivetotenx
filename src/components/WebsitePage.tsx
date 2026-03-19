@@ -706,7 +706,7 @@ const FreeTrainingSection = () => {
             </div>
             <h2 className="text-2xl md:text-3xl font-display font-bold" style={{ color: 'hsl(0 0% 95%)' }}>
               How AI Can Transform Your Business in{' '}
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+              <span style={{ color: '#D88E08' }}>
                 Days — Not Months
               </span>
             </h2>
