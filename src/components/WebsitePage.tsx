@@ -74,10 +74,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       style={{ color: 'hsl(0 0% 95%)' }}>
       
         What if your business could run{' '}
-        <span
-        className="bg-clip-text text-transparent"
-        style={{ backgroundImage: 'var(--gradient-vibrant)', backgroundSize: '200% auto' }}>
-        
+        <span style={{ color: '#1789CE' }}>
           5–10x more efficiently?
         </span>
       </h1>
