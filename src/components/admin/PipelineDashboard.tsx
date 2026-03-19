@@ -205,13 +205,13 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
 
   return (
     <div className="space-y-6">
-      {/* Clarity Engine Header */}
+      {/* Clarity Path Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
           <Zap className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-foreground font-display">The Clarity Engine™</h2>
+          <h2 className="text-lg font-bold text-foreground font-display">The 5to10x Clarity Path™</h2>
           <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build</p>
         </div>
       </div>
