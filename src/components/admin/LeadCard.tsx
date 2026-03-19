@@ -451,7 +451,7 @@ const LeadCard = ({
                   )}
 
                   {/* Stage reminder */}
-                  {['qualified', 'deep_dive_sent', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
+                  {['qualified', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
                     <div className="flex items-center gap-2 bg-amber-500/5 border border-amber-500/20 rounded-md px-2 py-1.5">
                       <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
                       <span className="text-[10px] text-amber-700">Reminder</span>
