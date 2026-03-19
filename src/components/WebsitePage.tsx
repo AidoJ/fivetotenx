@@ -268,14 +268,14 @@ const RapidDeploySection = () => {
 
 const IntegrationsSection = () => {
   const integrations = [
-  { name: 'Google', category: 'Calendar & Workspace', logo: logoGoogle },
-  { name: 'Xero', category: 'Accounting', logo: logoXero },
-  { name: 'Stripe', category: 'Payments', logo: logoStripe },
-  { name: 'Twilio', category: 'Communications', logo: logoTwilio },
-  { name: 'Resend', category: 'Email', logo: logoResend },
-  { name: 'ChatGPT', category: 'AI Assistant', logo: logoChatGPT },
-  { name: 'Claude', category: 'AI Assistant', logo: logoClaude },
-  { name: 'Supabase', category: 'Backend & Data', logo: logoSupabase },
+  { name: 'Google', category: 'Calendar & Workspace', logo: logoGoogle, scale: '' },
+  { name: 'Xero', category: 'Accounting', logo: logoXero, scale: 'scale-150' },
+  { name: 'Stripe', category: 'Payments', logo: logoStripe, scale: '' },
+  { name: 'Twilio', category: 'Communications', logo: logoTwilio, scale: '' },
+  { name: 'Resend', category: 'Email', logo: logoResend, scale: '' },
+  { name: 'ChatGPT', category: 'AI Assistant', logo: logoChatGPT, scale: '' },
+  { name: 'Claude', category: 'AI Assistant', logo: logoClaude, scale: '' },
+  { name: 'Supabase', category: 'Backend & Data', logo: logoSupabase, scale: '' },
   ];
 
 
