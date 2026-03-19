@@ -182,9 +182,13 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
   const funnelSteps = [
     { label: 'Assessments', value: totalAssessments },
     { label: 'Qualified', value: qualifiedCount },
-    { label: 'Deep Dives', value: deepDiveCompleteCount },
-    { label: 'Discovery', value: discoveryCompletedCount },
-    { label: 'Proposals', value: proposalSentCount },
+    { label: 'Deep Dive Sent', value: deepDiveSentCount },
+    { label: 'Deep Dive Done', value: deepDiveCompleteCount },
+    { label: 'Discovery Booked', value: discoveryBookedCount },
+    { label: 'Discovery Done', value: discoveryCompletedCount },
+    { label: 'Scoping Sent', value: scopingSentCount },
+    { label: 'Scoping Done', value: scopingCompleteCount },
+    { label: 'Proposals Sent', value: proposalSentCount },
     { label: 'Signed', value: signedCount },
   ];
   const maxFunnel = Math.max(...funnelSteps.map(s => s.value), 1);
