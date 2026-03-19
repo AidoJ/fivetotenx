@@ -388,7 +388,7 @@ serve(async (req) => {
                   </p>
                   ${isQualified ? `
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
-                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is <strong>Pattern Mapping™</strong> — a quick 5-minute questionnaire to identify your highest-leverage opportunities. Check your inbox for the invite, or click the link above.
+                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is your <strong>Straight Talk™</strong> — a focused conversation about what's worth fixing first. We'll be in touch to schedule that.
                   </p>
                   ` : `
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
