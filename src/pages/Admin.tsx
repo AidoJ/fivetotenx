@@ -98,12 +98,12 @@ interface ClientInterview {
 }
 
 const STAGES: { key: PipelineStage; label: string }[] = [
-  { key: 'assessment', label: 'Signal Capture™' },
+  { key: 'assessment', label: 'Reality Check™' },
   { key: 'qualified', label: 'Qualified' },
-  { key: 'discovery_call' as PipelineStage, label: 'Alignment Dialogue™' },
-  { key: 'proposal', label: 'Commercial Clarity™' },
-  { key: 'signed', label: 'Activated ✅' },
-  { key: 'build_refinement' as PipelineStage, label: 'Build & Activate™' },
+  { key: 'discovery_call' as PipelineStage, label: 'Straight Talk™' },
+  { key: 'proposal', label: 'Green Light™' },
+  { key: 'signed', label: 'Signed ✅' },
+  { key: 'build_refinement' as PipelineStage, label: 'Go Live™' },
   { key: 'completed' as PipelineStage, label: 'Completed ✅' },
 ];
 
@@ -304,7 +304,7 @@ const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete, onT
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Mic className="w-4 h-4 text-primary" />
-          <h4 className="text-xs font-bold text-foreground">Alignment Dialogue Calls</h4>
+          <h4 className="text-xs font-bold text-foreground">Straight Talk™ Calls</h4>
           {filtered.length > 0 && (
             <Badge variant="outline" className="text-[9px] h-4">{filtered.length}</Badge>
           )}
@@ -607,7 +607,7 @@ const ROI_REPORT_INFO = {
   trigger: 'Sent when assessment is completed and "Send Report" is clicked',
   from: 'grow@5to10x.app',
   subject: 'Strategic Growth Report – {Business Name}',
-  description: 'Full ROI breakdown with business data, coaching, pricing, and Alignment Dialogue CTA. This template is code-managed due to its complexity (dynamic pricing tables, conditional sections). Edit via the send-report edge function.',
+  description: 'Full ROI breakdown with business data, coaching, pricing, and Straight Talk™ CTA. This template is code-managed due to its complexity (dynamic pricing tables, conditional sections). Edit via the send-report edge function.',
 };
 
 /* ─────────── Main Admin ─────────── */
@@ -693,7 +693,7 @@ const Admin = () => {
   };
 
   const handleSendDiscoveryFromQualified = async (lead: Assessment) => {
-    // After removing Pattern Mapping, qualifying now goes straight to Alignment Dialogue
+    // Qualifying now goes straight to Straight Talk™
     handleSendDiscoveryInvite(lead);
   };
 
@@ -1188,11 +1188,11 @@ const Admin = () => {
 
   // Mirror dashboard's 6 consolidated stages
   const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
-    { id: 'assessment', label: 'Signal Capture™', icon: ClipboardList, stages: ['assessment', 'qualified'] },
-    { id: 'discovery', label: 'Alignment Dialogue™', icon: Phone, stages: ['discovery_call'] },
-    { id: 'scoping', label: 'System Blueprint™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
-    { id: 'proposal', label: 'Commercial Clarity™', icon: FileText, stages: ['proposal'] },
-    { id: 'build', label: 'Build & Activate™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
+    { id: 'assessment', label: 'Reality Check™', icon: ClipboardList, stages: ['assessment', 'qualified'] },
+    { id: 'discovery', label: 'Straight Talk™', icon: Phone, stages: ['discovery_call'] },
+    { id: 'scoping', label: 'Game Plan™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
+    { id: 'proposal', label: 'Green Light™', icon: FileText, stages: ['proposal'] },
+    { id: 'build', label: 'Go Live™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
   ];
 
   const grouped = PIPELINE_GROUPS.map(group => ({

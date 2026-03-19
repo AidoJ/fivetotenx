@@ -110,8 +110,8 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
 
   const cards: CardConfig[] = [
     {
-      id: 'signal_capture',
-      label: 'Signal Capture™',
+      id: 'reality_check',
+      label: 'Reality Check™',
       subtitle: 'Phase 1 — Assess',
       icon: Radar,
       stages: ['assessment', 'qualified'],
@@ -120,26 +120,26 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         { label: 'Signals', value: totalAssessments },
         { label: 'Qualified', value: qualifiedCount, color: 'text-green-500' },
       ],
-      nextAction: 'Schedule Alignment Dialogue',
-      question: 'What\'s beneath the surface?',
+      nextAction: 'Schedule Straight Talk',
+      question: 'What\'s actually going on?',
     },
     {
-      id: 'alignment_dialogue',
-      label: 'Alignment Dialogue™',
+      id: 'straight_talk',
+      label: 'Straight Talk™',
       subtitle: 'Phase 2 — Discuss',
       icon: MessageCircle,
       stages: ['discovery_call' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === ('discovery_call' as PipelineStage)),
       metrics: [
         { label: 'Booked', value: discoveryBookedCount },
-        { label: 'Aligned', value: discoveryCompletedCount, color: 'text-green-500' },
+        { label: 'Agreed', value: discoveryCompletedCount, color: 'text-green-500' },
       ],
-      nextAction: 'Send System Blueprint',
-      question: 'What does success look like?',
+      nextAction: 'Send Game Plan',
+      question: 'What\'s worth fixing first?',
     },
     {
-      id: 'system_blueprint',
-      label: 'System Blueprint™',
+      id: 'game_plan',
+      label: 'Game Plan™',
       subtitle: 'Phase 3 — Plan',
       icon: Puzzle,
       stages: ['discovery_call' as PipelineStage, 'proposal'],
@@ -148,12 +148,12 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         { label: 'Sent', value: scopingSentCount },
         { label: 'Completed', value: scopingCompleteCount, color: 'text-green-500' },
       ],
-      nextAction: 'Generate Commercial Clarity',
-      question: 'How does it work end to end?',
+      nextAction: 'Prepare Green Light',
+      question: 'How will this work in your business?',
     },
     {
-      id: 'commercial_clarity',
-      label: 'Commercial Clarity™',
+      id: 'green_light',
+      label: 'Green Light™',
       subtitle: 'Phase 4 — Sign Off',
       icon: FileText,
       stages: ['proposal'],
@@ -161,14 +161,14 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       metrics: [
         { label: 'Generated', value: proposalGeneratedCount },
         { label: 'Sent', value: proposalSentCount },
-        { label: 'Activated', value: signedCount, color: 'text-green-500' },
+        { label: 'Signed', value: signedCount, color: 'text-green-500' },
       ],
       nextAction: 'Send & Follow Up',
-      question: 'What\'s the return?',
+      question: 'Clear scope. Clear cost. Clear outcome.',
     },
     {
-      id: 'build_activate',
-      label: 'Build & Activate™',
+      id: 'go_live',
+      label: 'Go Live™',
       subtitle: 'Phase 5 — Build',
       icon: Rocket,
       stages: ['signed', 'build_refinement' as PipelineStage, 'completed' as PipelineStage],
@@ -178,20 +178,20 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         { label: 'Building', value: buildInProgress, color: 'text-blue-500' },
         { label: 'Live', value: buildCompleted, color: 'text-green-500' },
       ],
-      question: 'Let\'s bring it to life.',
+      question: 'Less admin. More time. Smoother operations.',
     },
   ];
 
   // Funnel data — streamlined 8-step funnel
   const funnelSteps = [
-    { label: 'Signals Captured', value: totalAssessments },
+    { label: 'Reality Checked', value: totalAssessments },
     { label: 'Qualified', value: qualifiedCount },
-    { label: 'Dialogue Booked', value: discoveryBookedCount },
-    { label: 'Aligned', value: discoveryCompletedCount },
-    { label: 'Blueprint Sent', value: scopingSentCount },
-    { label: 'Blueprint Done', value: scopingCompleteCount },
-    { label: 'Clarity Sent', value: proposalSentCount },
-    { label: 'Activated', value: signedCount },
+    { label: 'Talk Booked', value: discoveryBookedCount },
+    { label: 'Agreed', value: discoveryCompletedCount },
+    { label: 'Game Plan Sent', value: scopingSentCount },
+    { label: 'Game Plan Done', value: scopingCompleteCount },
+    { label: 'Green Light Sent', value: proposalSentCount },
+    { label: 'Gone Live', value: signedCount },
   ];
   const maxFunnel = Math.max(...funnelSteps.map(s => s.value), 1);
 
@@ -205,13 +205,13 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
 
   return (
     <div className="space-y-6">
-      {/* Clarity Engine Header */}
+      {/* Clarity Path Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
           <Zap className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-foreground font-display">The Clarity Engine™</h2>
+          <h2 className="text-lg font-bold text-foreground font-display">The 5to10x Clarity Path™</h2>
           <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build</p>
         </div>
       </div>
@@ -252,7 +252,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       {/* Conversion Funnel */}
       <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="text-xs font-bold text-foreground mb-3 flex items-center gap-2">
-          <TrendingDown className="w-4 h-4 text-primary" /> Clarity Engine™ Funnel
+          <TrendingDown className="w-4 h-4 text-primary" /> Clarity Path™ Funnel
         </h3>
         <div className="space-y-2">
           {funnelSteps.map((step, i) => {

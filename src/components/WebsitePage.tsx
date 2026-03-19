@@ -932,7 +932,7 @@ const FooterSection = () =>
   </footer>;
 
 
-/* ─────────────── Signal Capture Section ─────────────── */
+/* ─────────────── Reality Check Section ─────────────── */
 
 const STEP_LABELS = ['Business', 'Metrics', 'Operations', 'Growth'];
 
@@ -968,7 +968,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
       <div className="max-w-3xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-10">
           <span className="text-xs font-bold uppercase tracking-wider text-primary mb-2 inline-block">
-            Signal Capture™ — Phase 1 of the Clarity Engine
+            Reality Check™ — Phase 1 of the Clarity Path
           </span>
           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-3">
             Business Snapshot
@@ -1042,14 +1042,14 @@ const WebsitePage = () => {
     <div className="min-h-screen overflow-x-hidden">
       {/* 1. TEASER — Hero with CTA */}
       <HeroSection onStartAssessment={handleStartAssessment} />
-      {/* Signal Capture™ — inline assessment */}
+      {/* Reality Check™ — inline assessment */}
       {showAssessment && <SignalCaptureSection sectionRef={signalCaptureRef} />}
       {/* 2. WHAT — The Problem */}
       <HiddenCostSection />
       <SelfAssessmentSection />
       {/* 3. WHY — Why Change Now */}
       <ShiftSection />
-      {/* 4. HOW — Our Clarity Engine */}
+      {/* 4. HOW — Our Clarity Path */}
       <ClarityEngineSection onStart={handleStartAssessment} />
       <WhatWeDoSection />
       <IntegrationsSection />

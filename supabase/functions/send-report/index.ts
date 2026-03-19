@@ -77,7 +77,7 @@ serve(async (req) => {
 
     // Zoom section removed — no longer used
 
-    // Pattern Mapping™ CTA for qualified leads
+    // Straight Talk™ CTA for qualified leads
     const deepDiveBaseUrl = 'https://5to10x.app';
     const deepDiveSection = (isQualified && assessmentId)
       ? `
@@ -87,12 +87,12 @@ serve(async (req) => {
               <tr>
                 <td style="padding: 32px; text-align: center;">
                   <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR A CUSTOM BUILD</p>
-                  <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for Pattern Mapping™?</h2>
+                  <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for Your Straight Talk™?</h2>
                   <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 20px; max-width: 480px; margin-left: auto; margin-right: auto;">
-                    Your business qualifies for a custom app build. Complete our 5-minute Pattern Mapping™ questionnaire so we can identify the highest-leverage opportunities for ${businessName || 'your business'}.
+                    Your business qualifies for a custom app build. We'll be in touch to schedule your Straight Talk™ — a focused conversation about what needs to change for ${businessName || 'your business'}.
                   </p>
                   <a href="${deepDiveBaseUrl}/deep-dive?id=${assessmentId}" style="display: inline-block; padding: 14px 36px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">
-                    Start Pattern Mapping™ →
+                    Get Started →
                   </a>
                 </td>
               </tr>
@@ -388,7 +388,7 @@ serve(async (req) => {
                   </p>
                   ${isQualified ? `
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
-                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is <strong>Pattern Mapping™</strong> — a quick 5-minute questionnaire to identify your highest-leverage opportunities. Check your inbox for the invite, or click the link above.
+                    We'd love to discuss how to bring this to life for ${businessName || 'your business'}. The next step is your <strong>Straight Talk™</strong> — a focused conversation about what's worth fixing first. We'll be in touch to schedule that.
                   </p>
                   ` : `
                   <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
@@ -466,13 +466,13 @@ serve(async (req) => {
         console.error('Admin notification failed (non-blocking):', adminErr);
       }
 
-      // Auto-send Pattern Mapping™ invite to qualified leads
+      // Auto-send Straight Talk™ invite to qualified leads
       if (assessmentId) {
         try {
           const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
           const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
           
-          await fetch(`${supabaseUrl}/functions/v1/send-deep-dive-invite`, {
+          await fetch(`${supabaseUrl}/functions/v1/send-discovery-invite`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${supabaseAnonKey}`,
@@ -486,21 +486,21 @@ serve(async (req) => {
             }),
           });
 
-          // Update pipeline stage to deep_dive_sent (Pattern Mapping™ Sent)
+          // Update pipeline stage to qualified (Straight Talk™ invite sent)
           const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
           const supabase = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
           const now = new Date().toISOString();
           const followUpAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
           await supabase.from('roi_assessments').update({
-            pipeline_stage: 'deep_dive_sent',
+            pipeline_stage: 'qualified',
             invite_sent: true,
             invite_sent_at: now,
             follow_up_scheduled_at: followUpAt,
           }).eq('id', assessmentId);
 
-          console.log('Auto-sent Pattern Mapping™ invite to qualified lead:', contactEmail);
+          console.log('Auto-sent Straight Talk™ invite to qualified lead:', contactEmail);
         } catch (ddErr) {
-          console.error('Auto Pattern Mapping™ invite failed (non-blocking):', ddErr);
+          console.error('Auto Straight Talk™ invite failed (non-blocking):', ddErr);
         }
       }
     }
