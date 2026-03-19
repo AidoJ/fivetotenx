@@ -576,48 +576,88 @@ const ProcessSection = () => {
 
 const ZeroRiskSection = () =>
 <section className="bg-background px-4 py-20 md:py-28">
-    <div className="max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <motion.div {...fadeUp} className="space-y-6">
-          <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground">
-            Zero Risk Development
-          </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            We believe you should see the value before committing. That's why we offer a <strong className="text-foreground">build-before-pay model</strong>.
-          </p>
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-1" />
-              <span className="text-foreground">We demonstrate the working solution first</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-1" />
-              <span className="text-foreground">If you see the value, we move forward</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-1" />
-              <span className="text-foreground">If not, you walk away. Simple.</span>
-            </div>
-          </div>
-        </motion.div>
+    <div className="max-w-5xl mx-auto">
+      <motion.div {...fadeUp} className="text-center mb-16">
+        <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4 tracking-wide">
+          Our Guarantee
+        </span>
+        <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-4">
+          We Build It. You Judge It.<br className="hidden md:block" /> Then You Decide.
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Most agencies ask for tens of thousands upfront and deliver months later. We flip that entirely.
+        </p>
+      </motion.div>
 
-        <motion.div {...stagger(0.3)} className="space-y-6">
-          <div className="rounded-2xl border border-border bg-card p-8" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <Shield className="w-12 h-12 text-primary mb-4" />
-            <h3 className="font-display font-bold text-xl text-foreground mb-3">Massive ROI Potential</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Reducing staff admin time</li>
-              <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Eliminating manual processes</li>
-              <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Improving operational visibility</li>
-              <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Automating customer interactions</li>
-              <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 text-primary shrink-0 mt-0.5" /> Removing workflow bottlenecks</li>
-            </ul>
-            <p className="mt-4 text-sm text-foreground font-semibold">
-              Many businesses recover their investment within months.
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {[
+          {
+            step: '01',
+            title: 'We Build Your System',
+            description: 'In 1–2 weeks, we design and build a working MVP tailored to your business — not a mockup, a real system you can use.',
+            icon: Rocket
+          },
+          {
+            step: '02',
+            title: 'You See It Working',
+            description: 'We demo the live system. You test it, ask questions, and see exactly how it transforms your operations.',
+            icon: Eye
+          },
+          {
+            step: '03',
+            title: 'You Decide — Zero Pressure',
+            description: 'Love it? We go live. Not convinced? Your $1,000 deposit is refunded in full. No invoices, no awkward conversations.',
+            icon: Shield
+          }
+        ].map((item, i) => (
+          <motion.div key={item.step} {...stagger(i * 0.15)}
+            className="rounded-2xl border border-border bg-card p-8 relative overflow-hidden"
+            style={{ boxShadow: 'var(--shadow-card)' }}>
+            <span className="absolute top-4 right-4 text-5xl font-display font-black text-primary/10">{item.step}</span>
+            <item.icon className="w-10 h-10 text-primary mb-4" />
+            <h3 className="font-display font-bold text-lg text-foreground mb-2">{item.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div {...fadeUp}
+        className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-8 md:p-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-4">
+            <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+              The $1,000 Good Faith Deposit
+            </h3>
+            <p className="text-muted-foreground leading-relaxed">
+              We ask for a <strong className="text-foreground">fully refundable $1,000 deposit</strong> to begin. It's not a fee — it's a filter. It ensures we're both serious about creating something valuable.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              If the finished system doesn't deliver the value we promised, you get every cent back. No questions, no conditions, no fine print.
             </p>
           </div>
-        </motion.div>
-      </div>
+          <div className="space-y-5">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <span className="text-foreground text-sm"><strong>100% refundable</strong> — if you don't see the value, you walk away whole</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <span className="text-foreground text-sm"><strong>Applied to your project</strong> — if you proceed, it comes off the total</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <span className="text-foreground text-sm"><strong>Working system first</strong> — you never pay for promises, only proven results</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <span className="text-foreground text-sm"><strong>1–2 week turnaround</strong> — your MVP is built and demoed before any commitment</span>
+            </div>
+            <p className="text-xs text-muted-foreground italic pt-2">
+              We've never had a client ask for a refund. But the option is always there.
+            </p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   </section>;
 
