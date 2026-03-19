@@ -130,7 +130,7 @@ const ShiftSection = () =>
           className="rounded-xl border border-border bg-card p-4 text-center"
           style={{ boxShadow: 'var(--shadow-card)' }}>
           
-              <X className="w-5 h-5 text-destructive mx-auto mb-2" />
+              <X className="w-8 h-8 mx-auto mb-2" strokeWidth={3} style={{ color: '#C42D64' }} />
               <span className="text-sm font-medium text-foreground">{item}</span>
             </motion.div>
         )}
