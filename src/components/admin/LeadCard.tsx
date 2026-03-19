@@ -373,21 +373,7 @@ const LeadCard = ({
               {/* Stage Actions */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
-                  {/* Deep Dive links */}
-                  {['deep_dive_sent', 'deep_dive_complete', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => window.open(deepDiveUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Pattern Map
-                      </Button>
-                      {lead.pipeline_stage === 'deep_dive_sent' && (
-                        <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                          onClick={() => onSendDeepDive(lead)}>
-                          <Send className="w-3 h-3" /> Resend
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                  {/* Discovery tools */}
 
                   {/* Discovery tools */}
                   {['deep_dive_complete', 'discovery_call'].includes(lead.pipeline_stage) && (
