@@ -363,7 +363,7 @@ const HiddenCostSection = () => {
               <p className="text-4xl font-display font-bold text-foreground">20–30 hrs</p>
               <p className="text-muted-foreground">lost per week</p>
             </div>
-            <div className="rounded-2xl p-6 text-center" style={{ background: '#2258B4' }}>
+            <div className="rounded-2xl p-6 text-center" style={{ background: '#643AA4' }}>
               <p className="text-white/80 text-sm mb-1">Over a year, that can represent</p>
               <p className="text-3xl font-display font-bold text-white">Tens of thousands</p>
               <p className="text-white/80 text-sm">in operational cost</p>
