@@ -38,9 +38,12 @@ export interface FormData {
   hourlyStaffCost: string;
   lostSalesReasons: string[];
 
-  // Section 4
+  // Section 4 – Growth & Context
   currentFeatures: string[];
   conversionImpactAnswer: string;
+  currentWebsite: string;
+  primaryGoals: string[];
+  additionalNotes: string;
 }
 
 export interface PricingTier {
@@ -171,6 +174,9 @@ export const initialFormData: FormData = {
   lostSalesReasons: [],
   currentFeatures: [],
   conversionImpactAnswer: '',
+  currentWebsite: '',
+  primaryGoals: [],
+  additionalNotes: '',
 };
 
 export const REVENUE_OPTIONS = [
@@ -199,6 +205,19 @@ export const CURRENT_FEATURES = [
   'Loyalty system',
   'Automated upsell flows',
   'CRM automation',
+];
+
+export const GOAL_OPTIONS = [
+  'Increase revenue / sales',
+  'Reduce manual admin work',
+  'Improve customer retention',
+  'Better booking / scheduling',
+  'Automate follow-ups & reminders',
+  'Launch loyalty / rewards program',
+  'Mobile app for customers',
+  'Internal staff tools',
+  'E-commerce / online sales',
+  'Data & analytics dashboard',
 ];
 
 export const BUSINESS_TYPES: { value: BusinessType; label: string; description: string }[] = [

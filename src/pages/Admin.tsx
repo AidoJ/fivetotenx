@@ -100,8 +100,6 @@ interface ClientInterview {
 const STAGES: { key: PipelineStage; label: string }[] = [
   { key: 'assessment', label: 'Signal Capture™' },
   { key: 'qualified', label: 'Qualified' },
-  { key: 'deep_dive_sent', label: 'Pattern Map Sent' },
-  { key: 'deep_dive_complete', label: 'Pattern Map Done' },
   { key: 'discovery_call' as PipelineStage, label: 'Alignment Dialogue™' },
   { key: 'proposal', label: 'Commercial Clarity™' },
   { key: 'signed', label: 'Activated ✅' },
@@ -609,7 +607,7 @@ const ROI_REPORT_INFO = {
   trigger: 'Sent when assessment is completed and "Send Report" is clicked',
   from: 'grow@5to10x.app',
   subject: 'Strategic Growth Report – {Business Name}',
-  description: 'Full ROI breakdown with business data, coaching, pricing, and Deep Dive CTA. This template is code-managed due to its complexity (dynamic pricing tables, conditional sections). Edit via the send-report edge function.',
+  description: 'Full ROI breakdown with business data, coaching, pricing, and Alignment Dialogue CTA. This template is code-managed due to its complexity (dynamic pricing tables, conditional sections). Edit via the send-report edge function.',
 };
 
 /* ─────────── Main Admin ─────────── */
@@ -694,32 +692,9 @@ const Admin = () => {
     }
   };
 
-  const handleSendDeepDive = async (lead: Assessment) => {
-    try {
-      const { error } = await supabase.functions.invoke('send-deep-dive-invite', {
-        body: { contactName: lead.contact_name, contactEmail: lead.contact_email, businessName: lead.business_name, assessmentId: lead.id },
-      });
-      if (error) throw error;
-      const now = new Date().toISOString();
-      const followUpDays = lead.follow_up_days || 2;
-      const followUpAt = new Date(Date.now() + followUpDays * 24 * 60 * 60 * 1000).toISOString();
-      await supabase.from('roi_assessments').update({
-        pipeline_stage: 'deep_dive_sent' as any,
-        invite_sent: true,
-        invite_sent_at: now,
-        follow_up_scheduled_at: followUpAt,
-      }).eq('id', lead.id);
-      setLeads(prev => prev.map(l => l.id === lead.id ? {
-        ...l,
-        pipeline_stage: 'deep_dive_sent' as PipelineStage,
-        invite_sent: true,
-        invite_sent_at: now,
-        follow_up_scheduled_at: followUpAt,
-      } : l));
-      toast({ title: 'Pattern Map Sent ✅', description: `Invite sent to ${lead.contact_email}` });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
-    }
+  const handleSendDiscoveryFromQualified = async (lead: Assessment) => {
+    // After removing Pattern Mapping, qualifying now goes straight to Alignment Dialogue
+    handleSendDiscoveryInvite(lead);
   };
 
   const handleScheduleReminder = async (id: string, days: number | null, scheduledAt: string | null) => {
@@ -1214,7 +1189,6 @@ const Admin = () => {
   // Mirror dashboard's 6 consolidated stages
   const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
     { id: 'assessment', label: 'Signal Capture™', icon: ClipboardList, stages: ['assessment', 'qualified'] },
-    { id: 'deep_dive', label: 'Pattern Mapping™', icon: Send, stages: ['deep_dive_sent', 'deep_dive_complete'] },
     { id: 'discovery', label: 'Alignment Dialogue™', icon: Phone, stages: ['discovery_call'] },
     { id: 'scoping', label: 'System Blueprint™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
     { id: 'proposal', label: 'Commercial Clarity™', icon: FileText, stages: ['proposal'] },
@@ -1305,7 +1279,7 @@ const Admin = () => {
                           key={lead.id}
                           lead={lead}
                           onMove={handleMove}
-                          onSendDeepDive={handleSendDeepDive}
+                          onSendDeepDive={handleSendDiscoveryFromQualified}
                           onUpdateFollowUp={handleUpdateFollowUp}
                           onPrepareProposal={handlePrepareProposal}
                           onSendProposal={handleSendProposal}

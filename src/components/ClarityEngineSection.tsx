@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { Radar, Search, MessageCircle, Puzzle, FileText, Rocket, ArrowRight, Sparkles } from 'lucide-react';
+import { Radar, MessageCircle, Puzzle, FileText, Rocket, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const phases = [
@@ -8,37 +8,27 @@ const phases = [
     icon: Radar,
     emoji: '🧭',
     label: 'Signal Capture™',
-    phase: 'Phase 1',
+    phase: 'Phase 1 — Assess',
     formerly: 'Assessment',
     question: 'What\'s really going on beneath the surface?',
-    description: 'We capture the signal in the noise — a high-level snapshot of your business, challenges, and untapped opportunities.',
+    description: 'We capture the signal in the noise — a comprehensive snapshot of your business, challenges, goals, and untapped opportunities.',
     accent: 'from-blue-500 to-indigo-500',
-  },
-  {
-    icon: Search,
-    emoji: '🔍',
-    label: 'Pattern Mapping™',
-    phase: 'Phase 2',
-    formerly: 'Deep Dive',
-    question: 'Where are you leaking time, money, and momentum?',
-    description: 'We identify patterns, inefficiencies, and leverage points across your workflows, data, and customer journey.',
-    accent: 'from-violet-500 to-purple-500',
   },
   {
     icon: MessageCircle,
     emoji: '💬',
     label: 'Alignment Dialogue™',
-    phase: 'Phase 3',
+    phase: 'Phase 2 — Discuss',
     formerly: 'Discovery Call',
     question: 'What does success actually look like — and what matters most?',
     description: 'A structured conversation to align vision, priorities, and outcomes — turning insight into direction.',
-    accent: 'from-purple-500 to-pink-500',
+    accent: 'from-violet-500 to-purple-500',
   },
   {
     icon: Puzzle,
     emoji: '🧩',
     label: 'System Blueprint™',
-    phase: 'Phase 4',
+    phase: 'Phase 3 — Plan',
     formerly: 'Scoping',
     question: 'How does this work — end to end?',
     description: 'We architect your app as a system — defining features, flows, logic, and integrations.',
@@ -48,7 +38,7 @@ const phases = [
     icon: FileText,
     emoji: '📐',
     label: 'Commercial Clarity™',
-    phase: 'Phase 5',
+    phase: 'Phase 4 — Sign Off',
     formerly: 'Proposal',
     question: 'What\'s the return — and how do we get there?',
     description: 'A clear, outcome-driven plan that aligns functionality with ROI, investment, and execution.',
@@ -58,7 +48,7 @@ const phases = [
     icon: Rocket,
     emoji: '🚀',
     label: 'Build & Activate™',
-    phase: 'Phase 6',
+    phase: 'Phase 5 — Build',
     formerly: 'Build',
     question: 'Let\'s bring it to life.',
     description: 'We design, develop, and deploy your app — transforming strategy into a working growth engine.',
@@ -108,7 +98,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
           </span>
         </h2>
         <p className="text-sm md:text-lg leading-relaxed" style={{ color: 'hsl(220 20% 65%)' }}>
-          A structured, conversational framework that transforms scattered business processes into a scalable, revenue-aligned app.
+          Assess → Discuss → Plan → Sign Off → Build. A streamlined framework that transforms scattered business processes into a scalable, revenue-aligned app.
         </p>
       </motion.div>
 

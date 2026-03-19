@@ -38,10 +38,13 @@ export const DISCOVERY_QUESTIONS: Record<string, { label: string; category: stri
   compliance_data_residency: { label: 'Data residency requirements', category: 'Compliance', question: 'Do you need specific data residency (AU-only hosting)?' },
   compliance_payment: { label: 'Payment processing preferences', category: 'Compliance', question: 'Payment processing preferences (Stripe, Square, existing provider)?' },
   
-  // 7. Budget & Decision-Making
-  logistics_decision_makers: { label: 'Additional decision-makers', category: 'Logistics', question: 'Beyond the decision-maker identified in the deep dive, who else needs to sign off?' },
+  // 7. Budget, Decision-Making & Competitors
+  logistics_decision_makers: { label: 'Additional decision-makers', category: 'Logistics', question: 'Beyond the primary contact, who else needs to sign off?' },
   logistics_hard_deadlines: { label: 'Hard deadlines', category: 'Logistics', question: 'Is there a hard deadline driving this project (e.g. busy season, funding round)?' },
   logistics_phased_rollout: { label: 'Phased vs full rollout', category: 'Logistics', question: 'What\'s your comfort level with a phased rollout vs. a full launch?' },
+  logistics_budget_comfort: { label: 'Budget comfort level', category: 'Logistics', question: 'How do you feel about the investment range? Comfortable, a stretch, or need to explore options?' },
+  logistics_decision_timeline: { label: 'Decision timeline', category: 'Logistics', question: 'When are you looking to make a decision — this week, 2–4 weeks, 1–3 months?' },
+  logistics_competitors: { label: 'Competitive landscape', category: 'Logistics', question: 'Who are your main competitors? What do they do better or worse than you digitally?' },
   
   // 8. Support & Maintenance
   support_post_launch: { label: 'Post-launch support level', category: 'Support', question: 'What level of post-launch support do you expect (self-service vs. managed)?' },
