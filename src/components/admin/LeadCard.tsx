@@ -98,9 +98,9 @@ const getNextAction = (
 ) => {
   const stage = lead.pipeline_stage;
   if (stage === 'assessment' && !lead.is_qualified)
-    return { label: 'Qualify Lead', icon: Check, action: 'qualify' };
+    return { label: 'Qualify Signal', icon: Check, action: 'qualify' };
   if (stage === 'qualified')
-    return { label: lead.invite_sent ? 'Resend Deep Dive' : 'Send Deep Dive Invite', icon: Send, action: 'send_deep_dive' };
+    return { label: lead.invite_sent ? 'Resend Pattern Map' : 'Send Pattern Map Invite', icon: Send, action: 'send_deep_dive' };
   if (stage === 'deep_dive_sent')
     return { label: 'Awaiting Deep Dive', icon: Clock, action: 'waiting' };
   if (stage === 'deep_dive_complete')
