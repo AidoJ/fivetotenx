@@ -167,8 +167,8 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       question: 'Clear scope. Clear cost. Clear outcome.',
     },
     {
-      id: 'go_live',
-      label: 'Go Live™',
+      id: 'build_launch',
+      label: 'Build & Launch™',
       subtitle: 'Phase 5 — Build',
       icon: Rocket,
       stages: ['signed', 'build_refinement' as PipelineStage, 'completed' as PipelineStage],
@@ -176,7 +176,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       metrics: [
         { label: 'Approved', value: buildApproved },
         { label: 'Building', value: buildInProgress, color: 'text-blue-500' },
-        { label: 'Live', value: buildCompleted, color: 'text-green-500' },
+        { label: 'Gone Live', value: buildCompleted, color: 'text-green-500' },
       ],
       question: 'Less admin. More time. Smoother operations.',
     },
@@ -191,7 +191,8 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
     { label: 'Game Plan Sent', value: scopingSentCount },
     { label: 'Game Plan Done', value: scopingCompleteCount },
     { label: 'Green Light Sent', value: proposalSentCount },
-    { label: 'Gone Live', value: signedCount },
+    { label: 'Signed Off', value: signedCount },
+    { label: 'Gone Live ✅', value: buildCompleted },
   ];
   const maxFunnel = Math.max(...funnelSteps.map(s => s.value), 1);
 
@@ -212,7 +213,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
         </div>
         <div>
           <h2 className="text-lg font-bold text-foreground font-display">The 5to10x Clarity Path™</h2>
-          <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build</p>
+          <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build → Go Live</p>
         </div>
       </div>
 
@@ -293,7 +294,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
           const Icon = card.icon;
           const cardLeads = card.leads;
           const accent = phaseAccents[index];
-          const isTerminal = card.id === 'build_activate';
+          const isTerminal = card.id === 'build_launch';
           const worstSla = cardLeads.some(l => getSlaStatus(l) === 'red') ? 'red' : cardLeads.some(l => getSlaStatus(l) === 'amber') ? 'amber' : 'green';
 
           return (
