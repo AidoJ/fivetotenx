@@ -253,9 +253,9 @@ const LeadCard = ({
   };
 
   const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
-    { key: 'assessment', label: 'Signal Capture' },
+    { key: 'assessment', label: 'Reality Check' },
     { key: 'qualified', label: 'Qualified' },
-    { key: 'discovery_call' as PipelineStage, label: 'Alignment' },
+    { key: 'discovery_call' as PipelineStage, label: 'Straight Talk' },
     { key: 'proposal', label: 'Clarity' },
     { key: 'signed', label: 'Activated' },
     { key: 'build_refinement' as PipelineStage, label: 'Build' },

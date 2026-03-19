@@ -1042,7 +1042,7 @@ const WebsitePage = () => {
     <div className="min-h-screen overflow-x-hidden">
       {/* 1. TEASER — Hero with CTA */}
       <HeroSection onStartAssessment={handleStartAssessment} />
-      {/* Signal Capture™ — inline assessment */}
+      {/* Reality Check™ — inline assessment */}
       {showAssessment && <SignalCaptureSection sectionRef={signalCaptureRef} />}
       {/* 2. WHAT — The Problem */}
       <HiddenCostSection />

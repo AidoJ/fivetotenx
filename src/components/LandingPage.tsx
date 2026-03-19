@@ -107,7 +107,7 @@ const LandingPage = ({ onStart }: Props) => {
         </motion.div>
       </section>
 
-      {/* Clarity Engine Section */}
+      {/* Clarity Path Section */}
       <ClarityEngineSection onStart={onStart} />
 
       {/* Features Section */}

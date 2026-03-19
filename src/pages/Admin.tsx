@@ -1188,11 +1188,11 @@ const Admin = () => {
 
   // Mirror dashboard's 6 consolidated stages
   const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
-    { id: 'assessment', label: 'Signal Capture™', icon: ClipboardList, stages: ['assessment', 'qualified'] },
-    { id: 'discovery', label: 'Alignment Dialogue™', icon: Phone, stages: ['discovery_call'] },
-    { id: 'scoping', label: 'System Blueprint™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
-    { id: 'proposal', label: 'Commercial Clarity™', icon: FileText, stages: ['proposal'] },
-    { id: 'build', label: 'Build & Activate™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
+    { id: 'assessment', label: 'Reality Check™', icon: ClipboardList, stages: ['assessment', 'qualified'] },
+    { id: 'discovery', label: 'Straight Talk™', icon: Phone, stages: ['discovery_call'] },
+    { id: 'scoping', label: 'Game Plan™', icon: Eye, stages: ['discovery_call', 'proposal'], filter: (l) => !!(l as any).scoping_sent && !scopingResponses.find((s: any) => s.assessment_id === l.id && s.completed) },
+    { id: 'proposal', label: 'Green Light™', icon: FileText, stages: ['proposal'] },
+    { id: 'build', label: 'Go Live™', icon: Wrench, stages: ['signed', 'build_refinement', 'completed'] },
   ];
 
   const grouped = PIPELINE_GROUPS.map(group => ({

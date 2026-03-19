@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
                 Hi ${contactName},
               </p>
               <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 16px;">
-                Based on your Signal Capture™ assessment and Pattern Mapping™ responses, we've prepared a tailored proposal for <strong>${businessName}</strong>.
+                Based on your Reality Check™ assessment and Straight Talk™ conversation, we've prepared a tailored proposal for <strong>${businessName}</strong>.
               </p>
               ${roi.pricing ? `
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 24px;">
