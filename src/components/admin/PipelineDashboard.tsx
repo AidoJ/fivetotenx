@@ -248,13 +248,18 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
             const convRate = prevValue && prevValue > 0 ? Math.round((step.value / prevValue) * 100) : null;
             return (
               <div key={step.label} className="flex items-center gap-3">
-                <span className="text-[11px] text-muted-foreground w-20 text-right shrink-0">{step.label}</span>
+                <span className="text-[11px] text-muted-foreground w-24 text-right shrink-0">{step.label}</span>
                 <div className="flex-1 h-6 bg-secondary/50 rounded-md overflow-hidden relative">
                   <div
-                    className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-md transition-all duration-500"
-                    style={{ width: `${width}%` }}
+                    className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-md"
+                    style={{
+                      width: `${width}%`,
+                      animation: `funnel-fill 0.8s ease-out ${i * 0.08}s both`,
+                    }}
                   />
-                  <span className="absolute inset-0 flex items-center px-2 text-[11px] font-bold text-foreground">
+                  <span className="absolute inset-0 flex items-center px-2 text-[11px] font-bold text-white drop-shadow-sm"
+                    style={{ animation: `fade-in 0.4s ease-out ${0.4 + i * 0.08}s both` }}
+                  >
                     {step.value}
                   </span>
                 </div>

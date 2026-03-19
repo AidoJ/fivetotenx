@@ -78,3 +78,7 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 }
+
+@keyframes funnel-fill {
+  from { width: 0%; }
+}
