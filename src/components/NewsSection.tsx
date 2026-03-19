@@ -159,7 +159,7 @@ const NewsSection = () => {
                       ))}
                     </div>
                   ) : feed?.items?.length ? (
-                    feed.items.slice(0, 4).map((item, j) => (
+                    feed.items.slice(0, 3).map((item, j) => (
                       <a
                         key={j}
                         href={item.link}
