@@ -73,8 +73,8 @@ const NewsSection = () => {
   };
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
-      <div className="max-w-5xl mx-auto">
+    <section className="px-4 py-12 md:py-16" style={{ background: '#000000' }}>
+      <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
