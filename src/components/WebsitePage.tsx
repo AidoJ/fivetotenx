@@ -141,7 +141,7 @@ const ShiftSection = () =>
         <p className="text-lg text-foreground font-semibold">
           …can now be handled automatically by simple, intelligent business apps.
         </p>
-        <div className="rounded-2xl p-8 inline-block" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+        <div className="rounded-2xl p-8 inline-block" style={{ background: '#643AA4' }}>
           <p className="text-white text-lg md:text-xl font-display font-bold">
             Businesses that don’t embrace the AI wave risk being overtaken by competitors who are moving faster, making better decisions, and operating far more efficiently.
           </p>
