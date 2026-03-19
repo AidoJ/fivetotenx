@@ -74,10 +74,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       style={{ color: 'hsl(0 0% 95%)' }}>
       
         What if your business could run{' '}
-        <span
-        className="bg-clip-text text-transparent"
-        style={{ backgroundImage: 'var(--gradient-vibrant)', backgroundSize: '200% auto' }}>
-        
+        <span style={{ color: '#1789CE' }}>
           5–10x more efficiently?
         </span>
       </h1>
@@ -94,7 +91,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         onClick={onStartAssessment}
         size="lg"
         className="text-sm sm:text-base md:text-lg px-6 md:px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 whitespace-normal"
-        style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
+        style={{ background: '#2258B4', color: 'white', border: 'none', boxShadow: '0 0 30px #2258B433' }}>
         
             <span className="flex items-center gap-2 text-center">
               Discover Your Hidden Efficiency
@@ -168,9 +165,9 @@ const WhatWeDoSection = () => {
     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
+           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             What{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#643AA4' }}>
               5to10x
             </span>{' '}
             Does
@@ -189,7 +186,7 @@ const WhatWeDoSection = () => {
             className="rounded-xl border p-5 flex items-start gap-4"
             style={{ borderColor: 'hsl(260 30% 25%)', background: 'hsl(260 30% 12%)' }}>
             
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#2258B4' }}>
                 <cap.icon className="w-5 h-5 text-white" />
               </div>
               <p className="text-sm font-medium" style={{ color: 'hsl(220 20% 82%)' }}>{cap.text}</p>
@@ -276,7 +273,7 @@ const IntegrationsSection = () => {
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             Built to Integrate With the Tools{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#D88E08' }}>
               You Already Use
             </span>
           </h2>
@@ -315,7 +312,7 @@ const IntegrationsSection = () => {
               <p className="text-2xl font-display font-bold" style={{ color: 'hsl(0 0% 95%)' }}>Fewer errors.</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-display font-bold bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>More time to grow.</p>
+              <p className="text-2xl font-display font-bold" style={{ color: '#398C08' }}>More time to grow.</p>
             </div>
           </div>
         </motion.div>
@@ -366,7 +363,7 @@ const HiddenCostSection = () => {
               <p className="text-4xl font-display font-bold text-foreground">20–30 hrs</p>
               <p className="text-muted-foreground">lost per week</p>
             </div>
-            <div className="rounded-2xl p-6 text-center" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <div className="rounded-2xl p-6 text-center" style={{ background: '#2258B4' }}>
               <p className="text-white/80 text-sm mb-1">Over a year, that can represent</p>
               <p className="text-3xl font-display font-bold text-white">Tens of thousands</p>
               <p className="text-white/80 text-sm">in operational cost</p>
@@ -398,7 +395,7 @@ const SelfAssessmentSection = () => {
         <motion.div {...fadeUp} className="text-center mb-12">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             Where Are You{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#C42D64' }}>
               Losing Time?
             </span>
           </h2>
@@ -413,8 +410,8 @@ const SelfAssessmentSection = () => {
             key={i}
             className="rounded-xl border p-5 flex items-center justify-between gap-4 cursor-pointer transition-all"
             style={{
-              borderColor: answers[i] ? 'hsl(260 65% 52%)' : 'hsl(260 30% 25%)',
-              background: answers[i] ? 'hsl(260 40% 18%)' : 'hsl(260 30% 12%)'
+              borderColor: answers[i] ? '#2258B4' : 'hsl(260 30% 25%)',
+              background: answers[i] ? '#2258B422' : 'hsl(260 30% 12%)'
             }}
             onClick={() => {
               const next = [...answers];
@@ -428,7 +425,7 @@ const SelfAssessmentSection = () => {
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 answers[i] ? 'text-white' : 'text-white/40'}`
                 }
-                style={answers[i] ? { backgroundImage: 'var(--gradient-primary)' } : { background: 'hsl(260 30% 20%)' }}
+                style={answers[i] ? { background: '#2258B4' } : { background: 'hsl(260 30% 20%)' }}
                 onClick={(e) => {e.stopPropagation();const next = [...answers];next[i] = true;setAnswers(next);}}>
                 
                   Yes
@@ -451,8 +448,8 @@ const SelfAssessmentSection = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-2xl p-6 text-center"
-          style={{ backgroundImage: 'var(--gradient-primary)' }}>
+           className="rounded-2xl p-6 text-center"
+           style={{ background: '#398C08' }}>
           
             <CheckCircle className="w-8 h-8 text-white mx-auto mb-3" />
             <p className="text-white font-display font-bold text-lg">
@@ -537,7 +534,7 @@ const ProcessSection = () => {
         <motion.div {...fadeUp} className="text-center mb-16">
           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             The 5to10x{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#D88E08' }}>
               Process
             </span>
           </h2>
@@ -552,13 +549,13 @@ const ProcessSection = () => {
             
               <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
-              style={{ backgroundImage: 'var(--gradient-primary)' }}>
+              style={{ background: '#643AA4' }}>
               
                 <step.icon className="w-7 h-7 text-white" />
               </div>
               <div
               className="text-xs font-bold uppercase tracking-wider"
-              style={{ color: 'hsl(260 60% 70%)' }}>
+              style={{ color: '#D88E08' }}>
               
                 Step {step.num}
               </div>
@@ -829,7 +826,7 @@ const CoFoundersSection = () => {
         <motion.div {...fadeUp} className="text-center mb-14">
           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
             Meet the{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#2258B4' }}>
               Co-Founders
             </span>
           </h2>
@@ -843,13 +840,13 @@ const CoFoundersSection = () => {
             {...stagger(0.2 * i)}
             className="rounded-2xl border border-border bg-card overflow-hidden"
             style={{ boxShadow: 'var(--shadow-card)' }}>
-              <div className="relative overflow-hidden flex items-center justify-center py-6" style={{ background: 'linear-gradient(135deg, #1e3a5f, #4338ca)' }}>
+              <div className="relative overflow-hidden flex items-center justify-center py-6" style={{ background: '#2258B4' }}>
                 <img src={founder.image} alt={founder.name} className="w-1/4 h-auto rounded-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
               </div>
               <div className="p-6 space-y-3">
                 <div>
                   <h3 className="text-xl font-display font-bold text-foreground">{founder.name}</h3>
-                  <p className="text-sm font-medium bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>{founder.role}</p>
+                  <p className="text-sm font-medium" style={{ color: '#1789CE' }}>{founder.role}</p>
                 </div>
                 <FounderBio bio={founder.bio} />
               </div>
@@ -866,7 +863,7 @@ const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       <motion.div {...fadeUp} className="space-y-8">
         <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground">
           Ready to See the Opportunity in{' '}
-          <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+          <span style={{ color: '#398C08' }}>
             Your Business?
           </span>
         </h2>
@@ -876,8 +873,8 @@ const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         <Button
         onClick={onStartAssessment}
         size="lg"
-        className="text-lg px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
-        style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
+        className="text-lg px-10 py-6 gap-3 rounded-xl font-semibold transition-all hover:scale-105"
+        style={{ background: '#398C08', color: 'white', border: 'none', boxShadow: '0 0 30px #398C0833' }}>
         
           <Sparkles className="w-5 h-5" />
           Start the Assessment
@@ -892,7 +889,7 @@ const ContactSection = () =>
 <section className="px-4 py-20" style={{ background: '#000000' }}>
     <div className="max-w-3xl mx-auto text-center">
       <motion.div {...fadeUp}>
-        <Mail className="w-10 h-10 mx-auto mb-4" style={{ color: 'hsl(260 80% 65%)' }} />
+        <Mail className="w-10 h-10 mx-auto mb-4" style={{ color: '#1789CE' }} />
         <h2 className="text-3xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(220 15% 93%)' }}>
           Get in Touch
         </h2>
@@ -903,9 +900,9 @@ const ContactSection = () =>
         href="mailto:grow@5to10x.app"
         className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105"
         style={{
-          background: 'linear-gradient(135deg, hsl(260 80% 60%), hsl(280 80% 55%))',
+          background: '#2258B4',
           color: '#fff',
-          boxShadow: '0 4px 20px hsl(260 80% 50% / 0.3)'
+          boxShadow: '0 4px 20px #2258B433'
         }}>
         
           <Mail className="w-5 h-5" />
@@ -917,16 +914,16 @@ const ContactSection = () =>
 
 
 const FooterSection = () =>
-<footer className="px-4 py-8 border-t" style={{ background: '#000000', borderColor: 'hsl(260 30% 20%)' }}>
+<footer className="px-4 py-8 border-t" style={{ background: '#010100', borderColor: 'hsl(0 0% 15%)' }}>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         <img src={logoWhiteStrap} alt="5to10X" className="h-12 w-auto" />
-        <span className="text-sm" style={{ color: 'hsl(0 0% 100%)' }}>
+        <span className="text-sm" style={{ color: '#73AD12', opacity: 0.7 }}>
           © {new Date().getFullYear()} 5to10X — Build • Innovate • Scale
         </span>
       </div>
       <div className="flex items-center gap-6">
-        <span className="text-xs" style={{ color: 'hsl(220 15% 45%)' }}>Automate • Accelerate • Multiply</span>
+        <span className="text-xs" style={{ color: '#398C08', opacity: 0.5 }}>Automate • Accelerate • Multiply</span>
       </div>
     </div>
   </footer>;

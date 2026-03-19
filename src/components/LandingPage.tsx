@@ -8,33 +8,43 @@ interface Props {
   onStart: () => void;
 }
 
+/* Logo-extracted colors: blue → green progression */
+const COLORS = {
+  blue: '#1789CE',
+  deepBlue: '#2258B4',
+  purple: '#643AA4',
+  green: '#398C08',
+};
+
 const features = [
   {
     icon: Zap,
     title: 'Automate & Save',
     description: 'Cut manual admin hours by up to 40% with smart automation that runs while you sleep.',
+    color: COLORS.deepBlue,
   },
   {
     icon: TrendingUp,
     title: 'Grow Revenue',
     description: 'Boost conversions, recover no-shows, and unlock upsell opportunities you didn\'t know existed.',
+    color: COLORS.purple,
   },
   {
     icon: BarChart3,
     title: 'Measure Real ROI',
     description: 'See exactly what a custom app is worth to your business — in pounds, not promises.',
+    color: COLORS.green,
   },
 ];
 
 const LandingPage = ({ onStart }: Props) => {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Hero Section */}
+      {/* Hero Section — Black bg, blue accent */}
       <section
         className="relative flex-1 flex flex-col items-center justify-center px-4 py-16 md:py-24 overflow-hidden"
         style={{ background: '#010100' }}
       >
-
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -59,10 +69,7 @@ const LandingPage = ({ onStart }: Props) => {
               transition={{ delay: 0.4 }}
             >
               The businesses winning today{' '}
-              <span
-                className="bg-clip-text text-transparent"
-                style={{ backgroundImage: 'var(--gradient-vibrant)', backgroundSize: '200% auto' }}
-              >
+              <span style={{ color: COLORS.blue }}>
                 aren't waiting.
               </span>
             </motion.h1>
@@ -89,11 +96,12 @@ const LandingPage = ({ onStart }: Props) => {
             <Button
               onClick={onStart}
               size="lg"
-              className="text-lg px-8 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="text-lg px-8 py-6 gap-3 rounded-xl font-semibold transition-all hover:scale-105"
               style={{
-                backgroundImage: 'var(--gradient-primary)',
+                background: COLORS.deepBlue,
                 color: 'white',
                 border: 'none',
+                boxShadow: `0 0 30px ${COLORS.deepBlue}33`,
               }}
             >
               <Sparkles className="w-5 h-5" />
@@ -110,7 +118,7 @@ const LandingPage = ({ onStart }: Props) => {
       {/* Clarity Path Section */}
       <ClarityEngineSection onStart={onStart} />
 
-      {/* Features Section */}
+      {/* Features Section — White bg, mid-range colors */}
       <section className="bg-background px-4 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
           <motion.div
@@ -121,7 +129,7 @@ const LandingPage = ({ onStart }: Props) => {
           >
             <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3">
               Discover what a custom app could do for{' '}
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+              <span style={{ color: COLORS.purple }}>
                 your business
               </span>
             </h2>
@@ -144,7 +152,7 @@ const LandingPage = ({ onStart }: Props) => {
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ backgroundImage: 'var(--gradient-primary)' }}
+                  style={{ background: feature.color }}
                 >
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
@@ -163,7 +171,12 @@ const LandingPage = ({ onStart }: Props) => {
             <Button
               onClick={onStart}
               size="lg"
-              className="gap-2 rounded-xl font-semibold"
+              className="gap-2 rounded-xl font-semibold transition-all hover:scale-105"
+              style={{
+                background: COLORS.green,
+                color: 'white',
+                boxShadow: `0 0 24px ${COLORS.green}33`,
+              }}
             >
               Calculate My ROI <ArrowRight className="w-4 h-4" />
             </Button>
@@ -171,9 +184,9 @@ const LandingPage = ({ onStart }: Props) => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-card border-t border-border px-4 py-6 text-center">
-        <p className="text-sm text-muted-foreground">
+      {/* Footer — Black bg, green text */}
+      <footer className="px-4 py-6 text-center" style={{ background: '#010100' }}>
+        <p className="text-sm" style={{ color: '#73AD12', opacity: 0.7 }}>
           © {new Date().getFullYear()} 5to10X — Build • Innovate • Scale
         </p>
       </footer>
