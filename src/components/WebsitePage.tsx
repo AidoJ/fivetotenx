@@ -19,6 +19,7 @@ import cellularWellbeingLogo from '@/assets/cellular-wellbeing-logo.png';
 import headshotEoghan from '@/assets/headshot-eoghan.png';
 import headshotAidan from '@/assets/headshot-aidan.png';
 import NewsSection from '@/components/NewsSection';
+import ClarityEngineSection from '@/components/ClarityEngineSection';
 
 interface Props {
   onStartAssessment: () => void;
@@ -744,6 +745,29 @@ const FreeTrainingSection = () => {
     </section>);
 };
 
+const FounderBio = ({ bio }: { bio: string }) => {
+  const [expanded, setExpanded] = useState(false);
+  const paragraphs = bio.split('\n\n');
+
+  return (
+    <div className="text-sm text-muted-foreground leading-relaxed">
+      {expanded ? (
+        <div className="space-y-3">
+          {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+          <button onClick={() => setExpanded(false)} className="text-primary font-medium text-xs hover:underline">Show less</button>
+        </div>
+      ) : (
+        <>
+          <p className="line-clamp-3">{paragraphs[0]}</p>
+          {paragraphs.length > 1 && (
+            <button onClick={() => setExpanded(true)} className="text-primary font-medium text-xs hover:underline mt-2">Read more</button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
 const CoFoundersSection = () => {
   const founders = [
   {
@@ -759,7 +783,6 @@ const CoFoundersSection = () => {
     bio: 'Aidan is a business transformation advisor with 30+ years of experience helping organisations improve performance through smarter strategy, operational design, and data-driven decision making.\n\nHaving held senior and executive roles with organisations including Cable & Wireless, Ericsson, Almarai, Construction Skills Queensland, Civil Contractors Federation, and Orbus3, Aidan has spent his career working at the intersection of business strategy, operational efficiency, and technology transformation.\n\nHe has a deep passion for adapting cutting-edge technology to practical business challenges, helping organisations simplify complex workflows and unlock new opportunities for growth.\n\nToday Aidan works closely with SME leaders, advising them on how to modernise their operations and build businesses that run more efficiently. His work focuses on delivering practical improvements that create immediate impact — reducing operational costs, implementing analytics that improve project margins, scaling efficiently as demand grows, and designing workflow systems that cut administrative workload in half.\n\nAidan\'s philosophy is simple: when businesses combine clear strategy with the right technology and efficient workflows, growth becomes far easier to achieve.'
   }];
 
-
   return (
     <section className="bg-background px-4 py-20 md:py-28">
       <div className="max-w-5xl mx-auto">
@@ -770,9 +793,7 @@ const CoFoundersSection = () => {
               Co-Founders
             </span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">A father-and-son team passionate about helping business owners simplify their systems and run leaner, more effective businesses.
-
-          </p>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">A father-and-son team passionate about helping business owners simplify their systems and run leaner, more effective businesses.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -782,33 +803,21 @@ const CoFoundersSection = () => {
             {...stagger(0.2 * i)}
             className="rounded-2xl border border-border bg-card overflow-hidden"
             style={{ boxShadow: 'var(--shadow-card)' }}>
-            
               <div className="relative overflow-hidden flex items-center justify-center py-6" style={{ background: 'linear-gradient(135deg, #1e3a5f, #4338ca)' }}>
-                <img
-                src={founder.image}
-                alt={founder.name}
-                className="w-1/4 h-auto rounded-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
-              
+                <img src={founder.image} alt={founder.name} className="w-1/4 h-auto rounded-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
               </div>
               <div className="p-6 space-y-3">
                 <div>
                   <h3 className="text-xl font-display font-bold text-foreground">{founder.name}</h3>
-                  <p className="text-sm font-medium bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
-                    {founder.role}
-                  </p>
+                  <p className="text-sm font-medium bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>{founder.role}</p>
                 </div>
-                <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
-                  {founder.bio.split('\n\n').map((paragraph, idx) =>
-                <p key={idx}>{paragraph}</p>
-                )}
-                </div>
+                <FounderBio bio={founder.bio} />
               </div>
             </motion.div>
           )}
         </div>
       </div>
     </section>);
-
 };
 
 const CTASection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
@@ -888,6 +897,7 @@ const FooterSection = () =>
 const WebsitePage = ({ onStartAssessment }: Props) =>
 <div className="min-h-screen overflow-x-hidden">
     <HeroSection onStartAssessment={onStartAssessment} />
+    <ClarityEngineSection onStart={onStartAssessment} />
     <ShiftSection />
     <WhatWeDoSection />
     <RapidDeploySection />
