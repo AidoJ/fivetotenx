@@ -94,11 +94,8 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         style={{ backgroundImage: 'var(--gradient-primary)', color: 'white', border: 'none' }}>
         
             <span className="flex items-center gap-2 text-center">
-              <Sparkles className="w-5 h-5 shrink-0" />
-              <span>How much efficiency is hiding in your business?</span>
-            </span>
-            <span className="text-xs sm:text-sm font-normal opacity-85 text-center">
-              Click HERE to discover where automation could unlock time, profit and growth.
+              Discover Your Hidden Efficiency
+              <ArrowRight className="w-5 h-5 shrink-0" />
             </span>
           </Button>
           <p className="text-sm" style={{ color: 'hsl(220 15% 55%)' }}>
