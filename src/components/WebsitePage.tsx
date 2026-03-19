@@ -302,8 +302,8 @@ const IntegrationsSection = () => {
             className="rounded-xl border p-6 text-center flex flex-col items-center gap-3"
             style={{ borderColor: 'hsl(0 0% 90%)', background: 'white' }}>
             
-              <div className="w-32 h-32 rounded-2xl flex items-center justify-center p-2">
-                <img src={int.logo} alt={int.name} className="w-full h-full object-contain" />
+              <div className="w-32 h-32 rounded-2xl flex items-center justify-center p-2 overflow-hidden">
+                <img src={int.logo} alt={int.name} className={`w-full h-full object-contain ${int.scale}`} />
               </div>
               <span className="text-base font-bold" style={{ color: 'hsl(0 0% 15%)' }}>{int.name}</span>
               <span className="text-xs" style={{ color: '#D88E08' }}>{int.category}</span>
