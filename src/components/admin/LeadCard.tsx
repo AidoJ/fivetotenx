@@ -114,7 +114,7 @@ const getNextAction = (
   if (stage === 'signed')
     return { label: 'Start Build', icon: Check, action: 'move_build' };
   if (stage === 'build_refinement')
-    return { label: 'Mark Complete', icon: Check, action: 'move_completed' };
+    return { label: 'Mark Go Live', icon: Check, action: 'move_completed' };
   return null;
 };
 
