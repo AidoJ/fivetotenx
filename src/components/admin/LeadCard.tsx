@@ -129,7 +129,7 @@ const CompletionChips = ({
     { label: 'Talked', done: isDiscoveryReady },
     { label: 'Game Plan', done: !!scopingResponse?.completed },
     { label: 'Green Light', done: !!proposal },
-    { label: 'Live', done: ['signed', 'build_refinement', 'completed'].includes(lead.pipeline_stage) },
+    { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
   ];
   return (
     <div className="flex items-center gap-1 flex-wrap">
