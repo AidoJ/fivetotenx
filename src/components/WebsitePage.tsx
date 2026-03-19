@@ -348,7 +348,7 @@ const HiddenCostSection = () => {
             {tasks.map((t, i) =>
             <div key={i} className="flex items-center justify-between rounded-lg border border-border bg-card p-4">
                 <span className="text-sm text-foreground">{t.task}</span>
-                <span className="text-sm font-bold text-destructive">{t.minutes} min</span>
+                <span className="text-sm font-bold" style={{ color: '#643AA4' }}>{t.minutes} min</span>
               </div>
             )}
             <div className="flex items-center justify-between rounded-lg border-2 border-destructive/30 bg-destructive/5 p-4 mt-4">
