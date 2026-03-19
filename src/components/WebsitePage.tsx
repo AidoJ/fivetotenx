@@ -323,7 +323,7 @@ const IntegrationsSection = () => {
               <p className="text-2xl font-display font-bold" style={{ color: 'hsl(0 0% 95%)' }}>Fewer errors.</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-display font-bold" style={{ color: '#398C08' }}>More time to grow.</p>
+              <p className="text-2xl font-display font-bold" style={{ color: '#D88E08' }}>More time to grow.</p>
             </div>
           </div>
         </motion.div>
