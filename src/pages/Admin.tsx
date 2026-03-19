@@ -195,7 +195,7 @@ const CalendlyWebhookSetup = () => {
   );
 };
 
-/* ─────────── Deep Dive Viewer ─────────── */
+/* ─────────── Pattern Map Viewer ─────────── */
 
 const DeepDiveField = ({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: any }) => {
   if (!value) return null;
