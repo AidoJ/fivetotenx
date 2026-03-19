@@ -968,7 +968,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
       <div className="max-w-3xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-10">
           <span className="text-xs font-bold uppercase tracking-wider text-primary mb-2 inline-block">
-            Signal Capture™ — Phase 1 of the Clarity Engine
+            Reality Check™ — Phase 1 of the Clarity Path
           </span>
           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-3">
             Business Snapshot
