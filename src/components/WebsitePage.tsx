@@ -19,6 +19,7 @@ import cellularWellbeingLogo from '@/assets/cellular-wellbeing-logo.png';
 import headshotEoghan from '@/assets/headshot-eoghan.png';
 import headshotAidan from '@/assets/headshot-aidan.png';
 import NewsSection from '@/components/NewsSection';
+import ClarityEngineSection from '@/components/ClarityEngineSection';
 
 interface Props {
   onStartAssessment: () => void;
