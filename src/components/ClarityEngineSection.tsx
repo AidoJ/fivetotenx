@@ -47,7 +47,7 @@ const phases = [
   {
     icon: Rocket,
     emoji: '🚀',
-    label: 'Go Live™',
+    label: 'Build & Launch™',
     phase: 'Phase 5 — Build',
     description: 'We build and launch your system.',
     bullets: ['Fast turnaround', 'Real working solution', 'Designed for your business'],

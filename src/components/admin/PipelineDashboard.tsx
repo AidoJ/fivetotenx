@@ -191,7 +191,8 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
     { label: 'Game Plan Sent', value: scopingSentCount },
     { label: 'Game Plan Done', value: scopingCompleteCount },
     { label: 'Green Light Sent', value: proposalSentCount },
-    { label: 'Gone Live', value: signedCount },
+    { label: 'Signed Off', value: signedCount },
+    { label: 'Gone Live ✅', value: buildCompleted },
   ];
   const maxFunnel = Math.max(...funnelSteps.map(s => s.value), 1);
 
