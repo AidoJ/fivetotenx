@@ -24,8 +24,8 @@ const PIPELINE_STEPS: { key: string; label: string; short: string }[] = [
   { key: 'discovery_call', label: 'Straight Talk™', short: 'TALK' },
   { key: 'proposal', label: 'Green Light™', short: 'GREEN' },
   { key: 'signed', label: 'Signed', short: 'SIGNED' },
-  { key: 'build_refinement', label: 'Build & Launch™', short: 'BUILD' },
-  { key: 'completed', label: 'Complete', short: 'DONE' },
+  { key: 'build_refinement', label: 'Build™', short: 'BUILD' },
+  { key: 'completed', label: 'Go Live™', short: 'LIVE' },
 ];
 
 const stageIdx = (stage: string) => PIPELINE_STEPS.findIndex(s => s.key === stage);
