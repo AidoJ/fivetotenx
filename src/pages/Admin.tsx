@@ -693,7 +693,7 @@ const Admin = () => {
   };
 
   const handleSendDiscoveryFromQualified = async (lead: Assessment) => {
-    // After removing Pattern Mapping, qualifying now goes straight to Alignment Dialogue
+    // Qualifying now goes straight to Straight Talk™
     handleSendDiscoveryInvite(lead);
   };
 
