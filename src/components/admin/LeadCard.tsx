@@ -432,7 +432,7 @@ const LeadCard = ({
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}?admin=1`, '_blank')}>
-                        <Pencil className="w-3 h-3" /> Edit Proposal
+                        <Pencil className="w-3 h-3" /> Edit Clarity Doc
                       </Button>
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => onSendProposal(lead)}>
