@@ -165,9 +165,9 @@ const WhatWeDoSection = () => {
     <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
+           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
             What{' '}
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+            <span style={{ color: '#643AA4' }}>
               5to10x
             </span>{' '}
             Does
