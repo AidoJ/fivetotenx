@@ -1049,7 +1049,7 @@ const WebsitePage = () => {
       <SelfAssessmentSection />
       {/* 3. WHY — Why Change Now */}
       <ShiftSection />
-      {/* 4. HOW — Our Clarity Engine */}
+      {/* 4. HOW — Our Clarity Path */}
       <ClarityEngineSection onStart={handleStartAssessment} />
       <WhatWeDoSection />
       <IntegrationsSection />

@@ -126,10 +126,10 @@ const CompletionChips = ({
 }) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
-    { label: 'Aligned', done: isDiscoveryReady },
-    { label: 'Blueprint', done: !!scopingResponse?.completed },
-    { label: 'Clarity', done: !!proposal },
-    { label: 'Activated', done: ['signed', 'build_refinement', 'completed'].includes(lead.pipeline_stage) },
+    { label: 'Talked', done: isDiscoveryReady },
+    { label: 'Game Plan', done: !!scopingResponse?.completed },
+    { label: 'Green Light', done: !!proposal },
+    { label: 'Live', done: ['signed', 'build_refinement', 'completed'].includes(lead.pipeline_stage) },
   ];
   return (
     <div className="flex items-center gap-1 flex-wrap">

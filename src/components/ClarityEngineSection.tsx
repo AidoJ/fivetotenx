@@ -1,57 +1,57 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { Radar, MessageCircle, Puzzle, FileText, Rocket, ArrowRight, Sparkles } from 'lucide-react';
+import { Compass, MessageCircle, Puzzle, CheckCircle, Rocket, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const phases = [
   {
-    icon: Radar,
+    icon: Compass,
     emoji: '🧭',
-    label: 'Signal Capture™',
+    label: 'Reality Check™',
     phase: 'Phase 1 — Assess',
-    formerly: 'Assessment',
-    question: 'What\'s really going on beneath the surface?',
-    description: 'We capture the signal in the noise — a comprehensive snapshot of your business, challenges, goals, and untapped opportunities.',
+    description: 'We take a proper look at how things are really running day-to-day.',
+    bullets: ['Where time is being lost', 'What\'s manual or clunky', 'What\'s slowing your team down'],
+    outcome: 'You get a clear picture of what\'s actually going on',
     accent: 'from-blue-500 to-indigo-500',
   },
   {
     icon: MessageCircle,
     emoji: '💬',
-    label: 'Alignment Dialogue™',
+    label: 'Straight Talk™',
     phase: 'Phase 2 — Discuss',
-    formerly: 'Discovery Call',
-    question: 'What does success actually look like — and what matters most?',
-    description: 'A structured conversation to align vision, priorities, and outcomes — turning insight into direction.',
+    description: 'We have a focused conversation about what needs to change.',
+    bullets: ['What\'s frustrating you most', 'What\'s costing time or money', 'What a better setup looks like'],
+    outcome: 'We agree on what\'s worth fixing first',
     accent: 'from-violet-500 to-purple-500',
   },
   {
     icon: Puzzle,
     emoji: '🧩',
-    label: 'System Blueprint™',
+    label: 'Game Plan™',
     phase: 'Phase 3 — Plan',
-    formerly: 'Scoping',
-    question: 'How does this work — end to end?',
-    description: 'We architect your app as a system — defining features, flows, logic, and integrations.',
+    description: 'We map out a simple, practical solution.',
+    bullets: ['What the app will do', 'How it fits into your workflow', 'What gets automated'],
+    outcome: 'You see exactly how this will work in your business',
     accent: 'from-pink-500 to-rose-500',
   },
   {
-    icon: FileText,
-    emoji: '📐',
-    label: 'Commercial Clarity™',
+    icon: CheckCircle,
+    emoji: '✅',
+    label: 'Green Light™',
     phase: 'Phase 4 — Sign Off',
-    formerly: 'Proposal',
-    question: 'What\'s the return — and how do we get there?',
-    description: 'A clear, outcome-driven plan that aligns functionality with ROI, investment, and execution.',
+    description: 'You review and approve everything before we build.',
+    bullets: ['Clear scope', 'Clear cost', 'Clear outcome'],
+    outcome: 'No surprises. Full confidence moving forward',
     accent: 'from-orange-500 to-amber-500',
   },
   {
     icon: Rocket,
     emoji: '🚀',
-    label: 'Build & Activate™',
+    label: 'Go Live™',
     phase: 'Phase 5 — Build',
-    formerly: 'Build',
-    question: 'Let\'s bring it to life.',
-    description: 'We design, develop, and deploy your app — transforming strategy into a working growth engine.',
+    description: 'We build and launch your system.',
+    bullets: ['Fast turnaround', 'Real working solution', 'Designed for your business'],
+    outcome: 'Less admin. More time. Smoother operations',
     accent: 'from-emerald-500 to-green-500',
   },
 ];
@@ -86,19 +86,19 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm"
           style={{ borderColor: 'hsl(0 0% 100% / 0.1)', background: 'hsl(0 0% 100% / 0.05)', color: 'hsl(0 0% 80%)' }}
         >
-          <span className="text-lg">⚡</span> The Clarity Engine™
+          <span className="text-lg">⚡</span> The 5to10x Clarity Path™
         </div>
         <h2
           className="text-2xl md:text-4xl lg:text-5xl font-display font-bold leading-tight"
           style={{ color: 'hsl(0 0% 95%)' }}
         >
-          From fragmented ideas to{' '}
+          From messy workflows to{' '}
           <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-vibrant)' }}>
-            engineered growth systems
+            a system that just works
           </span>
         </h2>
         <p className="text-sm md:text-lg leading-relaxed" style={{ color: 'hsl(220 20% 65%)' }}>
-          Assess → Discuss → Plan → Sign Off → Build. A streamlined framework that transforms scattered business processes into a scalable, revenue-aligned app.
+          A simple, structured way to turn how your business runs today into a streamlined, automated system.
         </p>
       </motion.div>
 
@@ -147,25 +147,25 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
                     backdropFilter: 'blur(8px)',
                   }}
                 >
-                  <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'hsl(220 20% 55%)' }}>
-                      {phase.phase}
-                    </span>
-                    <span
-                      className="text-[9px] px-2 py-0.5 rounded-full"
-                      style={{ border: '1px solid hsl(0 0% 100% / 0.1)', background: 'hsl(0 0% 100% / 0.05)', color: 'hsl(220 20% 55%)' }}
-                    >
-                      formerly {phase.formerly}
-                    </span>
-                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'hsl(220 20% 55%)' }}>
+                    {phase.phase}
+                  </span>
                   <h3 className="text-base md:text-2xl font-display font-bold" style={{ color: 'hsl(0 0% 95%)' }}>
                     {phase.emoji} {phase.label}
                   </h3>
                   <p className="text-xs md:text-base leading-relaxed" style={{ color: 'hsl(220 20% 72%)' }}>
                     {phase.description}
                   </p>
-                  <p className="text-xs md:text-sm italic font-medium group-hover:translate-x-1 transition-transform" style={{ color: 'hsl(260 60% 75%)' }}>
-                    "{phase.question}"
+                  <ul className="space-y-1 text-xs md:text-sm" style={{ color: 'hsl(220 20% 65%)' }}>
+                    {phase.bullets.map((b, j) => (
+                      <li key={j} className="flex items-start gap-2">
+                        <span className="mt-0.5">•</span>
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs md:text-sm font-medium group-hover:translate-x-1 transition-transform" style={{ color: 'hsl(260 60% 75%)' }}>
+                    → {phase.outcome}
                   </p>
                 </div>
               </motion.div>
@@ -193,7 +193,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
           }}
         >
           <Sparkles className="w-5 h-5" />
-          Start Your Signal Capture™
+          Start Your Reality Check™
           <ArrowRight className="w-5 h-5" />
         </Button>
         <p className="text-sm" style={{ color: 'hsl(220 15% 50%)' }}>

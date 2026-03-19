@@ -252,7 +252,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       {/* Conversion Funnel */}
       <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="text-xs font-bold text-foreground mb-3 flex items-center gap-2">
-          <TrendingDown className="w-4 h-4 text-primary" /> Clarity Engine™ Funnel
+          <TrendingDown className="w-4 h-4 text-primary" /> Clarity Path™ Funnel
         </h3>
         <div className="space-y-2">
           {funnelSteps.map((step, i) => {
