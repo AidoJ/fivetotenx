@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Zap, TrendingUp, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo-5to10x-color.webp';
+import ClarityEngineSection from '@/components/ClarityEngineSection';
 
 interface Props {
   onStart: () => void;
