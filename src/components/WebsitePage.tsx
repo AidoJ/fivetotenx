@@ -194,8 +194,8 @@ const WhatWeDoSection = () => {
           )}
         </div>
 
-        <motion.p {...stagger(0.5)} className="text-center mt-8 text-base" style={{ color: 'hsl(220 20% 65%)' }}>
-          Instead of forcing your business to adapt to generic software, we build <strong style={{ color: 'hsl(0 0% 88%)' }}>custom operational apps around your workflow</strong>.
+        <motion.p {...stagger(0.5)} className="text-center mt-8 text-base text-muted-foreground">
+          Instead of forcing your business to adapt to generic software, we build <strong className="text-foreground">custom operational apps around your workflow</strong>.
         </motion.p>
       </div>
     </section>);
