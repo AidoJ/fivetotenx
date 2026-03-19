@@ -889,6 +889,7 @@ const FooterSection = () =>
 const WebsitePage = ({ onStartAssessment }: Props) =>
 <div className="min-h-screen overflow-x-hidden">
     <HeroSection onStartAssessment={onStartAssessment} />
+    <ClarityEngineSection onStart={onStartAssessment} />
     <ShiftSection />
     <WhatWeDoSection />
     <RapidDeploySection />
