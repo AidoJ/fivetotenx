@@ -162,17 +162,17 @@ const WhatWeDoSection = () => {
 
 
   return (
-    <section className="px-4 py-20 md:py-28" style={{ background: '#000000' }}>
+    <section className="bg-background px-4 py-20 md:py-28">
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
-           <h2 className="text-2xl md:text-4xl font-display font-bold mb-4" style={{ color: 'hsl(0 0% 95%)' }}>
+           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
             What{' '}
             <span style={{ color: '#643AA4' }}>
               5to10x
             </span>{' '}
             Does
           </h2>
-          <p className="text-lg max-w-3xl mx-auto leading-relaxed" style={{ color: 'hsl(220 20% 72%)' }}>
+          <p className="text-lg max-w-3xl mx-auto leading-relaxed text-muted-foreground">
             We analyse how your business actually runs — the real workflows behind the scenes.
             Then we identify where simple technology can remove friction and dramatically improve efficiency.
           </p>
