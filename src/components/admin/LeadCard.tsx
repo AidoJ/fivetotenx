@@ -112,7 +112,7 @@ const getNextAction = (
   if (stage === 'discovery_call' && isDiscoveryReady && scopingResponse)
     return { label: 'Move to Clarity', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
-    return { label: 'Prepare Proposal', icon: FileText, action: 'prepare_proposal' };
+    return { label: 'Prepare Clarity Doc', icon: FileText, action: 'prepare_proposal' };
   if (stage === 'proposal' && proposal && !lead.proposal_sent_at)
     return { label: 'Send Proposal', icon: Send, action: 'send_proposal' };
   if (stage === 'proposal' && lead.proposal_sent_at)
