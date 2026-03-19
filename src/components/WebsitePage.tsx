@@ -91,7 +91,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         onClick={onStartAssessment}
         size="lg"
         className="text-sm sm:text-base md:text-lg px-6 md:px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 whitespace-normal"
-        style={{ background: '#2258B4', color: 'white', border: 'none', boxShadow: '0 0 30px #2258B433' }}>
+        style={{ background: '#1789CE', color: 'white', border: 'none', boxShadow: '0 0 30px #1789CE33' }}>
         
             <span className="flex items-center gap-2 text-center">
               Discover Your Hidden Efficiency
