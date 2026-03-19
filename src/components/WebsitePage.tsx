@@ -268,14 +268,14 @@ const RapidDeploySection = () => {
 
 const IntegrationsSection = () => {
   const integrations = [
-  { name: 'Google', category: 'Calendar & Workspace', logo: logoGoogle },
-  { name: 'Xero', category: 'Accounting', logo: logoXero },
-  { name: 'Stripe', category: 'Payments', logo: logoStripe },
-  { name: 'Twilio', category: 'Communications', logo: logoTwilio },
-  { name: 'Resend', category: 'Email', logo: logoResend },
-  { name: 'ChatGPT', category: 'AI Assistant', logo: logoChatGPT },
-  { name: 'Claude', category: 'AI Assistant', logo: logoClaude },
-  { name: 'Supabase', category: 'Backend & Data', logo: logoSupabase },
+  { name: 'Google', category: 'Calendar & Workspace', logo: logoGoogle, scale: '' },
+  { name: 'Xero', category: 'Accounting', logo: logoXero, scale: 'scale-150' },
+  { name: 'Stripe', category: 'Payments', logo: logoStripe, scale: '' },
+  { name: 'Twilio', category: 'Communications', logo: logoTwilio, scale: '' },
+  { name: 'Resend', category: 'Email', logo: logoResend, scale: '' },
+  { name: 'ChatGPT', category: 'AI Assistant', logo: logoChatGPT, scale: '' },
+  { name: 'Claude', category: 'AI Assistant', logo: logoClaude, scale: '' },
+  { name: 'Supabase', category: 'Backend & Data', logo: logoSupabase, scale: '' },
   ];
 
 
@@ -302,8 +302,8 @@ const IntegrationsSection = () => {
             className="rounded-xl border p-6 text-center flex flex-col items-center gap-3"
             style={{ borderColor: 'hsl(0 0% 90%)', background: 'white' }}>
             
-              <div className="w-32 h-32 rounded-2xl flex items-center justify-center p-2">
-                <img src={int.logo} alt={int.name} className="w-full h-full object-contain" />
+              <div className="w-32 h-32 rounded-2xl flex items-center justify-center p-2 overflow-hidden">
+                <img src={int.logo} alt={int.name} className={`w-full h-full object-contain ${int.scale}`} />
               </div>
               <span className="text-base font-bold" style={{ color: 'hsl(0 0% 15%)' }}>{int.name}</span>
               <span className="text-xs" style={{ color: '#D88E08' }}>{int.category}</span>
