@@ -19,14 +19,14 @@ type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
 
 const PIPELINE_STEPS: { key: string; label: string; short: string }[] = [
-  { key: 'assessment', label: 'Assessment', short: 'ASSESS' },
+  { key: 'assessment', label: 'Signal Capture™', short: 'SIGNAL' },
   { key: 'qualified', label: 'Qualified', short: 'QUAL' },
-  { key: 'deep_dive_sent', label: 'Deep Dive Sent', short: 'DD SENT' },
-  { key: 'deep_dive_complete', label: 'Deep Dive Done', short: 'DD DONE' },
-  { key: 'discovery_call', label: 'Discovery', short: 'DISC' },
-  { key: 'proposal', label: 'Proposal', short: 'PROP' },
-  { key: 'signed', label: 'Signed', short: 'SIGN' },
-  { key: 'build_refinement', label: 'Build', short: 'BUILD' },
+  { key: 'deep_dive_sent', label: 'Pattern Map Sent', short: 'PM SENT' },
+  { key: 'deep_dive_complete', label: 'Pattern Mapped', short: 'PM DONE' },
+  { key: 'discovery_call', label: 'Alignment Dialogue™', short: 'ALIGN' },
+  { key: 'proposal', label: 'Commercial Clarity™', short: 'CLARITY' },
+  { key: 'signed', label: 'Activated', short: 'ACTIVE' },
+  { key: 'build_refinement', label: 'Build & Activate™', short: 'BUILD' },
   { key: 'completed', label: 'Complete', short: 'DONE' },
 ];
 
@@ -98,23 +98,23 @@ const getNextAction = (
 ) => {
   const stage = lead.pipeline_stage;
   if (stage === 'assessment' && !lead.is_qualified)
-    return { label: 'Qualify Lead', icon: Check, action: 'qualify' };
+    return { label: 'Qualify Signal', icon: Check, action: 'qualify' };
   if (stage === 'qualified')
-    return { label: lead.invite_sent ? 'Resend Deep Dive' : 'Send Deep Dive Invite', icon: Send, action: 'send_deep_dive' };
+    return { label: lead.invite_sent ? 'Resend Pattern Map' : 'Send Pattern Map Invite', icon: Send, action: 'send_deep_dive' };
   if (stage === 'deep_dive_sent')
-    return { label: 'Awaiting Deep Dive', icon: Clock, action: 'waiting' };
+    return { label: 'Awaiting Pattern Map', icon: Clock, action: 'waiting' };
   if (stage === 'deep_dive_complete')
-    return { label: 'Send Discovery Invite', icon: Send, action: 'send_discovery' };
+    return { label: 'Send Alignment Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'discovery_call' && !isDiscoveryReady)
-    return { label: 'Mark Discovery Complete', icon: Check, action: 'mark_discovery' };
+    return { label: 'Mark Alignment Complete', icon: Check, action: 'mark_discovery' };
   if (stage === 'discovery_call' && isDiscoveryReady && !scopingResponse)
-    return { label: 'Send Scoping Link', icon: Copy, action: 'copy_scoping' };
+    return { label: 'Send Blueprint Link', icon: Copy, action: 'copy_scoping' };
   if (stage === 'discovery_call' && isDiscoveryReady && scopingResponse)
-    return { label: 'Move to Proposal', icon: FileText, action: 'move_proposal' };
+    return { label: 'Move to Clarity', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
-    return { label: 'Prepare Proposal', icon: FileText, action: 'prepare_proposal' };
+    return { label: 'Prepare Clarity Doc', icon: FileText, action: 'prepare_proposal' };
   if (stage === 'proposal' && proposal && !lead.proposal_sent_at)
-    return { label: 'Send Proposal', icon: Send, action: 'send_proposal' };
+    return { label: 'Send Clarity Doc', icon: Send, action: 'send_proposal' };
   if (stage === 'proposal' && lead.proposal_sent_at)
     return { label: 'Awaiting Signature', icon: Clock, action: 'waiting' };
   if (stage === 'signed')
@@ -132,11 +132,11 @@ const CompletionChips = ({
 }) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
-    { label: 'Deep Dive', done: !!deepDive },
-    { label: 'Discovery', done: isDiscoveryReady },
-    { label: 'Scoping', done: !!scopingResponse?.completed },
-    { label: 'Proposal', done: !!proposal },
-    { label: 'Signed', done: ['signed', 'build_refinement', 'completed'].includes(lead.pipeline_stage) },
+    { label: 'Pattern Map', done: !!deepDive },
+    { label: 'Aligned', done: isDiscoveryReady },
+    { label: 'Blueprint', done: !!scopingResponse?.completed },
+    { label: 'Clarity', done: !!proposal },
+    { label: 'Activated', done: ['signed', 'build_refinement', 'completed'].includes(lead.pipeline_stage) },
   ];
   return (
     <div className="flex items-center gap-1 flex-wrap">
@@ -260,13 +260,13 @@ const LeadCard = ({
   };
 
   const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
-    { key: 'assessment', label: 'Assessment' },
+    { key: 'assessment', label: 'Signal Capture' },
     { key: 'qualified', label: 'Qualified' },
-    { key: 'deep_dive_sent', label: 'DD Sent' },
-    { key: 'deep_dive_complete', label: 'DD Done' },
-    { key: 'discovery_call' as PipelineStage, label: 'Discovery' },
-    { key: 'proposal', label: 'Proposal' },
-    { key: 'signed', label: 'Signed' },
+    { key: 'deep_dive_sent', label: 'PM Sent' },
+    { key: 'deep_dive_complete', label: 'PM Done' },
+    { key: 'discovery_call' as PipelineStage, label: 'Alignment' },
+    { key: 'proposal', label: 'Clarity' },
+    { key: 'signed', label: 'Activated' },
     { key: 'build_refinement' as PipelineStage, label: 'Build' },
     { key: 'completed' as PipelineStage, label: 'Completed' },
   ];
@@ -387,7 +387,7 @@ const LeadCard = ({
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(deepDiveUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Deep Dive
+                        <ExternalLink className="w-3 h-3" /> Pattern Map
                       </Button>
                       {lead.pipeline_stage === 'deep_dive_sent' && (
                         <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
@@ -418,11 +418,11 @@ const LeadCard = ({
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={handleCopyScoping}>
                         {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copiedScoping ? 'Copied!' : 'Scoping Link'}
+                        {copiedScoping ? 'Copied!' : 'Blueprint Link'}
                       </Button>
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(scopingUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Open Scoping
+                        <ExternalLink className="w-3 h-3" /> Open Blueprint
                       </Button>
                     </div>
                   )}
@@ -432,7 +432,7 @@ const LeadCard = ({
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}?admin=1`, '_blank')}>
-                        <Pencil className="w-3 h-3" /> Edit Proposal
+                        <Pencil className="w-3 h-3" /> Edit Clarity Doc
                       </Button>
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => onSendProposal(lead)}>
@@ -445,7 +445,7 @@ const LeadCard = ({
                   {lead.pipeline_stage === 'signed' && proposal && (
                     <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                       onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
-                      <Eye className="w-3 h-3" /> View Proposal
+                      <Eye className="w-3 h-3" /> View Clarity Doc
                     </Button>
                   )}
 

@@ -195,7 +195,7 @@ const CalendlyWebhookSetup = () => {
   );
 };
 
-/* ─────────── Deep Dive Viewer ─────────── */
+/* ─────────── Pattern Map Viewer ─────────── */
 
 const DeepDiveField = ({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: any }) => {
   if (!value) return null;
@@ -238,7 +238,7 @@ const DeepDiveViewer = ({ submission }: { submission: DeepDiveSubmission }) => (
   >
     <div className="flex items-center gap-2">
       <ClipboardList className="w-4 h-4 text-primary" />
-      <h4 className="text-xs font-bold text-foreground">Deep Dive Responses</h4>
+      <h4 className="text-xs font-bold text-foreground">Pattern Map Responses</h4>
       <span className="text-[10px] text-muted-foreground">Submitted {formatDate(submission.created_at)}</span>
     </div>
 
@@ -306,7 +306,7 @@ const ClientInterviewSection = ({ assessmentId, interviews, onAdd, onDelete, onT
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Mic className="w-4 h-4 text-primary" />
-          <h4 className="text-xs font-bold text-foreground">Discovery Calls</h4>
+          <h4 className="text-xs font-bold text-foreground">Alignment Dialogue Calls</h4>
           {filtered.length > 0 && (
             <Badge variant="outline" className="text-[9px] h-4">{filtered.length}</Badge>
           )}
@@ -716,7 +716,7 @@ const Admin = () => {
         invite_sent_at: now,
         follow_up_scheduled_at: followUpAt,
       } : l));
-      toast({ title: 'Deep Dive Sent ✅', description: `Invite sent to ${lead.contact_email}` });
+      toast({ title: 'Pattern Map Sent ✅', description: `Invite sent to ${lead.contact_email}` });
     } catch {
       toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
     }
