@@ -19,14 +19,14 @@ type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
 
 const PIPELINE_STEPS: { key: string; label: string; short: string }[] = [
-  { key: 'assessment', label: 'Assessment', short: 'ASSESS' },
+  { key: 'assessment', label: 'Signal Capture™', short: 'SIGNAL' },
   { key: 'qualified', label: 'Qualified', short: 'QUAL' },
-  { key: 'deep_dive_sent', label: 'Deep Dive Sent', short: 'DD SENT' },
-  { key: 'deep_dive_complete', label: 'Deep Dive Done', short: 'DD DONE' },
-  { key: 'discovery_call', label: 'Discovery', short: 'DISC' },
-  { key: 'proposal', label: 'Proposal', short: 'PROP' },
-  { key: 'signed', label: 'Signed', short: 'SIGN' },
-  { key: 'build_refinement', label: 'Build', short: 'BUILD' },
+  { key: 'deep_dive_sent', label: 'Pattern Map Sent', short: 'PM SENT' },
+  { key: 'deep_dive_complete', label: 'Pattern Mapped', short: 'PM DONE' },
+  { key: 'discovery_call', label: 'Alignment Dialogue™', short: 'ALIGN' },
+  { key: 'proposal', label: 'Commercial Clarity™', short: 'CLARITY' },
+  { key: 'signed', label: 'Activated', short: 'ACTIVE' },
+  { key: 'build_refinement', label: 'Build & Activate™', short: 'BUILD' },
   { key: 'completed', label: 'Complete', short: 'DONE' },
 ];
 
