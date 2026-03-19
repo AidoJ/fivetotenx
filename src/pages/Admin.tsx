@@ -98,12 +98,12 @@ interface ClientInterview {
 }
 
 const STAGES: { key: PipelineStage; label: string }[] = [
-  { key: 'assessment', label: 'Signal Capture™' },
+  { key: 'assessment', label: 'Reality Check™' },
   { key: 'qualified', label: 'Qualified' },
-  { key: 'discovery_call' as PipelineStage, label: 'Alignment Dialogue™' },
-  { key: 'proposal', label: 'Commercial Clarity™' },
-  { key: 'signed', label: 'Activated ✅' },
-  { key: 'build_refinement' as PipelineStage, label: 'Build & Activate™' },
+  { key: 'discovery_call' as PipelineStage, label: 'Straight Talk™' },
+  { key: 'proposal', label: 'Green Light™' },
+  { key: 'signed', label: 'Signed ✅' },
+  { key: 'build_refinement' as PipelineStage, label: 'Go Live™' },
   { key: 'completed' as PipelineStage, label: 'Completed ✅' },
 ];
 
