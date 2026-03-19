@@ -167,8 +167,8 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       question: 'Clear scope. Clear cost. Clear outcome.',
     },
     {
-      id: 'go_live',
-      label: 'Go Live™',
+      id: 'build_launch',
+      label: 'Build & Launch™',
       subtitle: 'Phase 5 — Build',
       icon: Rocket,
       stages: ['signed', 'build_refinement' as PipelineStage, 'completed' as PipelineStage],
@@ -176,7 +176,7 @@ const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingRes
       metrics: [
         { label: 'Approved', value: buildApproved },
         { label: 'Building', value: buildInProgress, color: 'text-blue-500' },
-        { label: 'Live', value: buildCompleted, color: 'text-green-500' },
+        { label: 'Gone Live', value: buildCompleted, color: 'text-green-500' },
       ],
       question: 'Less admin. More time. Smoother operations.',
     },
