@@ -1,4 +1,6 @@
-# Welcome to your Lovable project
+# FiveToTenX — Lovable Project
+
+> Last sync test: 2026-03-22
 
 ## Project info
 
