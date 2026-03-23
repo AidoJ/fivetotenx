@@ -385,10 +385,21 @@ const LeadCard = ({
               {/* Stage Actions */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
-                  {/* Discovery tools */}
+                  {/* Straight Talk complete checkbox */}
+                  {lead.pipeline_stage === 'discovery_call' && (
+                    <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
+                      <input
+                        type="checkbox"
+                        checked={isStraightTalkComplete}
+                        onChange={(e) => onMarkDiscoveryReady(lead.id, e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-border accent-primary"
+                      />
+                      <span className="text-[10px] font-medium text-foreground">Straight Talk™ Complete</span>
+                    </div>
+                  )}
 
-                  {/* Straight Talk tools */}
-                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && (
+                  {/* Booking tools — only show when no booking exists yet */}
+                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && !hasInterviews && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(CALENDLY_URL, '_blank')}>
@@ -398,6 +409,12 @@ const LeadCard = ({
                         onClick={() => onSendDiscoveryInvite(lead)}>
                         <Send className="w-3 h-3" /> Send Booking Link
                       </Button>
+                    </div>
+                  )}
+
+                  {/* Straight Talk link */}
+                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => {
                           navigator.clipboard.writeText(straightTalkUrl);
