@@ -9,6 +9,7 @@ import DeepDive from "./pages/DeepDive";
 import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
 import ScopingQuestionnaire from "./pages/ScopingQuestionnaire";
+import StraightTalk from "./pages/StraightTalk";
 
 const queryClient = new QueryClient();
 
