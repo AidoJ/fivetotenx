@@ -117,13 +117,14 @@ const ScopingQuestionEditor = () => {
     setSaving(true);
     if (data.id) {
       await supabase.from('scoping_categories' as any).update({
-        label: data.label, icon: data.icon,
+        label: data.label, icon: data.icon, phase: data.phase || 'game_plan',
       } as any).eq('id', data.id);
     } else {
       const slug = (data.label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       await supabase.from('scoping_categories' as any).insert({
         industry_id: selectedIndustry, slug, label: data.label,
         icon: data.icon || 'Sparkles', sort_order: industryCats.length,
+        phase: data.phase || 'game_plan',
       } as any);
     }
     setSaving(false);
