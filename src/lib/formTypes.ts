@@ -1,6 +1,10 @@
 export type BusinessType = 'service' | 'product' | 'hybrid';
 
 export interface FormData {
+  // Industry selection
+  selectedIndustryId: string;
+  selectedIndustrySlug: string;
+
   // Section 1
   contactName: string;
   contactEmail: string;
@@ -44,6 +48,9 @@ export interface FormData {
   currentWebsite: string;
   primaryGoals: string[];
   additionalNotes: string;
+
+  // Industry-specific Reality Check responses
+  industryResponses: Record<string, string>;
 }
 
 export interface PricingTier {
@@ -143,6 +150,8 @@ export interface ROIResults {
 }
 
 export const initialFormData: FormData = {
+  selectedIndustryId: '',
+  selectedIndustrySlug: '',
   contactName: '',
   contactEmail: '',
   contactPhone: '',
@@ -177,6 +186,7 @@ export const initialFormData: FormData = {
   currentWebsite: '',
   primaryGoals: [],
   additionalNotes: '',
+  industryResponses: {},
 };
 
 export const REVENUE_OPTIONS = [

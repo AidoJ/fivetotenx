@@ -33,6 +33,7 @@ interface Category {
   label: string;
   icon: string;
   sort_order: number;
+  phase: string;
 }
 
 interface Question {
@@ -41,7 +42,17 @@ interface Question {
   question: string;
   detail_prompt: string;
   sort_order: number;
+  question_type: string;
+  options: any[];
 }
+
+const PHASE_OPTIONS = [
+  { value: 'reality_check', label: 'Reality Check™', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  { value: 'straight_talk', label: 'Straight Talk™', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  { value: 'game_plan', label: 'Game Plan™', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+];
+
+const QUESTION_TYPE_OPTIONS = ['text', 'number', 'select', 'multi_select', 'scale'];
 
 const ICON_OPTIONS = ['Sparkles', 'Calendar', 'Users', 'CreditCard', 'Settings', 'MessageSquare', 'UserCircle', 'Plug', 'Shield', 'Rocket', 'Hammer', 'Briefcase'];
 
@@ -106,13 +117,14 @@ const ScopingQuestionEditor = () => {
     setSaving(true);
     if (data.id) {
       await supabase.from('scoping_categories' as any).update({
-        label: data.label, icon: data.icon,
+        label: data.label, icon: data.icon, phase: data.phase || 'game_plan',
       } as any).eq('id', data.id);
     } else {
       const slug = (data.label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       await supabase.from('scoping_categories' as any).insert({
         industry_id: selectedIndustry, slug, label: data.label,
         icon: data.icon || 'Sparkles', sort_order: industryCats.length,
+        phase: data.phase || 'game_plan',
       } as any);
     }
     setSaving(false);
@@ -126,11 +138,13 @@ const ScopingQuestionEditor = () => {
     if (data.id) {
       await supabase.from('scoping_questions' as any).update({
         question: data.question, detail_prompt: data.detail_prompt,
+        question_type: data.question_type || 'text',
       } as any).eq('id', data.id);
     } else {
       await supabase.from('scoping_questions' as any).insert({
         category_id: selectedCategory, question: data.question,
         detail_prompt: data.detail_prompt || '', sort_order: categoryQuestions.length,
+        question_type: data.question_type || 'text',
       } as any);
     }
     setSaving(false);
@@ -229,7 +243,7 @@ const ScopingQuestionEditor = () => {
             </p>
             {selectedIndustry && (
               <Button size="sm" variant="outline" className="h-6 text-[10px] px-2"
-                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles' } })}>
+                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles', phase: 'game_plan' } })}>
                 <Plus className="w-3 h-3 mr-1" /> Add
               </Button>
             )}
@@ -252,6 +266,13 @@ const ScopingQuestionEditor = () => {
                     <p className="text-sm font-medium text-foreground">{cat.label}</p>
                     <Badge variant="outline" className="text-[8px] h-4">{cat.icon}</Badge>
                     <Badge variant="secondary" className="text-[8px] h-4">{qCount}q</Badge>
+                    <Badge variant="outline" className={`text-[8px] h-4 ${
+                      cat.phase === 'reality_check' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                      cat.phase === 'straight_talk' ? 'bg-amber-100 text-amber-800 border-amber-200' :
+                      'bg-purple-100 text-purple-800 border-purple-200'
+                    }`}>
+                      {cat.phase === 'reality_check' ? 'RC' : cat.phase === 'straight_talk' ? 'ST' : 'GP'}
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-0.5">
                     <Button size="sm" variant="ghost" className="h-5 w-5 p-0" onClick={(e) => { e.stopPropagation(); moveItem('scoping_categories', industryCats, i, -1); }}>
@@ -406,6 +427,17 @@ const EditDialog = ({ dialog, saving, onClose, onSaveIndustry, onSaveCategory, o
                 <Input value={form.label || ''} onChange={e => setForm({ ...form, label: e.target.value })} placeholder="e.g. Services & Offerings" />
               </div>
               <div className="space-y-1.5">
+                <Label className="text-xs">Phase</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {PHASE_OPTIONS.map(phase => (
+                    <button key={phase.value} onClick={() => setForm({ ...form, phase: phase.value })}
+                      className={`px-2 py-1 rounded text-[10px] font-medium border transition-all ${form.phase === phase.value ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-muted-foreground border-border hover:border-primary/30'}`}>
+                      {phase.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
                 <Label className="text-xs">Icon</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {ICON_OPTIONS.map(icon => (
@@ -421,12 +453,23 @@ const EditDialog = ({ dialog, saving, onClose, onSaveIndustry, onSaveCategory, o
           {dialog.type === 'question' && (
             <>
               <div className="space-y-1.5">
-                <Label className="text-xs">Question (Yes/No format)</Label>
-                <Textarea value={form.question || ''} onChange={e => setForm({ ...form, question: e.target.value })} rows={2} placeholder="Do you offer...?" />
+                <Label className="text-xs">Question</Label>
+                <Textarea value={form.question || ''} onChange={e => setForm({ ...form, question: e.target.value })} rows={2} placeholder="Your question..." />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Detail prompt (shown when "Yes")</Label>
-                <Textarea value={form.detail_prompt || ''} onChange={e => setForm({ ...form, detail_prompt: e.target.value })} rows={3} placeholder="Describe the specifics..." />
+                <Label className="text-xs">Detail prompt / help text</Label>
+                <Textarea value={form.detail_prompt || ''} onChange={e => setForm({ ...form, detail_prompt: e.target.value })} rows={3} placeholder="Additional context for the client..." />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Question Type</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {QUESTION_TYPE_OPTIONS.map(qt => (
+                    <button key={qt} onClick={() => setForm({ ...form, question_type: qt })}
+                      className={`px-2 py-1 rounded text-[10px] font-medium border transition-all ${form.question_type === qt ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-muted-foreground border-border hover:border-primary/30'}`}>
+                      {qt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </>
           )}

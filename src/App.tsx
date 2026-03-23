@@ -9,6 +9,7 @@ import DeepDive from "./pages/DeepDive";
 import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
 import ScopingQuestionnaire from "./pages/ScopingQuestionnaire";
+import StraightTalk from "./pages/StraightTalk";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/deep-dive" element={<DeepDive />} />
+          <Route path="/straight-talk" element={<StraightTalk />} />
           <Route path="/scoping" element={<ScopingQuestionnaire />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/proposal/:id" element={<Proposal />} />
