@@ -124,9 +124,9 @@ const getNextAction = (
 
 /* ── Completion Chips ── */
 const CompletionChips = ({
-  lead, deepDive, hasInterviews, isDiscoveryReady, scopingResponse, proposal,
+  lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal,
 }: {
-  lead: Assessment; deepDive: any; hasInterviews: boolean; isDiscoveryReady: boolean; scopingResponse: any; proposal: any;
+  lead: Assessment; deepDive: any; hasInterviews: boolean; isStraightTalkComplete: boolean; scopingResponse: any; proposal: any;
 }) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
