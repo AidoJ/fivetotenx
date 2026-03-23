@@ -1070,14 +1070,13 @@ const Admin = () => {
           setInterviews(prev => prev.map(i => 
             i.id === data.id ? { ...i, transcript: transcribeResult.transcript } : i
           ));
-          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved. Extracting discovery answers...' });
+          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved.' });
           
-          // The transcribe function auto-triggers extraction. Refresh answers after a delay.
+          // Refresh answers after a delay
           setTimeout(async () => {
             const { data: refreshed } = await supabase.from('roi_assessments').select('discovery_answers').eq('id', assessmentId).single();
             if (refreshed?.discovery_answers) {
               handleUpdateDiscoveryAnswers(assessmentId, refreshed.discovery_answers);
-              toast({ title: 'Discovery answers extracted ✅', description: 'AI-extracted answers are ready for review.' });
             }
           }, 15000);
         } catch (err: any) {
