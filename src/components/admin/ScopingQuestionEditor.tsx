@@ -427,6 +427,17 @@ const EditDialog = ({ dialog, saving, onClose, onSaveIndustry, onSaveCategory, o
                 <Input value={form.label || ''} onChange={e => setForm({ ...form, label: e.target.value })} placeholder="e.g. Services & Offerings" />
               </div>
               <div className="space-y-1.5">
+                <Label className="text-xs">Phase</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {PHASE_OPTIONS.map(phase => (
+                    <button key={phase.value} onClick={() => setForm({ ...form, phase: phase.value })}
+                      className={`px-2 py-1 rounded text-[10px] font-medium border transition-all ${form.phase === phase.value ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-muted-foreground border-border hover:border-primary/30'}`}>
+                      {phase.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
                 <Label className="text-xs">Icon</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {ICON_OPTIONS.map(icon => (
@@ -442,12 +453,23 @@ const EditDialog = ({ dialog, saving, onClose, onSaveIndustry, onSaveCategory, o
           {dialog.type === 'question' && (
             <>
               <div className="space-y-1.5">
-                <Label className="text-xs">Question (Yes/No format)</Label>
-                <Textarea value={form.question || ''} onChange={e => setForm({ ...form, question: e.target.value })} rows={2} placeholder="Do you offer...?" />
+                <Label className="text-xs">Question</Label>
+                <Textarea value={form.question || ''} onChange={e => setForm({ ...form, question: e.target.value })} rows={2} placeholder="Your question..." />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Detail prompt (shown when "Yes")</Label>
-                <Textarea value={form.detail_prompt || ''} onChange={e => setForm({ ...form, detail_prompt: e.target.value })} rows={3} placeholder="Describe the specifics..." />
+                <Label className="text-xs">Detail prompt / help text</Label>
+                <Textarea value={form.detail_prompt || ''} onChange={e => setForm({ ...form, detail_prompt: e.target.value })} rows={3} placeholder="Additional context for the client..." />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Question Type</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {QUESTION_TYPE_OPTIONS.map(qt => (
+                    <button key={qt} onClick={() => setForm({ ...form, question_type: qt })}
+                      className={`px-2 py-1 rounded text-[10px] font-medium border transition-all ${form.question_type === qt ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-muted-foreground border-border hover:border-primary/30'}`}>
+                      {qt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </>
           )}
