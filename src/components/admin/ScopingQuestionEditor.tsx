@@ -257,11 +257,33 @@ const ScopingQuestionEditor = () => {
             </p>
             {selectedIndustry && (
               <Button size="sm" variant="outline" className="h-6 text-[10px] px-2"
-                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles', phase: 'game_plan' } })}>
+                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles', phase: phaseFilter !== 'all' ? phaseFilter : 'game_plan' } })}>
                 <Plus className="w-3 h-3 mr-1" /> Add
               </Button>
             )}
           </div>
+
+          {/* Phase filter tabs */}
+          {selectedIndustry && (
+            <div className="flex gap-1 flex-wrap">
+              {[
+                { key: 'all', label: 'All', color: 'bg-secondary text-foreground border-border' },
+                { key: 'reality_check', label: `RC (${phaseCounts.reality_check}/${phaseQuestionCounts.reality_check}q)`, color: 'bg-blue-100 text-blue-800 border-blue-200' },
+                { key: 'straight_talk', label: `ST (${phaseCounts.straight_talk}/${phaseQuestionCounts.straight_talk}q)`, color: 'bg-amber-100 text-amber-800 border-amber-200' },
+                { key: 'game_plan', label: `GP (${phaseCounts.game_plan}/${phaseQuestionCounts.game_plan}q)`, color: 'bg-purple-100 text-purple-800 border-purple-200' },
+              ].map(p => (
+                <button
+                  key={p.key}
+                  onClick={() => { setPhaseFilter(p.key); setSelectedCategory(null); }}
+                  className={`text-[10px] px-2 py-1 rounded-md border font-medium transition-all ${
+                    phaseFilter === p.key ? `${p.color} ring-1 ring-offset-1 ring-primary/30` : 'bg-card text-muted-foreground border-border hover:bg-secondary'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
           {industryCats.map((cat, i) => {
             const qCount = questions.filter(q => q.category_id === cat.id).length;
             return (
