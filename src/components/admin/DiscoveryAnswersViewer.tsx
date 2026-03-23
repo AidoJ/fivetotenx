@@ -147,7 +147,7 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
 
       {!answers && !extracting && (
         <p className="text-[10px] text-muted-foreground italic">
-          Upload and transcribe discovery call recordings, then click "Extract from Transcripts" to auto-fill.
+          Upload and transcribe call recordings, then click "Extract from Transcripts" to auto-fill.
         </p>
       )}
 
