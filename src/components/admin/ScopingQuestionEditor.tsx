@@ -206,12 +206,15 @@ const ScopingQuestionEditor = () => {
         <div className="space-y-2">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Industries</p>
           {industries.map((ind, i) => {
-            const catCount = categories.filter(c => c.industry_id === ind.id).length;
-            const qCount = questions.filter(q => categories.find(c => c.id === q.category_id && c.industry_id === ind.id)).length;
+            const indCats = categories.filter(c => c.industry_id === ind.id);
+            const rcCount = indCats.filter(c => c.phase === 'reality_check').length;
+            const stCount = indCats.filter(c => c.phase === 'straight_talk').length;
+            const gpCount = indCats.filter(c => c.phase === 'game_plan').length;
+            const qCount = questions.filter(q => indCats.some(c => c.id === q.category_id)).length;
             return (
               <div
                 key={ind.id}
-                onClick={() => { setSelectedIndustry(ind.id); setSelectedCategory(null); }}
+                onClick={() => { setSelectedIndustry(ind.id); setSelectedCategory(null); setPhaseFilter('all'); }}
                 className={`rounded-lg border p-3 cursor-pointer transition-all ${
                   selectedIndustry === ind.id
                     ? 'border-primary bg-primary/5'
@@ -230,7 +233,13 @@ const ScopingQuestionEditor = () => {
                         <Badge variant="outline" className="text-[8px] h-4">Inactive</Badge>
                       )}
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{catCount} categories · {qCount} questions</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[9px] text-muted-foreground">{qCount}q</span>
+                      {rcCount > 0 && <Badge variant="outline" className="text-[7px] h-3.5 px-1 bg-blue-50 text-blue-700 border-blue-200">RC {rcCount}</Badge>}
+                      {stCount > 0 && <Badge variant="outline" className="text-[7px] h-3.5 px-1 bg-amber-50 text-amber-700 border-amber-200">ST {stCount}</Badge>}
+                      {gpCount > 0 && <Badge variant="outline" className="text-[7px] h-3.5 px-1 bg-purple-50 text-purple-700 border-purple-200">GP {gpCount}</Badge>}
+                      {rcCount === 0 && stCount === 0 && gpCount === 0 && <span className="text-[9px] text-destructive">No categories</span>}
+                    </div>
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
                     <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); moveItem('scoping_industries', industries, i, -1); }}>
