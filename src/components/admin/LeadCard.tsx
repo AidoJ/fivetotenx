@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Tables } from '@/integrations/supabase/types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Pencil, Eye, ClipboardList, ClipboardCheck, Plus,

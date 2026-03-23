@@ -10,6 +10,7 @@ import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
 import ScopingQuestionnaire from "./pages/ScopingQuestionnaire";
 import StraightTalk from "./pages/StraightTalk";
+import ClientDetail from "./pages/ClientDetail";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/straight-talk" element={<StraightTalk />} />
           <Route path="/scoping" element={<ScopingQuestionnaire />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/client/:id" element={<ClientDetail />} />
           <Route path="/proposal/:id" element={<Proposal />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
