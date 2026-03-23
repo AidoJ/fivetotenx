@@ -34,6 +34,8 @@ import BusinessSnapshot from '@/components/steps/BusinessSnapshot';
 import CustomerMetrics from '@/components/steps/CustomerMetrics';
 import OperationalEfficiency from '@/components/steps/OperationalEfficiency';
 import GrowthOpportunity from '@/components/steps/GrowthOpportunity';
+import IndustrySelector from '@/components/steps/IndustrySelector';
+import IndustryQuestions from '@/components/steps/IndustryQuestions';
 import ROIDashboard from '@/components/ROIDashboard';
 
 const fadeUp = {
