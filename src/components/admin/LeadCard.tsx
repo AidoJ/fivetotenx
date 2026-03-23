@@ -93,7 +93,7 @@ const getNextAction = (
   proposal: any,
   scopingResponse: any,
   hasInterviews: boolean,
-  isDiscoveryReady: boolean,
+  isStraightTalkComplete: boolean,
 ) => {
   const stage = lead.pipeline_stage;
   if (stage === 'assessment' && !lead.is_qualified)
@@ -102,11 +102,12 @@ const getNextAction = (
     return { label: 'Send Straight Talk Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'qualified' && hasInterviews)
     return { label: 'Move to Straight Talk', icon: Check, action: 'move_discovery' };
-  if (stage === 'discovery_call' && !isDiscoveryReady)
-    return { label: 'Mark Straight Talk Complete', icon: Check, action: 'mark_discovery' };
-  if (stage === 'discovery_call' && isDiscoveryReady && !scopingResponse)
-    return { label: 'Send Game Plan Link', icon: Copy, action: 'copy_scoping' };
-  if (stage === 'discovery_call' && isDiscoveryReady && scopingResponse)
+  // discovery_call = Straight Talk stage: CTA is Send Game Plan Link once complete
+  if (stage === 'discovery_call' && !isStraightTalkComplete)
+    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
+  if (stage === 'discovery_call' && isStraightTalkComplete && !scopingResponse)
+    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
+  if (stage === 'discovery_call' && isStraightTalkComplete && scopingResponse)
     return { label: 'Move to Green Light', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
     return { label: 'Prepare Green Light Doc', icon: FileText, action: 'prepare_proposal' };
@@ -123,13 +124,13 @@ const getNextAction = (
 
 /* ── Completion Chips ── */
 const CompletionChips = ({
-  lead, deepDive, hasInterviews, isDiscoveryReady, scopingResponse, proposal,
+  lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal,
 }: {
-  lead: Assessment; deepDive: any; hasInterviews: boolean; isDiscoveryReady: boolean; scopingResponse: any; proposal: any;
+  lead: Assessment; deepDive: any; hasInterviews: boolean; isStraightTalkComplete: boolean; scopingResponse: any; proposal: any;
 }) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
-    { label: 'Talked', done: isDiscoveryReady },
+    { label: 'Talked', done: isStraightTalkComplete },
     { label: 'Game Plan', done: !!scopingResponse?.completed },
     { label: 'Green Light', done: !!proposal },
     { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
@@ -219,13 +220,13 @@ const LeadCard = ({
 
   const roi = lead.roi_results as any;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
-  const isDiscoveryReady = (lead as any).discovery_ready === true;
+  const isStraightTalkComplete = (lead as any).discovery_ready === true;
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
   const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
   const straightTalkUrl = `${window.location.origin}/straight-talk?id=${lead.id}`;
   const slaColor = getSlaColor(lead);
 
-  const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isDiscoveryReady);
+  const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isStraightTalkComplete);
 
   const handleCopyScoping = async () => {
     await navigator.clipboard.writeText(scopingUrl);
@@ -240,8 +241,8 @@ const LeadCard = ({
       case 'send_deep_dive': onSendDeepDive(lead); break;
       case 'send_discovery': onSendDiscoveryInvite(lead); break;
       case 'move_discovery': onMove(lead.id, 'discovery_call' as PipelineStage); break;
-      case 'mark_discovery': onMarkDiscoveryReady(lead.id, true); break;
-      case 'copy_scoping': handleCopyScoping(); break;
+      case 'send_scoping': handleCopyScoping(); break;
+      case 'move_proposal': onMove(lead.id, 'proposal'); break;
       case 'move_proposal': onMove(lead.id, 'proposal'); break;
       case 'prepare_proposal': onPrepareProposal(lead); break;
       case 'send_proposal': onSendProposal(lead); break;
@@ -312,7 +313,7 @@ const LeadCard = ({
           lead={lead}
           deepDive={deepDive}
           hasInterviews={hasInterviews}
-          isDiscoveryReady={isDiscoveryReady}
+          isStraightTalkComplete={isStraightTalkComplete}
           scopingResponse={scopingResponse}
           proposal={proposal}
         />
@@ -384,10 +385,21 @@ const LeadCard = ({
               {/* Stage Actions */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
-                  {/* Discovery tools */}
+                  {/* Straight Talk complete checkbox */}
+                  {lead.pipeline_stage === 'discovery_call' && (
+                    <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
+                      <input
+                        type="checkbox"
+                        checked={isStraightTalkComplete}
+                        onChange={(e) => onMarkDiscoveryReady(lead.id, e.target.checked)}
+                        className="w-3.5 h-3.5 rounded border-border accent-primary"
+                      />
+                      <span className="text-[10px] font-medium text-foreground">Straight Talk™ Complete</span>
+                    </div>
+                  )}
 
-                  {/* Straight Talk tools */}
-                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && (
+                  {/* Booking tools — only show when no booking exists yet */}
+                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && !hasInterviews && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(CALENDLY_URL, '_blank')}>
@@ -397,6 +409,12 @@ const LeadCard = ({
                         onClick={() => onSendDiscoveryInvite(lead)}>
                         <Send className="w-3 h-3" /> Send Booking Link
                       </Button>
+                    </div>
+                  )}
+
+                  {/* Straight Talk link */}
+                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => {
                           navigator.clipboard.writeText(straightTalkUrl);
