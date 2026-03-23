@@ -307,6 +307,7 @@ export type Database = {
           form_data: Json
           id: string
           industry: string | null
+          industry_id: string | null
           invite_sent: boolean | null
           invite_sent_at: string | null
           is_qualified: boolean
@@ -339,6 +340,7 @@ export type Database = {
           form_data?: Json
           id?: string
           industry?: string | null
+          industry_id?: string | null
           invite_sent?: boolean | null
           invite_sent_at?: string | null
           is_qualified?: boolean
@@ -371,6 +373,7 @@ export type Database = {
           form_data?: Json
           id?: string
           industry?: string | null
+          industry_id?: string | null
           invite_sent?: boolean | null
           invite_sent_at?: string | null
           is_qualified?: boolean
@@ -388,7 +391,15 @@ export type Database = {
           stage_reminder_scheduled_at?: string | null
           stage_reminder_sent?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "roi_assessments_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "scoping_industries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scoping_categories: {
         Row: {
@@ -397,6 +408,7 @@ export type Database = {
           id: string
           industry_id: string
           label: string
+          phase: string
           slug: string
           sort_order: number
         }
@@ -406,6 +418,7 @@ export type Database = {
           id?: string
           industry_id: string
           label: string
+          phase?: string
           slug: string
           sort_order?: number
         }
@@ -415,6 +428,7 @@ export type Database = {
           id?: string
           industry_id?: string
           label?: string
+          phase?: string
           slug?: string
           sort_order?: number
         }
@@ -470,7 +484,9 @@ export type Database = {
           created_at: string
           detail_prompt: string
           id: string
+          options: Json
           question: string
+          question_type: string
           sort_order: number
         }
         Insert: {
@@ -478,7 +494,9 @@ export type Database = {
           created_at?: string
           detail_prompt?: string
           id?: string
+          options?: Json
           question: string
+          question_type?: string
           sort_order?: number
         }
         Update: {
@@ -486,7 +504,9 @@ export type Database = {
           created_at?: string
           detail_prompt?: string
           id?: string
+          options?: Json
           question?: string
+          question_type?: string
           sort_order?: number
         }
         Relationships: [
@@ -533,6 +553,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "scoping_responses_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      straight_talk_responses: {
+        Row: {
+          assessment_id: string
+          completed: boolean | null
+          created_at: string
+          id: string
+          industry: string
+          responses: Json
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          industry: string
+          responses?: Json
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          industry?: string
+          responses?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "straight_talk_responses_assessment_id_fkey"
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "roi_assessments"
