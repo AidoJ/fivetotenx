@@ -946,15 +946,33 @@ const FooterSection = () =>
 
 /* ─────────────── Reality Check Section ─────────────── */
 
-const STEP_LABELS = ['Business', 'Metrics', 'Operations', 'Growth'];
+const STEP_LABELS = ['Industry', 'Business', 'Metrics', 'Insights', 'Growth'];
 
 const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTMLDivElement> }) => {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [results, setResults] = useState<ROIResults | null>(null);
+  const [selectedIndustry, setSelectedIndustry] = useState<any>(null);
 
   const handleChange = (partial: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
+  };
+
+  const handleIndustrySelect = (industry: any) => {
+    setSelectedIndustry(industry);
+    handleChange({
+      selectedIndustryId: industry.id,
+      selectedIndustrySlug: industry.slug,
+      industry: industry.label,
+    });
+    setStep(1); // Auto-advance to Business Snapshot
+  };
+
+  const handleResponseChange = (questionId: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      industryResponses: { ...prev.industryResponses, [questionId]: value },
+    }));
   };
 
   const handleSubmit = () => {
@@ -966,14 +984,43 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
     setFormData(initialFormData);
     setResults(null);
     setStep(0);
+    setSelectedIndustry(null);
   };
 
-  const steps = [
-    <BusinessSnapshot key="s1" data={formData} onChange={handleChange} />,
-    <CustomerMetrics key="s2" data={formData} onChange={handleChange} />,
-    <OperationalEfficiency key="s3" data={formData} onChange={handleChange} />,
-    <GrowthOpportunity key="s4" data={formData} onChange={handleChange} />,
-  ];
+  const totalSteps = 5;
+
+  const renderStep = () => {
+    switch (step) {
+      case 0:
+        return (
+          <IndustrySelector
+            selectedIndustryId={formData.selectedIndustryId}
+            onSelect={handleIndustrySelect}
+          />
+        );
+      case 1:
+        return <BusinessSnapshot data={formData} onChange={handleChange} />;
+      case 2:
+        return <CustomerMetrics data={formData} onChange={handleChange} />;
+      case 3:
+        return formData.selectedIndustryId ? (
+          <IndustryQuestions
+            industryId={formData.selectedIndustryId}
+            phase="reality_check"
+            responses={formData.industryResponses}
+            onResponseChange={handleResponseChange}
+            title="Industry Insights"
+            subtitle={`Specific questions for ${selectedIndustry?.label || 'your industry'} — helps us understand your unique challenges.`}
+          />
+        ) : (
+          <OperationalEfficiency data={formData} onChange={handleChange} />
+        );
+      case 4:
+        return <GrowthOpportunity data={formData} onChange={handleChange} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <section ref={sectionRef} className="bg-background px-4 py-16 md:py-24">
@@ -994,7 +1041,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
           <ROIDashboard results={results} formData={formData} onReset={handleReset} />
         ) : (
           <>
-            <StepIndicator currentStep={step} totalSteps={4} labels={STEP_LABELS} />
+            <StepIndicator currentStep={step} totalSteps={totalSteps} labels={STEP_LABELS} />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -1006,7 +1053,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
                 className="rounded-2xl border border-border bg-card p-6 md:p-8"
                 style={{ boxShadow: 'var(--shadow-card)' }}
               >
-                {steps[step]}
+                {renderStep()}
               </motion.div>
             </AnimatePresence>
 
@@ -1020,7 +1067,9 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
                 <ArrowLeft className="w-4 h-4" /> Back
               </Button>
 
-              {step < 3 ? (
+              {step === 0 ? (
+                <div /> // Industry selector auto-advances
+              ) : step < totalSteps - 1 ? (
                 <Button onClick={() => setStep((s) => s + 1)} className="gap-2">
                   Next <ArrowRight className="w-4 h-4" />
                 </Button>
