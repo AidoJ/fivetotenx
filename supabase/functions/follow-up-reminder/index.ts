@@ -64,20 +64,17 @@ serve(async (req) => {
           .replace(/\{\{businessName\}\}/g, lead.business_name || 'your business');
         fromField = `${template.from_name} <${template.from_email}>`;
       } else {
-        subject = `${lead.contact_name}, your custom app proposal is waiting`;
+        subject = `${lead.contact_name}, let's have that Straight Talk™ about ${lead.business_name || 'your business'}`;
         fromField = '5to10X <grow@5to10x.app>';
         emailHtml = `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
             <p>Hi ${lead.contact_name},</p>
-            <p>We noticed you haven't had a chance to complete your Game Plan™ questionnaire for <strong>${lead.business_name || 'your business'}</strong> yet. No worries — we know you're busy!</p>
-            <p>Your personalised proposal is just a few questions away:</p>
-            <p style="text-align:center;margin:24px 0;">
-              <a href="${deepDiveUrl}" style="background:#2563eb;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Complete Game Plan™</a>
-            </p>
-            <p><strong>Need some help?</strong> We're happy to walk you through it on a quick call:</p>
+            <p>Your Reality Check™ showed that <strong>${lead.business_name || 'your business'}</strong> has real growth potential. We'd love to have a quick Straight Talk™ conversation — just 20 minutes to discuss what's worth fixing first.</p>
+            <p>No commitment, no pitch — just an honest discussion about your priorities.</p>
+            <p><strong>Ready to chat?</strong></p>
             <ul style="margin:12px 0;">
-              <li>📞 Schedule a <strong>phone call</strong> — just reply to this email with your preferred time</li>
-              <li>💻 Book a <strong>Zoom call</strong> — reply with "Zoom" and we'll send you a link</li>
+              <li>📞 Reply with a time that works for a <strong>phone call</strong></li>
+              <li>💻 Reply with "Zoom" and we'll send you a booking link</li>
             </ul>
             <p>Looking forward to helping ${lead.business_name || 'your business'} grow 5 to 10X!</p>
             <p style="margin-top:24px;color:#666;">— The 5to10X Team<br/>grow@5to10x.app</p>

@@ -46,7 +46,7 @@ serve(async (req) => {
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
       // Fallback
-      subject = `${contactName}, complete your Game Plan™ questionnaire for 5to10X`;
+      subject = `${contactName}, let's map out your Game Plan™ for ${businessName || '5to10X'}`;
       fromField = '5to10X <grow@5to10x.app>';
       emailHtml = `<p>Hi ${contactName}, please complete your Game Plan™ questionnaire: <a href="${deepDiveUrl}">${deepDiveUrl}</a></p>`;
     }
