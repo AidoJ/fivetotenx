@@ -276,7 +276,12 @@ const LeadCard = ({
         <div className={`w-2 h-2 rounded-full shrink-0 ${slaColor}`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="font-bold text-sm text-foreground truncate">{lead.contact_name}</p>
+            <p
+              className="font-bold text-sm text-primary truncate cursor-pointer hover:underline"
+              onClick={() => navigate(`/admin/client/${lead.id}`)}
+            >
+              {lead.contact_name}
+            </p>
             {lead.business_name && (
               <span className="text-xs text-muted-foreground truncate">· {lead.business_name}</span>
             )}
