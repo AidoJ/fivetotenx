@@ -1362,7 +1362,7 @@ const Admin = () => {
                       Calendly Webhook
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Register your webhook to auto-populate bookings when clients schedule discovery calls.
+                      Register your webhook to auto-populate bookings when clients schedule Straight Talk™ calls.
                     </p>
                   </div>
                   <Badge variant="outline" className="text-[10px]">Setup Required</Badge>
