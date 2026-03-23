@@ -243,7 +243,7 @@ const ScopingQuestionEditor = () => {
             </p>
             {selectedIndustry && (
               <Button size="sm" variant="outline" className="h-6 text-[10px] px-2"
-                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles' } })}>
+                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles', phase: 'game_plan' } })}>
                 <Plus className="w-3 h-3 mr-1" /> Add
               </Button>
             )}
