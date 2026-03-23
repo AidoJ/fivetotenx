@@ -93,7 +93,7 @@ const getNextAction = (
   proposal: any,
   scopingResponse: any,
   hasInterviews: boolean,
-  isDiscoveryReady: boolean,
+  isStraightTalkComplete: boolean,
 ) => {
   const stage = lead.pipeline_stage;
   if (stage === 'assessment' && !lead.is_qualified)
@@ -102,11 +102,12 @@ const getNextAction = (
     return { label: 'Send Straight Talk Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'qualified' && hasInterviews)
     return { label: 'Move to Straight Talk', icon: Check, action: 'move_discovery' };
-  if (stage === 'discovery_call' && !isDiscoveryReady)
-    return { label: 'Mark Straight Talk Complete', icon: Check, action: 'mark_discovery' };
-  if (stage === 'discovery_call' && isDiscoveryReady && !scopingResponse)
-    return { label: 'Send Game Plan Link', icon: Copy, action: 'copy_scoping' };
-  if (stage === 'discovery_call' && isDiscoveryReady && scopingResponse)
+  // discovery_call = Straight Talk stage: CTA is Send Game Plan Link once complete
+  if (stage === 'discovery_call' && !isStraightTalkComplete)
+    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
+  if (stage === 'discovery_call' && isStraightTalkComplete && !scopingResponse)
+    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
+  if (stage === 'discovery_call' && isStraightTalkComplete && scopingResponse)
     return { label: 'Move to Green Light', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
     return { label: 'Prepare Green Light Doc', icon: FileText, action: 'prepare_proposal' };
