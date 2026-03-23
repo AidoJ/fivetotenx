@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Tables } from '@/integrations/supabase/types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Pencil, Eye, ClipboardList, ClipboardCheck, Plus,
@@ -206,6 +207,7 @@ const LeadCard = ({
   onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse,
 }: LeadCardProps) => {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedScoping, setCopiedScoping] = useState(false);
@@ -274,7 +276,12 @@ const LeadCard = ({
         <div className={`w-2 h-2 rounded-full shrink-0 ${slaColor}`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="font-bold text-sm text-foreground truncate">{lead.contact_name}</p>
+            <p
+              className="font-bold text-sm text-primary truncate cursor-pointer hover:underline"
+              onClick={() => navigate(`/admin/client/${lead.id}`)}
+            >
+              {lead.contact_name}
+            </p>
             {lead.business_name && (
               <span className="text-xs text-muted-foreground truncate">· {lead.business_name}</span>
             )}
