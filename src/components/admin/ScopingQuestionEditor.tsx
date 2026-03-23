@@ -64,6 +64,7 @@ const ScopingQuestionEditor = () => {
   const [loading, setLoading] = useState(true);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [phaseFilter, setPhaseFilter] = useState<string>('all');
   const [saving, setSaving] = useState(false);
 
   // Dialog state
@@ -88,8 +89,21 @@ const ScopingQuestionEditor = () => {
   useEffect(() => { fetchAll(); }, []);
 
   const selectedInd = industries.find(i => i.id === selectedIndustry);
-  const industryCats = categories.filter(c => c.industry_id === selectedIndustry).sort((a, b) => a.sort_order - b.sort_order);
+  const allIndustryCats = categories.filter(c => c.industry_id === selectedIndustry).sort((a, b) => a.sort_order - b.sort_order);
+  const industryCats = phaseFilter === 'all' ? allIndustryCats : allIndustryCats.filter(c => c.phase === phaseFilter);
   const categoryQuestions = questions.filter(q => q.category_id === selectedCategory).sort((a, b) => a.sort_order - b.sort_order);
+
+  // Phase summary counts for selected industry
+  const phaseCounts = {
+    reality_check: allIndustryCats.filter(c => c.phase === 'reality_check').length,
+    straight_talk: allIndustryCats.filter(c => c.phase === 'straight_talk').length,
+    game_plan: allIndustryCats.filter(c => c.phase === 'game_plan').length,
+  };
+  const phaseQuestionCounts = {
+    reality_check: questions.filter(q => allIndustryCats.filter(c => c.phase === 'reality_check').some(c => c.id === q.category_id)).length,
+    straight_talk: questions.filter(q => allIndustryCats.filter(c => c.phase === 'straight_talk').some(c => c.id === q.category_id)).length,
+    game_plan: questions.filter(q => allIndustryCats.filter(c => c.phase === 'game_plan').some(c => c.id === q.category_id)).length,
+  };
 
   // ── CRUD ──
   const saveIndustry = async (data: Partial<Industry> & { id?: string }) => {
@@ -192,12 +206,15 @@ const ScopingQuestionEditor = () => {
         <div className="space-y-2">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Industries</p>
           {industries.map((ind, i) => {
-            const catCount = categories.filter(c => c.industry_id === ind.id).length;
-            const qCount = questions.filter(q => categories.find(c => c.id === q.category_id && c.industry_id === ind.id)).length;
+            const indCats = categories.filter(c => c.industry_id === ind.id);
+            const rcCount = indCats.filter(c => c.phase === 'reality_check').length;
+            const stCount = indCats.filter(c => c.phase === 'straight_talk').length;
+            const gpCount = indCats.filter(c => c.phase === 'game_plan').length;
+            const qCount = questions.filter(q => indCats.some(c => c.id === q.category_id)).length;
             return (
               <div
                 key={ind.id}
-                onClick={() => { setSelectedIndustry(ind.id); setSelectedCategory(null); }}
+                onClick={() => { setSelectedIndustry(ind.id); setSelectedCategory(null); setPhaseFilter('all'); }}
                 className={`rounded-lg border p-3 cursor-pointer transition-all ${
                   selectedIndustry === ind.id
                     ? 'border-primary bg-primary/5'
@@ -216,7 +233,13 @@ const ScopingQuestionEditor = () => {
                         <Badge variant="outline" className="text-[8px] h-4">Inactive</Badge>
                       )}
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{catCount} categories · {qCount} questions</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[9px] text-muted-foreground">{qCount}q</span>
+                      {rcCount > 0 && <Badge variant="outline" className="text-[7px] h-3.5 px-1 bg-blue-50 text-blue-700 border-blue-200">RC {rcCount}</Badge>}
+                      {stCount > 0 && <Badge variant="outline" className="text-[7px] h-3.5 px-1 bg-amber-50 text-amber-700 border-amber-200">ST {stCount}</Badge>}
+                      {gpCount > 0 && <Badge variant="outline" className="text-[7px] h-3.5 px-1 bg-purple-50 text-purple-700 border-purple-200">GP {gpCount}</Badge>}
+                      {rcCount === 0 && stCount === 0 && gpCount === 0 && <span className="text-[9px] text-destructive">No categories</span>}
+                    </div>
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
                     <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); moveItem('scoping_industries', industries, i, -1); }}>
@@ -243,11 +266,33 @@ const ScopingQuestionEditor = () => {
             </p>
             {selectedIndustry && (
               <Button size="sm" variant="outline" className="h-6 text-[10px] px-2"
-                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles', phase: 'game_plan' } })}>
+                onClick={() => setEditDialog({ type: 'category', mode: 'add', data: { label: '', icon: 'Sparkles', phase: phaseFilter !== 'all' ? phaseFilter : 'game_plan' } })}>
                 <Plus className="w-3 h-3 mr-1" /> Add
               </Button>
             )}
           </div>
+
+          {/* Phase filter tabs */}
+          {selectedIndustry && (
+            <div className="flex gap-1 flex-wrap">
+              {[
+                { key: 'all', label: 'All', color: 'bg-secondary text-foreground border-border' },
+                { key: 'reality_check', label: `RC (${phaseCounts.reality_check}/${phaseQuestionCounts.reality_check}q)`, color: 'bg-blue-100 text-blue-800 border-blue-200' },
+                { key: 'straight_talk', label: `ST (${phaseCounts.straight_talk}/${phaseQuestionCounts.straight_talk}q)`, color: 'bg-amber-100 text-amber-800 border-amber-200' },
+                { key: 'game_plan', label: `GP (${phaseCounts.game_plan}/${phaseQuestionCounts.game_plan}q)`, color: 'bg-purple-100 text-purple-800 border-purple-200' },
+              ].map(p => (
+                <button
+                  key={p.key}
+                  onClick={() => { setPhaseFilter(p.key); setSelectedCategory(null); }}
+                  className={`text-[10px] px-2 py-1 rounded-md border font-medium transition-all ${
+                    phaseFilter === p.key ? `${p.color} ring-1 ring-offset-1 ring-primary/30` : 'bg-card text-muted-foreground border-border hover:bg-secondary'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          )}
           {industryCats.map((cat, i) => {
             const qCount = questions.filter(q => q.category_id === cat.id).length;
             return (
