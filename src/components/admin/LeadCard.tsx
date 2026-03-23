@@ -321,11 +321,11 @@ const LeadCard = ({
       {/* ── ROW 4: Next Action CTA ── */}
       {nextAction && (
         <div className="px-4 pb-3">
-          {nextAction.action === 'waiting' ? (
+           {nextAction.action === 'waiting' ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 rounded-lg px-3 py-2">
               <Clock className="w-3.5 h-3.5" />
               <span>{nextAction.label}</span>
-              {lead.pipeline_stage === 'deep_dive_sent' && lead.follow_up_sent && (
+              {lead.pipeline_stage === 'proposal' && lead.proposal_follow_up_sent && (
                 <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20 ml-auto">Follow-up Sent ✓</Badge>
               )}
             </div>
