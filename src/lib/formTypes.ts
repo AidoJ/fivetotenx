@@ -48,6 +48,9 @@ export interface FormData {
   currentWebsite: string;
   primaryGoals: string[];
   additionalNotes: string;
+
+  // Industry-specific Reality Check responses
+  industryResponses: Record<string, string>;
 }
 
 export interface PricingTier {
