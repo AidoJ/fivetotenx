@@ -250,7 +250,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
           <Sparkles className="w-8 h-8 text-primary-foreground mx-auto" />
           <h3 className="text-xl font-display font-bold text-primary-foreground">Ready for the Next Step?</h3>
           <p className="text-sm text-primary-foreground/80 max-w-md mx-auto">
-            Your business qualifies for a custom build. Our team will review your Reality Check™ data and send you an invitation to schedule your Straight Talk™ — a focused conversation about what needs to change.
+            Your business qualifies for a custom build. Our team will review your Reality Check™ data and send you an invitation to your Straight Talk™ — a focused conversation about what needs to change and what's most important to you.
           </p>
         </motion.div>
       )}
