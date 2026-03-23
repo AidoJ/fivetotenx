@@ -186,6 +186,7 @@ export const initialFormData: FormData = {
   currentWebsite: '',
   primaryGoals: [],
   additionalNotes: '',
+  industryResponses: {},
 };
 
 export const REVENUE_OPTIONS = [
