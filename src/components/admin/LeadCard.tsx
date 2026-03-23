@@ -532,7 +532,7 @@ const LeadCard = ({
                     {interviews.filter(i => i.assessment_id === lead.id).map((iv: any) => (
                       <div key={iv.id} className="bg-secondary/50 rounded-md p-2 space-y-1 text-[11px]">
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-foreground">{iv.title}</span>
+                          <span className="font-semibold text-foreground">{normalizeInterviewTitle(iv.title)}</span>
                           <Badge variant={iv.call_completed ? 'default' : 'outline'} className="text-[8px] h-4">
                             {iv.call_completed ? '✓ Completed' : 'Upcoming'}
                           </Badge>
