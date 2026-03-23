@@ -222,6 +222,7 @@ const LeadCard = ({
   const isDiscoveryReady = (lead as any).discovery_ready === true;
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
   const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
+  const straightTalkUrl = `${window.location.origin}/straight-talk?id=${lead.id}`;
   const slaColor = getSlaColor(lead);
 
   const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isDiscoveryReady);
