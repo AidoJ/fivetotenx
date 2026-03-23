@@ -98,8 +98,10 @@ const getNextAction = (
   const stage = lead.pipeline_stage;
   if (stage === 'assessment' && !lead.is_qualified)
     return { label: 'Qualify Signal', icon: Check, action: 'qualify' };
-  if (stage === 'qualified')
+  if (stage === 'qualified' && !hasInterviews)
     return { label: 'Send Straight Talk Invite', icon: Send, action: 'send_discovery' };
+  if (stage === 'qualified' && hasInterviews)
+    return { label: 'Move to Straight Talk', icon: Check, action: 'move_discovery' };
   if (stage === 'discovery_call' && !isDiscoveryReady)
     return { label: 'Mark Straight Talk Complete', icon: Check, action: 'mark_discovery' };
   if (stage === 'discovery_call' && isDiscoveryReady && !scopingResponse)
@@ -236,6 +238,7 @@ const LeadCard = ({
       case 'qualify': onMove(lead.id, 'qualified'); break;
       case 'send_deep_dive': onSendDeepDive(lead); break;
       case 'send_discovery': onSendDiscoveryInvite(lead); break;
+      case 'move_discovery': onMove(lead.id, 'discovery_call' as PipelineStage); break;
       case 'mark_discovery': onMarkDiscoveryReady(lead.id, true); break;
       case 'copy_scoping': handleCopyScoping(); break;
       case 'move_proposal': onMove(lead.id, 'proposal'); break;
