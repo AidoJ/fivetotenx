@@ -64,6 +64,7 @@ const ScopingQuestionEditor = () => {
   const [loading, setLoading] = useState(true);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [phaseFilter, setPhaseFilter] = useState<string>('all');
   const [saving, setSaving] = useState(false);
 
   // Dialog state
@@ -88,8 +89,21 @@ const ScopingQuestionEditor = () => {
   useEffect(() => { fetchAll(); }, []);
 
   const selectedInd = industries.find(i => i.id === selectedIndustry);
-  const industryCats = categories.filter(c => c.industry_id === selectedIndustry).sort((a, b) => a.sort_order - b.sort_order);
+  const allIndustryCats = categories.filter(c => c.industry_id === selectedIndustry).sort((a, b) => a.sort_order - b.sort_order);
+  const industryCats = phaseFilter === 'all' ? allIndustryCats : allIndustryCats.filter(c => c.phase === phaseFilter);
   const categoryQuestions = questions.filter(q => q.category_id === selectedCategory).sort((a, b) => a.sort_order - b.sort_order);
+
+  // Phase summary counts for selected industry
+  const phaseCounts = {
+    reality_check: allIndustryCats.filter(c => c.phase === 'reality_check').length,
+    straight_talk: allIndustryCats.filter(c => c.phase === 'straight_talk').length,
+    game_plan: allIndustryCats.filter(c => c.phase === 'game_plan').length,
+  };
+  const phaseQuestionCounts = {
+    reality_check: questions.filter(q => allIndustryCats.filter(c => c.phase === 'reality_check').some(c => c.id === q.category_id)).length,
+    straight_talk: questions.filter(q => allIndustryCats.filter(c => c.phase === 'straight_talk').some(c => c.id === q.category_id)).length,
+    game_plan: questions.filter(q => allIndustryCats.filter(c => c.phase === 'game_plan').some(c => c.id === q.category_id)).length,
+  };
 
   // ── CRUD ──
   const saveIndustry = async (data: Partial<Industry> & { id?: string }) => {
