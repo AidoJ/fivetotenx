@@ -1,6 +1,10 @@
 export type BusinessType = 'service' | 'product' | 'hybrid';
 
 export interface FormData {
+  // Industry selection
+  selectedIndustryId: string;
+  selectedIndustrySlug: string;
+
   // Section 1
   contactName: string;
   contactEmail: string;
