@@ -266,6 +266,13 @@ const ScopingQuestionEditor = () => {
                     <p className="text-sm font-medium text-foreground">{cat.label}</p>
                     <Badge variant="outline" className="text-[8px] h-4">{cat.icon}</Badge>
                     <Badge variant="secondary" className="text-[8px] h-4">{qCount}q</Badge>
+                    <Badge variant="outline" className={`text-[8px] h-4 ${
+                      cat.phase === 'reality_check' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                      cat.phase === 'straight_talk' ? 'bg-amber-100 text-amber-800 border-amber-200' :
+                      'bg-purple-100 text-purple-800 border-purple-200'
+                    }`}>
+                      {cat.phase === 'reality_check' ? 'RC' : cat.phase === 'straight_talk' ? 'ST' : 'GP'}
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-0.5">
                     <Button size="sm" variant="ghost" className="h-5 w-5 p-0" onClick={(e) => { e.stopPropagation(); moveItem('scoping_categories', industryCats, i, -1); }}>
