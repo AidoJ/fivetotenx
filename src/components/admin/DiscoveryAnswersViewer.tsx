@@ -114,7 +114,7 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Brain className="w-4 h-4 text-primary" />
-          <h4 className="text-xs font-bold text-foreground">Discovery Answers</h4>
+          <h4 className="text-xs font-bold text-foreground">Extracted Answers</h4>
           {answers && (
             <Badge variant="outline" className="text-[9px] h-4">
               {answeredCount}/{totalQuestions} answered
