@@ -313,7 +313,7 @@ const LeadCard = ({
           lead={lead}
           deepDive={deepDive}
           hasInterviews={hasInterviews}
-          isDiscoveryReady={isDiscoveryReady}
+          isStraightTalkComplete={isStraightTalkComplete}
           scopingResponse={scopingResponse}
           proposal={proposal}
         />
