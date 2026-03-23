@@ -1109,16 +1109,16 @@ const Admin = () => {
         },
       });
       if (error) throw error;
-      // Move to discovery_call stage if not already there
-      if (lead.pipeline_stage === 'deep_dive_complete') {
+      // Move to Straight Talk stage if not already there
+      if (['qualified', 'deep_dive_complete'].includes(lead.pipeline_stage)) {
         await supabase.from('roi_assessments').update({
           pipeline_stage: 'discovery_call' as any,
         }).eq('id', lead.id);
         setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'discovery_call' as PipelineStage } : l));
       }
-      toast({ title: 'Discovery Invite Sent ✅', description: `Calendly booking link sent to ${lead.contact_email}` });
+      toast({ title: 'Straight Talk™ Invite Sent ✅', description: `Booking link sent to ${lead.contact_email}` });
     } catch {
-      toast({ title: 'Error', description: 'Failed to send discovery invite.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
     }
   };
 
