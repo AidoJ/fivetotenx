@@ -75,7 +75,14 @@ const ClientDetail = () => {
         supabase.from('scoping_questions').select('*').order('sort_order'),
       ]);
 
-      if (leadRes.error || !leadRes.data) {
+      if (leadRes.error) {
+        console.error('ClientDetail load error:', leadRes.error);
+        toast({ title: 'Lead not found', description: leadRes.error.message, variant: 'destructive' });
+        navigate('/admin');
+        return;
+      }
+      if (!leadRes.data) {
+        console.error('ClientDetail: no data returned for id', id);
         toast({ title: 'Lead not found', variant: 'destructive' });
         navigate('/admin');
         return;
