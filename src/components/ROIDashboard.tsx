@@ -53,6 +53,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         contact_phone: formData.contactPhone,
         business_name: formData.businessName,
         industry: formData.industry,
+        industry_id: formData.selectedIndustryId || null,
         form_data: JSON.parse(JSON.stringify(formData)),
         roi_results: JSON.parse(JSON.stringify(results)),
         report_sent: true,

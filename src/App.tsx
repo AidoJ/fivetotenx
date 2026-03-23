@@ -22,6 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/deep-dive" element={<DeepDive />} />
+          <Route path="/straight-talk" element={<StraightTalk />} />
           <Route path="/scoping" element={<ScopingQuestionnaire />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/proposal/:id" element={<Proposal />} />
