@@ -150,6 +150,8 @@ export interface ROIResults {
 }
 
 export const initialFormData: FormData = {
+  selectedIndustryId: '',
+  selectedIndustrySlug: '',
   contactName: '',
   contactEmail: '',
   contactPhone: '',
