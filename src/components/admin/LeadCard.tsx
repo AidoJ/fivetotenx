@@ -220,7 +220,7 @@ const LeadCard = ({
 
   const roi = lead.roi_results as any;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
-  const isDiscoveryReady = (lead as any).discovery_ready === true;
+  const isStraightTalkComplete = (lead as any).discovery_ready === true;
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
   const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
   const straightTalkUrl = `${window.location.origin}/straight-talk?id=${lead.id}`;
