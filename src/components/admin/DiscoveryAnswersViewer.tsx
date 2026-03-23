@@ -70,7 +70,7 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
       if (data?.error) throw new Error(data.error);
       if (data?.answers) {
         onUpdate(data.answers);
-        toast({ title: 'Discovery answers extracted ✅', description: 'AI has parsed the transcripts and extracted structured answers.' });
+        toast({ title: 'Answers extracted ✅', description: 'AI has parsed the transcripts and extracted structured answers.' });
       }
     } catch (err: any) {
       toast({ title: 'Extraction failed', description: err.message, variant: 'destructive' });
