@@ -226,7 +226,7 @@ const LeadCard = ({
   const straightTalkUrl = `${window.location.origin}/straight-talk?id=${lead.id}`;
   const slaColor = getSlaColor(lead);
 
-  const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isDiscoveryReady);
+  const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isStraightTalkComplete);
 
   const handleCopyScoping = async () => {
     await navigator.clipboard.writeText(scopingUrl);
