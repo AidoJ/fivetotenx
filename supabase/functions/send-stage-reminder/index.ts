@@ -14,6 +14,8 @@ const STAGE_TEMPLATE_MAP: Record<string, string> = {
   proposal: 'reminder-proposal',
 };
 
+const DEFAULT_CALENDLY_URL = 'https://calendly.com/aidan-rejuvenators/discovery';
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -70,7 +72,8 @@ serve(async (req) => {
       }
     }
 
-    const deepDiveUrl = `https://5to10x.app/deep-dive?id=${assessmentId}`;
+    // Game Plan™ questionnaire URL
+    const gamePlanUrl = `https://5to10x.app/scoping?id=${assessmentId}`;
     const contactName = lead.contact_name || '';
     const businessName = lead.business_name || 'your business';
 
@@ -82,7 +85,9 @@ serve(async (req) => {
       emailHtml = template.html_body
         .replace(/\{\{contactName\}\}/g, contactName)
         .replace(/\{\{businessName\}\}/g, businessName)
-        .replace(/\{\{deepDiveUrl\}\}/g, deepDiveUrl)
+        .replace(/\{\{deepDiveUrl\}\}/g, gamePlanUrl)
+        .replace(/\{\{gamePlanUrl\}\}/g, gamePlanUrl)
+        .replace(/\{\{calendlyUrl\}\}/g, DEFAULT_CALENDLY_URL)
         .replace(/\{\{proposalUrl\}\}/g, proposalUrl);
       subject = template.subject
         .replace(/\{\{contactName\}\}/g, contactName)

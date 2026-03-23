@@ -22,7 +22,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const deepDiveUrl = `https://5to10x.app/deep-dive?id=${assessmentId}`;
+    // Game Plan™ questionnaire URL (scoping page)
+    const gamePlanUrl = `https://5to10x.app/scoping?id=${assessmentId}`;
 
     // Try to load template from DB
     const { data: template } = await supabase
@@ -39,7 +40,7 @@ serve(async (req) => {
       emailHtml = template.html_body
         .replace(/\{\{contactName\}\}/g, contactName || '')
         .replace(/\{\{businessName\}\}/g, businessName || 'your business')
-        .replace(/\{\{deepDiveUrl\}\}/g, deepDiveUrl);
+        .replace(/\{\{deepDiveUrl\}\}/g, gamePlanUrl);
       subject = template.subject
         .replace(/\{\{contactName\}\}/g, contactName || '')
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
@@ -48,7 +49,7 @@ serve(async (req) => {
       // Fallback
       subject = `${contactName}, let's map out your Game Plan™ for ${businessName || '5to10X'}`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Hi ${contactName}, please complete your Game Plan™ questionnaire: <a href="${deepDiveUrl}">${deepDiveUrl}</a></p>`;
+      emailHtml = `<p>Hi ${contactName}, after our Straight Talk™ it's time to map your Game Plan™: <a href="${gamePlanUrl}">${gamePlanUrl}</a></p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {
