@@ -222,6 +222,7 @@ const LeadCard = ({
   const isDiscoveryReady = (lead as any).discovery_ready === true;
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
   const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
+  const straightTalkUrl = `${window.location.origin}/straight-talk?id=${lead.id}`;
   const slaColor = getSlaColor(lead);
 
   const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isDiscoveryReady);
@@ -320,11 +321,11 @@ const LeadCard = ({
       {/* ── ROW 4: Next Action CTA ── */}
       {nextAction && (
         <div className="px-4 pb-3">
-          {nextAction.action === 'waiting' ? (
+           {nextAction.action === 'waiting' ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 rounded-lg px-3 py-2">
               <Clock className="w-3.5 h-3.5" />
               <span>{nextAction.label}</span>
-              {lead.pipeline_stage === 'deep_dive_sent' && lead.follow_up_sent && (
+              {lead.pipeline_stage === 'proposal' && lead.proposal_follow_up_sent && (
                 <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20 ml-auto">Follow-up Sent ✓</Badge>
               )}
             </div>
@@ -385,6 +386,7 @@ const LeadCard = ({
                 <div className="space-y-2 py-1">
                   {/* Discovery tools */}
 
+                  {/* Straight Talk tools */}
                   {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
@@ -395,30 +397,39 @@ const LeadCard = ({
                         onClick={() => onSendDiscoveryInvite(lead)}>
                         <Send className="w-3 h-3" /> Send Booking Link
                       </Button>
+                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                        onClick={() => {
+                          navigator.clipboard.writeText(straightTalkUrl);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}>
+                        {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        {copied ? 'Copied!' : 'Straight Talk Link'}
+                      </Button>
                     </div>
                   )}
 
-                  {/* Scoping link */}
+                  {/* Game Plan tools */}
                   {['discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={handleCopyScoping}>
                         {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copiedScoping ? 'Copied!' : 'Blueprint Link'}
+                        {copiedScoping ? 'Copied!' : 'Game Plan Link'}
                       </Button>
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(scopingUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Open Blueprint
+                        <ExternalLink className="w-3 h-3" /> Open Game Plan
                       </Button>
                     </div>
                   )}
 
-                  {/* Proposal tools */}
+                  {/* Green Light tools */}
                   {lead.pipeline_stage === 'proposal' && proposal && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}?admin=1`, '_blank')}>
-                        <Pencil className="w-3 h-3" /> Edit Clarity Doc
+                        <Pencil className="w-3 h-3" /> Edit Green Light Doc
                       </Button>
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => onSendProposal(lead)}>
@@ -427,23 +438,20 @@ const LeadCard = ({
                     </div>
                   )}
 
-                  {/* Signed / Build */}
+                  {/* Signed — view doc */}
                   {lead.pipeline_stage === 'signed' && proposal && (
                     <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                       onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
-                      <Eye className="w-3 h-3" /> View Clarity Doc
+                      <Eye className="w-3 h-3" /> View Green Light Doc
                     </Button>
                   )}
 
+                  {/* Build stage */}
                   {lead.pipeline_stage === ('build_refinement' as PipelineStage) && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(CALENDLY_URL, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Schedule Call
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => onSendDiscoveryInvite(lead)}>
-                        <Send className="w-3 h-3" /> Send Link
+                        <ExternalLink className="w-3 h-3" /> Schedule Build Call
                       </Button>
                     </div>
                   )}
