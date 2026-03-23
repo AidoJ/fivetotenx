@@ -37,6 +37,12 @@ const formatCurrency = (v: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const normalizeInterviewTitle = (title?: string) => {
+  if (!title) return 'Straight Talk Call';
+  return title
+    .replace(/discovery call/gi, 'Straight Talk Call')
+    .replace(/discovery/gi, 'Straight Talk');
+};
 
 /* ── SLA helper ── */
 const getSlaColor = (lead: Assessment) => {
