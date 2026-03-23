@@ -238,6 +238,7 @@ const LeadCard = ({
       case 'qualify': onMove(lead.id, 'qualified'); break;
       case 'send_deep_dive': onSendDeepDive(lead); break;
       case 'send_discovery': onSendDiscoveryInvite(lead); break;
+      case 'move_discovery': onMove(lead.id, 'discovery_call' as PipelineStage); break;
       case 'mark_discovery': onMarkDiscoveryReady(lead.id, true); break;
       case 'copy_scoping': handleCopyScoping(); break;
       case 'move_proposal': onMove(lead.id, 'proposal'); break;
