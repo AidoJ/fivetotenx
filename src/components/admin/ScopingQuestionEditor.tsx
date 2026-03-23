@@ -138,11 +138,13 @@ const ScopingQuestionEditor = () => {
     if (data.id) {
       await supabase.from('scoping_questions' as any).update({
         question: data.question, detail_prompt: data.detail_prompt,
+        question_type: data.question_type || 'text',
       } as any).eq('id', data.id);
     } else {
       await supabase.from('scoping_questions' as any).insert({
         category_id: selectedCategory, question: data.question,
         detail_prompt: data.detail_prompt || '', sort_order: categoryQuestions.length,
+        question_type: data.question_type || 'text',
       } as any);
     }
     setSaving(false);
