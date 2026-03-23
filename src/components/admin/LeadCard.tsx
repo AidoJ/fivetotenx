@@ -207,6 +207,7 @@ const LeadCard = ({
   onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse,
 }: LeadCardProps) => {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedScoping, setCopiedScoping] = useState(false);
