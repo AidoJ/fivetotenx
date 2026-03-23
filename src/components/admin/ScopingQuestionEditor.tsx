@@ -33,6 +33,7 @@ interface Category {
   label: string;
   icon: string;
   sort_order: number;
+  phase: string;
 }
 
 interface Question {
@@ -41,7 +42,17 @@ interface Question {
   question: string;
   detail_prompt: string;
   sort_order: number;
+  question_type: string;
+  options: any[];
 }
+
+const PHASE_OPTIONS = [
+  { value: 'reality_check', label: 'Reality Check™', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  { value: 'straight_talk', label: 'Straight Talk™', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+  { value: 'game_plan', label: 'Game Plan™', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+];
+
+const QUESTION_TYPE_OPTIONS = ['text', 'number', 'select', 'multi_select', 'scale'];
 
 const ICON_OPTIONS = ['Sparkles', 'Calendar', 'Users', 'CreditCard', 'Settings', 'MessageSquare', 'UserCircle', 'Plug', 'Shield', 'Rocket', 'Hammer', 'Briefcase'];
 
