@@ -1070,14 +1070,13 @@ const Admin = () => {
           setInterviews(prev => prev.map(i => 
             i.id === data.id ? { ...i, transcript: transcribeResult.transcript } : i
           ));
-          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved. Extracting discovery answers...' });
+          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved.' });
           
-          // The transcribe function auto-triggers extraction. Refresh answers after a delay.
+          // Refresh answers after a delay
           setTimeout(async () => {
             const { data: refreshed } = await supabase.from('roi_assessments').select('discovery_answers').eq('id', assessmentId).single();
             if (refreshed?.discovery_answers) {
               handleUpdateDiscoveryAnswers(assessmentId, refreshed.discovery_answers);
-              toast({ title: 'Discovery answers extracted ✅', description: 'AI-extracted answers are ready for review.' });
             }
           }, 15000);
         } catch (err: any) {
@@ -1110,16 +1109,16 @@ const Admin = () => {
         },
       });
       if (error) throw error;
-      // Move to discovery_call stage if not already there
-      if (lead.pipeline_stage === 'deep_dive_complete') {
+      // Move to Straight Talk stage if not already there
+      if (['qualified', 'deep_dive_complete'].includes(lead.pipeline_stage)) {
         await supabase.from('roi_assessments').update({
           pipeline_stage: 'discovery_call' as any,
         }).eq('id', lead.id);
         setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'discovery_call' as PipelineStage } : l));
       }
-      toast({ title: 'Discovery Invite Sent ✅', description: `Calendly booking link sent to ${lead.contact_email}` });
+      toast({ title: 'Straight Talk™ Invite Sent ✅', description: `Booking link sent to ${lead.contact_email}` });
     } catch {
-      toast({ title: 'Error', description: 'Failed to send discovery invite.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Failed to send invite.', variant: 'destructive' });
     }
   };
 
@@ -1152,16 +1151,13 @@ const Admin = () => {
 
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
     const updates: any = { discovery_ready: ready };
-    if (ready) {
-      // Auto-move to proposal stage
-      updates.pipeline_stage = 'proposal';
-    }
+    // Do NOT auto-move to proposal — just mark Straight Talk as complete/incomplete
     const { error } = await supabase.from('roi_assessments').update(updates).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
-      toast({ title: ready ? 'Discovery marked complete ✅' : 'Discovery reopened', description: ready ? 'Lead moved to Proposal stage.' : 'Lead returned to Discovery Call.' });
+      toast({ title: ready ? 'Straight Talk™ marked complete ✅' : 'Straight Talk™ reopened' });
     }
   };
 
@@ -1366,7 +1362,7 @@ const Admin = () => {
                       Calendly Webhook
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Register your webhook to auto-populate bookings when clients schedule discovery calls.
+                      Register your webhook to auto-populate bookings when clients schedule Straight Talk™ calls.
                     </p>
                   </div>
                   <Badge variant="outline" className="text-[10px]">Setup Required</Badge>

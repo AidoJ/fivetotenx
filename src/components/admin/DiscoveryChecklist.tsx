@@ -162,7 +162,7 @@ const DiscoveryChecklist = ({ assessmentId, checklist, onUpdate, compact = false
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ClipboardCheck className="w-5 h-5 text-primary" />
-          <h3 className="text-sm font-bold text-foreground">Discovery Checklist</h3>
+          <h3 className="text-sm font-bold text-foreground">Straight Talk™ Checklist</h3>
           <Badge variant="outline" className="text-xs">
             {checkedCount}/{totalQuestions} covered
           </Badge>
