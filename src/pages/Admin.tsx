@@ -1057,33 +1057,41 @@ const Admin = () => {
       setInterviews(prev => [...prev, data as ClientInterview]);
       toast({ title: 'Interview saved ✅' });
 
-      // Auto-transcribe if audio was uploaded
+      // Auto-transcribe if audio was uploaded (background, non-blocking)
       if (audioUrl && data) {
-        toast({ title: 'Transcribing audio...', description: 'This may take a moment.' });
-        try {
-          const { data: transcribeResult, error: transcribeError } = await supabase.functions.invoke('transcribe-audio', {
-            body: { interviewId: data.id, audioUrl },
-          });
+        toast({ title: 'Audio uploaded ✅', description: 'Transcription started in background. You can keep working.' });
+
+        void supabase.functions.invoke('transcribe-audio', {
+          body: { interviewId: data.id, audioUrl },
+        }).then(async ({ data: transcribeResult, error: transcribeError }) => {
           if (transcribeError) throw transcribeError;
           if (transcribeResult?.error) throw new Error(transcribeResult.error);
-          
-          // Update local state with transcript
-          setInterviews(prev => prev.map(i => 
+
+          setInterviews(prev => prev.map(i =>
             i.id === data.id ? { ...i, transcript: transcribeResult.transcript } : i
           ));
+
           toast({ title: 'Audio transcribed ✅', description: 'Transcript saved.' });
-          
+
           // Refresh answers after a delay
           setTimeout(async () => {
-            const { data: refreshed } = await supabase.from('roi_assessments').select('discovery_answers').eq('id', assessmentId).single();
+            const { data: refreshed } = await supabase
+              .from('roi_assessments')
+              .select('discovery_answers')
+              .eq('id', assessmentId)
+              .single();
+
             if (refreshed?.discovery_answers) {
               handleUpdateDiscoveryAnswers(assessmentId, refreshed.discovery_answers);
             }
           }, 15000);
-        } catch (err: any) {
-          console.error('Transcription failed:', err);
-          toast({ title: 'Transcription failed', description: err.message || 'You can still use the audio file manually.', variant: 'destructive' });
-        }
+        }).catch((err: any) => {
+          console.error('Transcription request issue:', err);
+          toast({
+            title: 'Transcription delayed',
+            description: 'Upload succeeded. Processing may still complete in the background — refresh in a minute.',
+          });
+        });
       }
     }
   };
