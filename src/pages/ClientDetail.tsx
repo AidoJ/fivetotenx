@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Save, Loader2, Building2, Users, DollarSign, Target,
   Clock, Globe, TrendingUp, ShoppingCart, BarChart3, Zap, Mail, Phone,
-  MessageSquare, Radar, Puzzle, FileText,
+  MessageSquare, Radar, Puzzle, FileText, Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
