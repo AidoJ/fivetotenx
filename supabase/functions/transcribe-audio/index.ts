@@ -22,24 +22,8 @@ Deno.serve(async (req) => {
     const { interviewId, audioUrl } = await req.json();
     if (!interviewId || !audioUrl) throw new Error('interviewId and audioUrl are required');
 
-    // Download the audio file
-    const audioResponse = await fetch(audioUrl);
-    if (!audioResponse.ok) throw new Error(`Failed to download audio: ${audioResponse.status}`);
-    
-    const audioBlob = await audioResponse.blob();
-    const audioBase64 = btoa(
-      new Uint8Array(await audioBlob.arrayBuffer()).reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
-
-    // Determine media type
-    const contentType = audioResponse.headers.get('content-type') || 'audio/mpeg';
-    let mimeType = 'audio/mp3';
-    if (contentType.includes('wav')) mimeType = 'audio/wav';
-    else if (contentType.includes('mp4') || contentType.includes('m4a')) mimeType = 'audio/mp4';
-    else if (contentType.includes('webm')) mimeType = 'audio/webm';
-    else if (contentType.includes('ogg')) mimeType = 'audio/ogg';
-
-    // Use Gemini multimodal to transcribe
+    // Use URL-based audio input to avoid memory issues with large files
+    // The AI gateway supports image_url-style content parts for audio
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -64,10 +48,9 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
                 text: 'Please transcribe this audio recording of a client interview. Capture all details accurately as this will be used for a business proposal.'
               },
               {
-                type: 'input_audio',
-                input_audio: {
-                  data: audioBase64,
-                  format: mimeType.split('/')[1] || 'mp3'
+                type: 'image_url',
+                image_url: {
+                  url: audioUrl,
                 }
               }
             ]

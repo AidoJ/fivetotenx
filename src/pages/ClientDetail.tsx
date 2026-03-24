@@ -68,12 +68,13 @@ const ClientDetail = () => {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const [leadRes, stRes, scopeRes, catRes, qRes] = await Promise.all([
+      const [leadRes, stRes, scopeRes, catRes, qRes, intRes] = await Promise.all([
         supabase.from('roi_assessments').select('*').eq('id', id).single(),
         supabase.from('straight_talk_responses').select('*').eq('assessment_id', id).order('created_at', { ascending: false }).limit(1),
         supabase.from('scoping_responses').select('*').eq('assessment_id', id).order('created_at', { ascending: false }).limit(1),
         supabase.from('scoping_categories').select('*').order('sort_order'),
         supabase.from('scoping_questions').select('*').order('sort_order'),
+        supabase.from('client_interviews').select('*').eq('assessment_id', id).order('created_at', { ascending: false }),
       ]);
 
       if (leadRes.error) {
@@ -97,6 +98,7 @@ const ClientDetail = () => {
       setScopingResponse(scopeRes.data?.[0] || null);
       setCategories((catRes.data as any) || []);
       setQuestions((qRes.data as any) || []);
+      setInterviews((intRes.data as any) || []);
       setLoading(false);
     };
     load();
