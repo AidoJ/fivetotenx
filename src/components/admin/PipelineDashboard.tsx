@@ -395,6 +395,7 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
       </div>
     </div>
   );
-};
+});
+PipelineDashboard.displayName = 'PipelineDashboard';
 
 export default PipelineDashboard;
