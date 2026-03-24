@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           contactName: inviteeName || inviteeEmail,
           contactEmail: inviteeEmail,
-          businessName: null,
+          businessName: assessment.business_name || null,
           scheduledAt,
           zoomLink,
           eventName,
