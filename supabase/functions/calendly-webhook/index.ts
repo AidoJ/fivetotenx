@@ -82,6 +82,25 @@ Deno.serve(async (req) => {
 
       console.log('Booking saved for assessment:', assessment.id);
 
+      // Fire admin notification (fire and forget)
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      fetch(`${supabaseUrl}/functions/v1/notify-admin`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventType: 'booking_created',
+          leadName: inviteeName || inviteeEmail,
+          leadEmail: inviteeEmail,
+          businessName: null,
+          assessmentId: assessment.id,
+          details: { scheduledAt, zoomLink },
+        }),
+      }).catch(err => console.error('Admin notification failed:', err));
+
       return new Response(JSON.stringify({ success: true, matched: true, assessmentId: assessment.id }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

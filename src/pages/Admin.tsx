@@ -25,6 +25,7 @@ import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
 import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
 import CallGuide from '@/components/admin/CallGuide';
 import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
+import AutomationSettings from '@/components/admin/AutomationSettings';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -1151,13 +1152,48 @@ const Admin = () => {
 
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
     const updates: any = { discovery_ready: ready };
-    // Do NOT auto-move to proposal — just mark Straight Talk as complete/incomplete
     const { error } = await supabase.from('roi_assessments').update(updates).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
       toast({ title: ready ? 'Straight Talk™ marked complete ✅' : 'Straight Talk™ reopened' });
+
+      // Auto-send Game Plan link if enabled
+      if (ready) {
+        try {
+          const { data: autoSettings } = await supabase
+            .from('automation_settings')
+            .select('auto_send_gameplan_on_st_complete')
+            .limit(1)
+            .single();
+
+          if (autoSettings?.auto_send_gameplan_on_st_complete) {
+            const lead = leads.find(l => l.id === id);
+            if (lead && !lead.scoping_sent) {
+              const scopingUrl = `${window.location.origin}/scoping?id=${id}`;
+              await supabase.functions.invoke('send-discovery-invite', {
+                body: {
+                  contactName: lead.contact_name,
+                  contactEmail: lead.contact_email,
+                  businessName: lead.business_name,
+                  assessmentId: id,
+                  templateKey: 'scoping_invite',
+                  scopingUrl,
+                },
+              });
+              await supabase.from('roi_assessments').update({
+                scoping_sent: true,
+                scoping_sent_at: new Date().toISOString(),
+              }).eq('id', id);
+              setLeads(prev => prev.map(l => l.id === id ? { ...l, scoping_sent: true, scoping_sent_at: new Date().toISOString() } as any : l));
+              toast({ title: 'Game Plan™ link auto-sent ✅' });
+            }
+          }
+        } catch (autoErr) {
+          console.error('Auto-send Game Plan failed:', autoErr);
+        }
+      }
     }
   };
 
@@ -1348,27 +1384,33 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="settings">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-display font-bold text-foreground">Integrations</h2>
-                <p className="text-sm text-muted-foreground">Configure third-party service connections.</p>
-              </div>
+            <div className="space-y-8">
+              {/* Automation Settings */}
+              <AutomationSettings />
 
-              <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-display font-bold text-foreground flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-primary" />
-                      Calendly Webhook
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Register your webhook to auto-populate bookings when clients schedule Straight Talk™ calls.
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="text-[10px]">Setup Required</Badge>
+              {/* Integrations */}
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-display font-bold text-foreground">Integrations</h2>
+                  <p className="text-sm text-muted-foreground">Configure third-party service connections.</p>
                 </div>
 
-                <CalendlyWebhookSetup />
+                <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-display font-bold text-foreground flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-primary" />
+                        Calendly Webhook
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Register your webhook to auto-populate bookings when clients schedule Straight Talk™ calls.
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">Setup Required</Badge>
+                  </div>
+
+                  <CalendlyWebhookSetup />
+                </div>
               </div>
             </div>
           </TabsContent>

@@ -55,6 +55,51 @@ export type Database = {
           },
         ]
       }
+      automation_settings: {
+        Row: {
+          admin_notify_emails: string[]
+          admin_notify_on_booking: boolean
+          admin_notify_on_gp_complete: boolean
+          admin_notify_on_proposal_accepted: boolean
+          auto_prepare_proposal_on_gp_complete: boolean
+          auto_qualify_enabled: boolean
+          auto_send_gameplan_on_st_complete: boolean
+          auto_send_invite_on_qualify: boolean
+          created_at: string
+          id: string
+          roi_threshold_percent: number
+          updated_at: string
+        }
+        Insert: {
+          admin_notify_emails?: string[]
+          admin_notify_on_booking?: boolean
+          admin_notify_on_gp_complete?: boolean
+          admin_notify_on_proposal_accepted?: boolean
+          auto_prepare_proposal_on_gp_complete?: boolean
+          auto_qualify_enabled?: boolean
+          auto_send_gameplan_on_st_complete?: boolean
+          auto_send_invite_on_qualify?: boolean
+          created_at?: string
+          id?: string
+          roi_threshold_percent?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_notify_emails?: string[]
+          admin_notify_on_booking?: boolean
+          admin_notify_on_gp_complete?: boolean
+          admin_notify_on_proposal_accepted?: boolean
+          auto_prepare_proposal_on_gp_complete?: boolean
+          auto_qualify_enabled?: boolean
+          auto_send_gameplan_on_st_complete?: boolean
+          auto_send_invite_on_qualify?: boolean
+          created_at?: string
+          id?: string
+          roi_threshold_percent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_interviews: {
         Row: {
           assessment_id: string
