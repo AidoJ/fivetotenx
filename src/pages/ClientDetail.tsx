@@ -233,6 +233,9 @@ const ClientDetail = () => {
               <Puzzle className="w-3.5 h-3.5" /> Game Plan™
               {!scopingResponse && <Badge variant="secondary" className="text-[8px] h-3.5 ml-1">Empty</Badge>}
             </TabsTrigger>
+            <TabsTrigger value="analysis" className="gap-1.5 text-xs">
+              <Sparkles className="w-3.5 h-3.5" /> Analysis
+            </TabsTrigger>
             <TabsTrigger value="roi_summary" className="gap-1.5 text-xs">
               <DollarSign className="w-3.5 h-3.5" /> ROI Summary
             </TabsTrigger>
