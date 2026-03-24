@@ -61,7 +61,7 @@ const phases = [
     description: 'We make sure everything works — and your team is ready to use it from day one.',
     bullets: ['Real-world testing', 'Final refinements', 'Team walkthroughs and training', 'System deployed into your live environment'],
     outcome: 'You\'re confident, your team is ready, and everything is running',
-    color: PHASE_COLORS.lime,
+    color: PHASE_COLORS.green,
   },
 ];
 
