@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Tables } from '@/integrations/supabase/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Pencil, Eye, ClipboardList, ClipboardCheck, Plus,
-  MessageSquare, Phone, Building2, Calendar
+  MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
