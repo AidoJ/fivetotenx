@@ -223,6 +223,8 @@ const LeadCard = ({
   const [newNote, setNewNote] = useState('');
   const [noteType, setNoteType] = useState('comment');
   const [addingNote, setAddingNote] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   const roi = lead.roi_results as any;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
