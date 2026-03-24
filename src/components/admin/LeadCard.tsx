@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tables } from '@/integrations/supabase/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -59,10 +59,10 @@ const getSlaColor = (lead: Assessment) => {
 };
 
 /* ── Stage Tracker Dots ── */
-const StageTracker = ({ currentStage }: { currentStage: string }) => {
+const StageTracker = React.forwardRef<HTMLDivElement, { currentStage: string }>(({ currentStage }, ref) => {
   const current = stageIdx(currentStage);
   return (
-    <div className="flex items-center gap-0.5 w-full">
+    <div ref={ref} className="flex items-center gap-0.5 w-full">
       {PIPELINE_STEPS.map((step, i) => {
         const done = i < current;
         const active = i === current;
@@ -90,7 +90,8 @@ const StageTracker = ({ currentStage }: { currentStage: string }) => {
       })}
     </div>
   );
-};
+});
+StageTracker.displayName = 'StageTracker';
 
 /* ── Next Action CTA ── */
 const getNextAction = (
@@ -129,11 +130,9 @@ const getNextAction = (
 };
 
 /* ── Completion Chips ── */
-const CompletionChips = ({
-  lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal,
-}: {
+const CompletionChips = React.forwardRef<HTMLDivElement, {
   lead: Assessment; deepDive: any; hasInterviews: boolean; isStraightTalkComplete: boolean; scopingResponse: any; proposal: any;
-}) => {
+}>(({ lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal }, ref) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
     { label: 'Talked', done: isStraightTalkComplete },
@@ -142,7 +141,7 @@ const CompletionChips = ({
     { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
   ];
   return (
-    <div className="flex items-center gap-1 flex-wrap">
+    <div ref={ref} className="flex items-center gap-1 flex-wrap">
       {chips.map(c => (
         <span
           key={c.label}
@@ -155,27 +154,31 @@ const CompletionChips = ({
       ))}
     </div>
   );
-};
+});
+CompletionChips.displayName = 'CompletionChips';
 
 /* ── Collapsible Section Wrapper ── */
-const Section = ({ label, icon: Icon, children, defaultOpen = false, badge }: {
+const Section = React.forwardRef<HTMLDivElement, {
   label: string; icon: any; children: React.ReactNode; defaultOpen?: boolean; badge?: string;
-}) => {
+}>(({ label, icon: Icon, children, defaultOpen = false, badge }, ref) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-secondary/50 transition-colors">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-        <span className="text-[11px] font-semibold text-foreground flex-1">{label}</span>
-        {badge && <Badge variant="outline" className="text-[8px] h-4">{badge}</Badge>}
-        <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pl-6 pr-2 pb-2">
-        {children}
-      </CollapsibleContent>
-    </Collapsible>
+    <div ref={ref}>
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-secondary/50 transition-colors">
+          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="text-[11px] font-semibold text-foreground flex-1">{label}</span>
+          {badge && <Badge variant="outline" className="text-[8px] h-4">{badge}</Badge>}
+          <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-6 pr-2 pb-2">
+          {children}
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
-};
+});
+Section.displayName = 'Section';
 
 /* ═══════ MAIN LEAD CARD ═══════ */
 
@@ -209,13 +212,13 @@ export interface LeadCardProps {
   renderAnswers?: (assessmentId: string) => React.ReactNode;
 }
 
-const LeadCard = ({
+const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote,
   onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal,
   interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder,
   onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse,
-}: LeadCardProps) => {
+}, _ref) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -648,6 +651,7 @@ const LeadCard = ({
       </AnimatePresence>
     </motion.div>
   );
-};
+});
+LeadCard.displayName = 'LeadCard';
 
 export default LeadCard;
