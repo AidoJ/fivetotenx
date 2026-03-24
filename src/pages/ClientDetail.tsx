@@ -60,6 +60,7 @@ const ClientDetail = () => {
   const [scopingResponse, setScopingResponse] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
+  const [interviews, setInterviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -67,12 +68,13 @@ const ClientDetail = () => {
   useEffect(() => {
     if (!id) return;
     const load = async () => {
-      const [leadRes, stRes, scopeRes, catRes, qRes] = await Promise.all([
+      const [leadRes, stRes, scopeRes, catRes, qRes, intRes] = await Promise.all([
         supabase.from('roi_assessments').select('*').eq('id', id).single(),
         supabase.from('straight_talk_responses').select('*').eq('assessment_id', id).order('created_at', { ascending: false }).limit(1),
         supabase.from('scoping_responses').select('*').eq('assessment_id', id).order('created_at', { ascending: false }).limit(1),
         supabase.from('scoping_categories').select('*').order('sort_order'),
         supabase.from('scoping_questions').select('*').order('sort_order'),
+        supabase.from('client_interviews').select('*').eq('assessment_id', id).order('created_at', { ascending: false }),
       ]);
 
       if (leadRes.error) {
@@ -96,6 +98,7 @@ const ClientDetail = () => {
       setScopingResponse(scopeRes.data?.[0] || null);
       setCategories((catRes.data as any) || []);
       setQuestions((qRes.data as any) || []);
+      setInterviews((intRes.data as any) || []);
       setLoading(false);
     };
     load();
@@ -361,20 +364,67 @@ const ClientDetail = () => {
 
           {/* ── STRAIGHT TALK TAB ── */}
           <TabsContent value="straight_talk">
-            {!straightTalk ? (
+            {/* Show transcripts from uploaded recordings */}
+            {interviews.filter((i: any) => i.transcript).length > 0 && (
+              <div className="space-y-4 mb-6">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" /> Interview Transcripts
+                </h3>
+                {interviews.filter((i: any) => i.transcript).map((interview: any) => (
+                  <div key={interview.id} className="rounded-xl border border-border bg-card p-5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-foreground">{interview.title}</h4>
+                      <span className="text-[10px] text-muted-foreground">{new Date(interview.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-xs text-foreground/80 whitespace-pre-wrap max-h-64 overflow-y-auto">{interview.transcript}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Show AI-extracted discovery answers */}
+            {lead.discovery_answers && Object.keys(lead.discovery_answers as any).length > 0 && (
+              <div className="space-y-4 mb-6">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Radar className="w-4 h-4 text-primary" /> AI-Extracted Discovery Answers
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {Object.entries(lead.discovery_answers as Record<string, any>).map(([key, val]) => {
+                    const answer = typeof val === 'object' ? val : { answer: val };
+                    const q = questions.find((q: any) => q.id === key);
+                    return (
+                      <div key={key} className="rounded-lg border border-border bg-secondary/30 p-3 space-y-1">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{q?.question || key}</p>
+                        <p className="text-xs text-foreground">{answer.answer || String(val)}</p>
+                        {answer.confidence && (
+                          <Badge variant="outline" className={`text-[8px] ${answer.confidence === 'high' ? 'text-green-600 border-green-500/30' : answer.confidence === 'medium' ? 'text-amber-600 border-amber-500/30' : 'text-red-600 border-red-500/30'}`}>
+                            {answer.confidence} confidence
+                          </Badge>
+                        )}
+                        {answer.source_quote && (
+                          <p className="text-[10px] text-muted-foreground italic">"{answer.source_quote}"</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Formal ST questionnaire responses */}
+            {!straightTalk && interviews.filter((i: any) => i.transcript).length === 0 && (!lead.discovery_answers || Object.keys(lead.discovery_answers as any).length === 0) ? (
               <div className="rounded-xl border border-border bg-card p-12 text-center">
                 <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <h3 className="text-lg font-bold text-foreground mb-1">No Straight Talk™ responses yet</h3>
                 <p className="text-sm text-muted-foreground">
-                  The client hasn't completed the Straight Talk™ questionnaire yet.
-                  Responses will appear here once submitted.
+                  Upload a Zoom recording or wait for the client to complete the questionnaire.
                 </p>
               </div>
-            ) : (
+            ) : straightTalk ? (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-foreground">Straight Talk™ Responses</h3>
+                    <h3 className="text-sm font-bold text-foreground">Straight Talk™ Questionnaire Responses</h3>
                     <p className="text-xs text-muted-foreground">
                       Industry: {straightTalk.industry} · Submitted: {new Date(straightTalk.created_at).toLocaleDateString()}
                       {straightTalk.completed && <Badge className="ml-2 text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Complete</Badge>}
@@ -406,7 +456,6 @@ const ClientDetail = () => {
                     })}
                   </div>
                 ) : (
-                  /* Fallback: show raw response keys if no categories match */
                   <div className="rounded-xl border border-border bg-card p-5 space-y-4">
                     <h3 className="text-sm font-bold text-foreground">Responses</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -426,7 +475,7 @@ const ClientDetail = () => {
                   </div>
                 )}
               </div>
-            )}
+            ) : null}
           </TabsContent>
 
           {/* ── GAME PLAN TAB ── */}
