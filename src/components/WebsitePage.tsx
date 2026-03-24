@@ -615,8 +615,8 @@ const ZeroRiskSection = () =>
         {[
           {
             step: '01',
-            title: 'We Build Your System',
-            description: 'In 1–2 weeks, we design and build a working MVP tailored to your business — not a mockup, a real system you can use.',
+             title: 'We Redesign Your Workflow & Build the System',
+             description: 'In 1–2 weeks, we redesign part of your workflow and build a working system tailored to your business — not a mockup, a real system you can use.',
             icon: Rocket
           },
           {
