@@ -60,6 +60,7 @@ const ClientDetail = () => {
   const [scopingResponse, setScopingResponse] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
+  const [interviews, setInterviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
