@@ -59,18 +59,15 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
   style={{ background: '#010100' }}>
   
     <motion.div
-    initial={{ opacity: 0, y: 40 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.9 }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.5 }}
     className="relative z-10 text-center w-full max-w-4xl mx-auto space-y-8 px-2">
     
-      <motion.img
-
+      <img
       alt="5to10X — Build • Innovate • Scale"
       className="max-h-56 sm:max-h-[28rem] md:max-h-[36rem] w-auto max-w-full mx-auto drop-shadow-2xl"
-      initial={{ opacity: 0, scale: 0.85 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7, delay: 0.2 }} src="/lovable-uploads/840e15a9-3ed0-4c4b-9699-1a4d9a046d8c.webp" />
+      src="/lovable-uploads/840e15a9-3ed0-4c4b-9699-1a4d9a046d8c.webp" />
     
 
       
