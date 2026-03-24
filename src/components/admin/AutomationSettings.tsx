@@ -193,7 +193,7 @@ const AutomationSettings = () => {
         )}
       </div>
 
-      {/* Auto-Send Game Plan */}
+      {/* Auto-Prepare Proposal on ST Complete */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
@@ -201,9 +201,9 @@ const AutomationSettings = () => {
               <FileText className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h3 className="font-display font-bold text-foreground">Auto-Send Game Plan™ Link</h3>
+              <h3 className="font-display font-bold text-foreground">Auto-Move to Green Light™</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                When Straight Talk™ is marked complete, automatically email the Game Plan questionnaire link
+                When Straight Talk™ is marked complete (transcript + extraction done), automatically move the lead to the Green Light™ stage
               </p>
             </div>
           </div>
