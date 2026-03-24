@@ -267,7 +267,7 @@ const AutomationSettings = () => {
           <div className="flex items-center justify-between py-1.5">
             <div className="flex items-center gap-2">
               <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-sm text-foreground">Game Plan™ completed by client</span>
+              <span className="text-sm text-foreground">Straight Talk™ completed</span>
             </div>
             <Switch
               checked={config.admin_notify_on_gp_complete}
