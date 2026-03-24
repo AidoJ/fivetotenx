@@ -41,7 +41,7 @@ const phases = [
     description: 'You review and approve everything before we build.',
     bullets: ['Clear scope', 'Clear cost', 'Clear outcome'],
     outcome: 'No surprises. Full confidence moving forward',
-    color: PHASE_COLORS.gold,
+    color: PHASE_COLORS.pink,
   },
   {
     icon: Wrench,
