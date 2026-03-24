@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,36 +14,31 @@ interface DiscoveryAnswer {
   answer: string;
   confidence: 'high' | 'medium' | 'low' | 'not_found';
   source_quote?: string;
+  question?: string; // Dynamic question text from the edge function
 }
 
 type DiscoveryAnswers = Record<string, DiscoveryAnswer>;
-
-const QUESTION_LABELS: Record<string, { label: string; category: string }> = {
-  operations_workflows: { label: 'Daily/weekly workflows', category: 'Operations' },
-  operations_bottlenecks: { label: 'Bottlenecks & time-wasters', category: 'Operations' },
-  operations_seasonal: { label: 'Seasonal patterns', category: 'Operations' },
-  systems_crm_pos: { label: 'CRM/POS systems in use', category: 'Systems' },
-  systems_data_migration: { label: 'Data migration needs', category: 'Systems' },
-  systems_pain_points: { label: 'Current system pain points', category: 'Systems' },
-  users_internal_roles: { label: 'Internal user roles', category: 'Users' },
-  users_customer_portal: { label: 'Customer portal needs', category: 'Users' },
-  users_tech_proficiency: { label: 'Team tech proficiency', category: 'Users' },
-  revenue_success_metrics: { label: 'Success metrics / KPIs', category: 'Revenue' },
-  revenue_new_streams: { label: 'New revenue streams', category: 'Revenue' },
-  revenue_pricing_model: { label: 'Pricing/billing model', category: 'Revenue' },
-  compliance_regulations: { label: 'Industry regulations', category: 'Compliance' },
-  compliance_data_residency: { label: 'Data residency requirements', category: 'Compliance' },
-  logistics_decision_makers: { label: 'Key decision-makers', category: 'Logistics' },
-  logistics_hard_deadlines: { label: 'Hard deadlines', category: 'Logistics' },
-  logistics_support_expectations: { label: 'Post-launch support expectations', category: 'Logistics' },
-  logistics_budget_constraints: { label: 'Budget constraints', category: 'Logistics' },
-};
 
 const confidenceConfig = {
   high: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-500/10 border-green-500/20', label: 'High' },
   medium: { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-500/10 border-amber-500/20', label: 'Medium' },
   low: { icon: HelpCircle, color: 'text-orange-600', bg: 'bg-orange-500/10 border-orange-500/20', label: 'Low' },
   not_found: { icon: XCircle, color: 'text-muted-foreground', bg: 'bg-secondary/50 border-border', label: 'Not found' },
+};
+
+// Helper to derive a clean label from the key
+const keyToLabel = (key: string): string => {
+  return key
+    .replace(/__[a-f0-9]+$/, '') // Remove UUID suffix like __1498cdaa
+    .replace(/[_-]/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+};
+
+// Helper to derive a category from the key
+const keyToCategory = (key: string): string => {
+  const base = key.replace(/__[a-f0-9]+$/, '');
+  const firstPart = base.split('_')[0] || base.split('-')[0] || 'General';
+  return firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
 };
 
 interface Props {
@@ -96,18 +91,22 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
     setSaving(false);
   };
 
-  // Group answers by category
-  const categories = new Map<string, string[]>();
-  for (const key of Object.keys(QUESTION_LABELS)) {
-    const cat = QUESTION_LABELS[key].category;
-    if (!categories.has(cat)) categories.set(cat, []);
-    categories.get(cat)!.push(key);
-  }
+  // Dynamically group answers by category derived from keys
+  const categories = useMemo(() => {
+    if (!answers) return new Map<string, string[]>();
+    const catMap = new Map<string, string[]>();
+    for (const key of Object.keys(answers)) {
+      const cat = keyToCategory(key);
+      if (!catMap.has(cat)) catMap.set(cat, []);
+      catMap.get(cat)!.push(key);
+    }
+    return catMap;
+  }, [answers]);
 
   const answeredCount = answers
     ? Object.values(answers).filter(a => a.confidence !== 'not_found' && a.answer).length
     : 0;
-  const totalQuestions = Object.keys(QUESTION_LABELS).length;
+  const totalQuestions = answers ? Object.keys(answers).length : 0;
 
   return (
     <div className="space-y-2 border-t border-border pt-3">
@@ -115,7 +114,7 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
         <div className="flex items-center gap-2">
           <Brain className="w-4 h-4 text-primary" />
           <h4 className="text-xs font-bold text-foreground">Extracted Answers</h4>
-          {answers && (
+          {answers && totalQuestions > 0 && (
             <Badge variant="outline" className="text-[9px] h-4">
               {answeredCount}/{totalQuestions} answered
             </Badge>
@@ -124,15 +123,15 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
         <div className="flex items-center gap-1.5">
           <Button
             size="sm"
-            variant={answers ? 'outline' : 'default'}
+            variant={answers && totalQuestions > 0 ? 'outline' : 'default'}
             className="h-6 text-[10px] px-2 gap-1"
             onClick={handleExtract}
             disabled={extracting}
           >
             {extracting ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-            {answers ? 'Re-extract' : 'Extract from Transcripts'}
+            {answers && totalQuestions > 0 ? 'Re-extract' : 'Extract from Transcripts'}
           </Button>
-          {answers && (
+          {answers && totalQuestions > 0 && (
             <Button
               size="sm"
               variant="ghost"
@@ -145,14 +144,14 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
         </div>
       </div>
 
-      {!answers && !extracting && (
+      {(!answers || totalQuestions === 0) && !extracting && (
         <p className="text-[10px] text-muted-foreground italic">
           Upload and transcribe call recordings, then click "Extract from Transcripts" to auto-fill.
         </p>
       )}
 
       <AnimatePresence>
-        {expanded && answers && (
+        {expanded && answers && totalQuestions > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -173,12 +172,14 @@ const DiscoveryAnswersViewer = ({ assessmentId, answers, onUpdate }: Props) => {
                     const conf = confidenceConfig[a.confidence] || confidenceConfig.not_found;
                     const ConfIcon = conf.icon;
                     const isEditing = editingKey === key;
+                    // Use the dynamic question text if available, otherwise derive from key
+                    const label = a.question || keyToLabel(key);
 
                     return (
                       <div key={key} className={`rounded-md border p-2 space-y-1 ${conf.bg}`}>
-                        <div className="flex items-center justify-between">
-                          <p className="text-[10px] font-semibold text-foreground">{QUESTION_LABELS[key]?.label}</p>
-                          <div className="flex items-center gap-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[10px] font-semibold text-foreground leading-tight">{label}</p>
+                          <div className="flex items-center gap-1 shrink-0">
                             <ConfIcon className={`w-3 h-3 ${conf.color}`} />
                             <span className={`text-[8px] ${conf.color}`}>{conf.label}</span>
                             {!isEditing && (
