@@ -465,8 +465,8 @@ const LeadCard = ({
                     </div>
                   )}
 
-                  {/* Straight Talk link */}
-                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && (
+                  {/* Straight Talk link — only before ST is complete */}
+                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && !isStraightTalkComplete && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => {
@@ -576,8 +576,8 @@ const LeadCard = ({
                 </div>
               </Section>
 
-              {/* Bookings / Interviews */}
-              {interviews.filter(i => i.assessment_id === lead.id).length > 0 && (
+              {/* Bookings / Interviews — hide when ST is complete */}
+              {!isStraightTalkComplete && interviews.filter(i => i.assessment_id === lead.id).length > 0 && (
                 <Section label="Bookings" icon={Calendar} badge={`${interviews.filter(i => i.assessment_id === lead.id).length}`} defaultOpen>
                   <div className="space-y-2 py-1">
                     {interviews.filter(i => i.assessment_id === lead.id).map((iv: any) => (
