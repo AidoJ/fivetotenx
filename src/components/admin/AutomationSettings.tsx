@@ -224,7 +224,7 @@ const AutomationSettings = () => {
             <div>
               <h3 className="font-display font-bold text-foreground">Auto-Prepare Green Light™ Draft</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                When Game Plan™ is submitted, AI generates a draft proposal from all collected data
+                When Straight Talk™ is complete and analysis is done, AI generates a draft proposal from all collected data
               </p>
               <Badge variant="outline" className="text-[9px] mt-1 bg-amber-500/10 text-amber-700 border-amber-500/20">
                 AI-Powered · Admin review required before sending
