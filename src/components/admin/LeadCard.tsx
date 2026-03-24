@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Tables } from '@/integrations/supabase/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Pencil, Eye, ClipboardList, ClipboardCheck, Plus,
-  MessageSquare, Phone, Building2, Calendar
+  MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -223,6 +223,8 @@ const LeadCard = ({
   const [newNote, setNewNote] = useState('');
   const [noteType, setNoteType] = useState('comment');
   const [addingNote, setAddingNote] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   const roi = lead.roi_results as any;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
@@ -391,6 +393,36 @@ const LeadCard = ({
               {/* Stage Actions */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
+                  {/* Upload Zoom Recording — show at discovery_call stage */}
+                  {lead.pipeline_stage === 'discovery_call' && (
+                    <div className="space-y-1.5">
+                      <input
+                        ref={audioInputRef}
+                        type="file"
+                        accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.mp4"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploading(true);
+                          await onAddInterview(lead.id, 'Straight Talk Interview', '', file);
+                          setUploading(false);
+                          if (audioInputRef.current) audioInputRef.current.value = '';
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[10px] px-3 gap-1.5 w-full justify-start"
+                        disabled={uploading}
+                        onClick={() => audioInputRef.current?.click()}
+                      >
+                        {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                        {uploading ? 'Uploading & Transcribing…' : 'Upload Zoom Recording'}
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Straight Talk complete checkbox */}
                   {lead.pipeline_stage === 'discovery_call' && (
                     <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
