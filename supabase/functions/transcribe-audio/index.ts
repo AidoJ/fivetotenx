@@ -5,6 +5,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+const MIME_MAP: Record<string, string> = {
+  '.m4a': 'audio/mp4',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.webm': 'audio/webm',
+  '.mp4': 'video/mp4',
+  '.ogg': 'audio/ogg',
+};
+
+function getMimeType(url: string): string {
+  const ext = (url.match(/\.\w+(?=\?|$)/) || ['.m4a'])[0].toLowerCase();
+  return MIME_MAP[ext] || 'audio/mp4';
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -22,8 +36,32 @@ Deno.serve(async (req) => {
     const { interviewId, audioUrl } = await req.json();
     if (!interviewId || !audioUrl) throw new Error('interviewId and audioUrl are required');
 
-    // Use URL-based audio input to avoid memory issues with large files
-    // The AI gateway supports image_url-style content parts for audio
+    // Download audio and convert to base64 data URL (gateway requires data URL for audio)
+    const audioResp = await fetch(audioUrl);
+    if (!audioResp.ok) throw new Error(`Failed to download audio: ${audioResp.status}`);
+
+    const audioBytes = new Uint8Array(await audioResp.arrayBuffer());
+    
+    // Check size - reject files over 20MB to avoid memory issues
+    if (audioBytes.length > 20 * 1024 * 1024) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'File too large for transcription (max 20MB). Please use the Audio Only (.m4a) export from Zoom.' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Convert to base64 data URL
+    const mime = getMimeType(audioUrl);
+    let binary = '';
+    for (let i = 0; i < audioBytes.length; i++) {
+      binary += String.fromCharCode(audioBytes[i]);
+    }
+    const base64 = btoa(binary);
+    const dataUrl = `data:${mime};base64,${base64}`;
+
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -50,7 +88,7 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
               {
                 type: 'image_url',
                 image_url: {
-                  url: audioUrl,
+                  url: dataUrl,
                 }
               }
             ]

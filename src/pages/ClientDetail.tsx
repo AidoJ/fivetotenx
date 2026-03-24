@@ -23,9 +23,21 @@ const formatCurrency = (v: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
 
 /* ── Editable field component ── */
-const EditField = ({ label, value, onChange, type = 'text', icon: Icon, rows }: {
+const EditField = React.forwardRef<HTMLDivElement, {
   label: string; value: string; onChange: (v: string) => void; type?: string; icon?: any; rows?: number;
-}) => (
+}>(({ label, value, onChange, type = 'text', icon: Icon, rows }, ref) => (
+  <div ref={ref} className="space-y-1">
+    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+      {Icon && <Icon className="w-3 h-3" />} {label}
+    </Label>
+    {rows ? (
+      <Textarea value={value} onChange={e => onChange(e.target.value)} rows={rows} className="text-xs bg-secondary border-border resize-none" />
+    ) : (
+      <Input type={type} value={value} onChange={e => onChange(e.target.value)} className="h-8 text-xs bg-secondary border-border" />
+    )}
+  </div>
+));
+EditField.displayName = 'EditField';
   <div className="space-y-1">
     <Label className="text-[11px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
       {Icon && <Icon className="w-3 h-3" />} {label}
