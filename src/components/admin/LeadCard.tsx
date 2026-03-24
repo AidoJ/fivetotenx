@@ -212,13 +212,13 @@ export interface LeadCardProps {
   renderAnswers?: (assessmentId: string) => React.ReactNode;
 }
 
-const LeadCard = ({
+const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote,
   onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal,
   interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder,
   onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse,
-}: LeadCardProps) => {
+}, _ref) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
