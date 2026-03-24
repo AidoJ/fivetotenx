@@ -576,8 +576,8 @@ const LeadCard = ({
                 </div>
               </Section>
 
-              {/* Bookings / Interviews */}
-              {interviews.filter(i => i.assessment_id === lead.id).length > 0 && (
+              {/* Bookings / Interviews — hide when ST is complete */}
+              {!isStraightTalkComplete && interviews.filter(i => i.assessment_id === lead.id).length > 0 && (
                 <Section label="Bookings" icon={Calendar} badge={`${interviews.filter(i => i.assessment_id === lead.id).length}`} defaultOpen>
                   <div className="space-y-2 py-1">
                     {interviews.filter(i => i.assessment_id === lead.id).map((iv: any) => (
