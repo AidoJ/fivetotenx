@@ -233,6 +233,29 @@ const Proposal = () => {
     await supabase.from('roi_assessments').update({ pipeline_stage: 'signed' as any }).eq('id', proposal.assessment_id);
     setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString() } : null);
     setAccepting(false);
+
+    // Fire admin notification for proposal acceptance
+    try {
+      const { data: assessment } = await supabase
+        .from('roi_assessments')
+        .select('contact_name, contact_email, business_name')
+        .eq('id', proposal.assessment_id)
+        .single();
+
+      if (assessment) {
+        supabase.functions.invoke('notify-admin', {
+          body: {
+            eventType: 'proposal_accepted',
+            leadName: assessment.contact_name,
+            leadEmail: assessment.contact_email,
+            businessName: assessment.business_name,
+            assessmentId: proposal.assessment_id,
+          },
+        }).catch(err => console.error('Admin notification failed:', err));
+      }
+    } catch (err) {
+      console.error('Failed to send acceptance notification:', err);
+    }
   };
 
   const updateTimeline = (index: number, field: string, value: string) => {
