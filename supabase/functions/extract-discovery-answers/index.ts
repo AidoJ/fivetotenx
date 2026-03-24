@@ -119,24 +119,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Build the tool schema from the dynamic questions
-    const properties: Record<string, any> = {};
-    const propertyNames = Object.keys(questionMap);
-    for (const [key, question] of Object.entries(questionMap)) {
-      properties[key] = {
-        type: "object",
-        properties: {
-          answer: { type: "string", description: `Answer to: ${question}` },
-          confidence: { type: "string", enum: ["high", "medium", "low", "not_found"], description: "How confident the answer was found in the transcript" },
-          source_quote: { type: "string", description: "Brief quote from transcript supporting this answer" },
-        },
-        required: ["answer", "confidence"],
-        additionalProperties: false,
-      };
-    }
-
-    // Build a numbered question list for the system prompt so the AI has full context
-    const questionList = Object.entries(questionMap)
+    // Use a compact output schema to avoid provider schema-state limits on large dynamic question sets.
+    const questionEntries = Object.entries(questionMap);
+    const questionList = questionEntries
       .map(([key, q], i) => `${i + 1}. [${key}] ${q}`)
       .join('\n');
 
@@ -151,29 +136,44 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert business analyst extracting answers from interview transcripts. You must map the transcript content to these specific questions:\n\n${questionList}\n\nExtract precise, actionable answers from the transcript. If a question's answer is not found, set confidence to "not_found" and answer to empty string. Include brief source quotes where possible.`
+            content: `You are an expert business analyst extracting answers from interview transcripts. You must map transcript content to these exact keys/questions:\n\n${questionList}\n\nReturn one answer item for every key. If an answer is not found, set confidence to "not_found" and answer to empty string. Keep quotes short and specific.`
           },
           {
             role: 'user',
-            content: `Here are the interview transcripts:\n\n${allText}\n\nPlease extract structured answers to all the questions listed above.`
+            content: `Here are the interview transcripts:\n\n${allText}\n\nExtract structured answers for ALL keys above.`
           }
         ],
         tools: [
           {
-            type: "function",
+            type: 'function',
             function: {
-              name: "extract_discovery_answers",
-              description: "Extract structured answers from interview transcripts mapped to specific business questions",
+              name: 'extract_discovery_answers',
+              description: 'Extract structured answers from interview transcripts mapped to specific business questions',
               parameters: {
-                type: "object",
-                properties,
-                required: propertyNames,
+                type: 'object',
+                properties: {
+                  answers: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        key: { type: 'string', description: 'Must exactly match one provided question key' },
+                        answer: { type: 'string', description: 'Concise extracted answer' },
+                        confidence: { type: 'string', enum: ['high', 'medium', 'low', 'not_found'] },
+                        source_quote: { type: 'string', description: 'Short supporting quote from transcript' },
+                      },
+                      required: ['key', 'answer', 'confidence'],
+                      additionalProperties: false,
+                    }
+                  }
+                },
+                required: ['answers'],
                 additionalProperties: false,
               }
             }
           }
         ],
-        tool_choice: { type: "function", function: { name: "extract_discovery_answers" } },
+        tool_choice: { type: 'function', function: { name: 'extract_discovery_answers' } },
       }),
     });
 
@@ -200,21 +200,42 @@ Deno.serve(async (req) => {
       throw new Error('No structured output from AI');
     }
 
-    let extractedAnswers: Record<string, any>;
+    let parsedPayload: Record<string, any>;
     try {
-      extractedAnswers = typeof toolCall.function.arguments === 'string'
+      parsedPayload = typeof toolCall.function.arguments === 'string'
         ? JSON.parse(toolCall.function.arguments)
         : toolCall.function.arguments;
     } catch {
       throw new Error('Failed to parse AI structured output');
     }
 
-    // Enrich extracted answers with the original question text for downstream use
+    const allowedConfidence = new Set(['high', 'medium', 'low', 'not_found']);
+
+    // Seed all expected keys so downstream UI always has predictable output.
     const enrichedAnswers: Record<string, any> = {};
-    for (const [key, value] of Object.entries(extractedAnswers)) {
+    for (const [key, question] of questionEntries) {
       enrichedAnswers[key] = {
-        ...(value as any),
-        question: questionMap[key] || key,
+        answer: '',
+        confidence: 'not_found',
+        source_quote: '',
+        question,
+      };
+    }
+
+    const aiAnswers = Array.isArray(parsedPayload?.answers) ? parsedPayload.answers : [];
+    for (const item of aiAnswers) {
+      const key = typeof item?.key === 'string' ? item.key : '';
+      if (!key || !(key in questionMap)) continue;
+
+      const confidence = typeof item?.confidence === 'string' && allowedConfidence.has(item.confidence)
+        ? item.confidence
+        : 'low';
+
+      enrichedAnswers[key] = {
+        answer: typeof item?.answer === 'string' ? item.answer : '',
+        confidence,
+        source_quote: typeof item?.source_quote === 'string' ? item.source_quote : '',
+        question: questionMap[key],
       };
     }
 
