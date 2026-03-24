@@ -246,9 +246,12 @@ const RapidDeploySection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <motion.div {...stagger(0.2)}>
-            <p className="text-foreground mb-6 leading-relaxed">
-              Using modern development frameworks and AI-assisted engineering, we rapidly design and deploy functional operational apps for businesses.
-            </p>
+             <p className="text-foreground mb-6 leading-relaxed">
+               Using modern AI-assisted engineering and integration frameworks, we rapidly reshape how work flows across your business — then support that new workflow with simple connected systems your team can start using immediately.
+             </p>
+             <p className="text-foreground mb-6 font-semibold">
+               Most businesses begin seeing improvements within 1–2 weeks.
+             </p>
             <ul className="space-y-3">
               {examples.map((ex, i) =>
               <li key={i} className="flex items-center gap-3 text-foreground">
