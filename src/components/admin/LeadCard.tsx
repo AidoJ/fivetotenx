@@ -59,10 +59,10 @@ const getSlaColor = (lead: Assessment) => {
 };
 
 /* ── Stage Tracker Dots ── */
-const StageTracker = ({ currentStage }: { currentStage: string }) => {
+const StageTracker = React.forwardRef<HTMLDivElement, { currentStage: string }>(({ currentStage }, ref) => {
   const current = stageIdx(currentStage);
   return (
-    <div className="flex items-center gap-0.5 w-full">
+    <div ref={ref} className="flex items-center gap-0.5 w-full">
       {PIPELINE_STEPS.map((step, i) => {
         const done = i < current;
         const active = i === current;
@@ -90,7 +90,8 @@ const StageTracker = ({ currentStage }: { currentStage: string }) => {
       })}
     </div>
   );
-};
+});
+StageTracker.displayName = 'StageTracker';
 
 /* ── Next Action CTA ── */
 const getNextAction = (
