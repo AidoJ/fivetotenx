@@ -947,9 +947,9 @@ const FooterSection = () =>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         <img src={logoWhiteStrap} alt="5to10X" className="h-12 w-auto" />
-        <span className="text-sm" style={{ color: '#73AD12', opacity: 0.7 }}>
-          © {new Date().getFullYear()} 5to10X — Build • Innovate • Scale
-        </span>
+         <span className="text-sm" style={{ color: '#73AD12', opacity: 0.7 }}>
+           © {new Date().getFullYear()} 5to10X — Simplify • Connect • Multiply
+         </span>
       </div>
       <div className="flex items-center gap-6">
         <span className="text-xs" style={{ color: '#398C08', opacity: 0.5 }}>Automate • Accelerate • Multiply</span>
