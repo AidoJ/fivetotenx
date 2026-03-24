@@ -385,7 +385,7 @@ const HiddenCostSection = () => {
               <p className="text-white/80 text-sm">in operational cost</p>
             </div>
             <p className="text-center text-foreground font-medium">
-              Automation allows your team to focus on <strong>higher value work</strong> that grows the business.
+              Small inefficiencies rarely look serious on their own. But together they quietly shape how your business operates every day.
             </p>
           </motion.div>
         </div>
