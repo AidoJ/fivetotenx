@@ -42,22 +42,24 @@ Deno.serve(async (req) => {
 
     const audioBytes = new Uint8Array(await audioResp.arrayBuffer());
     
-    // Check size - reject files over 20MB to avoid memory issues
-    if (audioBytes.length > 20 * 1024 * 1024) {
+    // Check size - reject files over 100MB
+    if (audioBytes.length > 100 * 1024 * 1024) {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: 'File too large for transcription (max 20MB). Please use the Audio Only (.m4a) export from Zoom.' 
+        error: 'File too large for transcription (max 100MB). Please use the Audio Only (.m4a) export from Zoom.' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Convert to base64 data URL
+    // Convert to base64 data URL using chunks to avoid stack overflow
     const mime = getMimeType(audioUrl);
+    const chunkSize = 32768;
     let binary = '';
-    for (let i = 0; i < audioBytes.length; i++) {
-      binary += String.fromCharCode(audioBytes[i]);
+    for (let i = 0; i < audioBytes.length; i += chunkSize) {
+      const chunk = audioBytes.subarray(i, Math.min(i + chunkSize, audioBytes.length));
+      binary += String.fromCharCode(...chunk);
     }
     const base64 = btoa(binary);
     const dataUrl = `data:${mime};base64,${base64}`;
