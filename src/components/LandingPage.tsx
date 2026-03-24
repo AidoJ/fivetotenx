@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Zap, TrendingUp, BarChart3 } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap, TrendingUp, BarChart3, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo-5to10x-color.webp';
 import ClarityEngineSection from '@/components/ClarityEngineSection';
 
