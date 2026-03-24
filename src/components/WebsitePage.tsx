@@ -1109,8 +1109,8 @@ const WebsitePage = () => {
       {/* Staff Login */}
       <button
         onClick={() => navigate('/admin')}
-        className="fixed top-4 right-4 z-50 text-xs opacity-30 hover:opacity-100 transition-opacity px-3 py-1.5 rounded-md"
-        style={{ color: 'hsl(220 15% 55%)' }}
+        className="fixed top-4 right-4 z-50 text-sm font-medium opacity-30 hover:opacity-100 transition-opacity px-3 py-1.5 rounded-md"
+        style={{ color: '#643AA4' }}
       >
         Staff Login
       </button>
