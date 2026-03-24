@@ -65,7 +65,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
     className="relative z-10 text-center w-full max-w-4xl mx-auto space-y-8 px-2">
     
       <img
-      alt="5to10X — Build • Innovate • Scale"
+      alt="5to10X — Simplify • Connect • Multiply"
       className="max-h-56 sm:max-h-[28rem] md:max-h-[36rem] w-auto max-w-full mx-auto drop-shadow-2xl"
       src="/lovable-uploads/840e15a9-3ed0-4c4b-9699-1a4d9a046d8c.webp" />
     
@@ -80,19 +80,25 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       <h1
       className="text-xl sm:text-2xl md:text-5xl lg:text-6xl font-display font-bold leading-tight break-words"
       style={{ color: 'hsl(0 0% 95%)' }}>
-      
         What if your business could run{' '}
         <span style={{ color: '#1789CE' }}>
-          5–10x more efficiently?
-        </span>
+          5–10x more efficiently
+        </span>{' '}
+        — without replacing your systems or hiring more staff?
       </h1>
 
       <p
       className="text-sm sm:text-base md:text-xl max-w-2xl mx-auto leading-relaxed"
       style={{ color: 'hsl(220 20% 72%)' }}>
-      
-        Discover how AI-powered operational apps can eliminate manual work and transform your business in weeks.
+        We help small and mid-sized businesses redesign how work flows through their operations using practical AI and connected automation.
       </p>
+
+      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm sm:text-base md:text-lg font-display font-semibold" style={{ color: 'hsl(0 0% 85%)' }}>
+        <span>Less coordination.</span>
+        <span>Less admin.</span>
+        <span>Fewer workarounds.</span>
+        <span style={{ color: '#D88E08' }}>More momentum.</span>
+      </div>
 
         <div className="flex flex-col items-center justify-center gap-4 pt-4 w-full">
           <Button
@@ -100,9 +106,8 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         size="lg"
         className="text-sm sm:text-base md:text-lg px-6 md:px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 whitespace-normal"
         style={{ background: '#1789CE', color: 'white', border: 'none', boxShadow: '0 0 30px #1789CE33' }}>
-        
             <span className="flex items-center gap-2 text-center">
-              Discover Your Hidden Efficiency
+              Discover Where Efficiency Is Hiding
               <ArrowRight className="w-5 h-5 shrink-0" />
             </span>
           </Button>
@@ -119,11 +124,11 @@ const ShiftSection = () =>
     <div className="max-w-4xl mx-auto">
       <motion.div {...fadeUp} className="text-center mb-12">
         <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-6">
-          A Major Shift Is Happening
-        </h2>
-        <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          Artificial Intelligence and modern automation tools are allowing small and mid-sized companies to run leaner, faster, and far more efficiently than ever before.
-        </p>
+           A Major Shift Is Happening
+         </h2>
+         <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+           For the first time, small and mid-sized businesses can redesign how their operations work — without replacing their team or rebuilding everything from scratch.
+         </p>
       </motion.div>
 
       <motion.div {...stagger(0.2)} className="mb-12">
@@ -147,11 +152,14 @@ const ShiftSection = () =>
 
       <motion.div {...stagger(0.4)} className="text-center space-y-4">
         <p className="text-lg text-foreground font-semibold">
-          …can now be handled automatically by simple, intelligent business apps.
+          …can now be handled by connected AI-assisted workflows working quietly in the background.
+        </p>
+        <p className="text-lg text-foreground font-semibold mt-4">
+          This isn’t about installing software.
         </p>
         <div className="rounded-2xl p-8 inline-block" style={{ background: '#643AA4' }}>
           <p className="text-white text-lg md:text-xl font-display font-bold">
-            Businesses that don’t embrace the AI wave risk being overtaken by competitors who are moving faster, making better decisions, and operating far more efficiently.
+            It’s about rewiring how your business runs.
           </p>
         </div>
       </motion.div>
@@ -180,10 +188,13 @@ const WhatWeDoSection = () => {
             </span>{' '}
             Does
           </h2>
-          <p className="text-lg max-w-3xl mx-auto leading-relaxed text-muted-foreground">
-            We analyse how your business actually runs — the real workflows behind the scenes.
-            Then we identify where simple technology can remove friction and dramatically improve efficiency.
-          </p>
+           <p className="text-lg max-w-3xl mx-auto leading-relaxed text-muted-foreground mb-4">
+             We analyse how your business actually runs — the real workflows behind the scenes.
+             Then we identify where simple technology can remove friction and dramatically improve efficiency.
+           </p>
+           <p className="text-base max-w-2xl mx-auto leading-relaxed text-foreground font-semibold">
+             Most businesses don't need more software. They need their existing tools working together properly. That's what we fix.
+           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -202,9 +213,12 @@ const WhatWeDoSection = () => {
           )}
         </div>
 
-        <motion.p {...stagger(0.5)} className="text-center mt-8 text-base text-muted-foreground">
-          Instead of forcing your business to adapt to generic software, we build <strong className="text-foreground">custom operational apps around your workflow</strong>.
-        </motion.p>
+         <motion.p {...stagger(0.5)} className="text-center mt-8 text-base text-muted-foreground">
+           Instead of forcing your business to adapt to generic software, we redesign how your workflows operate — then support that redesign with <strong className="text-foreground">lightweight AI-assisted systems built around the way your business actually works</strong>.
+         </motion.p>
+         <motion.p {...stagger(0.6)} className="text-center mt-4 text-base text-foreground font-semibold">
+           The technology supports the process. Not the other way around.
+         </motion.p>
       </div>
     </section>);
 
@@ -225,19 +239,22 @@ const RapidDeploySection = () => {
     <section className="bg-background px-4 py-20 md:py-28">
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
-            Rapid App Deployment
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Traditional software projects take months and huge budgets. We take a different approach.
-          </p>
+           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
+             Rapid Workflow Redesign
+           </h2>
+           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+             Traditional software projects take months and huge budgets. We take a different approach.
+           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <motion.div {...stagger(0.2)}>
-            <p className="text-foreground mb-6 leading-relaxed">
-              Using modern development frameworks and AI-assisted engineering, we rapidly design and deploy functional operational apps for businesses.
-            </p>
+             <p className="text-foreground mb-6 leading-relaxed">
+               Using modern AI-assisted engineering and integration frameworks, we rapidly reshape how work flows across your business — then support that new workflow with simple connected systems your team can start using immediately.
+             </p>
+             <p className="text-foreground mb-6 font-semibold">
+               Most businesses begin seeing improvements within 1–2 weeks.
+             </p>
             <ul className="space-y-3">
               {examples.map((ex, i) =>
               <li key={i} className="flex items-center gap-3 text-foreground">
@@ -380,7 +397,10 @@ const HiddenCostSection = () => {
               <p className="text-white/80 text-sm">in operational cost</p>
             </div>
             <p className="text-center text-foreground font-medium">
-              Automation allows your team to focus on <strong>higher value work</strong> that grows the business.
+              Small inefficiencies rarely look serious on their own. But together they quietly shape how your business operates every day.
+            </p>
+            <p className="text-center text-muted-foreground text-sm mt-2">
+              AI now allows businesses to redesign how work moves through the organisation — not just automate individual tasks. Instead of staff coordinating systems… <strong className="text-foreground">systems coordinate the work.</strong>
             </p>
           </motion.div>
         </div>
@@ -601,8 +621,8 @@ const ZeroRiskSection = () =>
         {[
           {
             step: '01',
-            title: 'We Build Your System',
-            description: 'In 1–2 weeks, we design and build a working MVP tailored to your business — not a mockup, a real system you can use.',
+             title: 'We Redesign Your Workflow & Build the System',
+             description: 'In 1–2 weeks, we redesign part of your workflow and build a working system tailored to your business — not a mockup, a real system you can use.',
             icon: Rocket
           },
           {
@@ -933,12 +953,12 @@ const FooterSection = () =>
     <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         <img src={logoWhiteStrap} alt="5to10X" className="h-12 w-auto" />
-        <span className="text-sm" style={{ color: '#73AD12', opacity: 0.7 }}>
-          © {new Date().getFullYear()} 5to10X — Build • Innovate • Scale
-        </span>
+         <span className="text-sm" style={{ color: '#73AD12', opacity: 0.7 }}>
+           © {new Date().getFullYear()} 5to10X — Simplify • Connect • Multiply
+         </span>
       </div>
       <div className="flex items-center gap-6">
-        <span className="text-xs" style={{ color: '#398C08', opacity: 0.5 }}>Automate • Accelerate • Multiply</span>
+        <span className="text-xs" style={{ color: '#398C08', opacity: 0.5 }}>Fix the workflow. Multiply the output.</span>
       </div>
     </div>
   </footer>;
@@ -1120,7 +1140,20 @@ const WebsitePage = () => {
       <SelfAssessmentSection />
       {/* 3. WHY — Why Change Now */}
       <ShiftSection />
-      {/* 4. HOW — Our Clarity Path */}
+      {/* 4. HOW — Core Positioning + Clarity Path */}
+      <section className="px-4 py-16 md:py-20 text-center" style={{ background: '#010100' }}>
+        <motion.div {...fadeUp} className="max-w-3xl mx-auto space-y-4">
+          <p className="text-lg md:text-2xl font-display font-bold" style={{ color: 'hsl(0 0% 90%)' }}>
+            We don't start by building apps.
+          </p>
+          <p className="text-lg md:text-2xl font-display font-bold" style={{ color: 'hsl(0 0% 90%)' }}>
+            We start by improving how work moves through your business.
+          </p>
+          <p className="text-base md:text-lg" style={{ color: '#D88E08' }}>
+            Then we build only what's needed to support that improvement.
+          </p>
+        </motion.div>
+      </section>
       <ClarityEngineSection onStart={handleStartAssessment} />
       <WhatWeDoSection />
       <IntegrationsSection />

@@ -40,7 +40,7 @@ const phases = [
     label: 'Game Plan™',
     phase: 'Phase 3 — Plan',
     description: 'We map out a simple, practical solution.',
-    bullets: ['What the app will do', 'How it fits into your workflow', 'What gets automated'],
+    bullets: ['How the system will work in your business', 'How it fits into your workflow', 'What gets automated'],
     outcome: 'You see exactly how this will work in your business',
     color: PHASE_COLORS.purple,
   },
@@ -248,7 +248,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
           animate={headerInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.7 }}
         >
-          A simple, structured way to turn how your business runs today into a streamlined, automated system.
+          A simple, structured way to turn how your business runs today into a simpler, connected way of working powered by AI-assisted workflows.
         </motion.p>
       </motion.div>
 
