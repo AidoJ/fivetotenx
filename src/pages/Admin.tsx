@@ -1071,20 +1071,23 @@ const Admin = () => {
             i.id === data.id ? { ...i, transcript: transcribeResult.transcript } : i
           ));
 
-          toast({ title: 'Audio transcribed ✅', description: 'Transcript saved.' });
+          toast({ title: 'Audio transcribed ✅', description: 'Now extracting answers from transcript...' });
 
-          // Refresh answers after a delay
-          setTimeout(async () => {
-            const { data: refreshed } = await supabase
-              .from('roi_assessments')
-              .select('discovery_answers')
-              .eq('id', assessmentId)
-              .single();
-
-            if (refreshed?.discovery_answers) {
-              handleUpdateDiscoveryAnswers(assessmentId, refreshed.discovery_answers);
+          // Auto-trigger AI extraction of answers from the transcript
+          try {
+            const { data: extractResult, error: extractError } = await supabase.functions.invoke('extract-discovery-answers', {
+              body: { assessmentId },
+            });
+            if (extractError) throw extractError;
+            if (extractResult?.error) throw new Error(extractResult.error);
+            if (extractResult?.answers) {
+              handleUpdateDiscoveryAnswers(assessmentId, extractResult.answers);
+              toast({ title: 'Answers extracted ✅', description: 'AI has parsed the transcript and mapped answers to your Straight Talk questions.' });
             }
-          }, 15000);
+          } catch (extractErr: any) {
+            console.error('Auto-extraction failed:', extractErr);
+            toast({ title: 'Extraction needs manual trigger', description: 'Transcript saved. Click "Extract from Transcripts" to parse answers.', variant: 'destructive' });
+          }
         }).catch((err: any) => {
           console.error('Transcription request issue:', err);
           toast({
