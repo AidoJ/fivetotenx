@@ -651,6 +651,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
       </AnimatePresence>
     </motion.div>
   );
-};
+});
+LeadCard.displayName = 'LeadCard';
 
 export default LeadCard;

@@ -90,7 +90,7 @@ interface CardConfig {
   question: string;
 }
 
-const PipelineDashboard = ({ leads, deepDives, interviews, proposals, scopingResponses, onStageClick }: PipelineDashboardProps) => {
+const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProps>(({ leads, deepDives, interviews, proposals, scopingResponses, onStageClick }, ref) => {
   const totalAssessments = leads.length;
   const qualifiedCount = leads.filter(l => l.is_qualified).length;
 
