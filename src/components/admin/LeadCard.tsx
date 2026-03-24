@@ -109,12 +109,10 @@ const getNextAction = (
     return { label: 'Send Straight Talk Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'qualified' && hasInterviews)
     return { label: 'Move to Straight Talk', icon: Check, action: 'move_discovery' };
-  // discovery_call = Straight Talk stage: CTA is Send Game Plan Link once complete
+  // discovery_call = Straight Talk stage: CTA is Move to Green Light once complete
   if (stage === 'discovery_call' && !isStraightTalkComplete)
-    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
-  if (stage === 'discovery_call' && isStraightTalkComplete && !scopingResponse)
-    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
-  if (stage === 'discovery_call' && isStraightTalkComplete && scopingResponse)
+    return null; // No CTA until Straight Talk is complete
+  if (stage === 'discovery_call' && isStraightTalkComplete)
     return { label: 'Move to Green Light', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
     return { label: 'Prepare Green Light Doc', icon: FileText, action: 'prepare_proposal' };
