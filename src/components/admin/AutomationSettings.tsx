@@ -330,10 +330,9 @@ const AutomationSettings = () => {
             { step: '1', label: 'Client submits Reality Check™', auto: 'ROI report emailed automatically', enabled: true },
             { step: '2', label: 'ROI above threshold', auto: `Auto-qualify + send Straight Talk™ invite`, enabled: config.auto_qualify_enabled && config.auto_send_invite_on_qualify },
             { step: '3', label: 'Client books via Calendly', auto: 'Admin notified of booking', enabled: config.admin_notify_on_booking },
-            { step: '4', label: 'Admin uploads Zoom recording', auto: 'Auto-transcribe + extract answers + tick complete', enabled: true },
-            { step: '5', label: 'Straight Talk™ complete', auto: 'Auto-send Game Plan™ link', enabled: config.auto_send_gameplan_on_st_complete },
-            { step: '6', label: 'Client completes Game Plan™', auto: 'Admin notified + auto-draft proposal', enabled: config.admin_notify_on_gp_complete || config.auto_prepare_proposal_on_gp_complete },
-            { step: '7', label: 'Client accepts Green Light™', auto: 'Admin notified + move to Signed', enabled: config.admin_notify_on_proposal_accepted },
+            { step: '4', label: 'Admin uploads Zoom recording', auto: 'Auto-transcribe + extract answers + run analysis', enabled: true },
+            { step: '5', label: 'Straight Talk™ complete', auto: 'Auto-move to Green Light + draft proposal', enabled: config.auto_send_gameplan_on_st_complete || config.auto_prepare_proposal_on_gp_complete },
+            { step: '6', label: 'Client accepts Green Light™', auto: 'Admin notified + move to Signed', enabled: config.admin_notify_on_proposal_accepted },
           ].map(item => (
             <div key={item.step} className={`flex items-start gap-3 px-3 py-2 rounded-md ${item.enabled ? 'bg-primary/5 border border-primary/10' : 'bg-muted/50 border border-border opacity-60'}`}>
               <span className={`text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${item.enabled ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground'}`}>
