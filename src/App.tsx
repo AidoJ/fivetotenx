@@ -24,7 +24,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/deep-dive" element={<DeepDive />} />
           <Route path="/straight-talk" element={<StraightTalk />} />
-          <Route path="/scoping" element={<ScopingQuestionnaire />} />
+          {/* /scoping route retired — Game Plan merged into Straight Talk */}
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/client/:id" element={<ClientDetail />} />
           <Route path="/proposal/:id" element={<Proposal />} />
