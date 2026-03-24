@@ -210,9 +210,12 @@ const WhatWeDoSection = () => {
           )}
         </div>
 
-        <motion.p {...stagger(0.5)} className="text-center mt-8 text-base text-muted-foreground">
-          Instead of forcing your business to adapt to generic software, we build <strong className="text-foreground">custom operational apps around your workflow</strong>.
-        </motion.p>
+         <motion.p {...stagger(0.5)} className="text-center mt-8 text-base text-muted-foreground">
+           Instead of forcing your business to adapt to generic software, we redesign how your workflows operate — then support that redesign with <strong className="text-foreground">lightweight AI-assisted systems built around the way your business actually works</strong>.
+         </motion.p>
+         <motion.p {...stagger(0.6)} className="text-center mt-4 text-base text-foreground font-semibold">
+           The technology supports the process. Not the other way around.
+         </motion.p>
       </div>
     </section>);
 
