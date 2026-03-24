@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button';
 /* Logo-extracted colors for each phase */
 const PHASE_COLORS = {
   blue: '#1789CE',
-  deepBlue: '#2258B4',
   purple: '#643AA4',
+  pink: '#E0436A',
   gold: '#D88E08',
-  lime: '#73AD12',
   green: '#398C08',
 };
 
@@ -32,7 +31,7 @@ const phases = [
     description: 'We have a focused conversation about what needs to change and map out a practical solution.',
     bullets: ['What\'s frustrating you most', 'What\'s costing time or money', 'How automation fits your workflow'],
     outcome: 'We agree on what\'s worth fixing and how it\'ll work',
-    color: PHASE_COLORS.deepBlue,
+    color: PHASE_COLORS.purple,
   },
   {
     icon: CheckCircle,
@@ -42,7 +41,7 @@ const phases = [
     description: 'You review and approve everything before we build.',
     bullets: ['Clear scope', 'Clear cost', 'Clear outcome'],
     outcome: 'No surprises. Full confidence moving forward',
-    color: PHASE_COLORS.gold,
+    color: PHASE_COLORS.pink,
   },
   {
     icon: Wrench,
@@ -62,7 +61,7 @@ const phases = [
     description: 'We make sure everything works — and your team is ready to use it from day one.',
     bullets: ['Real-world testing', 'Final refinements', 'Team walkthroughs and training', 'System deployed into your live environment'],
     outcome: 'You\'re confident, your team is ready, and everything is running',
-    color: PHASE_COLORS.lime,
+    color: PHASE_COLORS.green,
   },
 ];
 
@@ -212,7 +211,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
           <motion.span
             style={{ color: PHASE_COLORS.blue }}
             animate={headerInView ? {
-              color: [PHASE_COLORS.blue, PHASE_COLORS.deepBlue, PHASE_COLORS.purple, PHASE_COLORS.gold, PHASE_COLORS.green, PHASE_COLORS.blue],
+              color: [PHASE_COLORS.blue, PHASE_COLORS.purple, PHASE_COLORS.pink, PHASE_COLORS.gold, PHASE_COLORS.green, PHASE_COLORS.blue],
             } : {}}
             transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
           >
@@ -253,7 +252,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
             className="w-full rounded-full"
             style={{
               height: timelineHeight,
-              background: `linear-gradient(to bottom, ${PHASE_COLORS.blue}, ${PHASE_COLORS.deepBlue}, ${PHASE_COLORS.purple}, ${PHASE_COLORS.gold}, ${PHASE_COLORS.lime}, ${PHASE_COLORS.green})`,
+              background: `linear-gradient(to bottom, ${PHASE_COLORS.blue}, ${PHASE_COLORS.purple}, ${PHASE_COLORS.pink}, ${PHASE_COLORS.gold}, ${PHASE_COLORS.green})`,
             }}
           />
         </div>
