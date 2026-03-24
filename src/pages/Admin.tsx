@@ -1152,13 +1152,48 @@ const Admin = () => {
 
   const handleMarkDiscoveryReady = async (id: string, ready: boolean) => {
     const updates: any = { discovery_ready: ready };
-    // Do NOT auto-move to proposal — just mark Straight Talk as complete/incomplete
     const { error } = await supabase.from('roi_assessments').update(updates).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
       toast({ title: ready ? 'Straight Talk™ marked complete ✅' : 'Straight Talk™ reopened' });
+
+      // Auto-send Game Plan link if enabled
+      if (ready) {
+        try {
+          const { data: autoSettings } = await supabase
+            .from('automation_settings')
+            .select('auto_send_gameplan_on_st_complete')
+            .limit(1)
+            .single();
+
+          if (autoSettings?.auto_send_gameplan_on_st_complete) {
+            const lead = leads.find(l => l.id === id);
+            if (lead && !lead.scoping_sent) {
+              const scopingUrl = `${window.location.origin}/scoping?id=${id}`;
+              await supabase.functions.invoke('send-discovery-invite', {
+                body: {
+                  contactName: lead.contact_name,
+                  contactEmail: lead.contact_email,
+                  businessName: lead.business_name,
+                  assessmentId: id,
+                  templateKey: 'scoping_invite',
+                  scopingUrl,
+                },
+              });
+              await supabase.from('roi_assessments').update({
+                scoping_sent: true,
+                scoping_sent_at: new Date().toISOString(),
+              }).eq('id', id);
+              setLeads(prev => prev.map(l => l.id === id ? { ...l, scoping_sent: true, scoping_sent_at: new Date().toISOString() } as any : l));
+              toast({ title: 'Game Plan™ link auto-sent ✅' });
+            }
+          }
+        } catch (autoErr) {
+          console.error('Auto-send Game Plan failed:', autoErr);
+        }
+      }
     }
   };
 
