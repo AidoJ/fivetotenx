@@ -1,0 +1,1 @@
+DELETE FROM public.client_interviews WHERE id IN ('6109e29a-4585-492b-855c-a35b1c4f37df', '8f7f1cba-91a9-4801-b5ec-a489b77860d1', 'df883aef-7530-490f-8b0f-90d466559af3');
