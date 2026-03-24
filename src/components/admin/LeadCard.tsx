@@ -469,8 +469,8 @@ const LeadCard = ({
                     </div>
                   )}
 
-                  {/* Game Plan tools */}
-                  {['discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
+                  {/* Game Plan tools — only show after Straight Talk is complete or at proposal stage */}
+                  {((lead.pipeline_stage === 'discovery_call' && isStraightTalkComplete) || lead.pipeline_stage === 'proposal') && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={handleCopyScoping}>
