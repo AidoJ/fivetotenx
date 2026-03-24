@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.notify-admin]
 verify_jwt = false
+
+[functions.send-booking-confirmation]
+verify_jwt = false

@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       // Find the assessment by email
       const { data: assessment, error: findErr } = await supabase
         .from('roi_assessments')
-        .select('id, pipeline_stage')
+        .select('id, pipeline_stage, business_name')
         .eq('contact_email', inviteeEmail.toLowerCase())
         .order('created_at', { ascending: false })
         .limit(1)
@@ -82,9 +82,27 @@ Deno.serve(async (req) => {
 
       console.log('Booking saved for assessment:', assessment.id);
 
-      // Fire admin notification (fire and forget)
       const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
       const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+      // Send booking confirmation to the CLIENT with ICS invite (fire and forget)
+      fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contactName: inviteeName || inviteeEmail,
+          contactEmail: inviteeEmail,
+          businessName: assessment.business_name || null,
+          scheduledAt,
+          zoomLink,
+          eventName,
+        }),
+      }).catch(err => console.error('Booking confirmation email failed:', err));
+
+      // Fire admin notification (fire and forget)
       fetch(`${supabaseUrl}/functions/v1/notify-admin`, {
         method: 'POST',
         headers: {
