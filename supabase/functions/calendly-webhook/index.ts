@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       // Find the assessment by email
       const { data: assessment, error: findErr } = await supabase
         .from('roi_assessments')
-        .select('id, pipeline_stage')
+        .select('id, pipeline_stage, business_name')
         .eq('contact_email', inviteeEmail.toLowerCase())
         .order('created_at', { ascending: false })
         .limit(1)
