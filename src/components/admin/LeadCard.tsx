@@ -130,11 +130,9 @@ const getNextAction = (
 };
 
 /* ── Completion Chips ── */
-const CompletionChips = ({
-  lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal,
-}: {
+const CompletionChips = React.forwardRef<HTMLDivElement, {
   lead: Assessment; deepDive: any; hasInterviews: boolean; isStraightTalkComplete: boolean; scopingResponse: any; proposal: any;
-}) => {
+}>(({ lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal }, ref) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
     { label: 'Talked', done: isStraightTalkComplete },
@@ -143,7 +141,7 @@ const CompletionChips = ({
     { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
   ];
   return (
-    <div className="flex items-center gap-1 flex-wrap">
+    <div ref={ref} className="flex items-center gap-1 flex-wrap">
       {chips.map(c => (
         <span
           key={c.label}
@@ -156,7 +154,8 @@ const CompletionChips = ({
       ))}
     </div>
   );
-};
+});
+CompletionChips.displayName = 'CompletionChips';
 
 /* ── Collapsible Section Wrapper ── */
 const Section = ({ label, icon: Icon, children, defaultOpen = false, badge }: {
