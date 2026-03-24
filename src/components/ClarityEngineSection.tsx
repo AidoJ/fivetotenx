@@ -211,7 +211,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
           <motion.span
             style={{ color: PHASE_COLORS.blue }}
             animate={headerInView ? {
-              color: [PHASE_COLORS.blue, PHASE_COLORS.deepBlue, PHASE_COLORS.purple, PHASE_COLORS.gold, PHASE_COLORS.green, PHASE_COLORS.blue],
+              color: [PHASE_COLORS.blue, PHASE_COLORS.purple, PHASE_COLORS.pink, PHASE_COLORS.gold, PHASE_COLORS.green, PHASE_COLORS.blue],
             } : {}}
             transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
           >
