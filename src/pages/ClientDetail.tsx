@@ -535,6 +535,18 @@ const ClientDetail = () => {
             )}
           </TabsContent>
 
+          {/* ── ANALYSIS TAB ── */}
+          <TabsContent value="analysis">
+            <OpportunityAnalysis
+              assessmentId={lead.id}
+              existingAnalysis={((lead.discovery_answers as any)?._analysis) || null}
+              onUpdate={(analysis) => {
+                const updated = { ...(lead.discovery_answers as any || {}), _analysis: analysis };
+                setLead({ ...lead, discovery_answers: updated as any });
+              }}
+            />
+          </TabsContent>
+
           {/* ── ROI SUMMARY TAB ── */}
           <TabsContent value="roi_summary">
             {roi ? (
