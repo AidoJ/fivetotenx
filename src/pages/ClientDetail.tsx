@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import logo from '@/assets/logo-5to10x-color.webp';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
+import OpportunityAnalysis from '@/components/admin/OpportunityAnalysis';
 
 type Assessment = Tables<'roi_assessments'>;
 
