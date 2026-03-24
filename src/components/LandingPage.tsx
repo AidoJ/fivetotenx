@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Zap, TrendingUp, BarChart3 } from 'lucide-react';
+import { ArrowRight, Sparkles, Zap, TrendingUp, BarChart3, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo-5to10x-color.webp';
 import ClarityEngineSection from '@/components/ClarityEngineSection';
 
@@ -38,8 +39,23 @@ const features = [
 ];
 
 const LandingPage = ({ onStart }: Props) => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Staff Login */}
+      <div className="absolute top-4 right-4 z-20">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/admin')}
+          className="gap-1.5 text-xs opacity-40 hover:opacity-100 transition-opacity"
+          style={{ color: 'hsl(220 15% 55%)' }}
+        >
+          <LogIn className="w-3.5 h-3.5" />
+          Staff Login
+        </Button>
+      </div>
       {/* Hero Section — Black bg, blue accent */}
       <section
         className="relative flex-1 flex flex-col items-center justify-center px-4 py-16 md:py-24 overflow-hidden"
