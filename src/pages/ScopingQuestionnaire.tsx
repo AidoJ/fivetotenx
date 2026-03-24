@@ -172,6 +172,25 @@ const ScopingQuestionnaire = () => {
         .update({ pipeline_stage: 'proposal' as any })
         .eq('id', assessmentId);
 
+      // Fire admin notification for Game Plan completion (fire and forget)
+      const { data: assessment } = await supabase
+        .from('roi_assessments')
+        .select('contact_name, contact_email, business_name')
+        .eq('id', assessmentId)
+        .single();
+
+      if (assessment) {
+        supabase.functions.invoke('notify-admin', {
+          body: {
+            eventType: 'gameplan_completed',
+            leadName: assessment.contact_name,
+            leadEmail: assessment.contact_email,
+            businessName: assessment.business_name,
+            assessmentId,
+          },
+        }).catch(err => console.error('Admin notification failed:', err));
+      }
+
       setSubmitted(true);
       toast({ title: 'Submitted! 🎉', description: 'Your scoping questionnaire has been received.' });
     } catch (err) {
