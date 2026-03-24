@@ -236,12 +236,12 @@ const RapidDeploySection = () => {
     <section className="bg-background px-4 py-20 md:py-28">
       <div className="max-w-4xl mx-auto">
         <motion.div {...fadeUp} className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
-            Rapid App Deployment
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Traditional software projects take months and huge budgets. We take a different approach.
-          </p>
+           <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-4">
+             Rapid Workflow Redesign
+           </h2>
+           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+             Traditional software projects take months and huge budgets. We take a different approach.
+           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
