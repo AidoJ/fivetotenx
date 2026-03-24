@@ -1137,7 +1137,20 @@ const WebsitePage = () => {
       <SelfAssessmentSection />
       {/* 3. WHY — Why Change Now */}
       <ShiftSection />
-      {/* 4. HOW — Our Clarity Path */}
+      {/* 4. HOW — Core Positioning + Clarity Path */}
+      <section className="px-4 py-16 md:py-20 text-center" style={{ background: '#010100' }}>
+        <motion.div {...fadeUp} className="max-w-3xl mx-auto space-y-4">
+          <p className="text-lg md:text-2xl font-display font-bold" style={{ color: 'hsl(0 0% 90%)' }}>
+            We don't start by building apps.
+          </p>
+          <p className="text-lg md:text-2xl font-display font-bold" style={{ color: 'hsl(0 0% 90%)' }}>
+            We start by improving how work moves through your business.
+          </p>
+          <p className="text-base md:text-lg" style={{ color: '#D88E08' }}>
+            Then we build only what's needed to support that improvement.
+          </p>
+        </motion.div>
+      </section>
       <ClarityEngineSection onStart={handleStartAssessment} />
       <WhatWeDoSection />
       <IntegrationsSection />
