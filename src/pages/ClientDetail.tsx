@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
@@ -23,10 +23,10 @@ const formatCurrency = (v: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
 
 /* ── Editable field component ── */
-const EditField = ({ label, value, onChange, type = 'text', icon: Icon, rows }: {
+const EditField = React.forwardRef<HTMLDivElement, {
   label: string; value: string; onChange: (v: string) => void; type?: string; icon?: any; rows?: number;
-}) => (
-  <div className="space-y-1">
+}>(({ label, value, onChange, type = 'text', icon: Icon, rows }, ref) => (
+  <div ref={ref} className="space-y-1">
     <Label className="text-[11px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
       {Icon && <Icon className="w-3 h-3" />} {label}
     </Label>
@@ -36,7 +36,8 @@ const EditField = ({ label, value, onChange, type = 'text', icon: Icon, rows }: 
       <Input type={type} value={value} onChange={e => onChange(e.target.value)} className="h-8 text-xs bg-secondary border-border" />
     )}
   </div>
-);
+));
+EditField.displayName = 'EditField';
 
 /* ── Read-only stat ── */
 const Stat = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
