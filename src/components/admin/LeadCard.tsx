@@ -404,6 +404,17 @@ const LeadCard = ({
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
+                          const MAX_SIZE_MB = 50;
+                          if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                            const sizeMB = (file.size / (1024 * 1024)).toFixed(0);
+                            const proceed = window.confirm(
+                              `This file is ${sizeMB}MB. Files over ${MAX_SIZE_MB}MB may fail to upload or transcribe.\n\nTip: In Zoom, download the "Audio Only" (.m4a) version instead of the full video — it's usually 5-10x smaller.\n\nProceed anyway?`
+                            );
+                            if (!proceed) {
+                              if (audioInputRef.current) audioInputRef.current.value = '';
+                              return;
+                            }
+                          }
                           setUploading(true);
                           await onAddInterview(lead.id, 'Straight Talk Interview', '', file);
                           setUploading(false);
