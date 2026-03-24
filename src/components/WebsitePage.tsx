@@ -399,6 +399,9 @@ const HiddenCostSection = () => {
             <p className="text-center text-foreground font-medium">
               Small inefficiencies rarely look serious on their own. But together they quietly shape how your business operates every day.
             </p>
+            <p className="text-center text-muted-foreground text-sm mt-2">
+              AI now allows businesses to redesign how work moves through the organisation — not just automate individual tasks. Instead of staff coordinating systems… <strong className="text-foreground">systems coordinate the work.</strong>
+            </p>
           </motion.div>
         </div>
       </div>
