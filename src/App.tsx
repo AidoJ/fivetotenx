@@ -8,7 +8,7 @@ import NotFound from "./pages/NotFound";
 import DeepDive from "./pages/DeepDive";
 import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
-import ScopingQuestionnaire from "./pages/ScopingQuestionnaire";
+// ScopingQuestionnaire retired — Game Plan merged into Straight Talk
 import StraightTalk from "./pages/StraightTalk";
 import ClientDetail from "./pages/ClientDetail";
 
