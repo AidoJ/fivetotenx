@@ -252,7 +252,7 @@ const ClarityEngineSection = ({ onStart }: ClarityEngineProps) => {
             className="w-full rounded-full"
             style={{
               height: timelineHeight,
-              background: `linear-gradient(to bottom, ${PHASE_COLORS.blue}, ${PHASE_COLORS.deepBlue}, ${PHASE_COLORS.purple}, ${PHASE_COLORS.gold}, ${PHASE_COLORS.lime}, ${PHASE_COLORS.green})`,
+              background: `linear-gradient(to bottom, ${PHASE_COLORS.blue}, ${PHASE_COLORS.purple}, ${PHASE_COLORS.pink}, ${PHASE_COLORS.gold}, ${PHASE_COLORS.green})`,
             }}
           />
         </div>
