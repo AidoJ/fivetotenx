@@ -185,10 +185,13 @@ const WhatWeDoSection = () => {
             </span>{' '}
             Does
           </h2>
-          <p className="text-lg max-w-3xl mx-auto leading-relaxed text-muted-foreground">
-            We analyse how your business actually runs — the real workflows behind the scenes.
-            Then we identify where simple technology can remove friction and dramatically improve efficiency.
-          </p>
+           <p className="text-lg max-w-3xl mx-auto leading-relaxed text-muted-foreground mb-4">
+             We analyse how your business actually runs — the real workflows behind the scenes.
+             Then we identify where simple technology can remove friction and dramatically improve efficiency.
+           </p>
+           <p className="text-base max-w-2xl mx-auto leading-relaxed text-foreground font-semibold">
+             Most businesses don't need more software. They need their existing tools working together properly. That's what we fix.
+           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
