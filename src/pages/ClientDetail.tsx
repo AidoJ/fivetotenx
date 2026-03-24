@@ -384,34 +384,12 @@ const ClientDetail = () => {
               </div>
             )}
 
-            {/* Show AI-extracted discovery answers */}
-            {lead.discovery_answers && Object.keys(lead.discovery_answers as any).length > 0 && (
-              <div className="space-y-4 mb-6">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <Radar className="w-4 h-4 text-primary" /> AI-Extracted Discovery Answers
-                </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {Object.entries(lead.discovery_answers as Record<string, any>).map(([key, val]) => {
-                    const answer = typeof val === 'object' ? val : { answer: val };
-                    const q = questions.find((q: any) => q.id === key);
-                    return (
-                      <div key={key} className="rounded-lg border border-border bg-secondary/30 p-3 space-y-1">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{q?.question || key}</p>
-                        <p className="text-xs text-foreground">{answer.answer || String(val)}</p>
-                        {answer.confidence && (
-                          <Badge variant="outline" className={`text-[8px] ${answer.confidence === 'high' ? 'text-green-600 border-green-500/30' : answer.confidence === 'medium' ? 'text-amber-600 border-amber-500/30' : 'text-red-600 border-red-500/30'}`}>
-                            {answer.confidence} confidence
-                          </Badge>
-                        )}
-                        {answer.source_quote && (
-                          <p className="text-[10px] text-muted-foreground italic">"{answer.source_quote}"</p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            {/* AI-extracted discovery answers with Extract button */}
+            <DiscoveryAnswersViewer
+              assessmentId={lead.id}
+              answers={(lead.discovery_answers && Object.keys(lead.discovery_answers as any).length > 0) ? lead.discovery_answers as any : null}
+              onUpdate={(updated) => setLead({ ...lead, discovery_answers: updated as any })}
+            />
 
             {/* Formal ST questionnaire responses */}
             {!straightTalk && interviews.filter((i: any) => i.transcript).length === 0 && (!lead.discovery_answers || Object.keys(lead.discovery_answers as any).length === 0) ? (
