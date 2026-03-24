@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Compass, MessageCircle, Puzzle, CheckCircle, Wrench, FlaskConical, ArrowRight, Sparkles } from 'lucide-react';
+import { Compass, MessageCircle, CheckCircle, Wrench, FlaskConical, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 /* Logo-extracted colors for each phase */

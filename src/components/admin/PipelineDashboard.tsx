@@ -285,8 +285,8 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
         </div>
       </div>
 
-      {/* 6 Phase Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      {/* 5 Phase Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {cards.map((card, index) => {
           const Icon = card.icon;
           const cardLeads = card.leads;
