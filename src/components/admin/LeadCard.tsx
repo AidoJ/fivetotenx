@@ -480,22 +480,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                     </div>
                   )}
 
-                  {/* Game Plan tools — only show after Straight Talk is complete or at proposal stage */}
-                  {((lead.pipeline_stage === 'discovery_call' && isStraightTalkComplete) || lead.pipeline_stage === 'proposal') && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={handleCopyScoping}>
-                        {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copiedScoping ? 'Copied!' : 'Game Plan Link'}
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => window.open(scopingUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Open Game Plan
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Green Light tools */}
+                  {/* Green Light tools — show after Straight Talk complete at proposal stage */}
                   {lead.pipeline_stage === 'proposal' && proposal && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
