@@ -124,11 +124,11 @@ const ShiftSection = () =>
     <div className="max-w-4xl mx-auto">
       <motion.div {...fadeUp} className="text-center mb-12">
         <h2 className="text-2xl md:text-4xl font-display font-bold text-foreground mb-6">
-          A Major Shift Is Happening
-        </h2>
-        <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          Artificial Intelligence and modern automation tools are allowing small and mid-sized companies to run leaner, faster, and far more efficiently than ever before.
-        </p>
+           A Major Shift Is Happening
+         </h2>
+         <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+           For the first time, small and mid-sized businesses can redesign how their operations work — without replacing their team or rebuilding everything from scratch.
+         </p>
       </motion.div>
 
       <motion.div {...stagger(0.2)} className="mb-12">
