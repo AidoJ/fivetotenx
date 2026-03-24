@@ -158,24 +158,27 @@ const CompletionChips = React.forwardRef<HTMLDivElement, {
 CompletionChips.displayName = 'CompletionChips';
 
 /* ── Collapsible Section Wrapper ── */
-const Section = ({ label, icon: Icon, children, defaultOpen = false, badge }: {
+const Section = React.forwardRef<HTMLDivElement, {
   label: string; icon: any; children: React.ReactNode; defaultOpen?: boolean; badge?: string;
-}) => {
+}>(({ label, icon: Icon, children, defaultOpen = false, badge }, ref) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-secondary/50 transition-colors">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-        <span className="text-[11px] font-semibold text-foreground flex-1">{label}</span>
-        {badge && <Badge variant="outline" className="text-[8px] h-4">{badge}</Badge>}
-        <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pl-6 pr-2 pb-2">
-        {children}
-      </CollapsibleContent>
-    </Collapsible>
+    <div ref={ref}>
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-secondary/50 transition-colors">
+          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="text-[11px] font-semibold text-foreground flex-1">{label}</span>
+          {badge && <Badge variant="outline" className="text-[8px] h-4">{badge}</Badge>}
+          <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-6 pr-2 pb-2">
+          {children}
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
-};
+});
+Section.displayName = 'Section';
 
 /* ═══════ MAIN LEAD CARD ═══════ */
 
