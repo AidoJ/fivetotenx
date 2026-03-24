@@ -181,14 +181,12 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
     },
   ];
 
-  // Funnel data — streamlined 8-step funnel
+  // Funnel data — streamlined 6-step funnel
   const funnelSteps = [
     { label: 'Reality Checked', value: totalAssessments },
     { label: 'Qualified', value: qualifiedCount },
     { label: 'Talk Booked', value: discoveryBookedCount },
-    { label: 'Agreed', value: discoveryCompletedCount },
-    { label: 'Game Plan Sent', value: scopingSentCount },
-    { label: 'Game Plan Done', value: scopingCompleteCount },
+    { label: 'Talk Completed', value: discoveryCompletedCount },
     { label: 'Green Light Sent', value: proposalSentCount },
     { label: 'Signed Off', value: signedCount },
     { label: 'Gone Live ✅', value: buildCompleted },
