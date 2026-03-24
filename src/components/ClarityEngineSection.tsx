@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button';
 /* Logo-extracted colors for each phase */
 const PHASE_COLORS = {
   blue: '#1789CE',
-  deepBlue: '#2258B4',
   purple: '#643AA4',
+  pink: '#E0436A',
   gold: '#D88E08',
-  lime: '#73AD12',
   green: '#398C08',
 };
 
