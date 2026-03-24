@@ -229,10 +229,6 @@ const ClientDetail = () => {
               <MessageSquare className="w-3.5 h-3.5" /> Straight Talk™
               {!straightTalk && interviews.filter((i: any) => i.transcript).length === 0 && (!lead.discovery_answers || Object.keys(lead.discovery_answers as any).filter(k => k !== '_analysis').length === 0) && <Badge variant="secondary" className="text-[8px] h-3.5 ml-1">Empty</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="game_plan" className="gap-1.5 text-xs">
-              <Puzzle className="w-3.5 h-3.5" /> Game Plan™
-              {!scopingResponse && <Badge variant="secondary" className="text-[8px] h-3.5 ml-1">Empty</Badge>}
-            </TabsTrigger>
             <TabsTrigger value="analysis" className="gap-1.5 text-xs">
               <Sparkles className="w-3.5 h-3.5" /> Analysis
             </TabsTrigger>
