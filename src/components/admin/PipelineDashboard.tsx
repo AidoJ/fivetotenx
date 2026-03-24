@@ -68,11 +68,10 @@ const slaColors = {
   red: 'bg-red-500',
 };
 
-// Phase accent colors (cool → warm progression) — now 6 phases
+// Phase accent colors (cool → warm progression) — now 5 phases
 const phaseAccents = [
   { bg: 'from-blue-500/10 to-indigo-500/10', border: 'border-blue-500/30', text: 'text-blue-600', icon: 'bg-blue-500/15 text-blue-600' },
   { bg: 'from-violet-500/10 to-purple-500/10', border: 'border-violet-500/30', text: 'text-violet-600', icon: 'bg-violet-500/15 text-violet-600' },
-  { bg: 'from-pink-500/10 to-rose-500/10', border: 'border-pink-500/30', text: 'text-pink-600', icon: 'bg-pink-500/15 text-pink-600' },
   { bg: 'from-orange-500/10 to-amber-500/10', border: 'border-orange-500/30', text: 'text-orange-600', icon: 'bg-orange-500/15 text-orange-600' },
   { bg: 'from-lime-500/10 to-emerald-500/10', border: 'border-lime-500/30', text: 'text-lime-600', icon: 'bg-lime-500/15 text-lime-600' },
   { bg: 'from-emerald-500/10 to-green-500/10', border: 'border-emerald-500/30', text: 'text-emerald-600', icon: 'bg-emerald-500/15 text-emerald-600' },
@@ -128,35 +127,21 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
     {
       id: 'straight_talk',
       label: 'Straight Talk™',
-      subtitle: 'Phase 2 — Discuss',
+      subtitle: 'Phase 2 — Discuss & Plan',
       icon: MessageCircle,
       stages: ['discovery_call' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === ('discovery_call' as PipelineStage)),
       metrics: [
         { label: 'Booked', value: discoveryBookedCount },
-        { label: 'Agreed', value: discoveryCompletedCount, color: 'text-green-500' },
-      ],
-      nextAction: 'Send Game Plan',
-      question: 'What\'s worth fixing first?',
-    },
-    {
-      id: 'game_plan',
-      label: 'Game Plan™',
-      subtitle: 'Phase 3 — Plan',
-      icon: Puzzle,
-      stages: ['discovery_call' as PipelineStage, 'proposal'],
-      leads: leads.filter(l => (l as any).scoping_sent && !scopingResponses.find(s => s.assessment_id === l.id && s.completed)),
-      metrics: [
-        { label: 'Sent', value: scopingSentCount },
-        { label: 'Completed', value: scopingCompleteCount, color: 'text-green-500' },
+        { label: 'Completed', value: discoveryCompletedCount, color: 'text-green-500' },
       ],
       nextAction: 'Prepare Green Light',
-      question: 'How will this work in your business?',
+      question: 'What\'s worth fixing and how?',
     },
     {
       id: 'green_light',
       label: 'Green Light™',
-      subtitle: 'Phase 4 — Sign Off',
+      subtitle: 'Phase 3 — Sign Off',
       icon: FileText,
       stages: ['proposal'],
       leads: leads.filter(l => l.pipeline_stage === 'proposal'),
@@ -171,7 +156,7 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
     {
       id: 'build',
       label: 'Build™',
-      subtitle: 'Phase 5 — Build',
+      subtitle: 'Phase 4 — Build',
       icon: Wrench,
       stages: ['signed', 'build_refinement' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === 'signed' || l.pipeline_stage === ('build_refinement' as PipelineStage)),
@@ -185,7 +170,7 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
     {
       id: 'go_live',
       label: 'Go Live™',
-      subtitle: 'Phase 6 — Test • Train • Launch',
+      subtitle: 'Phase 5 — Test • Train • Launch',
       icon: FlaskConical,
       stages: ['completed' as PipelineStage],
       leads: leads.filter(l => l.pipeline_stage === ('completed' as PipelineStage)),
@@ -196,14 +181,12 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
     },
   ];
 
-  // Funnel data — streamlined 8-step funnel
+  // Funnel data — streamlined 6-step funnel
   const funnelSteps = [
     { label: 'Reality Checked', value: totalAssessments },
     { label: 'Qualified', value: qualifiedCount },
     { label: 'Talk Booked', value: discoveryBookedCount },
-    { label: 'Agreed', value: discoveryCompletedCount },
-    { label: 'Game Plan Sent', value: scopingSentCount },
-    { label: 'Game Plan Done', value: scopingCompleteCount },
+    { label: 'Talk Completed', value: discoveryCompletedCount },
     { label: 'Green Light Sent', value: proposalSentCount },
     { label: 'Signed Off', value: signedCount },
     { label: 'Gone Live ✅', value: buildCompleted },
@@ -227,7 +210,7 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
         </div>
         <div>
           <h2 className="text-lg font-bold text-foreground font-display">The 5to10x Clarity Path™</h2>
-          <p className="text-[11px] text-muted-foreground">Assess → Discuss → Plan → Sign Off → Build → Go Live</p>
+          <p className="text-[11px] text-muted-foreground">Assess → Discuss & Plan → Sign Off → Build → Go Live</p>
         </div>
       </div>
 
@@ -302,8 +285,8 @@ const PipelineDashboard = React.forwardRef<HTMLDivElement, PipelineDashboardProp
         </div>
       </div>
 
-      {/* 6 Phase Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      {/* 5 Phase Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {cards.map((card, index) => {
           const Icon = card.icon;
           const cardLeads = card.leads;

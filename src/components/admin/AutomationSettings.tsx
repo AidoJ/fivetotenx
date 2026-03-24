@@ -193,7 +193,7 @@ const AutomationSettings = () => {
         )}
       </div>
 
-      {/* Auto-Send Game Plan */}
+      {/* Auto-Prepare Proposal on ST Complete */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
@@ -201,9 +201,9 @@ const AutomationSettings = () => {
               <FileText className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h3 className="font-display font-bold text-foreground">Auto-Send Game Plan™ Link</h3>
+              <h3 className="font-display font-bold text-foreground">Auto-Move to Green Light™</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                When Straight Talk™ is marked complete, automatically email the Game Plan questionnaire link
+                When Straight Talk™ is marked complete (transcript + extraction done), automatically move the lead to the Green Light™ stage
               </p>
             </div>
           </div>
@@ -224,7 +224,7 @@ const AutomationSettings = () => {
             <div>
               <h3 className="font-display font-bold text-foreground">Auto-Prepare Green Light™ Draft</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                When Game Plan™ is submitted, AI generates a draft proposal from all collected data
+                When Straight Talk™ is complete and analysis is done, AI generates a draft proposal from all collected data
               </p>
               <Badge variant="outline" className="text-[9px] mt-1 bg-amber-500/10 text-amber-700 border-amber-500/20">
                 AI-Powered · Admin review required before sending
@@ -267,7 +267,7 @@ const AutomationSettings = () => {
           <div className="flex items-center justify-between py-1.5">
             <div className="flex items-center gap-2">
               <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-sm text-foreground">Game Plan™ completed by client</span>
+              <span className="text-sm text-foreground">Straight Talk™ completed</span>
             </div>
             <Switch
               checked={config.admin_notify_on_gp_complete}
@@ -330,10 +330,9 @@ const AutomationSettings = () => {
             { step: '1', label: 'Client submits Reality Check™', auto: 'ROI report emailed automatically', enabled: true },
             { step: '2', label: 'ROI above threshold', auto: `Auto-qualify + send Straight Talk™ invite`, enabled: config.auto_qualify_enabled && config.auto_send_invite_on_qualify },
             { step: '3', label: 'Client books via Calendly', auto: 'Admin notified of booking', enabled: config.admin_notify_on_booking },
-            { step: '4', label: 'Admin uploads Zoom recording', auto: 'Auto-transcribe + extract answers + tick complete', enabled: true },
-            { step: '5', label: 'Straight Talk™ complete', auto: 'Auto-send Game Plan™ link', enabled: config.auto_send_gameplan_on_st_complete },
-            { step: '6', label: 'Client completes Game Plan™', auto: 'Admin notified + auto-draft proposal', enabled: config.admin_notify_on_gp_complete || config.auto_prepare_proposal_on_gp_complete },
-            { step: '7', label: 'Client accepts Green Light™', auto: 'Admin notified + move to Signed', enabled: config.admin_notify_on_proposal_accepted },
+            { step: '4', label: 'Admin uploads Zoom recording', auto: 'Auto-transcribe + extract answers + run analysis', enabled: true },
+            { step: '5', label: 'Straight Talk™ complete', auto: 'Auto-move to Green Light + draft proposal', enabled: config.auto_send_gameplan_on_st_complete || config.auto_prepare_proposal_on_gp_complete },
+            { step: '6', label: 'Client accepts Green Light™', auto: 'Admin notified + move to Signed', enabled: config.admin_notify_on_proposal_accepted },
           ].map(item => (
             <div key={item.step} className={`flex items-start gap-3 px-3 py-2 rounded-md ${item.enabled ? 'bg-primary/5 border border-primary/10' : 'bg-muted/50 border border-border opacity-60'}`}>
               <span className={`text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${item.enabled ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground'}`}>

@@ -229,10 +229,6 @@ const ClientDetail = () => {
               <MessageSquare className="w-3.5 h-3.5" /> Straight Talk™
               {!straightTalk && interviews.filter((i: any) => i.transcript).length === 0 && (!lead.discovery_answers || Object.keys(lead.discovery_answers as any).filter(k => k !== '_analysis').length === 0) && <Badge variant="secondary" className="text-[8px] h-3.5 ml-1">Empty</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="game_plan" className="gap-1.5 text-xs">
-              <Puzzle className="w-3.5 h-3.5" /> Game Plan™
-              {!scopingResponse && <Badge variant="secondary" className="text-[8px] h-3.5 ml-1">Empty</Badge>}
-            </TabsTrigger>
             <TabsTrigger value="analysis" className="gap-1.5 text-xs">
               <Sparkles className="w-3.5 h-3.5" /> Analysis
             </TabsTrigger>
@@ -462,78 +458,6 @@ const ClientDetail = () => {
             ) : null}
           </TabsContent>
 
-          {/* ── GAME PLAN TAB ── */}
-          <TabsContent value="game_plan">
-            {!scopingResponse ? (
-              <div className="rounded-xl border border-border bg-card p-12 text-center">
-                <Puzzle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-bold text-foreground mb-1">No Game Plan™ responses yet</h3>
-                <p className="text-sm text-muted-foreground">
-                  The client hasn't completed the Game Plan™ questionnaire yet.
-                  Responses will appear here once submitted.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Game Plan™ Responses</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Industry: {scopingResponse.industry} · Submitted: {new Date(scopingResponse.created_at).toLocaleDateString()}
-                      {scopingResponse.completed && <Badge className="ml-2 text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Complete</Badge>}
-                    </p>
-                  </div>
-                </div>
-
-                {gpCategories.length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {gpCategories.map((cat: any) => {
-                      const catQuestions = gpQuestions.filter((q: any) => q.category_id === cat.id);
-                      if (catQuestions.length === 0) return null;
-                      const isSkipped = (scopingResponse.skipped_categories || []).includes(cat.id);
-                      return (
-                        <div key={cat.id} className={`rounded-xl border bg-card p-5 space-y-4 ${isSkipped ? 'border-amber-500/30 opacity-60' : 'border-border'}`}>
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-bold text-foreground">{cat.label}</h3>
-                            {isSkipped && <Badge variant="outline" className="text-[9px] text-amber-600 border-amber-500/30">Skipped</Badge>}
-                          </div>
-                          <div className="space-y-3">
-                            {catQuestions.map((q: any) => (
-                              <EditField
-                                key={q.id}
-                                label={q.question}
-                                value={scResponses[q.id] || ''}
-                                onChange={v => updateScopingResponse(q.id, v)}
-                                rows={2}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-                    <h3 className="text-sm font-bold text-foreground">Responses</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {Object.entries(scResponses).map(([qId, answer]) => {
-                        const q = questions.find((q: any) => q.id === qId);
-                        return (
-                          <EditField
-                            key={qId}
-                            label={q?.question || qId}
-                            value={String(answer || '')}
-                            onChange={v => updateScopingResponse(qId, v)}
-                            rows={2}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
 
           {/* ── ANALYSIS TAB ── */}
           <TabsContent value="analysis">

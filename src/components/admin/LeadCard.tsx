@@ -109,12 +109,10 @@ const getNextAction = (
     return { label: 'Send Straight Talk Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'qualified' && hasInterviews)
     return { label: 'Move to Straight Talk', icon: Check, action: 'move_discovery' };
-  // discovery_call = Straight Talk stage: CTA is Send Game Plan Link once complete
+  // discovery_call = Straight Talk stage: CTA is Move to Green Light once complete
   if (stage === 'discovery_call' && !isStraightTalkComplete)
-    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
-  if (stage === 'discovery_call' && isStraightTalkComplete && !scopingResponse)
-    return { label: 'Send Game Plan Link', icon: Send, action: 'send_scoping' };
-  if (stage === 'discovery_call' && isStraightTalkComplete && scopingResponse)
+    return null; // No CTA until Straight Talk is complete
+  if (stage === 'discovery_call' && isStraightTalkComplete)
     return { label: 'Move to Green Light', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
     return { label: 'Prepare Green Light Doc', icon: FileText, action: 'prepare_proposal' };
@@ -136,7 +134,6 @@ const CompletionChips = React.forwardRef<HTMLDivElement, {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
     { label: 'Talked', done: isStraightTalkComplete },
-    { label: 'Game Plan', done: !!scopingResponse?.completed },
     { label: 'Green Light', done: !!proposal },
     { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
   ];
@@ -483,22 +480,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                     </div>
                   )}
 
-                  {/* Game Plan tools — only show after Straight Talk is complete or at proposal stage */}
-                  {((lead.pipeline_stage === 'discovery_call' && isStraightTalkComplete) || lead.pipeline_stage === 'proposal') && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={handleCopyScoping}>
-                        {copiedScoping ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copiedScoping ? 'Copied!' : 'Game Plan Link'}
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => window.open(scopingUrl, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Open Game Plan
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Green Light tools */}
+                  {/* Green Light tools — show after Straight Talk complete at proposal stage */}
                   {lead.pipeline_stage === 'proposal' && proposal && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"

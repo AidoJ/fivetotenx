@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Compass, MessageCircle, Puzzle, CheckCircle, Wrench, FlaskConical, ArrowRight, Sparkles } from 'lucide-react';
+import { Compass, MessageCircle, CheckCircle, Wrench, FlaskConical, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 /* Logo-extracted colors for each phase */
@@ -28,27 +28,17 @@ const phases = [
     icon: MessageCircle,
     emoji: '💬',
     label: 'Straight Talk™',
-    phase: 'Phase 2 — Discuss',
-    description: 'We have a focused conversation about what needs to change.',
-    bullets: ['What\'s frustrating you most', 'What\'s costing time or money', 'What a better setup looks like'],
-    outcome: 'We agree on what\'s worth fixing first',
+    phase: 'Phase 2 — Discuss & Plan',
+    description: 'We have a focused conversation about what needs to change and map out a practical solution.',
+    bullets: ['What\'s frustrating you most', 'What\'s costing time or money', 'How automation fits your workflow'],
+    outcome: 'We agree on what\'s worth fixing and how it\'ll work',
     color: PHASE_COLORS.deepBlue,
-  },
-  {
-    icon: Puzzle,
-    emoji: '🧩',
-    label: 'Game Plan™',
-    phase: 'Phase 3 — Plan',
-    description: 'We map out a simple, practical solution.',
-    bullets: ['How the system will work in your business', 'How it fits into your workflow', 'What gets automated'],
-    outcome: 'You see exactly how this will work in your business',
-    color: PHASE_COLORS.purple,
   },
   {
     icon: CheckCircle,
     emoji: '✅',
     label: 'Green Light™',
-    phase: 'Phase 4 — Sign Off',
+    phase: 'Phase 3 — Sign Off',
     description: 'You review and approve everything before we build.',
     bullets: ['Clear scope', 'Clear cost', 'Clear outcome'],
     outcome: 'No surprises. Full confidence moving forward',
@@ -58,7 +48,7 @@ const phases = [
     icon: Wrench,
     emoji: '🛠️',
     label: 'Build™',
-    phase: 'Phase 5 — Build',
+    phase: 'Phase 4 — Build',
     description: 'We develop your system around your actual workflow.',
     bullets: ['Core features built', 'Integrations connected', 'Working version ready'],
     outcome: 'Your solution takes shape',
@@ -68,7 +58,7 @@ const phases = [
     icon: FlaskConical,
     emoji: '🧪',
     label: 'Test, Handover & Go Live™',
-    phase: 'Phase 6 — Test • Train • Launch',
+    phase: 'Phase 5 — Test • Train • Launch',
     description: 'We make sure everything works — and your team is ready to use it from day one.',
     bullets: ['Real-world testing', 'Final refinements', 'Team walkthroughs and training', 'System deployed into your live environment'],
     outcome: 'You\'re confident, your team is ready, and everything is running',

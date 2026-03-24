@@ -762,6 +762,35 @@ const Admin = () => {
       const bName = lead.business_name || 'your business';
       const industry = lead.industry || formData?.industry || '';
 
+      // Get Straight Talk responses
+      const { data: stData } = await supabase
+        .from('straight_talk_responses')
+        .select('*')
+        .eq('assessment_id', lead.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const stResponse = stData?.[0];
+      const stResponses = stResponse?.responses || {};
+
+      // Get analysis data
+      const analysis = (lead.discovery_answers as any)?._analysis || null;
+      const discoveryAnswers = lead.discovery_answers as any || {};
+
+      // Get ST questions for context
+      const industryId = lead.industry_id;
+      let stQuestionMap: Record<string, any> = {};
+      if (industryId) {
+        const { data: stCats } = await supabase.from('scoping_categories').select('*').eq('industry_id', industryId).eq('phase', 'straight_talk');
+        const stCatIds = (stCats || []).map((c: any) => c.id);
+        if (stCatIds.length > 0) {
+          const { data: stQs } = await supabase.from('scoping_questions').select('*').in('category_id', stCatIds);
+          (stQs || []).forEach((q: any) => {
+            const cat = (stCats || []).find((c: any) => c.id === q.category_id);
+            stQuestionMap[q.id] = { question: q.question, category: cat?.label || '' };
+          });
+        }
+      }
+
       // Calculate fixed investment from ROI midpoint
       const buildMid = roi?.pricing ? Math.round((roi.pricing.buildCostLow + roi.pricing.buildCostHigh) / 2) : 0;
 
@@ -770,17 +799,32 @@ const Admin = () => {
       overviewParts.push(`Thank you for the opportunity to work with ${bName}.`);
       
       const dataSources = ['ROI assessment'];
+      if (leadInterviews.length > 0) dataSources.push(`Straight Talk™ session${leadInterviews.length > 1 ? 's' : ''}`);
+      if (analysis) dataSources.push('opportunity analysis');
       if (dd) dataSources.push('deep dive questionnaire');
-      if (leadInterviews.length > 0) dataSources.push(`client interview${leadInterviews.length > 1 ? 's' : ''}`);
       overviewParts.push(`\nBased on the information gathered during the ${dataSources.join(', ')}, this proposal outlines the development of a custom application and automation solution${industry ? ` for the ${industry} sector` : ''}.`);
 
+      // Include analysis summary in overview
+      if (analysis?.summary) {
+        overviewParts.push(`\n${analysis.summary}`);
+      }
+
+      // Include key findings from ST extracted answers
+      const extractedAnswers = Object.entries(discoveryAnswers)
+        .filter(([k, v]: [string, any]) => k !== '_analysis' && v?.answer && v?.confidence !== 'not_found')
+        .map(([k, v]: [string, any]) => v);
+      if (extractedAnswers.length > 0) {
+        const topFindings = extractedAnswers.slice(0, 5).map((a: any) => `• ${a.question || ''}: ${a.answer}`);
+        overviewParts.push(`\nKey findings from Straight Talk™:\n${topFindings.join('\n')}`);
+      }
+
       if (dd?.pain_points) {
-        overviewParts.push(`\nKey challenges identified during discovery:\n${dd.pain_points}`);
+        overviewParts.push(`\nKey challenges identified:\n${dd.pain_points}`);
       }
       if (dd?.primary_goals && dd.primary_goals.length > 0) {
         overviewParts.push(`\nPrimary objectives:\n${dd.primary_goals.map(g => `• ${g}`).join('\n')}`);
       }
-      // Include interview insights in overview
+      // Include interview insights
       if (leadInterviews.length > 0) {
         const interviewInsights = leadInterviews
           .filter(i => i.content || i.transcript)
@@ -789,39 +833,51 @@ const Admin = () => {
             return text.length > 200 ? text.substring(0, 200) + '...' : text;
           });
         if (interviewInsights.length > 0) {
-          overviewParts.push(`\nKey points from client conversations:\n${interviewInsights.map(t => `• ${t}`).join('\n')}`);
+          overviewParts.push(`\nKey points from Straight Talk™ conversations:\n${interviewInsights.map(t => `• ${t}`).join('\n')}`);
         }
       }
       overviewParts.push(`\nThe objective is to deliver a scalable digital platform that supports the ongoing growth and efficiency of ${bName}.`);
 
-      // ── Proposed Solution narrative ──
+      // ── Proposed Solution narrative enriched with analysis ──
       const solutionParts: string[] = [];
-      solutionParts.push(`Based on the discovery process, the proposed solution addresses ${bName}'s core needs:`);
-      if (dd?.pain_points) {
-        solutionParts.push(`\nThe application will directly tackle the identified pain points by automating manual processes and providing streamlined digital workflows.`);
+      solutionParts.push(`Based on the Straight Talk™ process, the proposed solution addresses ${bName}'s core needs:`);
+
+      // Include Big 5 opportunities from analysis
+      if (analysis?.big_hits && analysis.big_hits.length > 0) {
+        solutionParts.push(`\nTop automation opportunities identified:`);
+        analysis.big_hits.forEach((hit: any, i: number) => {
+          solutionParts.push(`\n${i + 1}. ${hit.title} — ${hit.explanation}`);
+          solutionParts.push(`   Recommendation: ${hit.recommendation}`);
+          solutionParts.push(`   Estimated impact: ${formatCurrency(hit.estimated_annual_impact)}/year`);
+        });
       }
+
       if (dd?.current_tools) {
         solutionParts.push(`\nCurrently, ${bName} uses: ${dd.current_tools}. The new system will either replace or integrate with these tools to create a unified platform.`);
-      }
-      if (dd?.current_website) {
-        solutionParts.push(`\nExisting web presence (${dd.current_website}) will be considered in the solution architecture.`);
-      }
-      if (dd?.competitors) {
-        solutionParts.push(`\nCompetitive landscape noted: ${dd.competitors}. The solution will be designed to provide a competitive advantage in this market.`);
       }
       if (formData?.lostSalesReasons && formData.lostSalesReasons.length > 0) {
         solutionParts.push(`\nThe application will specifically address the following friction points that currently contribute to lost sales:\n${formData.lostSalesReasons.map((r: string) => `• ${r}`).join('\n')}`);
       }
 
-      // ── App Features from deep dive must-have + nice-to-have + assessment ──
+      // ── App Features from analysis + deep dive + assessment ──
       const appFeatures: string[] = [];
+      // Derive features from analysis recommendations
+      if (analysis?.big_hits) {
+        analysis.big_hits.forEach((hit: any) => {
+          appFeatures.push(`${hit.title} — ${hit.recommendation}`);
+        });
+      }
+      if (analysis?.quick_wins) {
+        analysis.quick_wins.slice(0, 3).forEach((win: any) => {
+          appFeatures.push(`${win.title} (quick win)`);
+        });
+      }
       if (dd?.must_have_features) {
         dd.must_have_features.split(/[,\n]/).filter(Boolean).forEach(f => appFeatures.push(f.trim()));
       }
       if (dd?.nice_to_have_features) {
         dd.nice_to_have_features.split(/[,\n]/).filter(Boolean).forEach(f => appFeatures.push(`${f.trim()} (nice-to-have)`));
       }
-      // Add features implied by assessment data
       if (formData?.currentFeatures) {
         const missing = (formData.currentFeatures as string[]).filter((f: string) => 
           !appFeatures.some(af => af.toLowerCase().includes(f.toLowerCase()))
@@ -829,7 +885,6 @@ const Admin = () => {
         missing.forEach(f => appFeatures.push(f));
       }
       if (appFeatures.length === 0) {
-        // Only use generic defaults if we truly have no data
         appFeatures.push(
           'Custom web/mobile application interface',
           'Secure database architecture',
@@ -846,7 +901,6 @@ const Admin = () => {
         dd.required_integrations.forEach(i => integrations.push(i));
       }
       if (dd?.current_tools) {
-        // Extract tool names that might need integration
         const toolNames = dd.current_tools.split(/[,\n;]/).map(t => t.trim()).filter(Boolean);
         toolNames.forEach(t => {
           if (!integrations.some(i => i.toLowerCase().includes(t.toLowerCase()))) {
@@ -858,7 +912,7 @@ const Admin = () => {
         integrations.push('CRM platforms', 'Payment systems', 'Scheduling platforms', 'API-based services');
       }
 
-      // ── UX Design informed by pain points ──
+      // ── UX Design ──
       let uxDesign = 'Creation of an intuitive user interface designed to reduce friction for users, simplify operational processes, and improve engagement and retention.';
       if (dd?.pain_points) {
         uxDesign += `\n\nThe UX design will specifically address the usability challenges identified: ${dd.pain_points.substring(0, 200)}${dd.pain_points.length > 200 ? '...' : ''}.`;
@@ -867,8 +921,11 @@ const Admin = () => {
         uxDesign += '\n\nMobile-first design is a priority given the identified impact of poor mobile experience on conversions.';
       }
 
-      // ── Expected Impact with real numbers from ROI ──
+      // ── Expected Impact with real numbers from ROI + analysis ──
       const expectedImpact: string[] = [];
+      if (analysis?.total_potential_impact) {
+        expectedImpact.push(`Total potential impact from automation opportunities — projected ${formatCurrency(analysis.total_potential_impact)}/year`);
+      }
       if (roi?.revenueLift) expectedImpact.push(`Revenue lift from improved conversion — projected ${formatCurrency(roi.revenueLift)}/year`);
       if (roi?.operationalSavings) expectedImpact.push(`Operational savings from automation — projected ${formatCurrency(roi.operationalSavings)}/year (${Math.round(roi.weeklySavingsHours || 0)} hrs/week saved)`);
       if (roi?.retentionImprovement) expectedImpact.push(`Customer retention improvement — projected ${formatCurrency(roi.retentionImprovement)}/year`);
@@ -892,7 +949,7 @@ const Admin = () => {
         ...(formData?.lostSalesReasons?.length > 0 ? ['Conversion optimisation implementation'] : []),
       ];
 
-      // ── Timeline using deep dive timeline + decision timeline ──
+      // ── Timeline ──
       let devDuration = '4–8 weeks';
       if (dd?.timeline) {
         devDuration = dd.timeline;
@@ -928,6 +985,8 @@ const Admin = () => {
         timelinePhases,
         investmentAmount: buildMid,
         investmentNote,
+        // Include analysis data for reference
+        analysisData: analysis || null,
         paymentStructure: [
           { label: 'Deposit', percentage: 40, description: 'Payable upon acceptance of this proposal to commence work.' },
           { label: 'Development Milestone', percentage: 30, description: 'Payable at agreed development milestone.' },
@@ -958,7 +1017,7 @@ const Admin = () => {
       }).select().single();
       if (error) throw error;
       setProposals(prev => [...prev, data as ProposalRecord]);
-      toast({ title: 'Proposal Draft Created ✅', description: 'Synthesised from assessment, deep dive & interviews. Opening for review and editing...' });
+      toast({ title: 'Proposal Draft Created ✅', description: 'Synthesised from Reality Check™, Straight Talk™ & opportunity analysis. Opening for review...' });
       window.open(`${window.location.origin}/proposal/${data.id}?admin=1`, '_blank');
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Failed to create proposal.', variant: 'destructive' });
