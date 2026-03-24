@@ -530,18 +530,22 @@ const LeadCard = ({
 
                   {/* Stage reminder */}
                   {['qualified', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
-                    <div className="flex items-center gap-2 bg-amber-500/5 border border-amber-500/20 rounded-md px-2 py-1.5">
-                      <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
-                      <span className="text-[10px] text-amber-700">Reminder</span>
-                      <Input type="number" min={1} max={720}
-                        defaultValue={(lead as any).stage_reminder_days || 72}
-                        className="h-6 w-14 text-[10px] text-center"
-                        onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
-                      <span className="text-[10px] text-muted-foreground">hrs</span>
+                    <div className="flex flex-wrap items-center gap-1.5 bg-amber-500/5 border border-amber-500/20 rounded-md px-2 py-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                        <span className="text-[10px] text-amber-700 whitespace-nowrap">Reminder</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Input type="number" min={1} max={720}
+                          defaultValue={(lead as any).stage_reminder_days || 72}
+                          className="h-6 w-12 text-[10px] text-center"
+                          onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
+                        <span className="text-[9px] text-muted-foreground">hrs</span>
+                      </div>
                       {(lead as any).stage_reminder_sent && (
-                        <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20">Sent ✓</Badge>
+                        <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20 shrink-0">Sent ✓</Badge>
                       )}
-                      <Button size="sm" variant="ghost" className="h-5 text-[9px] px-1.5 text-amber-700 ml-auto"
+                      <Button size="sm" variant="ghost" className="h-5 text-[9px] px-1.5 text-amber-700 shrink-0 ml-auto"
                         onClick={() => onSendReminder(lead)}>
                         <Send className="w-3 h-3" /> Now
                       </Button>
