@@ -408,6 +408,10 @@ const LeadCard = ({
                           await onAddInterview(lead.id, 'Straight Talk Interview', '', file);
                           setUploading(false);
                           if (audioInputRef.current) audioInputRef.current.value = '';
+                          // Auto-mark Straight Talk as complete
+                          if (!isStraightTalkComplete) {
+                            onMarkDiscoveryReady(lead.id, true);
+                          }
                         }}
                       />
                       <Button
