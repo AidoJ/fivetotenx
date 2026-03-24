@@ -25,6 +25,7 @@ import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
 import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
 import CallGuide from '@/components/admin/CallGuide';
 import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
+import AutomationSettings from '@/components/admin/AutomationSettings';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
