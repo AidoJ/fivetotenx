@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -1101,8 +1102,18 @@ const WebsitePage = () => {
     }, 100);
   };
 
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden relative">
+      {/* Staff Login */}
+      <button
+        onClick={() => navigate('/admin')}
+        className="fixed top-4 right-4 z-50 text-xs opacity-30 hover:opacity-100 transition-opacity px-3 py-1.5 rounded-md"
+        style={{ color: 'hsl(220 15% 55%)' }}
+      >
+        Staff Login
+      </button>
       {/* 1. TEASER — Hero with CTA */}
       <HeroSection onStartAssessment={handleStartAssessment} />
       {/* Reality Check™ — inline assessment */}
