@@ -763,7 +763,13 @@ const Admin = () => {
       const industry = lead.industry || formData?.industry || '';
 
       // Get Straight Talk responses
-      const stResponse = straightTalkResponses.find((s: any) => s.assessment_id === lead.id);
+      const { data: stData } = await supabase
+        .from('straight_talk_responses')
+        .select('*')
+        .eq('assessment_id', lead.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const stResponse = stData?.[0];
       const stResponses = stResponse?.responses || {};
 
       // Get analysis data
@@ -774,12 +780,15 @@ const Admin = () => {
       const industryId = lead.industry_id;
       let stQuestionMap: Record<string, any> = {};
       if (industryId) {
-        const stCats = allCategories.filter((c: any) => c.industry_id === industryId && c.phase === 'straight_talk');
-        const stCatIds = stCats.map((c: any) => c.id);
-        allQuestions.filter((q: any) => stCatIds.includes(q.category_id)).forEach((q: any) => {
-          const cat = stCats.find((c: any) => c.id === q.category_id);
-          stQuestionMap[q.id] = { question: q.question, category: cat?.label || '' };
-        });
+        const { data: stCats } = await supabase.from('scoping_categories').select('*').eq('industry_id', industryId).eq('phase', 'straight_talk');
+        const stCatIds = (stCats || []).map((c: any) => c.id);
+        if (stCatIds.length > 0) {
+          const { data: stQs } = await supabase.from('scoping_questions').select('*').in('category_id', stCatIds);
+          (stQs || []).forEach((q: any) => {
+            const cat = (stCats || []).find((c: any) => c.id === q.category_id);
+            stQuestionMap[q.id] = { question: q.question, category: cat?.label || '' };
+          });
+        }
       }
 
       // Calculate fixed investment from ROI midpoint
