@@ -65,7 +65,7 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
     className="relative z-10 text-center w-full max-w-4xl mx-auto space-y-8 px-2">
     
       <img
-      alt="5to10X — Build • Innovate • Scale"
+      alt="5to10X — Simplify • Connect • Multiply"
       className="max-h-56 sm:max-h-[28rem] md:max-h-[36rem] w-auto max-w-full mx-auto drop-shadow-2xl"
       src="/lovable-uploads/840e15a9-3ed0-4c4b-9699-1a4d9a046d8c.webp" />
     
