@@ -134,7 +134,6 @@ const CompletionChips = React.forwardRef<HTMLDivElement, {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
     { label: 'Talked', done: isStraightTalkComplete },
-    { label: 'Game Plan', done: !!scopingResponse?.completed },
     { label: 'Green Light', done: !!proposal },
     { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
   ];
