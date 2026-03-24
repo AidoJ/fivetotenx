@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Save, Loader2, Building2, Users, DollarSign, Target,
   Clock, Globe, TrendingUp, ShoppingCart, BarChart3, Zap, Mail, Phone,
-  MessageSquare, Radar, Puzzle, FileText,
+  MessageSquare, Radar, Puzzle, FileText, Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import logo from '@/assets/logo-5to10x-color.webp';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
+import OpportunityAnalysis from '@/components/admin/OpportunityAnalysis';
 
 type Assessment = Tables<'roi_assessments'>;
 
@@ -231,6 +232,9 @@ const ClientDetail = () => {
             <TabsTrigger value="game_plan" className="gap-1.5 text-xs">
               <Puzzle className="w-3.5 h-3.5" /> Game Plan™
               {!scopingResponse && <Badge variant="secondary" className="text-[8px] h-3.5 ml-1">Empty</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="gap-1.5 text-xs">
+              <Sparkles className="w-3.5 h-3.5" /> Analysis
             </TabsTrigger>
             <TabsTrigger value="roi_summary" className="gap-1.5 text-xs">
               <DollarSign className="w-3.5 h-3.5" /> ROI Summary
@@ -529,6 +533,18 @@ const ClientDetail = () => {
                 )}
               </div>
             )}
+          </TabsContent>
+
+          {/* ── ANALYSIS TAB ── */}
+          <TabsContent value="analysis">
+            <OpportunityAnalysis
+              assessmentId={lead.id}
+              existingAnalysis={((lead.discovery_answers as any)?._analysis) || null}
+              onUpdate={(analysis) => {
+                const updated = { ...(lead.discovery_answers as any || {}), _analysis: analysis };
+                setLead({ ...lead, discovery_answers: updated as any });
+              }}
+            />
           </TabsContent>
 
           {/* ── ROI SUMMARY TAB ── */}
