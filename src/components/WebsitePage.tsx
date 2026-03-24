@@ -80,19 +80,25 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
       <h1
       className="text-xl sm:text-2xl md:text-5xl lg:text-6xl font-display font-bold leading-tight break-words"
       style={{ color: 'hsl(0 0% 95%)' }}>
-      
         What if your business could run{' '}
         <span style={{ color: '#1789CE' }}>
-          5–10x more efficiently?
-        </span>
+          5–10x more efficiently
+        </span>{' '}
+        — without replacing your systems or hiring more staff?
       </h1>
 
       <p
       className="text-sm sm:text-base md:text-xl max-w-2xl mx-auto leading-relaxed"
       style={{ color: 'hsl(220 20% 72%)' }}>
-      
-        Discover how AI-powered operational apps can eliminate manual work and transform your business in weeks.
+        We help small and mid-sized businesses redesign how work flows through their operations using practical AI and connected automation.
       </p>
+
+      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm sm:text-base md:text-lg font-display font-semibold" style={{ color: 'hsl(0 0% 85%)' }}>
+        <span>Less coordination.</span>
+        <span>Less admin.</span>
+        <span>Fewer workarounds.</span>
+        <span style={{ color: '#D88E08' }}>More momentum.</span>
+      </div>
 
         <div className="flex flex-col items-center justify-center gap-4 pt-4 w-full">
           <Button
@@ -100,9 +106,8 @@ const HeroSection = ({ onStartAssessment }: {onStartAssessment: () => void;}) =>
         size="lg"
         className="text-sm sm:text-base md:text-lg px-6 md:px-10 py-6 gap-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 whitespace-normal"
         style={{ background: '#1789CE', color: 'white', border: 'none', boxShadow: '0 0 30px #1789CE33' }}>
-        
             <span className="flex items-center gap-2 text-center">
-              Discover Your Hidden Efficiency
+              Discover Where Efficiency Is Hiding
               <ArrowRight className="w-5 h-5 shrink-0" />
             </span>
           </Button>
