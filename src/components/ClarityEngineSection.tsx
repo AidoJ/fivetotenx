@@ -31,7 +31,7 @@ const phases = [
     description: 'We have a focused conversation about what needs to change and map out a practical solution.',
     bullets: ['What\'s frustrating you most', 'What\'s costing time or money', 'How automation fits your workflow'],
     outcome: 'We agree on what\'s worth fixing and how it\'ll work',
-    color: PHASE_COLORS.deepBlue,
+    color: PHASE_COLORS.purple,
   },
   {
     icon: CheckCircle,
