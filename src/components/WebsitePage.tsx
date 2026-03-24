@@ -952,7 +952,7 @@ const FooterSection = () =>
          </span>
       </div>
       <div className="flex items-center gap-6">
-        <span className="text-xs" style={{ color: '#398C08', opacity: 0.5 }}>Automate • Accelerate • Multiply</span>
+        <span className="text-xs" style={{ color: '#398C08', opacity: 0.5 }}>Fix the workflow. Multiply the output.</span>
       </div>
     </div>
   </footer>;
