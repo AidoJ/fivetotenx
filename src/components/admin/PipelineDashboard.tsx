@@ -1,3 +1,4 @@
+import React from 'react';
 import { Tables } from '@/integrations/supabase/types';
 import { Badge } from '@/components/ui/badge';
 import { 
