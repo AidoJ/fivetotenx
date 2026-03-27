@@ -197,6 +197,7 @@ export interface LeadCardProps {
   onSendReminder: (lead: Assessment) => void;
   onScheduleReminder: (id: string, days: number | null, scheduledAt: string | null) => void;
   onSendDiscoveryInvite: (lead: Assessment) => void;
+  onSendSelfInterview: (lead: Assessment) => void;
   onMarkDiscoveryReady: (id: string, ready: boolean) => void;
   onUpdateDiscoveryAnswers: (id: string, answers: any) => void;
   onUpdateChecklist: (id: string, checklist: Record<string, boolean>) => void;
