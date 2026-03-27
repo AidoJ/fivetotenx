@@ -10,6 +10,7 @@ import {
   Mic, Square, Play, RotateCcw, ArrowRight, ArrowLeft, CheckCircle,
   Loader2, Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare,
   UserCircle, Plug, Shield, Rocket, Hammer, Briefcase, Send, Pause,
+  ExternalLink, Save,
 } from 'lucide-react';
 import logo from '@/assets/logo-5to10x-color.webp';
 
@@ -17,6 +18,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare,
   UserCircle, Plug, Shield, Rocket, Hammer, Briefcase,
 };
+
+const CALENDLY_REFINEMENT_URL = 'https://calendly.com/aidan-rejuvenators/discovery';
 
 interface Category { id: string; label: string; icon: string; sort_order: number; }
 interface Question { id: string; category_id: string; question: string; detail_prompt: string; sort_order: number; }
@@ -49,6 +52,9 @@ const SelfInterview = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [started, setStarted] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [existingResponseId, setExistingResponseId] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -97,16 +103,24 @@ const SelfInterview = () => {
         setCategories(cats);
         setQuestions(allQ.filter((q: Question) => catIds.includes(q.category_id)));
 
-        // Load existing responses
+        // Load existing responses (resume support)
         const { data: existing } = await supabase
           .from('straight_talk_responses')
-          .select('responses')
+          .select('id, responses, completed')
           .eq('assessment_id', assessmentId)
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (existing?.[0]?.responses) {
-          setResponses(existing[0].responses as Record<string, string>);
+        if (existing?.[0]) {
+          setExistingResponseId(existing[0].id);
+          if (existing[0].responses && Object.keys(existing[0].responses as any).length > 0) {
+            setResponses(existing[0].responses as Record<string, string>);
+            // If already started (has responses), skip intro
+            setStarted(true);
+          }
+          if (existing[0].completed) {
+            setSubmitted(true);
+          }
         }
       }
       setLoading(false);
@@ -120,6 +134,40 @@ const SelfInterview = () => {
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [audioUrl]);
+
+  // ── Auto-save to DB after each answer ──
+  const saveResponsesToDb = useCallback(async (updatedResponses: Record<string, string>) => {
+    if (!assessmentId) return;
+    setAutoSaving(true);
+    try {
+      const payload = {
+        responses: JSON.parse(JSON.stringify(updatedResponses)),
+        updated_at: new Date().toISOString(),
+      };
+
+      if (existingResponseId) {
+        await supabase.from('straight_talk_responses')
+          .update(payload)
+          .eq('id', existingResponseId);
+      } else {
+        const { data } = await supabase.from('straight_talk_responses')
+          .insert([{
+            assessment_id: assessmentId,
+            industry: 'self-interview',
+            responses: JSON.parse(JSON.stringify(updatedResponses)),
+            completed: false,
+          }])
+          .select('id')
+          .single();
+        if (data) setExistingResponseId(data.id);
+      }
+      setLastSaved(new Date());
+    } catch (err) {
+      console.error('Auto-save failed:', err);
+    } finally {
+      setAutoSaving(false);
+    }
+  }, [assessmentId, existingResponseId]);
 
   const startRecording = useCallback(async () => {
     try {
@@ -199,8 +247,11 @@ const SelfInterview = () => {
 
       const { transcript } = await res.json();
       if (transcript) {
-        setResponses(prev => ({ ...prev, [currentQuestion.id]: transcript }));
-        toast({ title: 'Answer saved ✅' });
+        const updatedResponses = { ...responses, [currentQuestion.id]: transcript };
+        setResponses(updatedResponses);
+        // Auto-save to DB immediately
+        await saveResponsesToDb(updatedResponses);
+        toast({ title: 'Answer saved ✅', description: 'Progress saved automatically' });
       }
     } catch (err: any) {
       console.error('Transcription error:', err);
@@ -208,7 +259,7 @@ const SelfInterview = () => {
     } finally {
       setTranscribing(false);
     }
-  }, [audioBlob, currentQuestion, toast]);
+  }, [audioBlob, currentQuestion, toast, responses, saveResponsesToDb]);
 
   const goNext = useCallback(() => {
     resetRecording();
@@ -228,22 +279,15 @@ const SelfInterview = () => {
     if (!assessmentId) return;
     setSubmitting(true);
     try {
-      // Check for existing response to update or insert
-      const { data: existing } = await supabase
-        .from('straight_talk_responses')
-        .select('id')
-        .eq('assessment_id', assessmentId)
-        .limit(1);
-
-      if (existing && existing.length > 0) {
+      // Mark as completed
+      if (existingResponseId) {
         await supabase.from('straight_talk_responses')
           .update({ responses: JSON.parse(JSON.stringify(responses)), completed: true, updated_at: new Date().toISOString() })
-          .eq('id', existing[0].id);
+          .eq('id', existingResponseId);
       } else {
-        const industrySlug = categories[0] ? 'self-interview' : 'unknown';
         await supabase.from('straight_talk_responses').insert([{
           assessment_id: assessmentId,
-          industry: industrySlug,
+          industry: 'self-interview',
           responses: JSON.parse(JSON.stringify(responses)),
           completed: true,
         }]);
@@ -251,7 +295,7 @@ const SelfInterview = () => {
 
       // Advance pipeline
       await supabase.from('roi_assessments')
-        .update({ pipeline_stage: 'deep_dive_complete' as any })
+        .update({ pipeline_stage: 'deep_dive_complete' as any, discovery_ready: true })
         .eq('id', assessmentId);
 
       // Notify admin
@@ -305,6 +349,7 @@ const SelfInterview = () => {
     );
   }
 
+  // ── COMPLETION SCREEN with refinement call booking ──
   if (submitted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -316,7 +361,26 @@ const SelfInterview = () => {
           <p className="text-muted-foreground">
             Your self-interview is complete. We'll review your answers and come prepared with tailored solutions for {businessName || 'your business'}.
           </p>
-          <p className="text-sm text-muted-foreground">We'll be in touch shortly to schedule a focused solutions call.</p>
+
+          {/* Refinement Call CTA */}
+          <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-6 space-y-3">
+            <h3 className="text-lg font-bold text-foreground">Ready to go deeper?</h3>
+            <p className="text-sm text-muted-foreground">
+              Book a short refinement call so we can dig into the key areas and come to you with a concrete plan.
+            </p>
+            <Button
+              size="lg"
+              className="gap-2 w-full"
+              onClick={() => window.open(`${CALENDLY_REFINEMENT_URL}?name=${encodeURIComponent(contactName)}&email=`, '_blank')}
+            >
+              <Calendar className="w-4 h-4" /> Book Refinement Call
+            </Button>
+            <p className="text-xs text-muted-foreground">30 minutes · Focused on solutions</p>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            Or we'll be in touch shortly to arrange this.
+          </p>
         </motion.div>
       </div>
     );
@@ -335,6 +399,7 @@ const SelfInterview = () => {
 
   // ── INTRO SCREEN ──
   if (!started) {
+    const existingAnswers = Object.keys(responses).filter(k => allQuestions.some(q => q.id === k)).length;
     return (
       <div className="min-h-screen bg-background">
         <div className="border-b border-border bg-card">
@@ -363,6 +428,15 @@ const SelfInterview = () => {
             </p>
           </motion.div>
 
+          {existingAnswers > 0 && (
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-4">
+              <p className="text-sm font-medium text-primary">
+                Welcome back! You've answered {existingAnswers} of {allQuestions.length} questions.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Your progress was saved — pick up where you left off.</p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto text-left">
             <div className="rounded-xl bg-card border border-border p-4 space-y-1">
               <Mic className="w-5 h-5 text-primary" />
@@ -383,7 +457,7 @@ const SelfInterview = () => {
 
           <div className="space-y-3">
             <Button size="lg" className="gap-2 px-8" onClick={() => setStarted(true)}>
-              Start Self-Interview <ArrowRight className="w-4 h-4" />
+              {existingAnswers > 0 ? 'Continue Self-Interview' : 'Start Self-Interview'} <ArrowRight className="w-4 h-4" />
             </Button>
             <p className="text-xs text-muted-foreground">Takes about 10–15 minutes · Your progress saves automatically</p>
           </div>
@@ -405,10 +479,22 @@ const SelfInterview = () => {
         <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
           <img src={logo} alt="5to10x" className="h-7" />
           <div className="flex items-center gap-3">
+            {/* Auto-save indicator */}
+            <div className="flex items-center gap-1.5">
+              {autoSaving ? (
+                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+                </span>
+              ) : lastSaved ? (
+                <span className="flex items-center gap-1 text-[10px] text-primary/70">
+                  <Save className="w-3 h-3" /> Saved
+                </span>
+              ) : null}
+            </div>
             <Badge variant="outline" className="text-[10px]">
               {answeredCount}/{allQuestions.length} answered
             </Badge>
-            <span className="text-xs text-muted-foreground">{businessName}</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">{businessName}</span>
           </div>
         </div>
         <Progress value={progress} className="h-1" />

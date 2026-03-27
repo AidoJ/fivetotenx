@@ -197,6 +197,7 @@ export interface LeadCardProps {
   onSendReminder: (lead: Assessment) => void;
   onScheduleReminder: (id: string, days: number | null, scheduledAt: string | null) => void;
   onSendDiscoveryInvite: (lead: Assessment) => void;
+  onSendSelfInterview: (lead: Assessment) => void;
   onMarkDiscoveryReady: (id: string, ready: boolean) => void;
   onUpdateDiscoveryAnswers: (id: string, answers: any) => void;
   onUpdateChecklist: (id: string, checklist: Record<string, boolean>) => void;
@@ -213,7 +214,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   lead, onMove, onSendDeepDive, onUpdateFollowUp, deepDive, notes, onAddNote,
   onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal,
   interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder,
-  onSendDiscoveryInvite, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
+  onSendDiscoveryInvite, onSendSelfInterview, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse,
 }, _ref) => {
   const navigate = useNavigate();
@@ -451,9 +452,13 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                     </div>
                   )}
 
-                  {/* Booking tools — only show when no booking exists yet */}
+                  {/* Booking & Self-Interview tools — only show when no booking exists yet */}
                   {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && !hasInterviews && (
                     <div className="flex items-center gap-1.5 flex-wrap">
+                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
+                        onClick={() => onSendSelfInterview(lead)}>
+                        <Mic className="w-3 h-3" /> Send Self-Interview
+                      </Button>
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
                         onClick={() => window.open(CALENDLY_URL, '_blank')}>
                         <ExternalLink className="w-3 h-3" /> Calendly
