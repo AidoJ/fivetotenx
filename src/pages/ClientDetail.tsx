@@ -415,12 +415,22 @@ const ClientDetail = () => {
 
             {/* Formal ST questionnaire responses */}
             {!straightTalk && interviews.filter((i: any) => i.transcript).length === 0 && (!lead.discovery_answers || Object.keys(lead.discovery_answers as any).length === 0) ? (
-              <div className="rounded-xl border border-border bg-card p-12 text-center">
+              <div className="rounded-xl border border-border bg-card p-12 text-center space-y-4">
                 <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <h3 className="text-lg font-bold text-foreground mb-1">No Straight Talk™ responses yet</h3>
                 <p className="text-sm text-muted-foreground">
-                  Upload a Zoom recording or wait for the client to complete the questionnaire.
+                  Upload a Zoom recording, send a self-interview, or wait for the client to complete the questionnaire.
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleSendSelfInterview}
+                  disabled={sendingSelfInterview}
+                >
+                  {sendingSelfInterview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                  Send Self-Interview Link
+                </Button>
               </div>
             ) : straightTalk ? (
               <div className="space-y-6">
