@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, Save, Loader2, Building2, Users, DollarSign, Target,
   Clock, Globe, TrendingUp, ShoppingCart, BarChart3, Zap, Mail, Phone,
-  MessageSquare, Radar, Puzzle, FileText, Sparkles,
+  MessageSquare, Radar, Puzzle, FileText, Sparkles, Mic, Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +67,7 @@ const ClientDetail = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [sendingSelfInterview, setSendingSelfInterview] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -160,6 +161,27 @@ const ClientDetail = () => {
       toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
+  };
+
+  const handleSendSelfInterview = async () => {
+    if (!lead) return;
+    setSendingSelfInterview(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-self-interview', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          assessmentId: lead.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Self-Interview invite sent ✅', description: `Email sent to ${lead.contact_email}` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message, variant: 'destructive' });
+    } finally {
+      setSendingSelfInterview(false);
+    }
   };
 
   if (loading) {
@@ -393,12 +415,22 @@ const ClientDetail = () => {
 
             {/* Formal ST questionnaire responses */}
             {!straightTalk && interviews.filter((i: any) => i.transcript).length === 0 && (!lead.discovery_answers || Object.keys(lead.discovery_answers as any).length === 0) ? (
-              <div className="rounded-xl border border-border bg-card p-12 text-center">
+              <div className="rounded-xl border border-border bg-card p-12 text-center space-y-4">
                 <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                 <h3 className="text-lg font-bold text-foreground mb-1">No Straight Talk™ responses yet</h3>
                 <p className="text-sm text-muted-foreground">
-                  Upload a Zoom recording or wait for the client to complete the questionnaire.
+                  Upload a Zoom recording, send a self-interview, or wait for the client to complete the questionnaire.
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleSendSelfInterview}
+                  disabled={sendingSelfInterview}
+                >
+                  {sendingSelfInterview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                  Send Self-Interview Link
+                </Button>
               </div>
             ) : straightTalk ? (
               <div className="space-y-6">

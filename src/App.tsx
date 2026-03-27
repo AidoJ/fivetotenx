@@ -11,6 +11,7 @@ import Proposal from "./pages/Proposal";
 // ScopingQuestionnaire retired — Game Plan merged into Straight Talk
 import StraightTalk from "./pages/StraightTalk";
 import ClientDetail from "./pages/ClientDetail";
+import SelfInterview from "./pages/SelfInterview";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/client/:id" element={<ClientDetail />} />
           <Route path="/proposal/:id" element={<Proposal />} />
+          <Route path="/self-interview" element={<SelfInterview />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
