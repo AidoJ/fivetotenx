@@ -1421,6 +1421,7 @@ const Admin = () => {
                           onSendReminder={handleSendReminder}
                           onScheduleReminder={handleScheduleReminder}
                           onSendDiscoveryInvite={handleSendDiscoveryInvite}
+                          onSendSelfInterview={handleSendSelfInterview}
                           onMarkDiscoveryReady={handleMarkDiscoveryReady}
                           onUpdateDiscoveryAnswers={handleUpdateDiscoveryAnswers}
                           onUpdateChecklist={handleUpdateChecklist}
