@@ -387,7 +387,7 @@ const SelfInterview = () => {
             </Button>
             <p className="text-xs text-muted-foreground">Takes about 10–15 minutes · Your progress saves automatically</p>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
