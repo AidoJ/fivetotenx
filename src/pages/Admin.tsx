@@ -1253,39 +1253,24 @@ const Admin = () => {
       setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
       toast({ title: ready ? 'Straight Talk™ marked complete ✅' : 'Straight Talk™ reopened' });
 
-      // Auto-send Game Plan link if enabled
+      // Auto-move to Green Light if enabled
       if (ready) {
         try {
           const { data: autoSettings } = await supabase
             .from('automation_settings')
-            .select('auto_send_gameplan_on_st_complete')
+            .select('auto_prepare_proposal_on_gp_complete')
             .limit(1)
             .single();
 
-          if (autoSettings?.auto_send_gameplan_on_st_complete) {
-            const lead = leads.find(l => l.id === id);
-            if (lead && !lead.scoping_sent) {
-              const scopingUrl = `${window.location.origin}/scoping?id=${id}`;
-              await supabase.functions.invoke('send-discovery-invite', {
-                body: {
-                  contactName: lead.contact_name,
-                  contactEmail: lead.contact_email,
-                  businessName: lead.business_name,
-                  assessmentId: id,
-                  templateKey: 'scoping_invite',
-                  scopingUrl,
-                },
-              });
-              await supabase.from('roi_assessments').update({
-                scoping_sent: true,
-                scoping_sent_at: new Date().toISOString(),
-              }).eq('id', id);
-              setLeads(prev => prev.map(l => l.id === id ? { ...l, scoping_sent: true, scoping_sent_at: new Date().toISOString() } as any : l));
-              toast({ title: 'Game Plan™ link auto-sent ✅' });
-            }
+          if (autoSettings?.auto_prepare_proposal_on_gp_complete) {
+            await supabase.from('roi_assessments').update({
+              pipeline_stage: 'proposal' as any,
+            }).eq('id', id);
+            setLeads(prev => prev.map(l => l.id === id ? { ...l, pipeline_stage: 'proposal' } as any : l));
+            toast({ title: 'Auto-moved to Green Light™ ✅' });
           }
         } catch (autoErr) {
-          console.error('Auto-send Game Plan failed:', autoErr);
+          console.error('Auto-move to Green Light failed:', autoErr);
         }
       }
     }
@@ -1315,8 +1300,7 @@ const Admin = () => {
   // Mirror dashboard's 6 consolidated stages
   const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
     { id: 'assessment', label: 'Reality Check™', icon: ClipboardList, stages: ['assessment', 'qualified'] },
-    { id: 'discovery', label: 'Straight Talk™', icon: Phone, stages: ['discovery_call'], filter: (l) => !(l as any).scoping_sent },
-    { id: 'scoping', label: 'Game Plan™', icon: Eye, stages: ['discovery_call'], filter: (l) => !!(l as any).scoping_sent },
+    { id: 'discovery', label: 'Straight Talk™', icon: Phone, stages: ['discovery_call', 'deep_dive_sent', 'deep_dive_complete'] },
     { id: 'proposal', label: 'Green Light™', icon: FileText, stages: ['proposal'] },
     { id: 'build', label: 'Build™', icon: Wrench, stages: ['signed', 'build_refinement'] },
     { id: 'go_live', label: 'Go Live™', icon: Check, stages: ['completed'] },
