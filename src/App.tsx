@@ -11,6 +11,7 @@ import Proposal from "./pages/Proposal";
 // ScopingQuestionnaire retired — Game Plan merged into Straight Talk
 import StraightTalk from "./pages/StraightTalk";
 import ClientDetail from "./pages/ClientDetail";
+import SelfInterview from "./pages/SelfInterview";
 
 const queryClient = new QueryClient();
 
