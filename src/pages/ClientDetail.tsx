@@ -182,6 +182,7 @@ const ClientDetail = () => {
     } finally {
       setSendingSelfInterview(false);
     }
+  };
 
   if (loading) {
     return (
