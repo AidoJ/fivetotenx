@@ -1193,6 +1193,30 @@ const Admin = () => {
     }
   };
 
+  const handleSendSelfInterview = async (lead: Assessment) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-self-interview', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          assessmentId: lead.id,
+        },
+      });
+      if (error) throw error;
+      // Move to Straight Talk stage if not already there
+      if (['qualified', 'deep_dive_complete'].includes(lead.pipeline_stage)) {
+        await supabase.from('roi_assessments').update({
+          pipeline_stage: 'discovery_call' as any,
+        }).eq('id', lead.id);
+        setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, pipeline_stage: 'discovery_call' as PipelineStage } : l));
+      }
+      toast({ title: 'Self-Interview Invite Sent ✅', description: `Choice email sent to ${lead.contact_email}` });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to send self-interview invite.', variant: 'destructive' });
+    }
+  };
+
   const handleUpdateDiscoveryAnswers = (id: string, answers: any) => {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, discovery_answers: answers } : l));
   };
