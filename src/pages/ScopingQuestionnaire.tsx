@@ -172,7 +172,7 @@ const ScopingQuestionnaire = () => {
         .update({ pipeline_stage: 'proposal' as any })
         .eq('id', assessmentId);
 
-      // Fire admin notification for Game Plan completion (fire and forget)
+      // Fire admin notification for Straight Talk completion (fire and forget)
       const { data: assessment } = await supabase
         .from('roi_assessments')
         .select('contact_name, contact_email, business_name')

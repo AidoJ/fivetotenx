@@ -264,7 +264,7 @@ const StraightTalk = () => {
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground">Thank You, {contactName}!</h1>
           <p className="text-muted-foreground">
-            Your Straight Talk™ responses have been received. Our team will review your answers and send you an invitation to begin the Game Plan™ — where we map out the practical solution for your business.
+            Your Straight Talk™ responses have been received. Our team will analyse your answers and prepare a tailored Green Light™ proposal for your business.
           </p>
           <p className="text-sm text-muted-foreground">We'll be in touch within 24–48 hours.</p>
         </motion.div>
