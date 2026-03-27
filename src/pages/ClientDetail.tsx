@@ -67,6 +67,7 @@ const ClientDetail = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [sendingSelfInterview, setSendingSelfInterview] = useState(false);
 
   useEffect(() => {
     if (!id) return;
