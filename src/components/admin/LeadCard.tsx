@@ -232,7 +232,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   const isStraightTalkComplete = (lead as any).discovery_ready === true;
   const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
   const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
-  const straightTalkUrl = `${window.location.origin}/straight-talk?id=${lead.id}`;
+  const straightTalkUrl = `${window.location.origin}/self-interview?id=${lead.id}`;
   const slaColor = getSlaColor(lead);
 
   const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isStraightTalkComplete);
@@ -470,7 +470,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                     </div>
                   )}
 
-                  {/* Straight Talk link — only before ST is complete */}
+                  {/* Self-Interview link (audio + resume) — only before ST is complete */}
                   {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && !isStraightTalkComplete && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
@@ -480,7 +480,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                           setTimeout(() => setCopied(false), 2000);
                         }}>
                         {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copied ? 'Copied!' : 'Straight Talk Link'}
+                        {copied ? 'Copied!' : 'Self-Interview Link'}
                       </Button>
                     </div>
                   )}
