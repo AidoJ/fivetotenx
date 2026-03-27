@@ -74,7 +74,7 @@ const SelfInterview = () => {
     const load = async () => {
       const { data: assessment } = await supabase
         .from('roi_assessments')
-        .select('business_name, contact_name, industry_id')
+        .select('business_name, contact_name, industry_id, discovery_answers')
         .eq('id', assessmentId)
         .single();
 
@@ -103,7 +103,22 @@ const SelfInterview = () => {
         setCategories(cats);
         setQuestions(allQ.filter((q: Question) => catIds.includes(q.category_id)));
 
-        // Load existing responses (resume support)
+        // Build merged responses: start with discovery_answers (extracted from transcripts)
+        let merged: Record<string, string> = {};
+        const discoveryAnswers = (assessment.discovery_answers || {}) as Record<string, any>;
+        // discovery_answers keys are "category-slug__shortId" — extract the shortId part
+        for (const [key, val] of Object.entries(discoveryAnswers)) {
+          const shortId = key.split('__')[1];
+          if (!shortId) continue;
+          // Find the full question ID that starts with this shortId
+          const matchedQ = allQ.find((q: Question) => q.id.startsWith(shortId) && catIds.includes(q.category_id));
+          if (matchedQ) {
+            const answer = typeof val === 'string' ? val : (val as any)?.answer || JSON.stringify(val);
+            merged[matchedQ.id] = answer;
+          }
+        }
+
+        // Load existing self-interview responses (resume support) — these override transcript answers
         const { data: existing } = await supabase
           .from('straight_talk_responses')
           .select('id, responses, completed')
@@ -113,14 +128,17 @@ const SelfInterview = () => {
 
         if (existing?.[0]) {
           setExistingResponseId(existing[0].id);
-          if (existing[0].responses && Object.keys(existing[0].responses as any).length > 0) {
-            setResponses(existing[0].responses as Record<string, string>);
-            // If already started (has responses), skip intro
-            setStarted(true);
-          }
+          const savedResponses = (existing[0].responses || {}) as Record<string, string>;
+          // Self-interview responses take priority over transcript extractions
+          merged = { ...merged, ...savedResponses };
           if (existing[0].completed) {
             setSubmitted(true);
           }
+        }
+
+        if (Object.keys(merged).length > 0) {
+          setResponses(merged);
+          setStarted(true);
         }
       }
       setLoading(false);
