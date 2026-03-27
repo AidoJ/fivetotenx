@@ -163,6 +163,26 @@ const ClientDetail = () => {
     setSaving(false);
   };
 
+  const handleSendSelfInterview = async () => {
+    if (!lead) return;
+    setSendingSelfInterview(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-self-interview', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          assessmentId: lead.id,
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Self-Interview invite sent ✅', description: `Email sent to ${lead.contact_email}` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message, variant: 'destructive' });
+    } finally {
+      setSendingSelfInterview(false);
+    }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
