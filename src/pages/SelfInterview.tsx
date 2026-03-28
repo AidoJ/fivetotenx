@@ -41,10 +41,19 @@ const SelfInterview = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
 
-  // Recording state — per question
+  // Recording state — per question (tracks both answer and note recordings)
   const [recordingQuestionId, setRecordingQuestionId] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [transcribingId, setTranscribingId] = useState<string | null>(null);
+
+  // Separate recording state for analyst notes
+  const [noteRecordingId, setNoteRecordingId] = useState<string | null>(null);
+  const [noteRecordingTime, setNoteRecordingTime] = useState(0);
+  const [noteTranscribingId, setNoteTranscribingId] = useState<string | null>(null);
+  const noteMediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const noteChunksRef = useRef<Blob[]>([]);
+  const noteTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const noteStreamRef = useRef<MediaStream | null>(null);
 
   // Responses
   const [responses, setResponses] = useState<Record<string, string>>({});
