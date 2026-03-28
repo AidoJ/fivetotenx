@@ -70,6 +70,16 @@ const ClientDetail = () => {
   const [dirty, setDirty] = useState(false);
   const [sendingSelfInterview, setSendingSelfInterview] = useState(false);
 
+  const handleRecordTranscribed = useCallback((questionId: string, transcript: string) => {
+    setStraightTalk((prev: any) => ({
+      ...prev,
+      responses: { ...(prev?.responses || {}), [questionId]: transcript },
+    }));
+    setDirty(true);
+  }, []);
+
+  const recorder = useQuestionRecorder({ onTranscribed: handleRecordTranscribed });
+
   useEffect(() => {
     if (!id) return;
     const load = async () => {
