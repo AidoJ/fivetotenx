@@ -463,29 +463,50 @@ const ClientDetail = () => {
                       return (
                         <div key={cat.id} className="rounded-xl border border-border bg-card p-5 space-y-4">
                           <h3 className="text-sm font-bold text-foreground">{cat.label}</h3>
-                          <div className="space-y-4">
-                            {catQuestions.map((q: any) => (
-                              <div key={q.id} className="space-y-1.5">
-                                <EditField
-                                  label={q.question}
-                                  value={stResponses[q.id] || ''}
-                                  onChange={v => updateStraightTalkResponse(q.id, v)}
-                                  rows={2}
-                                />
-                                <div className="pl-3 border-l-2 border-accent">
-                                  <Label className="text-[10px] text-accent-foreground/60 uppercase tracking-wider flex items-center gap-1">
-                                    <FileText className="w-2.5 h-2.5" /> Analyst Notes
-                                  </Label>
-                                  <Textarea
-                                    placeholder="Add refinement notes for the proposal…"
-                                    value={stResponses[`_note_${q.id}`] || ''}
-                                    onChange={e => updateStraightTalkResponse(`_note_${q.id}`, e.target.value)}
+                          <div className="space-y-5">
+                            {catQuestions.map((q: any) => {
+                              const isRecording = recorder.recordingQuestionId === q.id;
+                              const isTranscribing = recorder.transcribingId === q.id;
+                              return (
+                                <div key={q.id} className="space-y-2">
+                                  <EditField
+                                    label={q.question}
+                                    value={stResponses[q.id] || ''}
+                                    onChange={v => updateStraightTalkResponse(q.id, v)}
                                     rows={2}
-                                    className="text-xs bg-accent/10 border-accent/20 resize-none mt-1 italic"
                                   />
+                                  {/* Record button */}
+                                  <div className="flex items-center gap-2">
+                                    {isTranscribing ? (
+                                      <Badge variant="secondary" className="text-[10px] gap-1">
+                                        <Loader2 className="w-3 h-3 animate-spin" /> Transcribing…
+                                      </Badge>
+                                    ) : isRecording ? (
+                                      <Button size="sm" variant="destructive" className="h-7 text-[10px] gap-1" onClick={recorder.stopRecording}>
+                                        <Square className="w-3 h-3" /> Stop {recorder.formatTime(recorder.recordingTime)}
+                                      </Button>
+                                    ) : (
+                                      <Button size="sm" variant="outline" className="h-7 text-[10px] gap-1" onClick={() => recorder.startRecording(q.id, q.question)}>
+                                        <Mic className="w-3 h-3" /> {stResponses[q.id] ? 'Re-record' : 'Record'}
+                                      </Button>
+                                    )}
+                                  </div>
+                                  {/* Analyst notes */}
+                                  <div className="pl-3 border-l-2 border-accent">
+                                    <Label className="text-[10px] text-accent-foreground/60 uppercase tracking-wider flex items-center gap-1">
+                                      <FileText className="w-2.5 h-2.5" /> Analyst Notes
+                                    </Label>
+                                    <Textarea
+                                      placeholder="Add refinement notes for the proposal…"
+                                      value={stResponses[`_note_${q.id}`] || ''}
+                                      onChange={e => updateStraightTalkResponse(`_note_${q.id}`, e.target.value)}
+                                      rows={2}
+                                      className="text-xs bg-accent/10 border-accent/20 resize-none mt-1 italic"
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       );
