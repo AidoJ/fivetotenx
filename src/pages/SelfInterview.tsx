@@ -41,10 +41,19 @@ const SelfInterview = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
 
-  // Recording state — per question
+  // Recording state — per question (tracks both answer and note recordings)
   const [recordingQuestionId, setRecordingQuestionId] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [transcribingId, setTranscribingId] = useState<string | null>(null);
+
+  // Separate recording state for analyst notes
+  const [noteRecordingId, setNoteRecordingId] = useState<string | null>(null);
+  const [noteRecordingTime, setNoteRecordingTime] = useState(0);
+  const [noteTranscribingId, setNoteTranscribingId] = useState<string | null>(null);
+  const noteMediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const noteChunksRef = useRef<Blob[]>([]);
+  const noteTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const noteStreamRef = useRef<MediaStream | null>(null);
 
   // Responses
   const [responses, setResponses] = useState<Record<string, string>>({});
@@ -232,6 +241,84 @@ const SelfInterview = () => {
 
   const stopRecording = useCallback(() => {
     mediaRecorderRef.current?.stop();
+  }, []);
+
+  // ── Note transcription ──
+  const transcribeNoteBlob = useCallback(async (blob: Blob, questionId: string, questionText: string) => {
+    const noteKey = `_note_${questionId}`;
+    setNoteTranscribingId(questionId);
+    try {
+      const formData = new FormData();
+      formData.append('audio', blob, 'note.webm');
+      formData.append('question', `Analyst refinement note for: ${questionText}`);
+
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(`https://${projectId}.supabase.co/functions/v1/transcribe-question`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(err.error || `Failed: ${res.status}`);
+      }
+
+      const { transcript } = await res.json();
+      if (transcript) {
+        setResponses(prev => {
+          const existing = prev[noteKey] || '';
+          const updated = { ...prev, [noteKey]: existing ? `${existing}\n${transcript}` : transcript };
+          saveResponsesToDb(updated);
+          return updated;
+        });
+        toast({ title: 'Note transcribed & saved ✅' });
+      }
+    } catch (err: any) {
+      console.error('Note transcription error:', err);
+      toast({ title: 'Transcription failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setNoteTranscribingId(null);
+    }
+  }, [toast, saveResponsesToDb]);
+
+  const startNoteRecording = useCallback(async (questionId: string) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      noteStreamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      noteMediaRecorderRef.current = mediaRecorder;
+      noteChunksRef.current = [];
+      setNoteRecordingTime(0);
+      setNoteRecordingId(questionId);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) noteChunksRef.current.push(e.data);
+      };
+
+      const q = allQuestions.find(q => q.id === questionId);
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(noteChunksRef.current, { type: 'audio/webm' });
+        stream.getTracks().forEach(t => t.stop());
+        noteStreamRef.current = null;
+        setNoteRecordingId(null);
+        if (noteTimerRef.current) { clearInterval(noteTimerRef.current); noteTimerRef.current = null; }
+        transcribeNoteBlob(blob, questionId, q?.question || '');
+      };
+
+      mediaRecorder.start(1000);
+      noteTimerRef.current = setInterval(() => setNoteRecordingTime(t => t + 1), 1000);
+    } catch {
+      toast({ title: 'Microphone access denied', description: 'Please allow microphone access.', variant: 'destructive' });
+    }
+  }, [allQuestions, toast, transcribeNoteBlob]);
+
+  const stopNoteRecording = useCallback(() => {
+    noteMediaRecorderRef.current?.stop();
   }, []);
 
   const handleTextChange = useCallback((questionId: string, value: string) => {
@@ -559,7 +646,27 @@ const SelfInterview = () => {
                               onBlur={() => handleTextBlur(`_note_${q.id}`)}
                               rows={2}
                               className="text-xs bg-accent/10 border-accent/20 resize-none italic"
+                              disabled={noteTranscribingId === q.id}
                             />
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {noteRecordingId === q.id ? (
+                                <Button size="sm" variant="destructive" className="gap-1.5 text-xs" onClick={stopNoteRecording}>
+                                  <Square className="w-3 h-3" /> Stop ({formatTime(noteRecordingTime)})
+                                </Button>
+                              ) : noteTranscribingId === q.id ? (
+                                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing note...
+                                </span>
+                              ) : (
+                                <Button
+                                  size="sm" variant="outline" className="gap-1.5 text-xs border-accent/30"
+                                  onClick={() => startNoteRecording(q.id)}
+                                  disabled={recordingQuestionId !== null || noteRecordingId !== null}
+                                >
+                                  <Mic className="w-3.5 h-3.5" /> {responses[`_note_${q.id}`]?.trim() ? 'Add to Note' : 'Record Note'}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
