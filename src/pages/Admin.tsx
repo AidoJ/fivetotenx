@@ -1305,6 +1305,18 @@ const Admin = () => {
   const getDeepDive = (assessmentId: string) => deepDives.find(d => d.assessment_id === assessmentId) || null;
   const getProposal = (assessmentId: string) => proposals.find(p => p.assessment_id === assessmentId) || null;
   const getScopingResponse = (assessmentId: string) => scopingResponses.find((s: any) => s.assessment_id === assessmentId) || null;
+  const getStProgress = (lead: Assessment): { answered: number; total: number } | null => {
+    const industryId = lead.industry_id || (lead.form_data as any)?.selectedIndustryId;
+    if (!industryId) return null;
+    const cats = stCategories.filter((c: any) => c.industry_id === industryId && ['straight_talk', 'game_plan'].includes(c.phase));
+    const catIds = cats.map((c: any) => c.id);
+    const qs = stQuestions.filter((q: any) => catIds.includes(q.category_id));
+    if (qs.length === 0) return null;
+    const stRes = stResponses.find((s: any) => s.assessment_id === lead.id);
+    const responses = (stRes?.responses || {}) as Record<string, string>;
+    const answered = qs.filter((q: any) => responses[q.id]?.trim()).length;
+    return { answered, total: qs.length };
+  };
 
   // Mirror dashboard's 6 consolidated stages
   const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
