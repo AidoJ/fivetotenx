@@ -1435,6 +1435,7 @@ const Admin = () => {
                           scopingResponse={getScopingResponse(lead.id)}
                           stProgress={getStProgress(lead)}
                         />
+                      ))}
                     </div>
                   </div>
                 ))}
