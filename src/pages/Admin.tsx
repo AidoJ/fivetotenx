@@ -647,7 +647,7 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes, trainingRes, scopingRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes, trainingRes, scopingRes, stResRes, stCatRes, stQRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
@@ -656,6 +656,9 @@ const Admin = () => {
       supabase.from('admin_tasks' as any).select('*').order('created_at', { ascending: false }),
       supabase.from('training_registrations' as any).select('*').order('created_at', { ascending: false }),
       supabase.from('scoping_responses' as any).select('*').order('created_at', { ascending: false }),
+      supabase.from('straight_talk_responses').select('*').order('created_at', { ascending: false }),
+      supabase.from('scoping_categories').select('*').order('sort_order'),
+      supabase.from('scoping_questions').select('*').order('sort_order'),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
@@ -668,6 +671,9 @@ const Admin = () => {
     if (!tasksRes.error) setTasks((tasksRes.data as unknown as AdminTask[]) || []);
     if (!trainingRes.error) setTrainingRegs(trainingRes.data || []);
     if (!scopingRes.error) setScopingResponses(scopingRes.data || []);
+    if (!stResRes.error) setStResponses(stResRes.data || []);
+    if (!stCatRes.error) setStCategories((stCatRes.data as any) || []);
+    if (!stQRes.error) setStQuestions((stQRes.data as any) || []);
 
     setLoading(false);
   };
