@@ -548,6 +548,19 @@ const SelfInterview = () => {
                               </Button>
                             )}
                           </div>
+
+                          {/* Analyst Notes */}
+                          <div className="border-l-2 border-accent pl-3 mt-1">
+                            <p className="text-[10px] text-accent-foreground/60 uppercase tracking-wider font-medium mb-1">Analyst Notes</p>
+                            <Textarea
+                              placeholder="Add refinement notes for the proposal…"
+                              value={responses[`_note_${q.id}`] || ''}
+                              onChange={(e) => handleTextChange(`_note_${q.id}`, e.target.value)}
+                              onBlur={() => handleTextBlur(`_note_${q.id}`)}
+                              rows={2}
+                              className="text-xs bg-accent/10 border-accent/20 resize-none italic"
+                            />
+                          </div>
                         </div>
                       </div>
                     );

@@ -130,7 +130,8 @@ const getNextAction = (
 /* ── Completion Chips ── */
 const CompletionChips = React.forwardRef<HTMLDivElement, {
   lead: Assessment; deepDive: any; hasInterviews: boolean; isStraightTalkComplete: boolean; scopingResponse: any; proposal: any;
-}>(({ lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal }, ref) => {
+  stProgress?: { answered: number; total: number } | null;
+}>(({ lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal, stProgress }, ref) => {
   const chips: { label: string; done: boolean }[] = [
     { label: 'Qualified', done: lead.is_qualified },
     { label: 'Talked', done: isStraightTalkComplete },
@@ -149,6 +150,11 @@ const CompletionChips = React.forwardRef<HTMLDivElement, {
           {c.done ? '✓ ' : ''}{c.label}
         </span>
       ))}
+      {stProgress && stProgress.total > 0 && (
+        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-secondary text-foreground ml-auto">
+          📝 {stProgress.answered}/{stProgress.total}
+        </span>
+      )}
     </div>
   );
 });
@@ -208,6 +214,7 @@ export interface LeadCardProps {
   renderInterviews?: (assessmentId: string) => React.ReactNode;
   renderChecklist?: (assessmentId: string) => React.ReactNode;
   renderAnswers?: (assessmentId: string) => React.ReactNode;
+  stProgress?: { answered: number; total: number } | null;
 }
 
 const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
@@ -215,7 +222,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal,
   interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder,
   onSendDiscoveryInvite, onSendSelfInterview, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
-  onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse,
+  onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse, stProgress,
 }, _ref) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
@@ -325,6 +332,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
           isStraightTalkComplete={isStraightTalkComplete}
           scopingResponse={scopingResponse}
           proposal={proposal}
+          stProgress={stProgress}
         />
       </div>
 

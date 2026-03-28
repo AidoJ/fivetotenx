@@ -629,6 +629,9 @@ const Admin = () => {
   const [interviews, setInterviews] = useState<ClientInterview[]>([]);
   const [tasks, setTasks] = useState<AdminTask[]>([]);
   const [trainingRegs, setTrainingRegs] = useState<any[]>([]);
+  const [stResponses, setStResponses] = useState<any[]>([]);
+  const [stCategories, setStCategories] = useState<any[]>([]);
+  const [stQuestions, setStQuestions] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -644,7 +647,7 @@ const Admin = () => {
   }, []);
 
   const fetchLeads = async () => {
-    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes, trainingRes, scopingRes] = await Promise.all([
+    const [leadsRes, deepDivesRes, notesRes, proposalsRes, interviewsRes, tasksRes, trainingRes, scopingRes, stResRes, stCatRes, stQRes] = await Promise.all([
       supabase.from('roi_assessments').select('*').order('created_at', { ascending: false }),
       supabase.from('deep_dive_submissions').select('*'),
       supabase.from('lead_notes').select('*').order('created_at', { ascending: true }),
@@ -653,6 +656,9 @@ const Admin = () => {
       supabase.from('admin_tasks' as any).select('*').order('created_at', { ascending: false }),
       supabase.from('training_registrations' as any).select('*').order('created_at', { ascending: false }),
       supabase.from('scoping_responses' as any).select('*').order('created_at', { ascending: false }),
+      supabase.from('straight_talk_responses').select('*').order('created_at', { ascending: false }),
+      supabase.from('scoping_categories').select('*').order('sort_order'),
+      supabase.from('scoping_questions').select('*').order('sort_order'),
     ]);
 
     if (leadsRes.error) toast({ title: 'Error', description: leadsRes.error.message, variant: 'destructive' });
@@ -665,6 +671,9 @@ const Admin = () => {
     if (!tasksRes.error) setTasks((tasksRes.data as unknown as AdminTask[]) || []);
     if (!trainingRes.error) setTrainingRegs(trainingRes.data || []);
     if (!scopingRes.error) setScopingResponses(scopingRes.data || []);
+    if (!stResRes.error) setStResponses(stResRes.data || []);
+    if (!stCatRes.error) setStCategories((stCatRes.data as any) || []);
+    if (!stQRes.error) setStQuestions((stQRes.data as any) || []);
 
     setLoading(false);
   };
@@ -1296,6 +1305,18 @@ const Admin = () => {
   const getDeepDive = (assessmentId: string) => deepDives.find(d => d.assessment_id === assessmentId) || null;
   const getProposal = (assessmentId: string) => proposals.find(p => p.assessment_id === assessmentId) || null;
   const getScopingResponse = (assessmentId: string) => scopingResponses.find((s: any) => s.assessment_id === assessmentId) || null;
+  const getStProgress = (lead: Assessment): { answered: number; total: number } | null => {
+    const industryId = lead.industry_id || (lead.form_data as any)?.selectedIndustryId;
+    if (!industryId) return null;
+    const cats = stCategories.filter((c: any) => c.industry_id === industryId && ['straight_talk', 'game_plan'].includes(c.phase));
+    const catIds = cats.map((c: any) => c.id);
+    const qs = stQuestions.filter((q: any) => catIds.includes(q.category_id));
+    if (qs.length === 0) return null;
+    const stRes = stResponses.find((s: any) => s.assessment_id === lead.id);
+    const responses = (stRes?.responses || {}) as Record<string, string>;
+    const answered = qs.filter((q: any) => responses[q.id]?.trim()).length;
+    return { answered, total: qs.length };
+  };
 
   // Mirror dashboard's 6 consolidated stages
   const PIPELINE_GROUPS: { id: string; label: string; icon: any; stages: string[]; filter?: (l: Assessment) => boolean }[] = [
@@ -1412,6 +1433,7 @@ const Admin = () => {
                           onToggleComplete={handleToggleComplete}
                           onUpdateZoomLink={handleUpdateZoomLink}
                           scopingResponse={getScopingResponse(lead.id)}
+                          stProgress={getStProgress(lead)}
                         />
                       ))}
                     </div>
