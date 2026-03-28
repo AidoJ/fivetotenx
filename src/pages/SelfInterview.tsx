@@ -646,7 +646,27 @@ const SelfInterview = () => {
                               onBlur={() => handleTextBlur(`_note_${q.id}`)}
                               rows={2}
                               className="text-xs bg-accent/10 border-accent/20 resize-none italic"
+                              disabled={noteTranscribingId === q.id}
                             />
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {noteRecordingId === q.id ? (
+                                <Button size="sm" variant="destructive" className="gap-1.5 text-xs" onClick={stopNoteRecording}>
+                                  <Square className="w-3 h-3" /> Stop ({formatTime(noteRecordingTime)})
+                                </Button>
+                              ) : noteTranscribingId === q.id ? (
+                                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing note...
+                                </span>
+                              ) : (
+                                <Button
+                                  size="sm" variant="outline" className="gap-1.5 text-xs border-accent/30"
+                                  onClick={() => startNoteRecording(q.id)}
+                                  disabled={recordingQuestionId !== null || noteRecordingId !== null}
+                                >
+                                  <Mic className="w-3.5 h-3.5" /> {responses[`_note_${q.id}`]?.trim() ? 'Add to Note' : 'Record Note'}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
