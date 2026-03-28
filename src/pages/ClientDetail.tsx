@@ -3,11 +3,12 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
+import { useQuestionRecorder } from '@/hooks/useQuestionRecorder';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Save, Loader2, Building2, Users, DollarSign, Target,
   Clock, Globe, TrendingUp, ShoppingCart, BarChart3, Zap, Mail, Phone,
-  MessageSquare, Radar, Puzzle, FileText, Sparkles, Mic, Send,
+  MessageSquare, Radar, Puzzle, FileText, Sparkles, Mic, Square, Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
