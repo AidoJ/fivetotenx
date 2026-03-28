@@ -222,7 +222,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   onPrepareProposal, onSendProposal, onUpdateProposalFollowUp, proposal,
   interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder,
   onSendDiscoveryInvite, onSendSelfInterview, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
-  onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse,
+  onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse, stProgress,
 }, _ref) => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
