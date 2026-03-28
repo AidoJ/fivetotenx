@@ -332,6 +332,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
           isStraightTalkComplete={isStraightTalkComplete}
           scopingResponse={scopingResponse}
           proposal={proposal}
+          stProgress={stProgress}
         />
       </div>
 
