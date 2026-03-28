@@ -243,6 +243,84 @@ const SelfInterview = () => {
     mediaRecorderRef.current?.stop();
   }, []);
 
+  // ── Note transcription ──
+  const transcribeNoteBlob = useCallback(async (blob: Blob, questionId: string, questionText: string) => {
+    const noteKey = `_note_${questionId}`;
+    setNoteTranscribingId(questionId);
+    try {
+      const formData = new FormData();
+      formData.append('audio', blob, 'note.webm');
+      formData.append('question', `Analyst refinement note for: ${questionText}`);
+
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(`https://${projectId}.supabase.co/functions/v1/transcribe-question`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(err.error || `Failed: ${res.status}`);
+      }
+
+      const { transcript } = await res.json();
+      if (transcript) {
+        setResponses(prev => {
+          const existing = prev[noteKey] || '';
+          const updated = { ...prev, [noteKey]: existing ? `${existing}\n${transcript}` : transcript };
+          saveResponsesToDb(updated);
+          return updated;
+        });
+        toast({ title: 'Note transcribed & saved ✅' });
+      }
+    } catch (err: any) {
+      console.error('Note transcription error:', err);
+      toast({ title: 'Transcription failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setNoteTranscribingId(null);
+    }
+  }, [toast, saveResponsesToDb]);
+
+  const startNoteRecording = useCallback(async (questionId: string) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      noteStreamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+      noteMediaRecorderRef.current = mediaRecorder;
+      noteChunksRef.current = [];
+      setNoteRecordingTime(0);
+      setNoteRecordingId(questionId);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) noteChunksRef.current.push(e.data);
+      };
+
+      const q = allQuestions.find(q => q.id === questionId);
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(noteChunksRef.current, { type: 'audio/webm' });
+        stream.getTracks().forEach(t => t.stop());
+        noteStreamRef.current = null;
+        setNoteRecordingId(null);
+        if (noteTimerRef.current) { clearInterval(noteTimerRef.current); noteTimerRef.current = null; }
+        transcribeNoteBlob(blob, questionId, q?.question || '');
+      };
+
+      mediaRecorder.start(1000);
+      noteTimerRef.current = setInterval(() => setNoteRecordingTime(t => t + 1), 1000);
+    } catch {
+      toast({ title: 'Microphone access denied', description: 'Please allow microphone access.', variant: 'destructive' });
+    }
+  }, [allQuestions, toast, transcribeNoteBlob]);
+
+  const stopNoteRecording = useCallback(() => {
+    noteMediaRecorderRef.current?.stop();
+  }, []);
+
   const handleTextChange = useCallback((questionId: string, value: string) => {
     setResponses(prev => {
       const updated = { ...prev, [questionId]: value };
