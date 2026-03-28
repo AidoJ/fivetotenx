@@ -214,6 +214,7 @@ export interface LeadCardProps {
   renderInterviews?: (assessmentId: string) => React.ReactNode;
   renderChecklist?: (assessmentId: string) => React.ReactNode;
   renderAnswers?: (assessmentId: string) => React.ReactNode;
+  stProgress?: { answered: number; total: number } | null;
 }
 
 const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
