@@ -12,8 +12,11 @@ import {
   Mic, Square, RotateCcw, ArrowRight, CheckCircle,
   Loader2, Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare,
   UserCircle, Plug, Shield, Rocket, Hammer, Briefcase, Send,
-  Save,
+  Save, MinusCircle, HelpCircle, Clock, ChevronDown,
 } from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import logo from '@/assets/logo-5to10x-color.webp';
 
 const ICON_MAP: Record<string, React.ElementType> = {
