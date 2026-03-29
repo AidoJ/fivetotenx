@@ -259,7 +259,6 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
       case 'move_discovery': onMove(lead.id, 'discovery_call' as PipelineStage); break;
       case 'send_scoping': handleCopyScoping(); break;
       case 'move_proposal': onMove(lead.id, 'proposal'); break;
-      case 'move_proposal': onMove(lead.id, 'proposal'); break;
       case 'prepare_proposal': onPrepareProposal(lead); break;
       case 'send_proposal': onSendProposal(lead); break;
       case 'move_build': onMove(lead.id, 'build_refinement' as PipelineStage); break;
