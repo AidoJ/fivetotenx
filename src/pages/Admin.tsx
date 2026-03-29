@@ -1314,7 +1314,12 @@ const Admin = () => {
     if (qs.length === 0) return null;
     const stRes = stResponses.find((s: any) => s.assessment_id === lead.id);
     const responses = (stRes?.responses || {}) as Record<string, string>;
-    const answered = qs.filter((q: any) => responses[q.id]?.trim()).length;
+    const answered = qs.filter((q: any) => {
+      const ans = responses[q.id]?.trim();
+      if (ans) return true;
+      const skip = responses[`_skip_${q.id}`];
+      return skip === 'na' || skip === 'dont_know';
+    }).length;
     return { answered, total: qs.length };
   };
 
