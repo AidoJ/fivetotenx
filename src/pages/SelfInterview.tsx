@@ -682,6 +682,28 @@ const SelfInterview = () => {
                                 <Mic className="w-3.5 h-3.5" /> {hasAnswer ? 'Re-record' : 'Record'}
                               </Button>
                             )}
+
+                            {/* Skip dropdown */}
+                            {!hasAnswer && !isRecordingThis && !isTranscribingThis && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button size="sm" variant="ghost" className="gap-1 text-xs text-muted-foreground">
+                                    <ChevronDown className="w-3 h-3" /> Skip
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start">
+                                  {SKIP_REASONS.map(sr => (
+                                    <DropdownMenuItem key={sr.value} onClick={() => handleSkip(q.id, sr.value)} className="gap-2">
+                                      <sr.icon className="w-4 h-4" />
+                                      <div>
+                                        <p className="text-sm font-medium">{sr.label}</p>
+                                        <p className="text-[10px] text-muted-foreground">{sr.description}</p>
+                                      </div>
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
                           </div>
 
                           {/* Analyst Notes */}
