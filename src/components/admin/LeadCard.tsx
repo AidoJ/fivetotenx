@@ -401,9 +401,9 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
               {/* Stage Actions */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
-                  {/* Upload Zoom Recording — show at discovery_call stage */}
+                  {/* Upload Zoom Recording — fallback, de-prioritised */}
                   {lead.pipeline_stage === 'discovery_call' && (
-                    <div className="space-y-1.5">
+                    <>
                       <input
                         ref={audioInputRef}
                         type="file"
@@ -427,7 +427,6 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                           await onAddInterview(lead.id, 'Straight Talk Interview', '', file);
                           setUploading(false);
                           if (audioInputRef.current) audioInputRef.current.value = '';
-                          // Auto-mark Straight Talk as complete
                           if (!isStraightTalkComplete) {
                             onMarkDiscoveryReady(lead.id, true);
                           }
@@ -435,15 +434,15 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                       />
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="h-7 text-[10px] px-3 gap-1.5 w-full justify-start"
+                        variant="ghost"
+                        className="h-6 text-[9px] px-2 gap-1 text-muted-foreground"
                         disabled={uploading}
                         onClick={() => audioInputRef.current?.click()}
                       >
                         {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                        {uploading ? 'Uploading & Transcribing…' : 'Upload Zoom Recording'}
+                        {uploading ? 'Uploading & Transcribing…' : 'Upload Full Zoom Recording (fallback)'}
                       </Button>
-                    </div>
+                    </>
                   )}
 
                   {/* Straight Talk complete checkbox */}
