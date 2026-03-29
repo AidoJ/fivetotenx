@@ -584,7 +584,7 @@ const SelfInterview = () => {
             {categories.map((cat) => {
               const Icon = ICON_MAP[cat.icon] || Sparkles;
               const catQuestions = questions.filter(q => q.category_id === cat.id);
-              const catAnswered = catQuestions.filter(q => responses[q.id]?.trim()).length;
+              const catAnswered = catQuestions.filter(q => isQuestionComplete(q.id)).length;
               const allDone = catAnswered === catQuestions.length && catQuestions.length > 0;
               return (
                 <TabsTrigger key={cat.id} value={cat.id} className="flex items-center gap-1.5 text-xs px-3 py-2 data-[state=active]:bg-background">
