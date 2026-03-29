@@ -111,6 +111,9 @@ const SelfInterview = () => {
         setQuestions(allQ.filter((q: Question) => catIds.includes(q.category_id)));
         if (cats.length > 0) setActiveTab(cats[0].id);
 
+        const isInvalidAnswer = (v: string) => 
+          !v?.trim() || v === 'not_found' || v.toLowerCase().includes('[no audible response]');
+
         let merged: Record<string, string> = {};
         const discoveryAnswers = (assessment.discovery_answers || {}) as Record<string, any>;
         for (const [key, val] of Object.entries(discoveryAnswers)) {
@@ -119,7 +122,7 @@ const SelfInterview = () => {
           const matchedQ = allQ.find((q: Question) => q.id.startsWith(shortId) && catIds.includes(q.category_id));
           if (matchedQ) {
             const answer = typeof val === 'string' ? val : (val as any)?.answer || JSON.stringify(val);
-            merged[matchedQ.id] = answer;
+            if (!isInvalidAnswer(answer)) merged[matchedQ.id] = answer;
           }
         }
 
@@ -133,7 +136,12 @@ const SelfInterview = () => {
         if (existing?.[0]) {
           setExistingResponseId(existing[0].id);
           const savedResponses = (existing[0].responses || {}) as Record<string, string>;
-          merged = { ...merged, ...savedResponses };
+          // Filter invalid answers but keep meta keys (_note_, _skip_)
+          for (const [k, v] of Object.entries(savedResponses)) {
+            if (k.startsWith('_') || !isInvalidAnswer(v)) {
+              merged[k] = v;
+            }
+          }
           if (existing[0].completed) setSubmitted(true);
         }
 
