@@ -574,37 +574,42 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                 </div>
               </Section>
 
-              {/* Bookings / Interviews — hide when ST is complete */}
-              {!isStraightTalkComplete && interviews.filter(i => i.assessment_id === lead.id).length > 0 && (
-                <Section label="Bookings" icon={Calendar} badge={`${interviews.filter(i => i.assessment_id === lead.id).length}`} defaultOpen>
+              {/* Bookings / Interviews — always show if any exist */}
+              {interviews.filter(i => i.assessment_id === lead.id).length > 0 && (
+                <Section label="Bookings" icon={Calendar} badge={`${interviews.filter(i => i.assessment_id === lead.id).length}`} defaultOpen={!isStraightTalkComplete}>
                   <div className="space-y-2 py-1">
-                    {interviews.filter(i => i.assessment_id === lead.id).map((iv: any) => (
-                      <div key={iv.id} className="bg-secondary/50 rounded-md p-2 space-y-1 text-[11px]">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-foreground">{normalizeInterviewTitle(iv.title)}</span>
-                          <Badge variant={iv.call_completed ? 'default' : 'outline'} className="text-[8px] h-4">
-                            {iv.call_completed ? '✓ Completed' : 'Upcoming'}
-                          </Badge>
+                    {interviews.filter(i => i.assessment_id === lead.id).map((iv: any) => {
+                      const isPast = iv.scheduled_at && new Date(iv.scheduled_at).getTime() < Date.now();
+                      const statusLabel = iv.call_completed ? '✓ Completed' : isPast ? '⏰ Past Due' : 'Upcoming';
+                      const statusVariant = iv.call_completed ? 'default' : isPast ? 'destructive' : 'outline';
+                      return (
+                        <div key={iv.id} className="bg-secondary/50 rounded-md p-2 space-y-1 text-[11px]">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-foreground">{normalizeInterviewTitle(iv.title)}</span>
+                            <Badge variant={statusVariant as any} className="text-[8px] h-4">
+                              {statusLabel}
+                            </Badge>
+                          </div>
+                          {iv.scheduled_at && (
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              <span>{new Date(iv.scheduled_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                          )}
+                          {iv.zoom_link && !iv.call_completed && !isPast && (
+                            <div className="flex items-center gap-1.5">
+                              <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                              <a href={iv.zoom_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
+                                Join Zoom
+                              </a>
+                            </div>
+                          )}
+                          {iv.content && (
+                            <p className="text-muted-foreground">{iv.content}</p>
+                          )}
                         </div>
-                        {iv.scheduled_at && (
-                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <Clock className="w-3 h-3" />
-                            <span>{new Date(iv.scheduled_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
-                        )}
-                        {iv.zoom_link && (
-                          <div className="flex items-center gap-1.5">
-                            <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                            <a href={iv.zoom_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
-                              Join Zoom
-                            </a>
-                          </div>
-                        )}
-                        {iv.content && (
-                          <p className="text-muted-foreground">{iv.content}</p>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </Section>
               )}
