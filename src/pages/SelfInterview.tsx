@@ -136,7 +136,12 @@ const SelfInterview = () => {
         if (existing?.[0]) {
           setExistingResponseId(existing[0].id);
           const savedResponses = (existing[0].responses || {}) as Record<string, string>;
-          merged = { ...merged, ...savedResponses };
+          // Filter invalid answers but keep meta keys (_note_, _skip_)
+          for (const [k, v] of Object.entries(savedResponses)) {
+            if (k.startsWith('_') || !isInvalidAnswer(v)) {
+              merged[k] = v;
+            }
+          }
           if (existing[0].completed) setSubmitted(true);
         }
 
