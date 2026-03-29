@@ -381,7 +381,42 @@ const SelfInterview = () => {
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-  const answeredCount = Object.keys(responses).filter(k => allQuestions.some(q => q.id === k && responses[k]?.trim())).length;
+  const SKIP_REASONS = [
+    { value: 'na', label: 'Not Applicable', icon: MinusCircle, description: 'Not relevant to my business' },
+    { value: 'dont_know', label: "Don't Know", icon: HelpCircle, description: 'Need help answering this' },
+    { value: 'later', label: 'Will Answer Later', icon: Clock, description: "I'll come back to this" },
+  ] as const;
+  type SkipReason = typeof SKIP_REASONS[number]['value'];
+
+  const getSkipReason = (qId: string): SkipReason | null => {
+    const val = responses[`_skip_${qId}`];
+    if (val === 'na' || val === 'dont_know' || val === 'later') return val;
+    return null;
+  };
+
+  const handleSkip = useCallback((questionId: string, reason: SkipReason) => {
+    setResponses(prev => {
+      const updated = { ...prev, [`_skip_${questionId}`]: reason };
+      saveResponsesToDb(updated);
+      return updated;
+    });
+  }, [saveResponsesToDb]);
+
+  const clearSkip = useCallback((questionId: string) => {
+    setResponses(prev => {
+      const { [`_skip_${questionId}`]: _, ...rest } = prev;
+      saveResponsesToDb(rest);
+      return rest;
+    });
+  }, [saveResponsesToDb]);
+
+  const isQuestionComplete = (qId: string): boolean => {
+    if (responses[qId]?.trim()) return true;
+    const skip = getSkipReason(qId);
+    return skip === 'na' || skip === 'dont_know';
+  };
+
+  const answeredCount = allQuestions.filter(q => isQuestionComplete(q.id)).length;
   const progress = allQuestions.length > 0 ? (answeredCount / allQuestions.length) * 100 : 0;
 
   // ── Loading ──
