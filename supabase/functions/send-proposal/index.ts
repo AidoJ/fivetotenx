@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
           <tr>
             <td style="padding: 32px;">
               <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 16px;">
-                Hi ${contactName},
+                Hi ${(contactName || '').split(' ')[0]},
               </p>
               <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 16px;">
                 Based on your Reality Check™ assessment and Straight Talk™ conversation, we've prepared a tailored proposal for <strong>${businessName}</strong>.
