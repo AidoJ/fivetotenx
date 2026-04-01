@@ -278,6 +278,32 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
     setAddingNote(false);
   };
 
+  const handleResendReport = async () => {
+    setResending(true);
+    try {
+      const formData = lead.form_data as any;
+      const results = lead.roi_results as any;
+      const { error } = await supabase.functions.invoke('send-report', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          results,
+          formData,
+          assessmentId: lead.id,
+          isQualified: lead.is_qualified,
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Report resent ✅', description: `Sent to ${lead.contact_email}` });
+    } catch (err) {
+      console.error('Resend report error:', err);
+      toast({ title: 'Failed to resend', description: 'Please try again.', variant: 'destructive' });
+    } finally {
+      setResending(false);
+    }
+  };
+
   const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
     { key: 'assessment', label: 'Reality Check' },
     { key: 'qualified', label: 'Qualified' },
