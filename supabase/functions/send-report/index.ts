@@ -469,12 +469,12 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- TOTAL IMPACT -->
           <tr>
-            <td style="padding: 0 32px 32px;">
+             <td class="content-pad" style="padding: 0 32px 32px;">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 28px; border-radius: 12px; text-align: center;">
+                  <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 24px 16px; border-radius: 12px; text-align: center;">
                     <p style="color: #93c5fd; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px;">Your Projected Annual Impact</p>
-                    <p style="color: #ffffff; font-size: 42px; font-weight: 800; margin: 0; letter-spacing: -1px;">{{totalAnnualImpact}}</p>
+                    <p class="impact-number" style="color: #ffffff; font-size: 42px; font-weight: 800; margin: 0; letter-spacing: -1px;">{{totalAnnualImpact}}</p>
                     <p style="color: #bfdbfe; font-size: 13px; margin: 8px 0 0;">per year in combined revenue growth, savings & efficiency gains</p>
                   </td>
                 </tr>
