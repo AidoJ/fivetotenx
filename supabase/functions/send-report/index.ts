@@ -451,7 +451,7 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- Opening Letter -->
           <tr>
-            <td style="padding: 36px 32px 0;">
+            <td class="content-pad" style="padding: 36px 32px 0;">
               <p style="color: #1e293b; font-size: 16px; line-height: 1.7; margin: 0 0 16px;">Hi {{contactName}},</p>
               <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
                 Thank you for investing the time to complete this assessment. What follows isn't just a set of numbers — it's a strategic roadmap for how <strong>{{businessName}}</strong> can leverage modern technology to unlock measurable growth.
