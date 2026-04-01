@@ -1,4 +1,5 @@
-import { FormData, CURRENT_FEATURES, GOAL_OPTIONS } from '@/lib/formTypes';
+import { useState } from 'react';
+import { FormData, CURRENT_FEATURES, GOAL_OPTIONS, LOST_SALES_REASONS } from '@/lib/formTypes';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
