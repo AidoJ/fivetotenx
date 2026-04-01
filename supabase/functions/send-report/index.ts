@@ -223,10 +223,24 @@ serve(async (req) => {
             <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1e3a5f, #4338ca); border-radius: 12px; overflow: hidden;">
               <tr>
                 <td style="padding: 32px; text-align: center;">
-                  <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR A CUSTOM BUILD</p>
+                   <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR AN AI BUSINESS REWIRING SESSION</p>
                   <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for Your Straight Talk™?</h2>
-                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 24px; max-width: 480px; margin-left: auto; margin-right: auto;">
-                    Your business qualifies for a custom app build. The next step is your Straight Talk™ — a focused conversation about what matters most to {{businessName}}. Choose the option that works best for you:
+                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 8px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    This isn't about building another app. It's about redesigning how work flows through your business.
+                  </p>
+                  <p style="color: #bfdbfe; font-size: 13px; line-height: 1.7; margin: 0 0 6px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    Your Straight Talk™ session is a strategic review where we map:
+                  </p>
+                  <table cellpadding="0" cellspacing="0" style="margin: 0 auto 8px; text-align: left; max-width: 420px;">
+                    <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the hidden friction slowing your operations</td></tr>
+                    <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the decisions AI can start making for you</td></tr>
+                    <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the workflows that should disappear completely</td></tr>
+                    <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• and the fastest path to measurable efficiency gains</td></tr>
+                  </table>
+                  <p style="color: #93c5fd; font-size: 13px; font-weight: 600; line-height: 1.7; margin: 0 0 24px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    Most businesses uncover 5–10× leverage opportunities in this session alone.
+                  </p>
+                  <p style="color: #bfdbfe; font-size: 14px; margin: 0 0 16px;">Choose the option that works best for you:</p>
                   </p>
                   <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 500px; margin: 0 auto;">
                     <tr>
@@ -262,7 +276,7 @@ serve(async (req) => {
     // ── Build closing section ──
     const closingSection = isQualified
       ? `<p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
-          We'd love to discuss how to bring this to life for {{businessName}}. The next step is your <strong>Straight Talk™</strong> — a focused conversation about what's worth fixing first. We'll be in touch to schedule that.
+          We're looking forward to mapping out the biggest wins for {{businessName}}. Choose one of the options above and we'll take it from there.
         </p>`
       : `<p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
           We'd love to discuss how to bring this to life for {{businessName}}. Reply to this email to start the conversation.
