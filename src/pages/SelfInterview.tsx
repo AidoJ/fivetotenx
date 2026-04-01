@@ -616,7 +616,6 @@ const SelfInterview = () => {
                     <Icon className="w-3.5 h-3.5" />
                   )}
                   <span className="hidden sm:inline">{cat.label}</span>
-                  <span className="text-[10px] text-muted-foreground">{catAnswered}/{catQuestions.length}</span>
                 </TabsTrigger>
               );
             })}
