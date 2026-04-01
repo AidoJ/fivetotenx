@@ -11,8 +11,8 @@ const fmt = (v: number) =>
 
 const row = (label: string, value: string) => `
   <tr>
-    <td style="padding: 10px 16px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${label}</td>
-    <td style="padding: 10px 16px; color: #1e293b; font-size: 13px; font-weight: 600; text-align: right; border-bottom: 1px solid #f1f5f9;">${value}</td>
+    <td style="padding: 8px 12px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9; word-break: break-word;">${label}</td>
+    <td style="padding: 8px 12px; color: #1e293b; font-size: 13px; font-weight: 600; text-align: right; border-bottom: 1px solid #f1f5f9; word-break: break-word;">${value}</td>
   </tr>`;
 
 const sectionHead = (title: string) => `
