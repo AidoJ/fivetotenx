@@ -32,7 +32,7 @@ import ClarityEngineSection from '@/components/ClarityEngineSection';
 import { FormData, initialFormData, calculateROI, ROIResults } from '@/lib/formTypes';
 import StepIndicator from '@/components/StepIndicator';
 import BusinessSnapshot from '@/components/steps/BusinessSnapshot';
-import CustomerMetrics from '@/components/steps/CustomerMetrics';
+import CustomerMetrics, { validateCustomerMetrics } from '@/components/steps/CustomerMetrics';
 import OperationalEfficiency from '@/components/steps/OperationalEfficiency';
 import GrowthOpportunity from '@/components/steps/GrowthOpportunity';
 import IndustrySelector from '@/components/steps/IndustrySelector';
@@ -973,6 +973,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [results, setResults] = useState<ROIResults | null>(null);
   const [selectedIndustry, setSelectedIndustry] = useState<any>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleChange = (partial: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
@@ -995,7 +996,40 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
     }));
   };
 
+  const validateStep = (currentStep: number): boolean => {
+    if (currentStep === 1) {
+      // Business Snapshot: require name, email, business name
+      const errs: Record<string, string> = {};
+      if (!formData.contactName.trim()) errs.contactName = 'Required';
+      if (!formData.contactEmail.trim()) errs.contactEmail = 'Required';
+      if (!formData.businessName.trim()) errs.businessName = 'Required';
+      setFieldErrors(errs);
+      return Object.keys(errs).length === 0;
+    }
+    if (currentStep === 2) {
+      // Customer Metrics: require core CLV fields
+      const errs = validateCustomerMetrics(formData);
+      setFieldErrors(errs);
+      return Object.keys(errs).length === 0;
+    }
+    setFieldErrors({});
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep((s) => s + 1);
+    }
+  };
+
   const handleSubmit = () => {
+    // Validate metrics step one more time
+    const metricsErrors = validateCustomerMetrics(formData);
+    if (Object.keys(metricsErrors).length > 0) {
+      setFieldErrors(metricsErrors);
+      setStep(2);
+      return;
+    }
     const roi = calculateROI(formData);
     setResults(roi);
   };
@@ -1021,7 +1055,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
       case 1:
         return <BusinessSnapshot data={formData} onChange={handleChange} />;
       case 2:
-        return <CustomerMetrics data={formData} onChange={handleChange} />;
+        return <CustomerMetrics data={formData} onChange={handleChange} errors={step === 2 ? fieldErrors : {}} />;
       case 3:
         return formData.selectedIndustryId ? (
           <IndustryQuestions
@@ -1090,7 +1124,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
               {step === 0 ? (
                 <div /> // Industry selector auto-advances
               ) : step < totalSteps - 1 ? (
-                <Button onClick={() => setStep((s) => s + 1)} className="gap-2">
+                <Button onClick={handleNext} className="gap-2">
                   Next <ArrowRight className="w-4 h-4" />
                 </Button>
               ) : (

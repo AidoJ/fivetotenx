@@ -3,10 +3,12 @@ import { FormData } from '@/lib/formTypes';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
 interface Props {
   data: FormData;
   onChange: (data: Partial<FormData>) => void;
+  errors?: Record<string, string>;
 }
 
 interface ToggleFieldProps {
@@ -18,10 +20,11 @@ interface ToggleFieldProps {
   known: boolean;
   onToggle: (known: boolean) => void;
   onChange: (value: string) => void;
+  error?: string;
 }
 
-const ToggleField = ({ label, description, id, placeholder, value, known, onToggle, onChange }: ToggleFieldProps) => (
-  <div className="space-y-2 rounded-lg border border-border bg-secondary/30 p-4">
+const ToggleField = ({ label, description, id, placeholder, value, known, onToggle, onChange, error }: ToggleFieldProps) => (
+  <div className={`space-y-2 rounded-lg border p-4 ${error ? 'border-destructive bg-destructive/5' : 'border-border bg-secondary/30'}`}>
     <div className="flex items-center justify-between gap-2">
       <Label htmlFor={id} className="text-sm font-medium">{label}</Label>
       <div className="flex gap-1">
@@ -56,13 +59,50 @@ const ToggleField = ({ label, description, id, placeholder, value, known, onTogg
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1"
+        className={`mt-1 ${error ? 'border-destructive' : ''}`}
+        aria-invalid={!!error}
       />
+    )}
+    {error && (
+      <p className="text-xs text-destructive flex items-center gap-1 mt-1">
+        <AlertCircle className="w-3 h-3" /> {error}
+      </p>
     )}
   </div>
 );
 
-const CustomerMetrics = ({ data, onChange }: Props) => {
+interface RequiredFieldProps {
+  label: string;
+  id: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}
+
+const RequiredField = ({ label, id, placeholder, value, onChange, error }: RequiredFieldProps) => (
+  <div className="space-y-2">
+    <Label htmlFor={id} className="flex items-center gap-1">
+      {label} <span className="text-destructive">*</span>
+    </Label>
+    <Input
+      id={id}
+      type="number"
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={error ? 'border-destructive ring-1 ring-destructive' : ''}
+      aria-invalid={!!error}
+    />
+    {error && (
+      <p className="text-xs text-destructive flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" /> {error}
+      </p>
+    )}
+  </div>
+);
+
+const CustomerMetrics = ({ data, onChange, errors = {} }: Props) => {
   const isService = data.businessType === 'service' || data.businessType === 'hybrid';
   const isProduct = data.businessType === 'product' || data.businessType === 'hybrid';
 
@@ -81,6 +121,8 @@ const CustomerMetrics = ({ data, onChange }: Props) => {
     setKnown((prev) => ({ ...prev, [field]: value }));
   };
 
+  const hasErrors = Object.keys(errors).length > 0;
+
   return (
     <div className="space-y-6">
       <div>
@@ -89,6 +131,15 @@ const CustomerMetrics = ({ data, onChange }: Props) => {
           Do you know the following marketing data? Toggle <strong>Yes</strong> and enter the value, or <strong>No</strong> to skip.
         </p>
       </div>
+
+      {hasErrors && (
+        <div className="rounded-lg border border-destructive bg-destructive/10 p-3 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-destructive font-medium">
+            Please complete the required fields marked with <span className="text-destructive">*</span> below to calculate your ROI.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ToggleField
@@ -173,27 +224,55 @@ const CustomerMetrics = ({ data, onChange }: Props) => {
       </div>
 
       <div className="pt-2">
-        <p className="text-sm text-muted-foreground mb-4 font-medium">Customer Lifetime Value (CLV) inputs:</p>
+        <p className="text-sm text-muted-foreground mb-1 font-medium">Customer Lifetime Value (CLV) inputs:</p>
+        <p className="text-xs text-destructive mb-4">These fields are required to calculate your ROI</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="space-y-2">
-            <Label htmlFor="purchaseValue">Average Purchase Value ($)</Label>
-            <Input id="purchaseValue" type="number" placeholder="e.g. 200"
-              value={data.avgPurchaseValue} onChange={(e) => onChange({ avgPurchaseValue: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="purchasesPerYear">Average Purchases Per Year</Label>
-            <Input id="purchasesPerYear" type="number" placeholder="e.g. 4"
-              value={data.avgPurchasesPerYear} onChange={(e) => onChange({ avgPurchasesPerYear: e.target.value })} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="retention">Average Customer Retention (years)</Label>
-            <Input id="retention" type="number" placeholder="e.g. 3"
-              value={data.avgRetentionYears} onChange={(e) => onChange({ avgRetentionYears: e.target.value })} />
-          </div>
+          <RequiredField
+            label="Average Purchase Value ($)"
+            id="purchaseValue"
+            placeholder="e.g. 200"
+            value={data.avgPurchaseValue}
+            onChange={(v) => onChange({ avgPurchaseValue: v })}
+            error={errors.avgPurchaseValue}
+          />
+          <RequiredField
+            label="Average Purchases Per Year"
+            id="purchasesPerYear"
+            placeholder="e.g. 4"
+            value={data.avgPurchasesPerYear}
+            onChange={(v) => onChange({ avgPurchasesPerYear: v })}
+            error={errors.avgPurchasesPerYear}
+          />
+          <RequiredField
+            label="Customer Retention (years)"
+            id="retention"
+            placeholder="e.g. 3"
+            value={data.avgRetentionYears}
+            onChange={(v) => onChange({ avgRetentionYears: v })}
+            error={errors.avgRetentionYears}
+          />
         </div>
       </div>
     </div>
   );
 };
+
+// Validation helper — exported for use in parent
+export const CUSTOMER_METRICS_REQUIRED = [
+  'avgPurchaseValue',
+  'avgPurchasesPerYear',
+  'avgRetentionYears',
+] as const;
+
+export function validateCustomerMetrics(data: FormData): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const key of CUSTOMER_METRICS_REQUIRED) {
+    const val = parseFloat(data[key]);
+    if (!val || val <= 0) {
+      errors[key] = 'Required — enter a value greater than 0';
+    }
+  }
+  return errors;
+}
 
 export default CustomerMetrics;
