@@ -200,7 +200,7 @@ serve(async (req) => {
         </td>
       </tr>` : `
       <tr>
-        <td style="padding: 0 32px 28px;">
+         <td class="content-pad" style="padding: 0 32px 28px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;">
             <tr><td style="padding: 24px;">
               <h3 style="color: #991b1b; font-size: 16px; margin: 0 0 8px;">⚠️ Viability Assessment</h3>
