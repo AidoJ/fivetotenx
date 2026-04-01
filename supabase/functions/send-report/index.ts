@@ -11,8 +11,8 @@ const fmt = (v: number) =>
 
 const row = (label: string, value: string) => `
   <tr>
-    <td style="padding: 10px 16px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${label}</td>
-    <td style="padding: 10px 16px; color: #1e293b; font-size: 13px; font-weight: 600; text-align: right; border-bottom: 1px solid #f1f5f9;">${value}</td>
+    <td style="padding: 8px 12px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9; word-break: break-word;">${label}</td>
+    <td style="padding: 8px 12px; color: #1e293b; font-size: 13px; font-weight: 600; text-align: right; border-bottom: 1px solid #f1f5f9; word-break: break-word;">${value}</td>
   </tr>`;
 
 const sectionHead = (title: string) => `
@@ -171,24 +171,24 @@ serve(async (req) => {
     // ── Build investment section ──
     const investmentSection = isViable ? `
       <tr>
-        <td style="padding: 0 32px 28px;">
+        <td class="content-pad" style="padding: 0 32px 28px;">
           <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">💰 Your Investment & Payment Options</h2>
           <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0 0 6px;">
             Based on your projected {{totalAnnualImpact}}/year impact, your app falls in our <strong>${pricing?.tierLabel || ''}</strong> tier.
           </p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin: 16px 0;">
             <tr>
-              <td style="padding: 16px; background: #f0f9ff; border-radius: 8px; text-align: center; width: 33%;">
+              <td class="stat-cell" style="padding: 16px; background: #f0f9ff; border-radius: 8px; text-align: center; width: 33%;">
                 <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Build Investment</p>
                 <p style="color: #1e3a5f; font-size: 20px; font-weight: 700; margin: 0;">${fmt(pricing?.buildCost || 0)}</p>
               </td>
-              <td style="width: 8px;"></td>
-              <td style="padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center; width: 33%;">
+              <td class="stat-spacer" style="width: 8px;"></td>
+              <td class="stat-cell" style="padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center; width: 33%;">
                 <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Break-even</p>
                 <p style="color: #16a34a; font-size: 20px; font-weight: 700; margin: 0;">${results.breakEvenMonths?.toFixed(1) || '0'} months</p>
               </td>
-              <td style="width: 8px;"></td>
-              <td style="padding: 16px; background: #fdf4ff; border-radius: 8px; text-align: center; width: 33%;">
+              <td class="stat-spacer" style="width: 8px;"></td>
+              <td class="stat-cell" style="padding: 16px; background: #fdf4ff; border-radius: 8px; text-align: center; width: 33%;">
                 <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Year 1 ROI</p>
                 <p style="color: #7c3aed; font-size: 20px; font-weight: 700; margin: 0;">${results.roiPercentage?.toFixed(0) || '0'}%</p>
               </td>
@@ -200,7 +200,7 @@ serve(async (req) => {
         </td>
       </tr>` : `
       <tr>
-        <td style="padding: 0 32px 28px;">
+         <td class="content-pad" style="padding: 0 32px 28px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;">
             <tr><td style="padding: 24px;">
               <h3 style="color: #991b1b; font-size: 16px; margin: 0 0 8px;">⚠️ Viability Assessment</h3>
@@ -219,48 +219,47 @@ serve(async (req) => {
     const deepDiveSection = (isQualified && assessmentId)
       ? `
         <tr>
-          <td style="padding: 0 32px 28px;">
+          <td class="content-pad" style="padding: 0 32px 28px;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1e3a5f, #4338ca); border-radius: 12px; overflow: hidden;">
               <tr>
-                <td style="padding: 32px; text-align: center;">
+                <td style="padding: 28px 20px; text-align: center;">
                    <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR AN AI BUSINESS REWIRING SESSION</p>
                   <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for Your Straight Talk™?</h2>
-                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 8px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 8px;">
                     This isn't about building another app. It's about redesigning how work flows through your business.
                   </p>
-                  <p style="color: #bfdbfe; font-size: 13px; line-height: 1.7; margin: 0 0 6px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                  <p style="color: #bfdbfe; font-size: 13px; line-height: 1.7; margin: 0 0 6px;">
                     Your Straight Talk™ session is a strategic review where we map:
                   </p>
-                  <table cellpadding="0" cellspacing="0" style="margin: 0 auto 8px; text-align: left; max-width: 420px;">
+                  <table cellpadding="0" cellspacing="0" style="margin: 0 auto 8px; text-align: left;">
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the hidden friction slowing your operations</td></tr>
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the decisions AI can start making for you</td></tr>
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the workflows that should disappear completely</td></tr>
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• and the fastest path to measurable efficiency gains</td></tr>
                   </table>
-                  <p style="color: #93c5fd; font-size: 13px; font-weight: 600; line-height: 1.7; margin: 0 0 24px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                  <p style="color: #93c5fd; font-size: 13px; font-weight: 600; line-height: 1.7; margin: 0 0 20px;">
                     Most businesses uncover 5–10× leverage opportunities in this session alone.
                   </p>
                   <p style="color: #bfdbfe; font-size: 14px; margin: 0 0 16px;">Choose the option that works best for you:</p>
-                  </p>
-                  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 500px; margin: 0 auto;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="padding: 0 6px 12px; width: 50%; vertical-align: top;">
+                      <td class="cta-cell" style="padding: 0 4px 12px; width: 50%; vertical-align: top;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;">
-                          <tr><td style="padding: 20px 16px; text-align: center;">
+                          <tr><td style="padding: 20px 12px; text-align: center;">
                             <p style="font-size: 28px; margin: 0 0 8px;">📅</p>
                             <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 6px;">Book a Live Call</p>
-                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Chat with Aidan & Eoghan on Zoom about next steps</p>
-                            <a href="${calendlyUrl}" style="display: inline-block; padding: 10px 24px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px;">Book Now →</a>
+                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Chat with Aidan & Eoghan on Zoom</p>
+                            <a href="${calendlyUrl}" style="display: inline-block; padding: 10px 20px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px;">Book Now →</a>
                           </td></tr>
                         </table>
                       </td>
-                      <td style="padding: 0 6px 12px; width: 50%; vertical-align: top;">
+                      <td class="cta-cell" style="padding: 0 4px 12px; width: 50%; vertical-align: top;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;">
-                          <tr><td style="padding: 20px 16px; text-align: center;">
+                          <tr><td style="padding: 20px 12px; text-align: center;">
                             <p style="font-size: 28px; margin: 0 0 8px;">🎙️</p>
                             <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 6px;">Self-Interview First</p>
-                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Record answers at your own pace, then we'll follow up</p>
-                            <a href="${selfInterviewUrl}" style="display: inline-block; padding: 10px 24px; background: rgba(255,255,255,0.2); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,0.3);">Start Now →</a>
+                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Record answers at your own pace</p>
+                            <a href="${selfInterviewUrl}" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.2); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,0.3);">Start Now →</a>
                           </td></tr>
                         </table>
                       </td>
@@ -415,15 +414,35 @@ serve(async (req) => {
 function buildDefaultTemplate(r: Record<string, string>): string {
   let html = `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"></head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body,table,td,a{-webkit-text-size-adjust:100%!important;-ms-text-size-adjust:100%!important}
+  table{border-collapse:collapse!important}
+  img{border:0;display:block;max-width:100%!important;height:auto!important}
+  @media only screen and (max-width:620px){
+    .outer-wrap{padding:12px 8px!important}
+    .main-table{width:100%!important;min-width:100%!important}
+    .content-pad{padding-left:16px!important;padding-right:16px!important}
+    .header-pad{padding:28px 16px!important}
+    .stat-cell{display:block!important;width:100%!important;margin-bottom:8px!important}
+    .stat-spacer{display:none!important}
+    .cta-cell{display:block!important;width:100%!important;padding:0 0 12px!important}
+    .impact-number{font-size:32px!important}
+    h1{font-size:22px!important}
+    h2{font-size:16px!important}
+  }
+</style>
+</head>
 <body style="margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; padding: 40px 20px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc;">
     <tr>
-      <td align="center">
-        <table width="640" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.06);">
+      <td align="center" class="outer-wrap" style="padding: 40px 20px;">
+        <table cellpadding="0" cellspacing="0" class="main-table" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.06); width: 100%; max-width: 640px;">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 40px 32px; text-align: center;">
+            <td class="header-pad" style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 40px 32px; text-align: center;">
               <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">Strategic Growth Assessment</p>
               <h1 style="color: #ffffff; font-size: 26px; margin: 0; font-weight: 700;">Digital Transformation ROI Report</h1>
               <p style="color: #bfdbfe; font-size: 15px; margin: 12px 0 0;">Prepared exclusively for {{businessName}}</p>
@@ -431,7 +450,7 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- Opening Letter -->
           <tr>
-            <td style="padding: 36px 32px 0;">
+            <td class="content-pad" style="padding: 36px 32px 0;">
               <p style="color: #1e293b; font-size: 16px; line-height: 1.7; margin: 0 0 16px;">Hi {{contactName}},</p>
               <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
                 Thank you for investing the time to complete this assessment. What follows isn't just a set of numbers — it's a strategic roadmap for how <strong>{{businessName}}</strong> can leverage modern technology to unlock measurable growth.
@@ -449,12 +468,12 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- TOTAL IMPACT -->
           <tr>
-            <td style="padding: 0 32px 32px;">
+             <td class="content-pad" style="padding: 0 32px 32px;">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 28px; border-radius: 12px; text-align: center;">
+                  <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 24px 16px; border-radius: 12px; text-align: center;">
                     <p style="color: #93c5fd; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px;">Your Projected Annual Impact</p>
-                    <p style="color: #ffffff; font-size: 42px; font-weight: 800; margin: 0; letter-spacing: -1px;">{{totalAnnualImpact}}</p>
+                    <p class="impact-number" style="color: #ffffff; font-size: 42px; font-weight: 800; margin: 0; letter-spacing: -1px;">{{totalAnnualImpact}}</p>
                     <p style="color: #bfdbfe; font-size: 13px; margin: 8px 0 0;">per year in combined revenue growth, savings & efficiency gains</p>
                   </td>
                 </tr>
@@ -463,7 +482,7 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- YOUR INPUTS -->
           <tr>
-            <td style="padding: 0 32px 28px;">
+             <td class="content-pad" style="padding: 0 32px 28px;">
               <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">📋 Your Business Data — Please Verify</h2>
               <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0 0 16px;">Accuracy matters. Every projection below is built on these inputs.</p>
               {{businessDataTable}}
@@ -471,9 +490,9 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- COACHING -->
           <tr>
-            <td style="padding: 0 32px 28px;">
+            <td class="content-pad" style="padding: 0 32px 28px;">
               <table width="100%" cellpadding="0" cellspacing="0" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; overflow: hidden;">
-                <tr><td style="padding: 24px;">
+                <tr><td style="padding: 20px 16px;">
                   <h3 style="color: #92400e; font-size: 16px; margin: 0 0 12px;">💡 A Note on Timing & Competitive Advantage</h3>
                   <p style="color: #78350f; font-size: 13px; line-height: 1.8; margin: 0 0 10px;">
                     Every month without automation, your business absorbs <strong>{{monthlyOpCost}}</strong> in avoidable operational costs. Every month without conversion optimisation, you're leaving approximately <strong>{{monthlyRevLift}}</strong> on the table.
@@ -490,7 +509,7 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- ROI BREAKDOWN -->
           <tr>
-            <td style="padding: 0 32px 28px;">
+            <td class="content-pad" style="padding: 0 32px 28px;">
               <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 16px;">📊 How We Calculated Your ROI</h2>
               {{roiBreakdownCards}}
             </td>
@@ -501,7 +520,7 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           {{deepDiveSection}}
           <!-- CLOSING -->
           <tr>
-            <td style="padding: 0 32px 32px;">
+            <td class="content-pad" style="padding: 0 32px 32px;">
               <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 12px;">🚀 Our Recommendation</h2>
               <p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0 0 14px;">
                 {{contactName}}, the data is clear: <strong>{{businessName}}</strong> has significant untapped potential.
@@ -517,7 +536,7 @@ function buildDefaultTemplate(r: Record<string, string>): string {
           </tr>
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
+            <td class="content-pad" style="padding: 20px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
               <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">You're not buying tech. You're buying profit.</p>
               <p style="color: #94a3b8; font-size: 12px; margin: 0;">This report was generated by 5to10X — Strategic App ROI Assessment</p>
             </td>
