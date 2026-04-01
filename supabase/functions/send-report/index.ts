@@ -219,48 +219,47 @@ serve(async (req) => {
     const deepDiveSection = (isQualified && assessmentId)
       ? `
         <tr>
-          <td style="padding: 0 32px 28px;">
+          <td class="content-pad" style="padding: 0 32px 28px;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1e3a5f, #4338ca); border-radius: 12px; overflow: hidden;">
               <tr>
-                <td style="padding: 32px; text-align: center;">
+                <td style="padding: 28px 20px; text-align: center;">
                    <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR AN AI BUSINESS REWIRING SESSION</p>
                   <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for Your Straight Talk™?</h2>
-                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 8px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 8px;">
                     This isn't about building another app. It's about redesigning how work flows through your business.
                   </p>
-                  <p style="color: #bfdbfe; font-size: 13px; line-height: 1.7; margin: 0 0 6px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                  <p style="color: #bfdbfe; font-size: 13px; line-height: 1.7; margin: 0 0 6px;">
                     Your Straight Talk™ session is a strategic review where we map:
                   </p>
-                  <table cellpadding="0" cellspacing="0" style="margin: 0 auto 8px; text-align: left; max-width: 420px;">
+                  <table cellpadding="0" cellspacing="0" style="margin: 0 auto 8px; text-align: left;">
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the hidden friction slowing your operations</td></tr>
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the decisions AI can start making for you</td></tr>
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• the workflows that should disappear completely</td></tr>
                     <tr><td style="color: #bfdbfe; font-size: 13px; padding: 3px 0;">• and the fastest path to measurable efficiency gains</td></tr>
                   </table>
-                  <p style="color: #93c5fd; font-size: 13px; font-weight: 600; line-height: 1.7; margin: 0 0 24px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                  <p style="color: #93c5fd; font-size: 13px; font-weight: 600; line-height: 1.7; margin: 0 0 20px;">
                     Most businesses uncover 5–10× leverage opportunities in this session alone.
                   </p>
                   <p style="color: #bfdbfe; font-size: 14px; margin: 0 0 16px;">Choose the option that works best for you:</p>
-                  </p>
-                  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 500px; margin: 0 auto;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="padding: 0 6px 12px; width: 50%; vertical-align: top;">
+                      <td class="cta-cell" style="padding: 0 4px 12px; width: 50%; vertical-align: top;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;">
-                          <tr><td style="padding: 20px 16px; text-align: center;">
+                          <tr><td style="padding: 20px 12px; text-align: center;">
                             <p style="font-size: 28px; margin: 0 0 8px;">📅</p>
                             <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 6px;">Book a Live Call</p>
-                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Chat with Aidan & Eoghan on Zoom about next steps</p>
-                            <a href="${calendlyUrl}" style="display: inline-block; padding: 10px 24px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px;">Book Now →</a>
+                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Chat with Aidan & Eoghan on Zoom</p>
+                            <a href="${calendlyUrl}" style="display: inline-block; padding: 10px 20px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px;">Book Now →</a>
                           </td></tr>
                         </table>
                       </td>
-                      <td style="padding: 0 6px 12px; width: 50%; vertical-align: top;">
+                      <td class="cta-cell" style="padding: 0 4px 12px; width: 50%; vertical-align: top;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;">
-                          <tr><td style="padding: 20px 16px; text-align: center;">
+                          <tr><td style="padding: 20px 12px; text-align: center;">
                             <p style="font-size: 28px; margin: 0 0 8px;">🎙️</p>
                             <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 6px;">Self-Interview First</p>
-                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Record answers at your own pace, then we'll follow up</p>
-                            <a href="${selfInterviewUrl}" style="display: inline-block; padding: 10px 24px; background: rgba(255,255,255,0.2); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,0.3);">Start Now →</a>
+                            <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Record answers at your own pace</p>
+                            <a href="${selfInterviewUrl}" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.2); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,0.3);">Start Now →</a>
                           </td></tr>
                         </table>
                       </td>
