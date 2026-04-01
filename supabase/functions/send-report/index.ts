@@ -171,24 +171,24 @@ serve(async (req) => {
     // ── Build investment section ──
     const investmentSection = isViable ? `
       <tr>
-        <td style="padding: 0 32px 28px;">
+        <td class="content-pad" style="padding: 0 32px 28px;">
           <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">💰 Your Investment & Payment Options</h2>
           <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0 0 6px;">
             Based on your projected {{totalAnnualImpact}}/year impact, your app falls in our <strong>${pricing?.tierLabel || ''}</strong> tier.
           </p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin: 16px 0;">
             <tr>
-              <td style="padding: 16px; background: #f0f9ff; border-radius: 8px; text-align: center; width: 33%;">
+              <td class="stat-cell" style="padding: 16px; background: #f0f9ff; border-radius: 8px; text-align: center; width: 33%;">
                 <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Build Investment</p>
                 <p style="color: #1e3a5f; font-size: 20px; font-weight: 700; margin: 0;">${fmt(pricing?.buildCost || 0)}</p>
               </td>
-              <td style="width: 8px;"></td>
-              <td style="padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center; width: 33%;">
+              <td class="stat-spacer" style="width: 8px;"></td>
+              <td class="stat-cell" style="padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center; width: 33%;">
                 <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Break-even</p>
                 <p style="color: #16a34a; font-size: 20px; font-weight: 700; margin: 0;">${results.breakEvenMonths?.toFixed(1) || '0'} months</p>
               </td>
-              <td style="width: 8px;"></td>
-              <td style="padding: 16px; background: #fdf4ff; border-radius: 8px; text-align: center; width: 33%;">
+              <td class="stat-spacer" style="width: 8px;"></td>
+              <td class="stat-cell" style="padding: 16px; background: #fdf4ff; border-radius: 8px; text-align: center; width: 33%;">
                 <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Year 1 ROI</p>
                 <p style="color: #7c3aed; font-size: 20px; font-weight: 700; margin: 0;">${results.roiPercentage?.toFixed(0) || '0'}%</p>
               </td>
