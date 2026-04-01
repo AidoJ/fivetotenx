@@ -276,7 +276,7 @@ serve(async (req) => {
     // ── Build closing section ──
     const closingSection = isQualified
       ? `<p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
-          We'd love to discuss how to bring this to life for {{businessName}}. The next step is your <strong>Straight Talk™</strong> — a focused conversation about what's worth fixing first. We'll be in touch to schedule that.
+          We're looking forward to mapping out the biggest wins for {{businessName}}. Choose one of the options above and we'll take it from there.
         </p>`
       : `<p style="color: #334155; font-size: 14px; line-height: 1.8; margin: 0;">
           We'd love to discuss how to bring this to life for {{businessName}}. Reply to this email to start the conversation.
