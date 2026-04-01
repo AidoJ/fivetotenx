@@ -591,7 +591,7 @@ const SelfInterview = () => {
               ) : null}
             </div>
             <Badge variant="outline" className="text-[10px]">
-              {answeredCount}/{allQuestions.length} answered
+              {progress === 100 ? 'All done ✅' : 'In progress'}
             </Badge>
             <span className="text-xs text-muted-foreground hidden sm:inline">{businessName}</span>
           </div>
