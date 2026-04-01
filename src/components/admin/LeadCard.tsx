@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Pencil, Eye, ClipboardList, ClipboardCheck, Plus,
-  MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2
+  MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -225,6 +227,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse, stProgress,
 }, _ref) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedScoping, setCopiedScoping] = useState(false);
@@ -232,6 +235,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   const [noteType, setNoteType] = useState('comment');
   const [addingNote, setAddingNote] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [resending, setResending] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
   const roi = lead.roi_results as any;
@@ -272,6 +276,32 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
     await onAddNote(lead.id, newNote, noteType);
     setNewNote('');
     setAddingNote(false);
+  };
+
+  const handleResendReport = async () => {
+    setResending(true);
+    try {
+      const formData = lead.form_data as any;
+      const results = lead.roi_results as any;
+      const { error } = await supabase.functions.invoke('send-report', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          results,
+          formData,
+          assessmentId: lead.id,
+          isQualified: lead.is_qualified,
+        },
+      });
+      if (error) throw error;
+      toast({ title: 'Report resent ✅', description: `Sent to ${lead.contact_email}` });
+    } catch (err) {
+      console.error('Resend report error:', err);
+      toast({ title: 'Failed to resend', description: 'Please try again.', variant: 'destructive' });
+    } finally {
+      setResending(false);
+    }
   };
 
   const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
@@ -398,9 +428,22 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                 </div>
               </Section>
 
-              {/* Stage Actions */}
+              {/* Actions & Tools */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
+                  {/* Resend Report & Invite */}
+                  {lead.report_sent && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[10px] px-2 gap-1"
+                      disabled={resending}
+                      onClick={handleResendReport}
+                    >
+                      {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                      {resending ? 'Sending…' : `Resend Report${lead.is_qualified ? ' & Invite' : ''}`}
+                    </Button>
+                  )}
                   {/* Upload Zoom Recording — fallback, de-prioritised */}
                   {lead.pipeline_stage === 'discovery_call' && (
                     <>
