@@ -227,6 +227,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse, stProgress,
 }, _ref) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedScoping, setCopiedScoping] = useState(false);
@@ -234,6 +235,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   const [noteType, setNoteType] = useState('comment');
   const [addingNote, setAddingNote] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [resending, setResending] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
   const roi = lead.roi_results as any;
