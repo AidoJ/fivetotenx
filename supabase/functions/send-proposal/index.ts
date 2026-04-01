@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
         .replace(/\{\{businessName\}\}/g, businessName);
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
+      const firstName = (contactName || '').split(' ')[0];
       subject = `${firstName}, your custom app proposal for ${businessName} is ready`;
       fromField = '5to10X <grow@5to10x.app>';
       emailHtml = `<!DOCTYPE html>
