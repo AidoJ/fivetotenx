@@ -973,6 +973,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [results, setResults] = useState<ROIResults | null>(null);
   const [selectedIndustry, setSelectedIndustry] = useState<any>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleChange = (partial: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
