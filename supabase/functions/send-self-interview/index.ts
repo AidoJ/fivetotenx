@@ -38,21 +38,23 @@ Deno.serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business')
         .replace(/\{\{selfInterviewUrl\}\}/g, selfInterviewUrl)
         .replace(/\{\{calendlyUrl\}\}/g, calendlyUrl);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      subject = `${contactName}, let's get your Straight Talk™ started`;
+      const firstName = (contactName || '').split(' ')[0];
+      subject = `${firstName}, let's get your Straight Talk™ started`;
       fromField = '5to10X <grow@5to10x.app>';
       emailHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-          <h2 style="color: #1a1a2e;">Hi ${contactName} 👋</h2>
+          <h2 style="color: #1a1a2e;">Hi ${firstName} 👋</h2>
           <p style="color: #444; line-height: 1.6;">
             We're excited to dig deeper into how we can help <strong>${businessName || 'your business'}</strong> grow. You've got two options to share your insights with us:
           </p>

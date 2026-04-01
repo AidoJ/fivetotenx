@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
           </div>
 
           <div style="padding: 30px 25px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-            <p style="font-size: 16px; color: #333; margin: 0 0 20px;">Hi ${contactName || 'there'},</p>
+            <p style="font-size: 16px; color: #333; margin: 0 0 20px;">Hi ${(contactName || 'there').split(' ')[0]},</p>
             <p style="font-size: 15px; color: #555; line-height: 1.6; margin: 0 0 25px;">
               Great news — your Straight Talk™ call with <strong>Aidan & Eoghan</strong> from 5to10X is locked in. Here are the details:
             </p>

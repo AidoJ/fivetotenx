@@ -34,17 +34,19 @@ serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
+      const firstName = (contactName || '').split(' ')[0];
       subject = `We've received your Game Plan™ responses — next steps for ${businessName || 'your project'}`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Thank you ${contactName}! We've received your Game Plan™ responses for ${businessName}. We'll review your data and be in touch within 24-48 hours with next steps.</p>`;
+      emailHtml = `<p>Thank you ${firstName}! We've received your Game Plan™ responses for ${businessName}. We'll review your data and be in touch within 24-48 hours with next steps.</p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {

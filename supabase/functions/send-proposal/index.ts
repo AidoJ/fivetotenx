@@ -61,17 +61,18 @@ Deno.serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName)
         .replace(/\{\{proposalUrl\}\}/g, proposalUrl)
         .replace(/\{\{buildRange\}\}/g, buildRange);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName);
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      subject = `${contactName}, your custom app proposal for ${businessName} is ready`;
+      subject = `${firstName}, your custom app proposal for ${businessName} is ready`;
       fromField = '5to10X <grow@5to10x.app>';
       emailHtml = `<!DOCTYPE html>
 <html>
