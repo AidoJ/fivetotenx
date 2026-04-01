@@ -415,15 +415,35 @@ serve(async (req) => {
 function buildDefaultTemplate(r: Record<string, string>): string {
   let html = `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"></head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body,table,td,a{-webkit-text-size-adjust:100%!important;-ms-text-size-adjust:100%!important}
+  table{border-collapse:collapse!important}
+  img{border:0;display:block;max-width:100%!important;height:auto!important}
+  @media only screen and (max-width:620px){
+    .outer-wrap{padding:12px 8px!important}
+    .main-table{width:100%!important;min-width:100%!important}
+    .content-pad{padding-left:16px!important;padding-right:16px!important}
+    .header-pad{padding:28px 16px!important}
+    .stat-cell{display:block!important;width:100%!important;margin-bottom:8px!important}
+    .stat-spacer{display:none!important}
+    .cta-cell{display:block!important;width:100%!important;padding:0 0 12px!important}
+    .impact-number{font-size:32px!important}
+    h1{font-size:22px!important}
+    h2{font-size:16px!important}
+  }
+</style>
+</head>
 <body style="margin: 0; padding: 0; background: #f8fafc; font-family: Georgia, 'Times New Roman', serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; padding: 40px 20px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc;">
     <tr>
-      <td align="center">
-        <table width="640" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.06);">
+      <td align="center" class="outer-wrap" style="padding: 40px 20px;">
+        <table cellpadding="0" cellspacing="0" class="main-table" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(30,58,95,0.06); width: 100%; max-width: 640px;">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 40px 32px; text-align: center;">
+            <td class="header-pad" style="background: linear-gradient(135deg, #1e3a5f, #1e40af); padding: 40px 32px; text-align: center;">
               <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">Strategic Growth Assessment</p>
               <h1 style="color: #ffffff; font-size: 26px; margin: 0; font-weight: 700;">Digital Transformation ROI Report</h1>
               <p style="color: #bfdbfe; font-size: 15px; margin: 12px 0 0;">Prepared exclusively for {{businessName}}</p>
