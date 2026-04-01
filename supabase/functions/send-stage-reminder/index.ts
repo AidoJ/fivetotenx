@@ -81,16 +81,15 @@ serve(async (req) => {
     let subject: string;
     let fromField: string;
 
+    const firstName = (contactName || '').split(' ')[0];
     if (template) {
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName)
         .replace(/\{\{deepDiveUrl\}\}/g, gamePlanUrl)
-        .replace(/\{\{gamePlanUrl\}\}/g, gamePlanUrl)
-        .replace(/\{\{calendlyUrl\}\}/g, DEFAULT_CALENDLY_URL)
         .replace(/\{\{proposalUrl\}\}/g, proposalUrl);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName);
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
