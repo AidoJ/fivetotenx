@@ -32,7 +32,7 @@ import ClarityEngineSection from '@/components/ClarityEngineSection';
 import { FormData, initialFormData, calculateROI, ROIResults } from '@/lib/formTypes';
 import StepIndicator from '@/components/StepIndicator';
 import BusinessSnapshot from '@/components/steps/BusinessSnapshot';
-import CustomerMetrics from '@/components/steps/CustomerMetrics';
+import CustomerMetrics, { validateCustomerMetrics } from '@/components/steps/CustomerMetrics';
 import OperationalEfficiency from '@/components/steps/OperationalEfficiency';
 import GrowthOpportunity from '@/components/steps/GrowthOpportunity';
 import IndustrySelector from '@/components/steps/IndustrySelector';
