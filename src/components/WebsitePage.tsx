@@ -1055,7 +1055,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
       case 1:
         return <BusinessSnapshot data={formData} onChange={handleChange} />;
       case 2:
-        return <CustomerMetrics data={formData} onChange={handleChange} />;
+        return <CustomerMetrics data={formData} onChange={handleChange} errors={step === 2 ? fieldErrors : {}} />;
       case 3:
         return formData.selectedIndustryId ? (
           <IndustryQuestions
