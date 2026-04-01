@@ -500,7 +500,7 @@ const SelfInterview = () => {
             <img src={logo} alt="5to10x" className="h-8" />
             <div className="text-right">
               <p className="text-sm font-medium text-foreground">{businessName}</p>
-              <p className="text-xs text-muted-foreground">Self-Interview</p>
+              <p className="text-xs text-muted-foreground">Straight Talk™</p>
             </div>
           </div>
         </div>
@@ -514,17 +514,19 @@ const SelfInterview = () => {
               Welcome to your <strong className="text-foreground">Straight Talk™ Self-Interview</strong>
             </p>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              We've organised {allQuestions.length} questions into {categories.length} sections.
-              Work through each tab at your own pace — record audio or type your answers.
+              We've put together a bank of specifically curated questions to help us understand as much as possible about {businessName || 'your business'} — your goals, challenges, and what makes your business tick.
+            </p>
+            <p className="text-muted-foreground max-w-lg mx-auto mt-3">
+              There's no pressure to answer every single question — just do the best you can. Skip anything that doesn't apply or that you're unsure about. Every answer helps us build a better plan for you. 💛
             </p>
           </motion.div>
 
           {existingAnswers > 0 && (
             <div className="rounded-xl bg-primary/5 border border-primary/20 p-4">
               <p className="text-sm font-medium text-primary">
-                Welcome back! You've answered {existingAnswers} of {allQuestions.length} questions.
+                Welcome back! You've made great progress already.
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Your progress was saved — pick up where you left off.</p>
+              <p className="text-xs text-muted-foreground mt-1">Your answers were saved — pick up right where you left off.</p>
             </div>
           )}
 
@@ -536,21 +538,33 @@ const SelfInterview = () => {
             </div>
             <div className="rounded-xl bg-card border border-border p-4 space-y-1">
               <CheckCircle className="w-5 h-5 text-primary" />
-              <p className="text-sm font-medium text-foreground">Auto-Transcribed</p>
-              <p className="text-xs text-muted-foreground">Audio is transcribed instantly</p>
+              <p className="text-sm font-medium text-foreground">Auto-Saved</p>
+              <p className="text-xs text-muted-foreground">Pause and come back anytime</p>
             </div>
             <div className="rounded-xl bg-card border border-border p-4 space-y-1">
               <Send className="w-5 h-5 text-primary" />
-              <p className="text-sm font-medium text-foreground">Submit</p>
+              <p className="text-sm font-medium text-foreground">We Do The Rest</p>
               <p className="text-xs text-muted-foreground">We analyse & prepare your plan</p>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <Button size="lg" className="gap-2 px-8" onClick={() => setStarted(true)}>
+          <div className="space-y-4">
+            <Button size="lg" className="gap-2 px-8 w-full sm:w-auto" onClick={() => setStarted(true)}>
               {existingAnswers > 0 ? 'Continue Self-Interview' : 'Start Self-Interview'} <ArrowRight className="w-4 h-4" />
             </Button>
             <p className="text-xs text-muted-foreground">Progress saves automatically after each answer</p>
+          </div>
+
+          <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 space-y-3 max-w-lg mx-auto">
+            <h3 className="text-base font-semibold text-foreground flex items-center justify-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" /> Prefer to chat with us instead?
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              You're welcome to book an interview with Aidan & Eoghan — we'll walk through everything together on a Zoom call. You can also start the self-interview now and finish up anything remaining during the call.
+            </p>
+            <Button variant="outline" size="lg" className="gap-2" onClick={() => window.open(CALENDLY_REFINEMENT_URL, '_blank')}>
+              <Calendar className="w-4 h-4" /> Book an Interview Instead
+            </Button>
           </div>
         </div>
       </div>
