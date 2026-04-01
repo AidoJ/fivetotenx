@@ -79,31 +79,18 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
 
       setSent(true);
       if (insertedRow) setAssessmentId(insertedRow.id);
-      toast({ title: 'Report sent! ✅', description: `Report sent to ${formData.contactEmail}` });
+      toast({ title: 'Report sent! ✅', description: `Report sent to ${formData.contactEmail}${results.pricing.isQualified ? ' (includes Straight Talk™ invitation)' : ''}` });
 
-      // Auto-send Straight Talk invite if qualified and automation enabled
+      // Update invite_sent flag if qualified (the report email already contains the Straight Talk CTA)
       if (results.pricing.isQualified && insertedRow?.id) {
         try {
-          const { data: autoSettings } = await supabase
-            .from('automation_settings')
-            .select('auto_send_invite_on_qualify')
-            .limit(1)
-            .single();
-
-          if (autoSettings?.auto_send_invite_on_qualify) {
-            await supabase.functions.invoke('send-discovery-invite', {
-              body: {
-                contactName: formData.contactName,
-                contactEmail: formData.contactEmail,
-                businessName: formData.businessName,
-                assessmentId: insertedRow.id,
-                calendlyUrl: 'https://calendly.com/aidan-rejuvenators/discovery',
-              },
-            });
-            console.log('Auto-sent Straight Talk invite');
-          }
-        } catch (autoErr) {
-          console.error('Auto-invite failed (non-critical):', autoErr);
+          await supabase.from('roi_assessments').update({
+            invite_sent: true,
+            invite_sent_at: new Date().toISOString(),
+          }).eq('id', insertedRow.id);
+          console.log('Qualified lead: report includes Straight Talk invite');
+        } catch (updateErr) {
+          console.error('Failed to update invite_sent flag (non-critical):', updateErr);
         }
       }
     } catch (err: unknown) {
