@@ -37,19 +37,20 @@ serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business')
         .replace(/\{\{deepDiveUrl\}\}/g, gamePlanUrl);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      // Fallback
-      subject = `${contactName}, let's map out your Game Plan™ for ${businessName || '5to10X'}`;
+      const firstName = (contactName || '').split(' ')[0];
+      subject = `${firstName}, let's map out your Game Plan™ for ${businessName || '5to10X'}`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Hi ${contactName}, after our Straight Talk™ it's time to map your Game Plan™: <a href="${gamePlanUrl}">${gamePlanUrl}</a></p>`;
+      emailHtml = `<p>Hi ${firstName}, after our Straight Talk™ it's time to map your Game Plan™: <a href="${gamePlanUrl}">${gamePlanUrl}</a></p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {

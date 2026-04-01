@@ -81,23 +81,22 @@ serve(async (req) => {
     let subject: string;
     let fromField: string;
 
+    const firstName = (contactName || '').split(' ')[0];
     if (template) {
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName)
         .replace(/\{\{deepDiveUrl\}\}/g, gamePlanUrl)
-        .replace(/\{\{gamePlanUrl\}\}/g, gamePlanUrl)
-        .replace(/\{\{calendlyUrl\}\}/g, DEFAULT_CALENDLY_URL)
         .replace(/\{\{proposalUrl\}\}/g, proposalUrl);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName);
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
       subject = `${contactName}, a quick reminder from 5to10X`;
       fromField = '5to10X <grow@5to10x.app>';
       emailHtml = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
-        <p>Hi ${contactName},</p>
+        <p>Hi ${(contactName || '').split(' ')[0]},</p>
         <p>Just a friendly reminder about your project with <strong>${businessName}</strong>. We'd love to help you move forward!</p>
         <p>Reply to this email or let us know a good time to chat.</p>
         <p style="margin-top:24px;color:#666;">— The 5to10X Team</p>

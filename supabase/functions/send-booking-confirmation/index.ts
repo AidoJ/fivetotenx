@@ -100,15 +100,16 @@ Deno.serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business')
         .replace(/\{\{date\}\}/g, date)
         .replace(/\{\{time\}\}/g, time)
         .replace(/\{\{zoomLink\}\}/g, zoomLink || '')
         .replace(/\{\{eventName\}\}/g, callTitle);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{date\}\}/g, date);
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
@@ -122,7 +123,7 @@ Deno.serve(async (req) => {
           </div>
 
           <div style="padding: 30px 25px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-            <p style="font-size: 16px; color: #333; margin: 0 0 20px;">Hi ${contactName || 'there'},</p>
+            <p style="font-size: 16px; color: #333; margin: 0 0 20px;">Hi ${(contactName || 'there').split(' ')[0]},</p>
             <p style="font-size: 15px; color: #555; line-height: 1.6; margin: 0 0 25px;">
               Great news — your Straight Talk™ call with <strong>Aidan & Eoghan</strong> from 5to10X is locked in. Here are the details:
             </p>

@@ -61,17 +61,19 @@ Deno.serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName)
         .replace(/\{\{proposalUrl\}\}/g, proposalUrl)
         .replace(/\{\{buildRange\}\}/g, buildRange);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName)
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName);
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      subject = `${contactName}, your custom app proposal for ${businessName} is ready`;
+      const firstName = (contactName || '').split(' ')[0];
+      subject = `${firstName}, your custom app proposal for ${businessName} is ready`;
       fromField = '5to10X <grow@5to10x.app>';
       emailHtml = `<!DOCTYPE html>
 <html>
@@ -90,7 +92,7 @@ Deno.serve(async (req) => {
           <tr>
             <td style="padding: 32px;">
               <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 16px;">
-                Hi ${contactName},
+                Hi ${(contactName || '').split(' ')[0]},
               </p>
               <p style="color: #334155; font-size: 15px; line-height: 1.8; margin: 0 0 16px;">
                 Based on your Reality Check™ assessment and Straight Talk™ conversation, we've prepared a tailored proposal for <strong>${businessName}</strong>.

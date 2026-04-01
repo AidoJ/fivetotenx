@@ -38,18 +38,20 @@ serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business')
         .replace(/\{\{calendlyUrl\}\}/g, bookingUrl);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business');
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
-      subject = `${contactName}, book your Straight Talk™ with 5to10X`;
+      const firstName = (contactName || '').split(' ')[0];
+      subject = `${firstName}, book your Straight Talk™ with 5to10X`;
       fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<p>Hi ${contactName}, book your Straight Talk™ here: <a href="${bookingUrl}">${bookingUrl}</a></p>`;
+      emailHtml = `<p>Hi ${firstName}, book your Straight Talk™ here: <a href="${bookingUrl}">${bookingUrl}</a></p>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {
