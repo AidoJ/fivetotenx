@@ -77,8 +77,10 @@ serve(async (req) => {
 
     // Zoom section removed — no longer used
 
-    // Straight Talk™ CTA for qualified leads
+    // Straight Talk™ CTA for qualified leads — two options: Zoom call or Self-Interview
     const deepDiveBaseUrl = 'https://5to10x.app';
+    const calendlyUrl = 'https://calendly.com/aidan-rejuvenators/discovery';
+    const selfInterviewUrl = `${deepDiveBaseUrl}/self-interview?id=${assessmentId}`;
     const deepDiveSection = (isQualified && assessmentId)
       ? `
         <tr>
@@ -88,12 +90,43 @@ serve(async (req) => {
                 <td style="padding: 32px; text-align: center;">
                   <p style="color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px;">✨ YOU QUALIFY FOR A CUSTOM BUILD</p>
                   <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px;">Ready for Your Straight Talk™?</h2>
-                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 20px; max-width: 480px; margin-left: auto; margin-right: auto;">
-                    Your business qualifies for a custom app build. We'll be in touch to schedule your Straight Talk™ — a focused conversation about what needs to change for ${businessName || 'your business'}.
+                  <p style="color: #bfdbfe; font-size: 14px; line-height: 1.7; margin: 0 0 24px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    Your business qualifies for a custom app build. The next step is your Straight Talk™ — a focused conversation about what matters most to ${businessName || 'your business'}. Choose the option that works best for you:
                   </p>
-                  <a href="${deepDiveBaseUrl}/deep-dive?id=${assessmentId}" style="display: inline-block; padding: 14px 36px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px;">
-                    Get Started →
-                  </a>
+
+                  <!-- Two-option layout -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 500px; margin: 0 auto;">
+                    <tr>
+                      <td style="padding: 0 6px 12px; width: 50%; vertical-align: top;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;">
+                          <tr>
+                            <td style="padding: 20px 16px; text-align: center;">
+                              <p style="font-size: 28px; margin: 0 0 8px;">📅</p>
+                              <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 6px;">Book a Live Call</p>
+                              <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Chat with Aidan & Eoghan on Zoom about next steps</p>
+                              <a href="${calendlyUrl}" style="display: inline-block; padding: 10px 24px; background: #ffffff; color: #1e3a5f; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px;">
+                                Book Now →
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td style="padding: 0 6px 12px; width: 50%; vertical-align: top;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;">
+                          <tr>
+                            <td style="padding: 20px 16px; text-align: center;">
+                              <p style="font-size: 28px; margin: 0 0 8px;">🎙️</p>
+                              <p style="color: #ffffff; font-size: 14px; font-weight: 700; margin: 0 0 6px;">Self-Interview First</p>
+                              <p style="color: #bfdbfe; font-size: 12px; line-height: 1.5; margin: 0 0 16px;">Record answers at your own pace, then we'll follow up</p>
+                              <a href="${selfInterviewUrl}" style="display: inline-block; padding: 10px 24px; background: rgba(255,255,255,0.2); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,0.3);">
+                                Start Now →
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
