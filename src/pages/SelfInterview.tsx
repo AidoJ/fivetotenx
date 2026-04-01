@@ -509,7 +509,7 @@ const SelfInterview = () => {
             <div className="w-20 h-20 rounded-2xl mx-auto flex items-center justify-center bg-primary/10 mb-6">
               <Mic className="w-10 h-10 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-3">Hi {contactName}! 👋</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-3">Hi {contactName.split(' ')[0]},</h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto mb-2">
               Welcome to your <strong className="text-foreground">Straight Talk™ Self-Interview</strong>
             </p>
