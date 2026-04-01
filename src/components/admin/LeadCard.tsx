@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Pencil, Eye, ClipboardList, ClipboardCheck, Plus,
-  MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2
+  MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
