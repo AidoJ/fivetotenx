@@ -270,7 +270,7 @@ serve(async (req) => {
 
     // ── All placeholder replacements ──
     const replacements: Record<string, string> = {
-      '{{contactName}}': contactName || '',
+      '{{contactName}}': (contactName || '').split(' ')[0],
       '{{businessName}}': businessName || 'Your Business',
       '{{businessTypeLabel}}': businessTypeLabel.toLowerCase(),
       '{{totalAnnualImpact}}': fmt(results.totalAnnualImpact),
