@@ -428,9 +428,22 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                 </div>
               </Section>
 
-              {/* Stage Actions */}
+              {/* Actions & Tools */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
+                  {/* Resend Report & Invite */}
+                  {lead.report_sent && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[10px] px-2 gap-1"
+                      disabled={resending}
+                      onClick={handleResendReport}
+                    >
+                      {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                      {resending ? 'Sending…' : `Resend Report${lead.is_qualified ? ' & Invite' : ''}`}
+                    </Button>
+                  )}
                   {/* Upload Zoom Recording — fallback, de-prioritised */}
                   {lead.pipeline_stage === 'discovery_call' && (
                     <>
