@@ -100,15 +100,16 @@ Deno.serve(async (req) => {
     let fromField: string;
 
     if (template) {
+      const firstName = (contactName || '').split(' ')[0];
       emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{businessName\}\}/g, businessName || 'your business')
         .replace(/\{\{date\}\}/g, date)
         .replace(/\{\{time\}\}/g, time)
         .replace(/\{\{zoomLink\}\}/g, zoomLink || '')
         .replace(/\{\{eventName\}\}/g, callTitle);
       subject = template.subject
-        .replace(/\{\{contactName\}\}/g, contactName || '')
+        .replace(/\{\{contactName\}\}/g, firstName)
         .replace(/\{\{date\}\}/g, date);
       fromField = `${template.from_name} <${template.from_email}>`;
     } else {
