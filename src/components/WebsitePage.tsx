@@ -996,7 +996,40 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
     }));
   };
 
+  const validateStep = (currentStep: number): boolean => {
+    if (currentStep === 1) {
+      // Business Snapshot: require name, email, business name
+      const errs: Record<string, string> = {};
+      if (!formData.contactName.trim()) errs.contactName = 'Required';
+      if (!formData.contactEmail.trim()) errs.contactEmail = 'Required';
+      if (!formData.businessName.trim()) errs.businessName = 'Required';
+      setFieldErrors(errs);
+      return Object.keys(errs).length === 0;
+    }
+    if (currentStep === 2) {
+      // Customer Metrics: require core CLV fields
+      const errs = validateCustomerMetrics(formData);
+      setFieldErrors(errs);
+      return Object.keys(errs).length === 0;
+    }
+    setFieldErrors({});
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep((s) => s + 1);
+    }
+  };
+
   const handleSubmit = () => {
+    // Validate metrics step one more time
+    const metricsErrors = validateCustomerMetrics(formData);
+    if (Object.keys(metricsErrors).length > 0) {
+      setFieldErrors(metricsErrors);
+      setStep(2);
+      return;
+    }
     const roi = calculateROI(formData);
     setResults(roi);
   };
