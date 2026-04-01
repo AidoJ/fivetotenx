@@ -11,6 +11,8 @@ interface Props {
 }
 
 const GrowthOpportunity = ({ data, onChange }: Props) => {
+  const [otherReason, setOtherReason] = useState('');
+
   const toggleFeature = (feature: string) => {
     const current = data.currentFeatures;
     const updated = current.includes(feature)
@@ -26,6 +28,24 @@ const GrowthOpportunity = ({ data, onChange }: Props) => {
       : [...current, goal];
     onChange({ primaryGoals: updated });
   };
+
+  const toggleReason = (reason: string) => {
+    const current = data.lostSalesReasons;
+    const updated = current.includes(reason)
+      ? current.filter((r) => r !== reason)
+      : [...current, reason];
+    onChange({ lostSalesReasons: updated });
+  };
+
+  const addOtherReason = () => {
+    const trimmed = otherReason.trim();
+    if (trimmed && !data.lostSalesReasons.includes(trimmed)) {
+      onChange({ lostSalesReasons: [...data.lostSalesReasons, trimmed] });
+      setOtherReason('');
+    }
+  };
+
+  const isCustomReason = (reason: string) => !LOST_SALES_REASONS.includes(reason);
 
   return (
     <div className="space-y-6">
