@@ -1124,7 +1124,7 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
               {step === 0 ? (
                 <div /> // Industry selector auto-advances
               ) : step < totalSteps - 1 ? (
-                <Button onClick={() => setStep((s) => s + 1)} className="gap-2">
+                <Button onClick={handleNext} className="gap-2">
                   Next <ArrowRight className="w-4 h-4" />
                 </Button>
               ) : (
