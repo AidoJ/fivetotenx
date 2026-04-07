@@ -308,6 +308,34 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
     }
   };
 
+  const handlePreviewReport = async () => {
+    setLoadingPreview(true);
+    try {
+      const fd = lead.form_data as any;
+      const res = lead.roi_results as any;
+      const { data, error } = await supabase.functions.invoke('send-report', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          results: res,
+          formData: fd,
+          assessmentId: lead.id,
+          isQualified: lead.is_qualified,
+          previewOnly: true,
+        },
+      });
+      if (error) throw error;
+      setPreviewHtml(data.html);
+      setPreviewOpen(true);
+    } catch (err) {
+      console.error('Preview error:', err);
+      toast({ title: 'Preview failed', description: 'Could not load report preview.', variant: 'destructive' });
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
   const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
     { key: 'assessment', label: 'Reality Check' },
     { key: 'qualified', label: 'Qualified' },
