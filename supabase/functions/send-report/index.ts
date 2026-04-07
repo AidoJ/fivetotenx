@@ -373,6 +373,13 @@ serve(async (req) => {
       emailHtml = buildDefaultTemplate(replacements);
     }
 
+    // ── Preview mode: return HTML without sending ──
+    if (previewOnly) {
+      return new Response(JSON.stringify({ html: emailHtml, subject }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // ── Send via Resend ──
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
