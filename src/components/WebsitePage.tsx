@@ -551,6 +551,28 @@ const CaseStudiesSection = () => {
 
 };
 
+const TestimonialsSection = () => (
+  <section className="px-4 py-20 md:py-28" style={{ background: 'hsl(260 30% 6%)' }}>
+    <div className="max-w-3xl mx-auto">
+      <motion.div {...fadeUp} className="text-center space-y-8">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide" style={{ background: 'rgba(212,142,8,0.15)', color: '#D88E08' }}>
+          <Quote className="w-4 h-4" />
+          Client Testimonial
+        </div>
+        <blockquote className="text-lg md:text-xl leading-relaxed italic" style={{ color: 'hsl(220 20% 80%)' }}>
+          "As a one-man-band owner/inventor/consultant style business, Aidan swooped straight into the backend operations of my business to find all the inefficiencies I'd been carrying and didn't have a solution for. In a very short time, he implemented an entire platform that now serves as a one-stop-shop for my clients and much to my delight, gives me the power to make many changes as the business evolves. The efficiency of this platform has easily saved me 50% in administration time, as well as adding additional features I never even thought of, or thought were possible. I wouldn't hesitate to recommend Aidan's team to any business that needs an efficiency makeover — you might be surprised at what they uncover!"
+        </blockquote>
+        <div className="space-y-1">
+          <p className="font-display font-bold text-foreground">A'Hara</p>
+          <a href="https://www.13creators.com" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:underline" style={{ color: '#D88E08' }}>
+            www.13creators.com
+          </a>
+        </div>
+      </motion.div>
+    </div>
+  </section>
+);
+
 const ProcessSection = () => {
   const steps = [
   { num: '1', title: 'Business Flow Analysis', desc: 'We map how your business currently operates and identify inefficiencies.', icon: Eye },
