@@ -314,12 +314,29 @@ function calculateDynamicPricing(totalAnnualImpact: number): DynamicPricing {
   };
 }
 
+// Industry presets for long-cycle businesses
+// These industries have high deal values but long sales cycles and rare repeats
+const LONG_CYCLE_SLUGS = new Set([
+  'property-real-estate',
+  'automotive-services',
+  'construction-civil',
+]);
+
+function isLongCycleBusiness(data: FormData): boolean {
+  if (LONG_CYCLE_SLUGS.has(data.selectedIndustrySlug)) return true;
+  // Also detect via data: if deal cycle > 4 weeks or purchases < 1/year
+  const dealWeeks = parseFloat(data.avgDealCycleWeeks) || 0;
+  const purchasesPerYear = parseFloat(data.avgPurchasesPerYear) || 1;
+  return dealWeeks > 4 || purchasesPerYear < 1;
+}
+
 export function calculateROI(data: FormData): ROIResults {
   const visitors = parseFloat(data.monthlyVisitors) || 0;
   const conversionRate = parseFloat(data.conversionRate) || 0;
   const avgSaleValue = parseFloat(data.avgPurchaseValue) || 0;
   const isService = data.businessType === 'service' || data.businessType === 'hybrid';
   const isProduct = data.businessType === 'product' || data.businessType === 'hybrid';
+  const longCycle = isLongCycleBusiness(data);
 
   // Revenue Lift — factor in purchase frequency so high-value / low-frequency
   // businesses don't get wildly inflated projections.
@@ -327,7 +344,10 @@ export function calculateROI(data: FormData): ROIResults {
   const monthlyRevenuePerCustomer = avgSaleValue * Math.min(purchasesPerYearForLift, 12) / 12;
   const currentConversion = conversionRate / 100;
   const currentMonthlySales = visitors * currentConversion * monthlyRevenuePerCustomer;
-  const improvedConversion = currentConversion * 1.15;
+
+  // For long-cycle businesses, conversion improvement is more modest (8% vs 15%)
+  const conversionLiftFactor = longCycle ? 1.08 : 1.15;
+  const improvedConversion = currentConversion * conversionLiftFactor;
   const newMonthlySales = visitors * improvedConversion * monthlyRevenuePerCustomer;
   const monthlyRevenueLift = newMonthlySales - currentMonthlySales;
   const annualRevenueLift = monthlyRevenueLift * 12;
