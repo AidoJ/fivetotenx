@@ -10,6 +10,7 @@ import {
   MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
