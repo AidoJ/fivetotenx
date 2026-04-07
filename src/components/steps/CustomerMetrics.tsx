@@ -301,7 +301,7 @@ const CustomerMetrics = ({ data, onChange, errors = {} }: Props) => {
       <div className="pt-2">
         <p className="text-sm text-muted-foreground mb-1 font-medium">Customer Lifetime Value (CLV) inputs:</p>
         <p className="text-xs text-destructive mb-4">These fields are required to calculate your ROI</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <RequiredField
             label="Average Purchase Value ($)"
             id="purchaseValue"
@@ -325,6 +325,19 @@ const CustomerMetrics = ({ data, onChange, errors = {} }: Props) => {
             value={data.avgRetentionYears}
             onChange={(v) => onChange({ avgRetentionYears: v })}
             error={errors.avgRetentionYears}
+          />
+          <ToggleField
+            label="Average Deal Cycle (weeks)"
+            description="How long from first enquiry to closed deal?"
+            id="dealCycle"
+            fieldKey="avgDealCycleWeeks"
+            placeholder="e.g. 2"
+            value={data.avgDealCycleWeeks}
+            known={known.avgDealCycleWeeks ?? null}
+            onToggle={(v) => toggle('avgDealCycleWeeks', v)}
+            onChange={(v) => onChange({ avgDealCycleWeeks: v })}
+            estimated={known.avgDealCycleWeeks === false}
+            estimateHint={FIELD_DEFAULTS.avgDealCycleWeeks?.hint}
           />
         </div>
       </div>
