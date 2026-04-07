@@ -33,6 +33,7 @@ export interface FormData {
   monthlyMarketingSpend: string;
   customerAcquisitionCost: string;
   upsellRevenuePercent: string; // % of revenue from upsells/cross-sells (product/hybrid)
+  avgDealCycleWeeks: string;    // avg weeks from first contact to closed deal
 
   // Section 3
   hoursAdmin: string;
