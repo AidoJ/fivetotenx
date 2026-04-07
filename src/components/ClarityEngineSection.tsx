@@ -28,7 +28,7 @@ const phases = [
     emoji: '💬',
     label: 'Straight Talk™',
     phase: 'Phase 2 — Discuss & Plan',
-    description: 'We have a focused conversation about what needs to change and map out a practical solution.',
+    description: 'We have a focused conversation about what needs to change and map out a practical solution — either by self-interview or a zoom-facilitated process where we help you uncover:',
     bullets: ['What\'s frustrating you most', 'What\'s costing time or money', 'How automation fits your workflow'],
     outcome: 'We agree on what\'s worth fixing and how it\'ll work',
     color: PHASE_COLORS.purple,
