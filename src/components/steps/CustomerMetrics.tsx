@@ -15,6 +15,7 @@ const FIELD_DEFAULTS: Record<string, { value: string; hint: string }> = {
   monthlyMarketingSpend: { value: '1000', hint: "Estimated $1,000/mo — update if you know yours" },
   customerAcquisitionCost: { value: '65', hint: "Estimated ~$65 per new customer" },
   upsellRevenuePercent: { value: '10', hint: "Estimated ~10% of revenue from upsells" },
+  avgDealCycleWeeks: { value: '2', hint: "Estimated ~2 weeks from enquiry to sale" },
 };
 
 interface Props {
