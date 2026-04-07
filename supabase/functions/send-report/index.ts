@@ -149,38 +149,16 @@ serve(async (req) => {
       </table>`;
     }
 
-    // ── Build payment plans HTML ──
-    let paymentPlansHtml = '';
-    if (isViable && pricing?.plans?.length > 0) {
-      const planRows = pricing.plans.map((plan: any) => `
-        <tr>
-          <td style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9;">
-            <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">${plan.label}</p>
-            <p style="color: #64748b; font-size: 12px; margin: 0;">${plan.description}</p>
-          </td>
-          <td style="padding: 14px 16px; text-align: right; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
-            ${plan.deposit > 0 ? `<p style="color: #1e293b; font-size: 13px; margin: 0;">Deposit: ${fmt(plan.deposit)}</p>` : ''}
-            ${plan.monthlyAmount > 0 ? `<p style="color: #2563eb; font-size: 13px; font-weight: 600; margin: 2px 0 0;">${fmt(plan.monthlyAmount)}/mo${plan.includesMaintenance ? ' (incl. maintenance)' : ''}</p>` : ''}
-            ${plan.totalCost > 0 ? `<p style="color: #64748b; font-size: 12px; margin: 2px 0 0;">Total: ${fmt(plan.totalCost)}</p>` : ''}
-          </td>
-        </tr>
-      `).join('');
-      paymentPlansHtml = `<table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 12px;">${planRows}</table>`;
-    }
-
-    // ── Build investment section ──
+    // ── Build investment section with Zero Risk model ──
     const investmentSection = isViable ? `
       <tr>
         <td class="content-pad" style="padding: 0 32px 28px;">
-          <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">💰 Your Investment & Payment Options</h2>
-          <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0 0 6px;">
-            Based on your projected {{totalAnnualImpact}}/year impact, your app falls in our <strong>${pricing?.tierLabel || ''}</strong> tier.
-          </p>
+          <h2 style="color: #1e3a5f; font-size: 18px; margin: 0 0 8px;">💰 Your Investment</h2>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin: 16px 0;">
             <tr>
               <td class="stat-cell" style="padding: 16px; background: #f0f9ff; border-radius: 8px; text-align: center; width: 33%;">
-                <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Build Investment</p>
-                <p style="color: #1e3a5f; font-size: 20px; font-weight: 700; margin: 0;">${fmt(pricing?.buildCost || 0)}</p>
+                <p style="color: #64748b; font-size: 11px; margin: 0 0 4px;">Estimated Build</p>
+                <p style="color: #1e3a5f; font-size: 20px; font-weight: 700; margin: 0;">${fmt(pricing?.buildCostLow || 0)} – ${fmt(pricing?.buildCostHigh || 0)}</p>
               </td>
               <td class="stat-spacer" style="width: 8px;"></td>
               <td class="stat-cell" style="padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center; width: 33%;">
@@ -194,9 +172,80 @@ serve(async (req) => {
               </td>
             </tr>
           </table>
-          <p style="color: #1e3a5f; font-size: 14px; font-weight: 600; margin: 16px 0 8px;">Choose a Payment Plan:</p>
-          ${paymentPlansHtml}
-          ${pricing?.annualMaintenance > 0 ? `<p style="color: #64748b; font-size: 12px; margin: 12px 0 0;">* Annual maintenance: ${fmt(pricing.annualMaintenance)}/year — included in subscription plans.</p>` : ''}
+
+          <!-- Zero Risk Model -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-top: 16px;">
+            <tr>
+              <td style="padding: 24px 20px;">
+                <h3 style="color: #1e3a5f; font-size: 16px; font-weight: 700; margin: 0 0 16px; text-align: center;">We Build It. You Judge It. Then You Decide.</h3>
+                <p style="color: #475569; font-size: 13px; line-height: 1.7; margin: 0 0 16px; text-align: center;">
+                  Most agencies ask for tens of thousands upfront and deliver months later. We flip that entirely.
+                </p>
+
+                <!-- Step 1 -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                  <tr>
+                    <td style="width: 36px; vertical-align: top; padding-top: 2px;">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: #1e3a5f; color: #ffffff; font-size: 13px; font-weight: 700; text-align: center; line-height: 28px;">1</div>
+                    </td>
+                    <td style="padding-left: 8px;">
+                      <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">We Redesign Your Workflow & Build the System</p>
+                      <p style="color: #64748b; font-size: 12px; line-height: 1.6; margin: 0;">In 1–2 weeks, we redesign part of your workflow and build a working system tailored to your business — not a mockup, a real system you can use.</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Step 2 -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                  <tr>
+                    <td style="width: 36px; vertical-align: top; padding-top: 2px;">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: #1e3a5f; color: #ffffff; font-size: 13px; font-weight: 700; text-align: center; line-height: 28px;">2</div>
+                    </td>
+                    <td style="padding-left: 8px;">
+                      <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">You See It Working</p>
+                      <p style="color: #64748b; font-size: 12px; line-height: 1.6; margin: 0;">We demo the live system. You test it, ask questions, and see exactly how it transforms your operations.</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Step 3 -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
+                  <tr>
+                    <td style="width: 36px; vertical-align: top; padding-top: 2px;">
+                      <div style="width: 28px; height: 28px; border-radius: 50%; background: #1e3a5f; color: #ffffff; font-size: 13px; font-weight: 700; text-align: center; line-height: 28px;">3</div>
+                    </td>
+                    <td style="padding-left: 8px;">
+                      <p style="color: #1e3a5f; font-size: 14px; font-weight: 700; margin: 0 0 4px;">You Decide — Zero Pressure</p>
+                      <p style="color: #64748b; font-size: 12px; line-height: 1.6; margin: 0;">Love it? We go live. Not convinced? Your $1,000 deposit is refunded in full. No invoices, no awkward conversations.</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Deposit Box -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1e3a5f, #1e40af); border-radius: 10px; overflow: hidden;">
+                  <tr>
+                    <td style="padding: 20px; text-align: center;">
+                      <p style="color: #93c5fd; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 6px;">To Get Started</p>
+                      <p style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0 0 8px;">$1,000 Commitment Deposit</p>
+                      <p style="color: #bfdbfe; font-size: 12px; line-height: 1.7; margin: 0 0 12px;">
+                        Fully refundable if the MVP doesn't deliver. Applied to your project total if you proceed.
+                      </p>
+                      <table cellpadding="0" cellspacing="0" style="margin: 0 auto; text-align: left;">
+                        <tr><td style="color: #bfdbfe; font-size: 12px; padding: 3px 0;">✓ Keeps momentum — your engagement drives a faster result</td></tr>
+                        <tr><td style="color: #bfdbfe; font-size: 12px; padding: 3px 0;">✓ 100% refundable — if the MVP doesn't deliver</td></tr>
+                        <tr><td style="color: #bfdbfe; font-size: 12px; padding: 3px 0;">✓ Applied to your project — comes straight off the total</td></tr>
+                        <tr><td style="color: #bfdbfe; font-size: 12px; padding: 3px 0;">✓ Working system first — you never pay for promises</td></tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="color: #94a3b8; font-size: 11px; text-align: center; margin: 12px 0 0; font-style: italic;">
+                  We've never had a client disengage — or ask for a refund. But both options are always there.
+                </p>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>` : `
       <tr>
@@ -211,7 +260,6 @@ serve(async (req) => {
           </table>
         </td>
       </tr>`;
-
     // ── Build Straight Talk CTA (qualified leads get two options) ──
     const deepDiveBaseUrl = 'https://5to10x.app';
     const calendlyUrl = 'https://calendly.com/aidan-rejuvenators/discovery';
