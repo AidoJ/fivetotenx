@@ -157,6 +157,7 @@ const CustomerMetrics = ({ data, onChange, errors = {} }: Props) => {
     monthlyMarketingSpend: data.monthlyMarketingSpend ? true : null,
     customerAcquisitionCost: data.customerAcquisitionCost ? true : null,
     upsellRevenuePercent: data.upsellRevenuePercent ? true : null,
+    avgDealCycleWeeks: data.avgDealCycleWeeks ? true : null,
   });
 
   const toggle = (field: string, value: boolean) => {
