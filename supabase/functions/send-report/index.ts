@@ -28,7 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contactName, contactEmail, businessName, results, formData, assessmentId, isQualified } = await req.json();
+    const { contactName, contactEmail, businessName, results, formData, assessmentId, isQualified, previewOnly } = await req.json();
 
     if (!contactEmail || !contactName) {
       return new Response(JSON.stringify({ error: 'Name and email are required' }), {
