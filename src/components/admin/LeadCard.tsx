@@ -463,18 +463,30 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
               {/* Actions & Tools */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
-                  {/* Resend Report & Invite */}
+                  {/* Preview & Resend Report */}
                   {lead.report_sent && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 text-[10px] px-2 gap-1"
-                      disabled={resending}
-                      onClick={handleResendReport}
-                    >
-                      {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                      {resending ? 'Sending…' : `Resend Report${lead.is_qualified ? ' & Invite' : ''}`}
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-[10px] px-2 gap-1"
+                        disabled={loadingPreview}
+                        onClick={handlePreviewReport}
+                      >
+                        {loadingPreview ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
+                        Preview
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-[10px] px-2 gap-1"
+                        disabled={resending}
+                        onClick={handleResendReport}
+                      >
+                        {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                        {resending ? 'Sending…' : `Resend Report${lead.is_qualified ? ' & Invite' : ''}`}
+                      </Button>
+                    </div>
                   )}
                   {/* Upload Zoom Recording — fallback, de-prioritised */}
                   {lead.pipeline_stage === 'discovery_call' && (
