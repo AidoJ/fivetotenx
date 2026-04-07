@@ -15,6 +15,7 @@ const FIELD_DEFAULTS: Record<string, { value: string; hint: string }> = {
   monthlyMarketingSpend: { value: '1000', hint: "Estimated $1,000/mo — update if you know yours" },
   customerAcquisitionCost: { value: '65', hint: "Estimated ~$65 per new customer" },
   upsellRevenuePercent: { value: '10', hint: "Estimated ~10% of revenue from upsells" },
+  avgDealCycleWeeks: { value: '2', hint: "Estimated ~2 weeks from enquiry to sale" },
 };
 
 interface Props {
@@ -156,6 +157,7 @@ const CustomerMetrics = ({ data, onChange, errors = {} }: Props) => {
     monthlyMarketingSpend: data.monthlyMarketingSpend ? true : null,
     customerAcquisitionCost: data.customerAcquisitionCost ? true : null,
     upsellRevenuePercent: data.upsellRevenuePercent ? true : null,
+    avgDealCycleWeeks: data.avgDealCycleWeeks ? true : null,
   });
 
   const toggle = (field: string, value: boolean) => {
@@ -301,7 +303,7 @@ const CustomerMetrics = ({ data, onChange, errors = {} }: Props) => {
       <div className="pt-2">
         <p className="text-sm text-muted-foreground mb-1 font-medium">Customer Lifetime Value (CLV) inputs:</p>
         <p className="text-xs text-destructive mb-4">These fields are required to calculate your ROI</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <RequiredField
             label="Average Purchase Value ($)"
             id="purchaseValue"
@@ -325,6 +327,19 @@ const CustomerMetrics = ({ data, onChange, errors = {} }: Props) => {
             value={data.avgRetentionYears}
             onChange={(v) => onChange({ avgRetentionYears: v })}
             error={errors.avgRetentionYears}
+          />
+          <ToggleField
+            label="Average Deal Cycle (weeks)"
+            description="How long from first enquiry to closed deal?"
+            id="dealCycle"
+            fieldKey="avgDealCycleWeeks"
+            placeholder="e.g. 2"
+            value={data.avgDealCycleWeeks}
+            known={known.avgDealCycleWeeks ?? null}
+            onToggle={(v) => toggle('avgDealCycleWeeks', v)}
+            onChange={(v) => onChange({ avgDealCycleWeeks: v })}
+            estimated={known.avgDealCycleWeeks === false}
+            estimateHint={FIELD_DEFAULTS.avgDealCycleWeeks?.hint}
           />
         </div>
       </div>

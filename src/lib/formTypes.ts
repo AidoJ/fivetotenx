@@ -33,6 +33,7 @@ export interface FormData {
   monthlyMarketingSpend: string;
   customerAcquisitionCost: string;
   upsellRevenuePercent: string; // % of revenue from upsells/cross-sells (product/hybrid)
+  avgDealCycleWeeks: string;    // avg weeks from first contact to closed deal
 
   // Section 3
   hoursAdmin: string;
@@ -175,6 +176,7 @@ export const initialFormData: FormData = {
   monthlyMarketingSpend: '',
   customerAcquisitionCost: '',
   upsellRevenuePercent: '',
+  avgDealCycleWeeks: '',
   hoursAdmin: '',
   hoursBooking: '',
   hoursFollowUps: '',
@@ -312,12 +314,29 @@ function calculateDynamicPricing(totalAnnualImpact: number): DynamicPricing {
   };
 }
 
+// Industry presets for long-cycle businesses
+// These industries have high deal values but long sales cycles and rare repeats
+const LONG_CYCLE_SLUGS = new Set([
+  'property-real-estate',
+  'automotive-services',
+  'construction-civil',
+]);
+
+function isLongCycleBusiness(data: FormData): boolean {
+  if (LONG_CYCLE_SLUGS.has(data.selectedIndustrySlug)) return true;
+  // Also detect via data: if deal cycle > 4 weeks or purchases < 1/year
+  const dealWeeks = parseFloat(data.avgDealCycleWeeks) || 0;
+  const purchasesPerYear = parseFloat(data.avgPurchasesPerYear) || 1;
+  return dealWeeks > 4 || purchasesPerYear < 1;
+}
+
 export function calculateROI(data: FormData): ROIResults {
   const visitors = parseFloat(data.monthlyVisitors) || 0;
   const conversionRate = parseFloat(data.conversionRate) || 0;
   const avgSaleValue = parseFloat(data.avgPurchaseValue) || 0;
   const isService = data.businessType === 'service' || data.businessType === 'hybrid';
   const isProduct = data.businessType === 'product' || data.businessType === 'hybrid';
+  const longCycle = isLongCycleBusiness(data);
 
   // Revenue Lift — factor in purchase frequency so high-value / low-frequency
   // businesses don't get wildly inflated projections.
@@ -325,7 +344,10 @@ export function calculateROI(data: FormData): ROIResults {
   const monthlyRevenuePerCustomer = avgSaleValue * Math.min(purchasesPerYearForLift, 12) / 12;
   const currentConversion = conversionRate / 100;
   const currentMonthlySales = visitors * currentConversion * monthlyRevenuePerCustomer;
-  const improvedConversion = currentConversion * 1.15;
+
+  // For long-cycle businesses, conversion improvement is more modest (8% vs 15%)
+  const conversionLiftFactor = longCycle ? 1.08 : 1.15;
+  const improvedConversion = currentConversion * conversionLiftFactor;
   const newMonthlySales = visitors * improvedConversion * monthlyRevenuePerCustomer;
   const monthlyRevenueLift = newMonthlySales - currentMonthlySales;
   const annualRevenueLift = monthlyRevenueLift * 12;
@@ -369,7 +391,10 @@ export function calculateROI(data: FormData): ROIResults {
     (parseFloat(data.hoursInvoicing) || 0);
   const hourlyRate = parseFloat(data.hourlyStaffCost) || 0;
   const annualAdminCost = totalWeeklyHours * hourlyRate * 52;
-  const annualSavings = annualAdminCost * 0.4;
+  // For long-cycle businesses, automation saves more (50% vs 40%) because
+  // the admin burden per deal is higher (compliance, contracts, follow-ups)
+  const savingsRate = longCycle ? 0.50 : 0.40;
+  const annualSavings = annualAdminCost * savingsRate;
 
   // Retention & Upsell
   const monthlyCustomers = parseFloat(data.monthlyNewCustomers) || 0;
@@ -378,7 +403,9 @@ export function calculateROI(data: FormData): ROIResults {
   const retentionYears = parseFloat(data.avgRetentionYears) || 1;
   const clv = avgPurchaseValue * purchasesPerYear * retentionYears;
   const activeCustomers = monthlyCustomers * 12;
-  const retainedCustomers = activeCustomers * 0.1;
+  // For long-cycle businesses, retention improvement is smaller (5% vs 10%)
+  const retentionLiftRate = longCycle ? 0.05 : 0.10;
+  const retainedCustomers = activeCustomers * retentionLiftRate;
   const retentionValue = retainedCustomers * clv;
 
   const totalAnnualImpact =
@@ -409,9 +436,9 @@ export function calculateROI(data: FormData): ROIResults {
     currentMonthlyRevenue: currentMonthlySales,
     newMonthlyRevenue: newMonthlySales,
     currentConversion: conversionRate,
-    newConversion: conversionRate * 1.15,
+    newConversion: conversionRate * conversionLiftFactor,
     weeklyAdminHours: totalWeeklyHours,
-    weeklySavingsHours: totalWeeklyHours * 0.4,
+    weeklySavingsHours: totalWeeklyHours * savingsRate,
     activeCustomers,
     clv,
     pricing,
