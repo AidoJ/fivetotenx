@@ -237,6 +237,9 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   const [addingNote, setAddingNote] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
   const roi = lead.roi_results as any;
