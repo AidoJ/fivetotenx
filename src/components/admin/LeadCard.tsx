@@ -735,6 +735,26 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
         )}
       </AnimatePresence>
     </motion.div>
+
+      {/* Report Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>ROI Report Preview — {lead.contact_name}</DialogTitle>
+          </DialogHeader>
+          {previewHtml ? (
+            <iframe
+              srcDoc={previewHtml}
+              className="w-full border rounded-lg"
+              style={{ minHeight: '600px' }}
+              title="Report Preview"
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 });
 LeadCard.displayName = 'LeadCard';
