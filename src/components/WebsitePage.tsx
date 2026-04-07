@@ -6,7 +6,7 @@ import {
   ArrowRight, ArrowLeft, Zap, TrendingUp, BarChart3, CheckCircle, X,
   Clock, Users, Cog, Rocket, Shield, Eye, Link2,
   CreditCard, Mail, MessageSquare, Database, Phone,
-  Sparkles, ChevronRight, PlayCircle } from
+  Sparkles, ChevronRight, PlayCircle, Quote } from
 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
