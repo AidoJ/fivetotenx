@@ -347,6 +347,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   ];
 
   return (
+    <>
     <motion.div
       layout
       initial={{ opacity: 0, y: 8 }}
