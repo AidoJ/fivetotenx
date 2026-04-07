@@ -1220,6 +1220,7 @@ const WebsitePage = () => {
       <CoFoundersSection />
       {/* 7. EXAMPLES — Case Studies */}
       <CaseStudiesSection />
+      <TestimonialsSection />
       {/* 8. LATEST NEWS */}
       <NewsSection />
       {/* 9. FINAL CTA & CONTACT */}
