@@ -10,6 +10,7 @@ import {
   MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
@@ -236,6 +237,9 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   const [addingNote, setAddingNote] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
   const roi = lead.roi_results as any;
@@ -304,6 +308,34 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
     }
   };
 
+  const handlePreviewReport = async () => {
+    setLoadingPreview(true);
+    try {
+      const fd = lead.form_data as any;
+      const res = lead.roi_results as any;
+      const { data, error } = await supabase.functions.invoke('send-report', {
+        body: {
+          contactName: lead.contact_name,
+          contactEmail: lead.contact_email,
+          businessName: lead.business_name,
+          results: res,
+          formData: fd,
+          assessmentId: lead.id,
+          isQualified: lead.is_qualified,
+          previewOnly: true,
+        },
+      });
+      if (error) throw error;
+      setPreviewHtml(data.html);
+      setPreviewOpen(true);
+    } catch (err) {
+      console.error('Preview error:', err);
+      toast({ title: 'Preview failed', description: 'Could not load report preview.', variant: 'destructive' });
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
   const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
     { key: 'assessment', label: 'Reality Check' },
     { key: 'qualified', label: 'Qualified' },
@@ -315,6 +347,7 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   ];
 
   return (
+    <>
     <motion.div
       layout
       initial={{ opacity: 0, y: 8 }}
@@ -431,18 +464,30 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
               {/* Actions & Tools */}
               <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
                 <div className="space-y-2 py-1">
-                  {/* Resend Report & Invite */}
+                  {/* Preview & Resend Report */}
                   {lead.report_sent && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 text-[10px] px-2 gap-1"
-                      disabled={resending}
-                      onClick={handleResendReport}
-                    >
-                      {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                      {resending ? 'Sending…' : `Resend Report${lead.is_qualified ? ' & Invite' : ''}`}
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-[10px] px-2 gap-1"
+                        disabled={loadingPreview}
+                        onClick={handlePreviewReport}
+                      >
+                        {loadingPreview ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
+                        Preview
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-[10px] px-2 gap-1"
+                        disabled={resending}
+                        onClick={handleResendReport}
+                      >
+                        {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                        {resending ? 'Sending…' : `Resend Report${lead.is_qualified ? ' & Invite' : ''}`}
+                      </Button>
+                    </div>
                   )}
                   {/* Upload Zoom Recording — fallback, de-prioritised */}
                   {lead.pipeline_stage === 'discovery_call' && (
@@ -691,6 +736,26 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
         )}
       </AnimatePresence>
     </motion.div>
+
+      {/* Report Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>ROI Report Preview — {lead.contact_name}</DialogTitle>
+          </DialogHeader>
+          {previewHtml ? (
+            <iframe
+              srcDoc={previewHtml}
+              className="w-full border rounded-lg"
+              style={{ minHeight: '600px' }}
+              title="Report Preview"
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 });
 LeadCard.displayName = 'LeadCard';

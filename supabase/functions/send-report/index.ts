@@ -28,7 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contactName, contactEmail, businessName, results, formData, assessmentId, isQualified } = await req.json();
+    const { contactName, contactEmail, businessName, results, formData, assessmentId, isQualified, previewOnly } = await req.json();
 
     if (!contactEmail || !contactName) {
       return new Response(JSON.stringify({ error: 'Name and email are required' }), {
@@ -371,6 +371,13 @@ serve(async (req) => {
       fromField = '5to10X Growth Report <grow@5to10x.app>';
       subject = `Strategic Growth Report – ${businessName || 'Your Business'} | App ROI Assessment`;
       emailHtml = buildDefaultTemplate(replacements);
+    }
+
+    // ── Preview mode: return HTML without sending ──
+    if (previewOnly) {
+      return new Response(JSON.stringify({ html: emailHtml, subject }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // ── Send via Resend ──
