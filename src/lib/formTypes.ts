@@ -391,7 +391,10 @@ export function calculateROI(data: FormData): ROIResults {
     (parseFloat(data.hoursInvoicing) || 0);
   const hourlyRate = parseFloat(data.hourlyStaffCost) || 0;
   const annualAdminCost = totalWeeklyHours * hourlyRate * 52;
-  const annualSavings = annualAdminCost * 0.4;
+  // For long-cycle businesses, automation saves more (50% vs 40%) because
+  // the admin burden per deal is higher (compliance, contracts, follow-ups)
+  const savingsRate = longCycle ? 0.50 : 0.40;
+  const annualSavings = annualAdminCost * savingsRate;
 
   // Retention & Upsell
   const monthlyCustomers = parseFloat(data.monthlyNewCustomers) || 0;
@@ -400,7 +403,9 @@ export function calculateROI(data: FormData): ROIResults {
   const retentionYears = parseFloat(data.avgRetentionYears) || 1;
   const clv = avgPurchaseValue * purchasesPerYear * retentionYears;
   const activeCustomers = monthlyCustomers * 12;
-  const retainedCustomers = activeCustomers * 0.1;
+  // For long-cycle businesses, retention improvement is smaller (5% vs 10%)
+  const retentionLiftRate = longCycle ? 0.05 : 0.10;
+  const retainedCustomers = activeCustomers * retentionLiftRate;
   const retentionValue = retainedCustomers * clv;
 
   const totalAnnualImpact =
