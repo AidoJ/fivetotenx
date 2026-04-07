@@ -176,6 +176,7 @@ export const initialFormData: FormData = {
   monthlyMarketingSpend: '',
   customerAcquisitionCost: '',
   upsellRevenuePercent: '',
+  avgDealCycleWeeks: '',
   hoursAdmin: '',
   hoursBooking: '',
   hoursFollowUps: '',
