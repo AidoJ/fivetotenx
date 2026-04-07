@@ -319,11 +319,14 @@ export function calculateROI(data: FormData): ROIResults {
   const isService = data.businessType === 'service' || data.businessType === 'hybrid';
   const isProduct = data.businessType === 'product' || data.businessType === 'hybrid';
 
-  // Revenue Lift
+  // Revenue Lift — factor in purchase frequency so high-value / low-frequency
+  // businesses don't get wildly inflated projections.
+  const purchasesPerYearForLift = parseFloat(data.avgPurchasesPerYear) || 1;
+  const monthlyRevenuePerCustomer = avgSaleValue * Math.min(purchasesPerYearForLift, 12) / 12;
   const currentConversion = conversionRate / 100;
-  const currentMonthlySales = visitors * currentConversion * avgSaleValue;
+  const currentMonthlySales = visitors * currentConversion * monthlyRevenuePerCustomer;
   const improvedConversion = currentConversion * 1.15;
-  const newMonthlySales = visitors * improvedConversion * avgSaleValue;
+  const newMonthlySales = visitors * improvedConversion * monthlyRevenuePerCustomer;
   const monthlyRevenueLift = newMonthlySales - currentMonthlySales;
   const annualRevenueLift = monthlyRevenueLift * 12;
 
