@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { assessmentId, mode, customPrompt } = await req.json();
+    const { assessmentId, mode, customPrompt, templateKey } = await req.json();
     if (!assessmentId) throw new Error("assessmentId required");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -326,7 +326,7 @@ Perform a THOROUGH technology analysis covering:
     // EMAIL DRAFT MODE
     // ────────────────────────────────────────────────────
     if (mode === "email_draft") {
-      const { templateKey } = await req.clone().json().catch(() => ({}));
+      const tplKey = templateKey || 'post_interview_thanks';
       const analysisData = (assessment.discovery_answers as any)?._analysis;
       const techStackData = assessment.tech_stack as any || {};
 
@@ -387,7 +387,7 @@ The email should:
 Format as clean HTML with a "Completed", "In Progress", and "Coming Next" structure.`,
       };
 
-      const emailPrompt = templatePrompts[templateKey] || templatePrompts.post_interview_thanks;
+      const emailPrompt = templatePrompts[tplKey] || templatePrompts.post_interview_thanks;
 
       const fullPrompt = `${emailPrompt}
 
