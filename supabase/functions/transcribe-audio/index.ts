@@ -36,33 +36,24 @@ Deno.serve(async (req) => {
     const { interviewId, audioUrl } = await req.json();
     if (!interviewId || !audioUrl) throw new Error('interviewId and audioUrl are required');
 
-    // Download audio and convert to base64 data URL (gateway requires data URL for audio)
-    const audioResp = await fetch(audioUrl);
-    if (!audioResp.ok) throw new Error(`Failed to download audio: ${audioResp.status}`);
-
-    const audioBytes = new Uint8Array(await audioResp.arrayBuffer());
-    
-    // Check size - reject files over 100MB
-    if (audioBytes.length > 100 * 1024 * 1024) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'File too large for transcription (max 100MB). Please use the Audio Only (.m4a) export from Zoom.' 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Convert to base64 data URL using chunks to avoid stack overflow
+    // For public URLs, pass directly to the AI gateway instead of downloading + base64 encoding
+    // This avoids edge function memory limits for large audio files
     const mime = getMimeType(audioUrl);
-    const chunkSize = 32768;
-    let binary = '';
-    for (let i = 0; i < audioBytes.length; i += chunkSize) {
-      const chunk = audioBytes.subarray(i, Math.min(i + chunkSize, audioBytes.length));
-      binary += String.fromCharCode(...chunk);
+    
+    // Check if URL is publicly accessible (Supabase public bucket or other public URL)
+    const isPublicUrl = audioUrl.startsWith('http://') || audioUrl.startsWith('https://');
+    
+    let audioContent: { type: string; image_url: { url: string } };
+    
+    if (isPublicUrl) {
+      // Try passing the URL directly first (works for public URLs with Gemini)
+      audioContent = {
+        type: 'image_url',
+        image_url: { url: audioUrl }
+      };
+    } else {
+      throw new Error('Audio URL must be a public HTTP(S) URL');
     }
-    const base64 = btoa(binary);
-    const dataUrl = `data:${mime};base64,${base64}`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
