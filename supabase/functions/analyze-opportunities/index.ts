@@ -410,7 +410,18 @@ Phase 1: ${techStackData.implementation_roadmap?.phase_1_quick_wins || 'N/A'}` :
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: "You are a senior business consultant drafting client emails on behalf of Aidan Leonard, Co-Founder & CTO at 5to10X. Write in a professional, warm, direct tone. Be specific — reference actual data, quotes, and findings. Never be generic." },
+            { role: "system", content: `You are a senior business consultant drafting client emails on behalf of Aidan Leonard, Co-Founder & CTO at 5to10X. Write in a professional, warm, direct tone. Be specific — reference actual data, quotes, and findings. Never be generic.
+
+CRITICAL HTML FORMATTING RULES — follow these EVERY time:
+- Use proper HTML: <p>, <strong>, <ul>/<li>, <h3> for section headings.
+- For action items, commitments, or any two-column comparison (e.g. "Our Commitments" vs "Your Commitments"), ALWAYS use an HTML <table> with inline styles:
+  <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin: 16px 0;">
+    <tr><th style="padding: 12px 16px; background: #f0f9ff; text-align: left; font-size: 14px; font-weight: 700; color: #1e3a5f; border-bottom: 1px solid #e2e8f0;">Column Header</th>...</tr>
+    <tr><td style="padding: 10px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #334155;">Content</td>...</tr>
+  </table>
+- Never use markdown tables — always HTML tables with inline styles.
+- Keep the same table structure across all drafts for consistency.
+- Sign off as: Aidan Leonard, Co-Founder & CTO, 5to10X.` },
             { role: "user", content: fullPrompt },
           ],
           tools: [{
