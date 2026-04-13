@@ -57,8 +57,6 @@ Deno.serve(async (req) => {
       base64 += btoa(binaryStr);
     }
 
-    const mimeType = getMimeType(audioUrl);
-    const dataUrl = `data:${mimeType};base64,${base64}`;
     console.log(`Base64 encoding complete (${(base64.length / 1024 / 1024).toFixed(1)}MB b64), sending to AI gateway...`);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
