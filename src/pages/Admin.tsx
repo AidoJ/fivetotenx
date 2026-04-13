@@ -1452,6 +1452,8 @@ const Admin = () => {
                           onUpdateZoomLink={handleUpdateZoomLink}
                           scopingResponse={getScopingResponse(lead.id)}
                           stProgress={getStProgress(lead)}
+                          onOpenDetail={(id) => setDetailModalId(id)}
+                          onDeleteProject={(id) => setDeleteConfirmId(id)}
                         />
                       ))}
                     </div>
