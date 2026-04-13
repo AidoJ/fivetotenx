@@ -530,6 +530,34 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
                         {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
                         {uploading ? 'Uploading & Transcribing…' : 'Upload Full Zoom Recording (fallback)'}
                       </Button>
+
+                      {/* Audio & Transcript Status */}
+                      {(() => {
+                        const leadInterviews = interviews.filter(i => i.assessment_id === lead.id);
+                        const withAudio = leadInterviews.filter(i => i.audio_file_url);
+                        const withTranscript = leadInterviews.filter(i => i.transcript);
+                        if (withAudio.length === 0) return null;
+                        const allTranscribed = withAudio.every(i => i.transcript);
+                        return (
+                          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium ${
+                            allTranscribed
+                              ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                              : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                          }`}>
+                            {allTranscribed ? (
+                              <>
+                                <Check className="w-3 h-3" />
+                                Audio uploaded & transcribed — ready for analysis
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="w-3 h-3" />
+                                {withAudio.length} audio uploaded, {withTranscript.length} transcribed — {withAudio.length - withTranscript.length} pending
+                              </>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </>
                   )}
 
