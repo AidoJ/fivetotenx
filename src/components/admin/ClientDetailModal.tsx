@@ -315,10 +315,9 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                               <div className="max-h-[500px] overflow-y-auto space-y-4 pr-2">
                                 {formatted.map((para: string, idx: number) => (
                                   <p key={idx} className="text-xs text-foreground/80 leading-relaxed">
-                                      {para}
-                                    </p>
-                                  );
-                                })}
+                                  {para}
+                                </p>
+                                ))}
                               </div>
                             </div>
                           );
