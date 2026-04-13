@@ -1583,6 +1583,65 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Client Detail Modal */}
+      {detailModalId && (
+        <ClientDetailModal
+          assessmentId={detailModalId}
+          open={!!detailModalId}
+          onClose={() => setDetailModalId(null)}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirmId} onOpenChange={v => { if (!v) setDeleteConfirmId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Project</DialogTitle>
+            <DialogDescription>
+              This will permanently remove this lead and all associated data (notes, interviews, proposals, time entries). This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={async () => {
+                if (!deleteConfirmId) return;
+                setDeleting(true);
+                try {
+                  // Delete cascading data first
+                  await Promise.all([
+                    supabase.from('lead_notes').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('client_interviews').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('proposals').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('time_entries').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('admin_tasks').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('straight_talk_responses').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('scoping_responses').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('deep_dive_submissions').delete().eq('assessment_id', deleteConfirmId),
+                  ]);
+                  const { error } = await supabase.from('roi_assessments').delete().eq('id', deleteConfirmId);
+                  if (error) throw error;
+                  setLeads(prev => prev.filter(l => l.id !== deleteConfirmId));
+                  setLeadNotes(prev => prev.filter(n => n.assessment_id !== deleteConfirmId));
+                  setInterviews(prev => prev.filter(i => i.assessment_id !== deleteConfirmId));
+                  setProposals(prev => prev.filter(p => p.assessment_id !== deleteConfirmId));
+                  toast({ title: 'Project deleted ✅' });
+                } catch (err: any) {
+                  toast({ title: 'Delete failed', description: err.message, variant: 'destructive' });
+                }
+                setDeleting(false);
+                setDeleteConfirmId(null);
+              }}
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
