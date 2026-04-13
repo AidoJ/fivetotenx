@@ -163,7 +163,7 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
     console.error('Transcription error:', error);
     const msg = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ success: false, error: msg }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
