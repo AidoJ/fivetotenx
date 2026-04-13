@@ -108,6 +108,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const generateDraft = async (templateKey: string) => {
     setGenerating(true);
     setSelectedTemplate(templateKey);
+    setConfirmSend(false);
     try {
       const { data, error } = await supabase.functions.invoke('analyze-opportunities', {
         body: { assessmentId, mode: 'email_draft', templateKey },
