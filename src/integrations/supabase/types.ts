@@ -100,6 +100,50 @@ export type Database = {
         }
         Relationships: []
       }
+      client_artifacts: {
+        Row: {
+          artifact_type: string
+          assessment_id: string
+          content: string | null
+          created_at: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          artifact_type?: string
+          assessment_id: string
+          content?: string | null
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          artifact_type?: string
+          assessment_id?: string
+          content?: string | null
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_artifacts_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_interviews: {
         Row: {
           assessment_id: string
