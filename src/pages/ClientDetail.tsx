@@ -594,6 +594,11 @@ const ClientDetail = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Time Tracking */}
+        <div className="mt-6">
+          <TimeTracker assessmentId={id!} />
+        </div>
       </div>
     </div>
   );
