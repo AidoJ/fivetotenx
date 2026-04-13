@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
@@ -26,6 +26,7 @@ import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
 import CallGuide from '@/components/admin/CallGuide';
 import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
 import AutomationSettings from '@/components/admin/AutomationSettings';
+import ClientDetailModal from '@/components/admin/ClientDetailModal';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -621,6 +622,9 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [pipelineFilter, setPipelineFilter] = useState<string | null>(null);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [detailModalId, setDetailModalId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
   const [scopingResponses, setScopingResponses] = useState<any[]>([]);
