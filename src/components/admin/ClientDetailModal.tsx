@@ -327,6 +327,9 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                       </div>
                     )}
 
+                    {/* Artifacts */}
+                    <ArtifactsPanel assessmentId={assessmentId} />
+
                     {/* AI-extracted answers */}
                     <DiscoveryAnswersViewer
                       assessmentId={assessmentId}
