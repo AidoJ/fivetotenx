@@ -275,19 +275,32 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-border">
-            <p className="text-[10px] text-muted-foreground">
-              Review and edit before sending. The email will be sent via your configured email provider.
-            </p>
-            <Button
-              size="sm"
-              className="gap-1.5"
-              onClick={sendEmail}
-              disabled={sending || !draft.subject || !draft.body}
-            >
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              Send Email
-            </Button>
+          <div className="space-y-3 pt-2 border-t border-border">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={confirmSend}
+                onChange={e => setConfirmSend(e.target.checked)}
+                className="rounded border-border"
+              />
+              <span className="text-xs text-foreground font-medium">
+                I have reviewed this email and confirm it is ready to send to {lead?.contact_name || 'the client'}
+              </span>
+            </label>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground">
+                Emails are never sent automatically — you must review, edit, and confirm before sending.
+              </p>
+              <Button
+                size="sm"
+                className="gap-1.5"
+                onClick={sendEmail}
+                disabled={sending || !draft.subject || !draft.body || !confirmSend}
+              >
+                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Send Email
+              </Button>
+            </div>
           </div>
         </div>
       )}
