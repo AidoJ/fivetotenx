@@ -114,7 +114,7 @@ ${discoveryPairs.length > 0 ? discoveryPairs.join("\n\n") : "No extracted answer
 
 ${!hasTranscripts ? "INTERVIEW TRANSCRIPTS:\nNo transcripts available — analysis is based on form data and questionnaire responses only. Results may be less precise." : ''}
 
-Based on ALL available data (prioritising the client's own spoken words from transcripts when available), identify the opportunities ranked by potential impact (time saved, revenue gained, cost reduced, risk mitigated).`;
+Based on ALL available data (prioritising the client's own spoken words from transcripts when available), identify the opportunities ranked by potential impact (time saved, revenue gained, cost reduced, risk mitigated).
 
 For each opportunity provide:
 - A clear title (max 8 words)
