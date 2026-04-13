@@ -81,6 +81,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const [sending, setSending] = useState(false);
   const [sentEmails, setSentEmails] = useState<SentEmail[]>([]);
   const [confirmSend, setConfirmSend] = useState(false);
+  const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview');
   const [expandedSent, setExpandedSent] = useState<string | null>(null);
 
   // Load sent email history from lead_notes with note_type = 'email_sent'
@@ -265,14 +266,59 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                 className="h-8 text-xs bg-secondary border-border"
               />
             </div>
+
+            {/* Preview / Edit toggle */}
             <div className="space-y-1">
-              <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Body (HTML)</Label>
-              <Textarea
-                value={draft.body}
-                onChange={e => setDraft({ ...draft, body: e.target.value })}
-                rows={16}
-                className="text-xs bg-secondary border-border resize-y font-mono"
-              />
+              <div className="flex items-center justify-between">
+                <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Email Body</Label>
+                <div className="flex items-center gap-1 bg-secondary rounded-md p-0.5">
+                  <button
+                    onClick={() => setViewMode('preview')}
+                    className={`px-2.5 py-1 rounded text-[10px] font-medium transition-colors ${
+                      viewMode === 'preview'
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => setViewMode('edit')}
+                    className={`px-2.5 py-1 rounded text-[10px] font-medium transition-colors ${
+                      viewMode === 'edit'
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Edit HTML
+                  </button>
+                </div>
+              </div>
+
+              {viewMode === 'preview' ? (
+                <div className="rounded-lg border border-border bg-white overflow-hidden">
+                  <div className="bg-secondary/30 px-4 py-2 border-b border-border flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-destructive/60" />
+                    <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
+                    <div className="w-2 h-2 rounded-full bg-green-500/60" />
+                    <span className="text-[10px] text-muted-foreground ml-2">Email Preview</span>
+                  </div>
+                  <iframe
+                    srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333;padding:24px 32px;margin:0;background:#fff}table{border-collapse:collapse;width:100%;margin:12px 0}td,th{padding:8px 12px;border:1px solid #e5e7eb;text-align:left;font-size:13px}th{background:#f9fafb;font-weight:600}ul,ol{padding-left:20px}li{margin-bottom:6px}strong{color:#1a1a2e}h1,h2,h3{color:#1a1a2e}</style></head><body>${draft.body}</body></html>`}
+                    className="w-full border-0"
+                    style={{ minHeight: '400px', height: '500px' }}
+                    title="Email preview"
+                    sandbox="allow-same-origin"
+                  />
+                </div>
+              ) : (
+                <Textarea
+                  value={draft.body}
+                  onChange={e => setDraft({ ...draft, body: e.target.value })}
+                  rows={20}
+                  className="text-xs bg-secondary border-border resize-y font-mono"
+                />
+              )}
             </div>
           </div>
 
