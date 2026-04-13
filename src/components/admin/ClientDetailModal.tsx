@@ -286,15 +286,55 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                           <FileText className="w-4 h-4 text-primary" /> Interview Transcripts
                         </h3>
-                        {interviews.filter((i: any) => i.transcript).map((interview: any) => (
-                          <div key={interview.id} className="rounded-xl border border-border bg-card p-5 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-bold text-foreground">{interview.title}</h4>
-                              <span className="text-[10px] text-muted-foreground">{new Date(interview.created_at).toLocaleDateString()}</span>
+                        {interviews.filter((i: any) => i.transcript).map((interview: any) => {
+                          // Parse transcript into paragraphs by splitting on speaker changes, long pauses, or double newlines
+                          const rawText: string = interview.transcript || '';
+                          const paragraphs = rawText
+                            .split(/\n{2,}|(?=(?:Speaker|Interviewer|Interviewee|Host|Guest|Aidan|Eoghan|Julia|Owen|Q:|A:)\s*[:—-])/gi)
+                            .map((p: string) => p.trim())
+                            .filter((p: string) => p.length > 0);
+                          
+                          // If no natural breaks found, split long text every ~3-4 sentences
+                          const formatted = paragraphs.length <= 1 && rawText.length > 300
+                            ? rawText.match(/[^.!?]*[.!?]+(?:\s|$)/g)?.reduce((acc: string[][], sentence: string, idx: number) => {
+                                const groupIdx = Math.floor(idx / 3);
+                                if (!acc[groupIdx]) acc[groupIdx] = [];
+                                acc[groupIdx].push(sentence);
+                                return acc;
+                              }, []).map((group: string[]) => group.join('')) || [rawText]
+                            : paragraphs;
+
+                          return (
+                            <div key={interview.id} className="rounded-xl border border-border bg-card p-5 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-xs font-bold text-foreground">{interview.title}</h4>
+                                <span className="text-[10px] text-muted-foreground">{new Date(interview.created_at).toLocaleDateString()}</span>
+                              </div>
+                              <div className="max-h-[500px] overflow-y-auto space-y-3 pr-2">
+                                {formatted.map((para: string, idx: number) => {
+                                  // Detect speaker labels and style them
+                                  const speakerMatch = para.match(/^(Speaker\s*\d*|Interviewer|Interviewee|Host|Guest|Aidan|Eoghan|Julia|Owen|Q|A)\s*[:—-]\s*/i);
+                                  if (speakerMatch) {
+                                    const speaker = speakerMatch[1];
+                                    const content = para.slice(speakerMatch[0].length);
+                                    return (
+                                      <div key={idx} className="text-xs text-foreground/80 leading-relaxed">
+                                        <span className="font-semibold text-primary text-[11px]">{speaker}:</span>{' '}
+                                        {content}
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <p key={idx} className="text-xs text-foreground/80 leading-relaxed">
+                                      {para}
+                                    </p>
+                                  );
+                                })}
+                              </div>
                             </div>
-                            <p className="text-xs text-foreground/80 whitespace-pre-wrap max-h-48 overflow-y-auto">{interview.transcript}</p>
-                          </div>
-                        ))}
+                          );
+                        })}
+                        
                       </div>
                     )}
 
