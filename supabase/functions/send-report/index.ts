@@ -28,7 +28,41 @@ serve(async (req) => {
   }
 
   try {
-    const { contactName, contactEmail, businessName, results, formData, assessmentId, isQualified, previewOnly } = await req.json();
+    const body = await req.json();
+    const { contactName, contactEmail, businessName, results, formData, assessmentId, isQualified, previewOnly } = body;
+
+    // ── Generic email mode (used by CommsPanel) ──
+    if (body.to && body.subject && body.html) {
+      const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+      if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY is not configured');
+
+      const emailPayload: any = {
+        from: `${body.fromName || '5to10X'} <grow@5to10x.app>`,
+        to: Array.isArray(body.to) ? body.to : [body.to],
+        subject: body.subject,
+        html: body.html,
+      };
+      if (body.cc && body.cc.length > 0) {
+        emailPayload.cc = body.cc;
+      }
+
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailPayload),
+      });
+      const resendData = await resendRes.json();
+      if (!resendRes.ok) {
+        console.error('Resend API error:', resendData);
+        throw new Error(`Email sending failed: ${JSON.stringify(resendData)}`);
+      }
+      return new Response(JSON.stringify({ success: true, id: resendData.id }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!contactEmail || !contactName) {
       return new Response(JSON.stringify({ error: 'Name and email are required' }), {
