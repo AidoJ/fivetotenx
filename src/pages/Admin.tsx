@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +27,7 @@ import DiscoveryChecklist from '@/components/admin/DiscoveryChecklist';
 import CallGuide from '@/components/admin/CallGuide';
 import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
 import AutomationSettings from '@/components/admin/AutomationSettings';
+import ClientDetailModal from '@/components/admin/ClientDetailModal';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -621,6 +623,9 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [pipelineFilter, setPipelineFilter] = useState<string | null>(null);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [detailModalId, setDetailModalId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [deepDives, setDeepDives] = useState<DeepDiveSubmission[]>([]);
   const [scopingResponses, setScopingResponses] = useState<any[]>([]);
@@ -1448,6 +1453,8 @@ const Admin = () => {
                           onUpdateZoomLink={handleUpdateZoomLink}
                           scopingResponse={getScopingResponse(lead.id)}
                           stProgress={getStProgress(lead)}
+                          onOpenDetail={(id) => setDetailModalId(id)}
+                          onDeleteProject={(id) => setDeleteConfirmId(id)}
                         />
                       ))}
                     </div>
@@ -1577,6 +1584,65 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Client Detail Modal */}
+      {detailModalId && (
+        <ClientDetailModal
+          assessmentId={detailModalId}
+          open={!!detailModalId}
+          onClose={() => setDetailModalId(null)}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirmId} onOpenChange={v => { if (!v) setDeleteConfirmId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Project</DialogTitle>
+            <DialogDescription>
+              This will permanently remove this lead and all associated data (notes, interviews, proposals, time entries). This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={async () => {
+                if (!deleteConfirmId) return;
+                setDeleting(true);
+                try {
+                  // Delete cascading data first
+                  await Promise.all([
+                    supabase.from('lead_notes').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('client_interviews').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('proposals').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('time_entries').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('admin_tasks').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('straight_talk_responses').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('scoping_responses').delete().eq('assessment_id', deleteConfirmId),
+                    supabase.from('deep_dive_submissions').delete().eq('assessment_id', deleteConfirmId),
+                  ]);
+                  const { error } = await supabase.from('roi_assessments').delete().eq('id', deleteConfirmId);
+                  if (error) throw error;
+                  setLeads(prev => prev.filter(l => l.id !== deleteConfirmId));
+                  setLeadNotes(prev => prev.filter(n => n.assessment_id !== deleteConfirmId));
+                  setInterviews(prev => prev.filter(i => i.assessment_id !== deleteConfirmId));
+                  setProposals(prev => prev.filter(p => p.assessment_id !== deleteConfirmId));
+                  toast({ title: 'Project deleted ✅' });
+                } catch (err: any) {
+                  toast({ title: 'Delete failed', description: err.message, variant: 'destructive' });
+                }
+                setDeleting(false);
+                setDeleteConfirmId(null);
+              }}
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

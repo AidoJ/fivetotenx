@@ -2,22 +2,16 @@ import React, { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Tables } from '@/integrations/supabase/types';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
-  Clock, AlertCircle, Pencil, Eye, ClipboardList, ClipboardCheck, Plus,
-  MessageSquare, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw
+  Clock, AlertCircle, Eye, Plus, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw,
+  Trash2, FolderOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -38,14 +32,6 @@ const CALENDLY_URL = 'https://calendly.com/aidan-rejuvenators/discovery';
 
 const formatCurrency = (v: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
-const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-const normalizeInterviewTitle = (title?: string) => {
-  if (!title) return 'Straight Talk Call';
-  return title
-    .replace(/discovery call/gi, 'Straight Talk Call')
-    .replace(/discovery/gi, 'Straight Talk');
-};
 
 /* ── SLA helper ── */
 const getSlaColor = (lead: Assessment) => {
@@ -62,25 +48,23 @@ const getSlaColor = (lead: Assessment) => {
 };
 
 /* ── Stage Tracker Dots ── */
-const StageTracker = React.forwardRef<HTMLDivElement, { currentStage: string }>(({ currentStage }, ref) => {
+const StageTracker = ({ currentStage }: { currentStage: string }) => {
   const current = stageIdx(currentStage);
   return (
-    <div ref={ref} className="flex items-center gap-0.5 w-full">
+    <div className="flex items-center gap-0.5 w-full">
       {PIPELINE_STEPS.map((step, i) => {
         const done = i < current;
         const active = i === current;
         return (
           <div key={step.key} className="flex items-center flex-1 min-w-0">
             <div className="flex flex-col items-center gap-0.5 w-full">
-              <div
-                className={`w-2.5 h-2.5 rounded-full border-2 transition-all shrink-0 ${
-                  done ? 'bg-primary border-primary' :
-                  active ? 'bg-primary border-primary ring-2 ring-primary/30' :
-                  'bg-muted border-border'
-                }`}
-              />
+              <div className={`w-2 h-2 rounded-full border-2 transition-all shrink-0 ${
+                done ? 'bg-primary border-primary' :
+                active ? 'bg-primary border-primary ring-2 ring-primary/30' :
+                'bg-muted border-border'
+              }`} />
               {active && (
-                <span className="text-[8px] font-bold text-primary leading-none whitespace-nowrap">
+                <span className="text-[7px] font-bold text-primary leading-none whitespace-nowrap">
                   {step.short}
                 </span>
               )}
@@ -93,15 +77,13 @@ const StageTracker = React.forwardRef<HTMLDivElement, { currentStage: string }>(
       })}
     </div>
   );
-});
-StageTracker.displayName = 'StageTracker';
+};
 
 /* ── Next Action CTA ── */
 const getNextAction = (
   lead: Assessment,
   deepDive: any,
   proposal: any,
-  scopingResponse: any,
   hasInterviews: boolean,
   isStraightTalkComplete: boolean,
 ) => {
@@ -112,9 +94,8 @@ const getNextAction = (
     return { label: 'Send Straight Talk Invite', icon: Send, action: 'send_discovery' };
   if (stage === 'qualified' && hasInterviews)
     return { label: 'Move to Straight Talk', icon: Check, action: 'move_discovery' };
-  // discovery_call = Straight Talk stage: CTA is Move to Green Light once complete
   if (stage === 'discovery_call' && !isStraightTalkComplete)
-    return null; // No CTA until Straight Talk is complete
+    return null;
   if (stage === 'discovery_call' && isStraightTalkComplete)
     return { label: 'Move to Green Light', icon: FileText, action: 'move_proposal' };
   if (stage === 'proposal' && !proposal)
@@ -129,62 +110,6 @@ const getNextAction = (
     return { label: 'Mark Go Live', icon: Check, action: 'move_completed' };
   return null;
 };
-
-/* ── Completion Chips ── */
-const CompletionChips = React.forwardRef<HTMLDivElement, {
-  lead: Assessment; deepDive: any; hasInterviews: boolean; isStraightTalkComplete: boolean; scopingResponse: any; proposal: any;
-  stProgress?: { answered: number; total: number } | null;
-}>(({ lead, deepDive, hasInterviews, isStraightTalkComplete, scopingResponse, proposal, stProgress }, ref) => {
-  const chips: { label: string; done: boolean }[] = [
-    { label: 'Qualified', done: lead.is_qualified },
-    { label: 'Talked', done: isStraightTalkComplete },
-    { label: 'Green Light', done: !!proposal },
-    { label: 'Gone Live', done: ['completed'].includes(lead.pipeline_stage) },
-  ];
-  return (
-    <div ref={ref} className="flex items-center gap-1 flex-wrap">
-      {chips.map(c => (
-        <span
-          key={c.label}
-          className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-            c.done ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-          }`}
-        >
-          {c.done ? '✓ ' : ''}{c.label}
-        </span>
-      ))}
-      {stProgress && stProgress.total > 0 && (
-        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-secondary text-foreground ml-auto">
-          📝 {stProgress.answered}/{stProgress.total}
-        </span>
-      )}
-    </div>
-  );
-});
-CompletionChips.displayName = 'CompletionChips';
-
-/* ── Collapsible Section Wrapper ── */
-const Section = React.forwardRef<HTMLDivElement, {
-  label: string; icon: any; children: React.ReactNode; defaultOpen?: boolean; badge?: string;
-}>(({ label, icon: Icon, children, defaultOpen = false, badge }, ref) => {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div ref={ref}>
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-secondary/50 transition-colors">
-          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-[11px] font-semibold text-foreground flex-1">{label}</span>
-          {badge && <Badge variant="outline" className="text-[8px] h-4">{badge}</Badge>}
-          <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pl-6 pr-2 pb-2">
-          {children}
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
-  );
-});
-Section.displayName = 'Section';
 
 /* ═══════ MAIN LEAD CARD ═══════ */
 
@@ -213,11 +138,12 @@ export interface LeadCardProps {
   onToggleComplete: (id: string, completed: boolean) => Promise<void>;
   onUpdateZoomLink: (id: string, zoomLink: string) => Promise<void>;
   scopingResponse: any;
-  // Render props for heavy sub-components to avoid circular deps
   renderInterviews?: (assessmentId: string) => React.ReactNode;
   renderChecklist?: (assessmentId: string) => React.ReactNode;
   renderAnswers?: (assessmentId: string) => React.ReactNode;
   stProgress?: { answered: number; total: number } | null;
+  onOpenDetail: (id: string) => void;
+  onDeleteProject: (id: string) => void;
 }
 
 const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
@@ -226,46 +152,25 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   interviews, onAddInterview, onDeleteInterview, onSendReminder, onScheduleReminder,
   onSendDiscoveryInvite, onSendSelfInterview, onMarkDiscoveryReady, onUpdateDiscoveryAnswers,
   onUpdateChecklist, onToggleComplete, onUpdateZoomLink, scopingResponse, stProgress,
+  onOpenDetail, onDeleteProject,
 }, _ref) => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [expanded, setExpanded] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [copiedScoping, setCopiedScoping] = useState(false);
-  const [newNote, setNewNote] = useState('');
-  const [noteType, setNoteType] = useState('comment');
-  const [addingNote, setAddingNote] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [loadingPreview, setLoadingPreview] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
   const roi = lead.roi_results as any;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
   const isStraightTalkComplete = (lead as any).discovery_ready === true;
-  const deepDiveUrl = `${window.location.origin}/deep-dive?id=${lead.id}`;
-  const scopingUrl = `${window.location.origin}/scoping?id=${lead.id}`;
-  const straightTalkUrl = `${window.location.origin}/self-interview?id=${lead.id}`;
   const slaColor = getSlaColor(lead);
 
-  const nextAction = getNextAction(lead, deepDive, proposal, scopingResponse, hasInterviews, isStraightTalkComplete);
-
-  const handleCopyScoping = async () => {
-    await navigator.clipboard.writeText(scopingUrl);
-    setCopiedScoping(true);
-    setTimeout(() => setCopiedScoping(false), 2000);
-  };
+  const nextAction = getNextAction(lead, deepDive, proposal, hasInterviews, isStraightTalkComplete);
 
   const handleNextAction = () => {
     if (!nextAction) return;
     switch (nextAction.action) {
       case 'qualify': onMove(lead.id, 'qualified'); break;
-      case 'send_deep_dive': onSendDeepDive(lead); break;
       case 'send_discovery': onSendDiscoveryInvite(lead); break;
       case 'move_discovery': onMove(lead.id, 'discovery_call' as PipelineStage); break;
-      case 'send_scoping': handleCopyScoping(); break;
       case 'move_proposal': onMove(lead.id, 'proposal'); break;
       case 'prepare_proposal': onPrepareProposal(lead); break;
       case 'send_proposal': onSendProposal(lead); break;
@@ -274,516 +179,136 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
     }
   };
 
-  const handleAddNote = async () => {
-    if (!newNote.trim()) return;
-    setAddingNote(true);
-    await onAddNote(lead.id, newNote, noteType);
-    setNewNote('');
-    setAddingNote(false);
-  };
-
-  const handleResendReport = async () => {
-    setResending(true);
-    try {
-      const formData = lead.form_data as any;
-      const results = lead.roi_results as any;
-      const { error } = await supabase.functions.invoke('send-report', {
-        body: {
-          contactName: lead.contact_name,
-          contactEmail: lead.contact_email,
-          businessName: lead.business_name,
-          results,
-          formData,
-          assessmentId: lead.id,
-          isQualified: lead.is_qualified,
-        },
-      });
-      if (error) throw error;
-      toast({ title: 'Report resent ✅', description: `Sent to ${lead.contact_email}` });
-    } catch (err) {
-      console.error('Resend report error:', err);
-      toast({ title: 'Failed to resend', description: 'Please try again.', variant: 'destructive' });
-    } finally {
-      setResending(false);
-    }
-  };
-
-  const handlePreviewReport = async () => {
-    setLoadingPreview(true);
-    try {
-      const fd = lead.form_data as any;
-      const res = lead.roi_results as any;
-      const { data, error } = await supabase.functions.invoke('send-report', {
-        body: {
-          contactName: lead.contact_name,
-          contactEmail: lead.contact_email,
-          businessName: lead.business_name,
-          results: res,
-          formData: fd,
-          assessmentId: lead.id,
-          isQualified: lead.is_qualified,
-          previewOnly: true,
-        },
-      });
-      if (error) throw error;
-      setPreviewHtml(data.html);
-      setPreviewOpen(true);
-    } catch (err) {
-      console.error('Preview error:', err);
-      toast({ title: 'Preview failed', description: 'Could not load report preview.', variant: 'destructive' });
-    } finally {
-      setLoadingPreview(false);
-    }
-  };
-
-  const STAGES_FOR_MOVE: { key: PipelineStage; label: string }[] = [
-    { key: 'assessment', label: 'Reality Check' },
-    { key: 'qualified', label: 'Qualified' },
-    { key: 'discovery_call' as PipelineStage, label: 'Straight Talk' },
-    { key: 'proposal', label: 'Green Light' },
-    { key: 'signed', label: 'Signed' },
-    { key: 'build_refinement' as PipelineStage, label: 'Build' },
-    { key: 'completed' as PipelineStage, label: 'Go Live' },
-  ];
+  // Audio status
+  const leadInterviews = interviews.filter(i => i.assessment_id === lead.id);
+  const withAudio = leadInterviews.filter(i => i.audio_file_url);
+  const allTranscribed = withAudio.length > 0 && withAudio.every(i => i.transcript);
 
   return (
-    <>
     <motion.div
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className="rounded-xl border border-border bg-card shadow-sm overflow-hidden"
     >
-      {/* ── ROW 1: Header ── */}
-      <div className="px-4 pt-3 pb-2 flex items-center gap-3">
+      {/* Header row */}
+      <div className="px-4 pt-3 pb-1.5 flex items-center gap-2">
         <div className={`w-2 h-2 rounded-full shrink-0 ${slaColor}`} />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p
-              className="font-bold text-sm text-primary truncate cursor-pointer hover:underline"
-              onClick={() => navigate(`/admin/client/${lead.id}`)}
-            >
-              {lead.contact_name}
-            </p>
-            {lead.business_name && (
-              <span className="text-xs text-muted-foreground truncate">· {lead.business_name}</span>
-            )}
-          </div>
+          <p className="font-bold text-sm text-foreground truncate">{lead.contact_name}</p>
+          {lead.business_name && (
+            <p className="text-[10px] text-muted-foreground truncate">{lead.business_name}</p>
+          )}
         </div>
         {roi?.totalAnnualImpact && (
-          <span className="text-xs font-bold text-primary shrink-0">
+          <span className="text-[10px] font-bold text-primary shrink-0">
             {formatCurrency(roi.totalAnnualImpact)}
           </span>
         )}
-        <button onClick={() => setExpanded(!expanded)} className="text-muted-foreground hover:text-foreground shrink-0">
-          <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-        </button>
       </div>
 
-      {/* ── ROW 2: Stage Tracker ── */}
-      <div className="px-4 pb-2">
+      {/* Stage tracker */}
+      <div className="px-4 pb-1.5">
         <StageTracker currentStage={lead.pipeline_stage} />
       </div>
 
-      {/* ── ROW 3: Completion Chips ── */}
-      <div className="px-4 pb-2">
-        <CompletionChips
-          lead={lead}
-          deepDive={deepDive}
-          hasInterviews={hasInterviews}
-          isStraightTalkComplete={isStraightTalkComplete}
-          scopingResponse={scopingResponse}
-          proposal={proposal}
-          stProgress={stProgress}
-        />
+      {/* Progress chips */}
+      <div className="px-4 pb-1.5 flex items-center gap-1 flex-wrap">
+        {[
+          { label: 'Qualified', done: lead.is_qualified },
+          { label: 'Talked', done: isStraightTalkComplete },
+          { label: 'Green Light', done: !!proposal },
+          { label: 'Live', done: ['completed'].includes(lead.pipeline_stage) },
+        ].map(c => (
+          <span key={c.label} className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${c.done ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+            {c.done ? '✓ ' : ''}{c.label}
+          </span>
+        ))}
+        {stProgress && stProgress.total > 0 && (
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full font-medium bg-secondary text-foreground ml-auto">
+            📝 {stProgress.answered}/{stProgress.total}
+          </span>
+        )}
       </div>
 
-      {/* ── ROW 4: Next Action CTA ── */}
+      {/* Audio status */}
+      {withAudio.length > 0 && (
+        <div className="px-4 pb-1.5">
+          <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-medium ${
+            allTranscribed ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
+          }`}>
+            {allTranscribed ? <Check className="w-2.5 h-2.5" /> : <AlertCircle className="w-2.5 h-2.5" />}
+            {allTranscribed ? 'Transcribed ✓' : `${withAudio.length - leadInterviews.filter(i => i.transcript).length} pending`}
+          </div>
+        </div>
+      )}
+
+      {/* Next action */}
       {nextAction && (
-        <div className="px-4 pb-3">
-           {nextAction.action === 'waiting' ? (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 rounded-lg px-3 py-2">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{nextAction.label}</span>
-              {lead.pipeline_stage === 'proposal' && lead.proposal_follow_up_sent && (
-                <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20 ml-auto">Follow-up Sent ✓</Badge>
-              )}
+        <div className="px-4 pb-2">
+          {nextAction.action === 'waiting' ? (
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-secondary/50 rounded-lg px-2 py-1.5">
+              <Clock className="w-3 h-3" /> {nextAction.label}
             </div>
           ) : (
-            <Button
-              size="sm"
-              className="w-full h-8 text-xs gap-2"
-              onClick={handleNextAction}
-            >
-              <nextAction.icon className="w-3.5 h-3.5" />
-              {nextAction.label}
+            <Button size="sm" className="w-full h-7 text-[10px] gap-1.5" onClick={handleNextAction}>
+              <nextAction.icon className="w-3 h-3" /> {nextAction.label}
             </Button>
           )}
         </div>
       )}
 
-      {/* ── EXPANDED SECTIONS ── */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-t border-border"
-          >
-            <div className="px-3 py-2 space-y-0.5">
-              {/* Contact Details */}
-              <Section label="Contact Details" icon={Mail}>
-                <div className="space-y-1.5 text-xs text-muted-foreground py-1">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-3 h-3" />
-                    <a href={`mailto:${lead.contact_email}`} className="hover:text-primary">{lead.contact_email}</a>
-                  </div>
-                  {lead.contact_phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-3 h-3" /> {lead.contact_phone}
-                    </div>
-                  )}
-                  {lead.industry && (
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-3 h-3" /> {lead.industry}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3 h-3" /> {formatDate(lead.created_at)}
-                  </div>
-                  {roi?.pricing && (
-                    <div className="mt-2 bg-secondary rounded-md p-2 space-y-0.5">
-                      <p><strong>Build:</strong> {formatCurrency(roi.pricing.buildCostLow)} – {formatCurrency(roi.pricing.buildCostHigh)}</p>
-                      <p><strong>Tier:</strong> {roi.pricing.tierLabel} · <strong>ROI:</strong> {Math.round(roi.roiPercentage)}% · <strong>Break-even:</strong> {Math.round(roi.breakEvenMonths)}mo</p>
-                    </div>
-                  )}
-                </div>
-              </Section>
+      {/* Action buttons row */}
+      <div className="px-3 pb-3 flex items-center gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 h-7 text-[10px] gap-1"
+          onClick={() => onOpenDetail(lead.id)}
+        >
+          <FolderOpen className="w-3 h-3" /> Open Details
+        </Button>
 
-              {/* Actions & Tools */}
-              <Section label="Actions & Tools" icon={ClipboardList} defaultOpen>
-                <div className="space-y-2 py-1">
-                  {/* Preview & Resend Report */}
-                  {lead.report_sent && (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-6 text-[10px] px-2 gap-1"
-                        disabled={loadingPreview}
-                        onClick={handlePreviewReport}
-                      >
-                        {loadingPreview ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
-                        Preview
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-6 text-[10px] px-2 gap-1"
-                        disabled={resending}
-                        onClick={handleResendReport}
-                      >
-                        {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                        {resending ? 'Sending…' : `Resend Report${lead.is_qualified ? ' & Invite' : ''}`}
-                      </Button>
-                    </div>
-                  )}
-                  {/* Upload Zoom Recording — fallback, de-prioritised */}
-                  {lead.pipeline_stage === 'discovery_call' && (
-                    <>
-                      <input
-                        ref={audioInputRef}
-                        type="file"
-                        accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.mp4"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const MAX_SIZE_MB = 50;
-                          if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-                            const sizeMB = (file.size / (1024 * 1024)).toFixed(0);
-                            const proceed = window.confirm(
-                              `This file is ${sizeMB}MB. Files over ${MAX_SIZE_MB}MB may fail to upload or transcribe.\n\nTip: In Zoom, download the "Audio Only" (.m4a) version instead of the full video — it's usually 5-10x smaller.\n\nProceed anyway?`
-                            );
-                            if (!proceed) {
-                              if (audioInputRef.current) audioInputRef.current.value = '';
-                              return;
-                            }
-                          }
-                          setUploading(true);
-                          await onAddInterview(lead.id, 'Straight Talk Interview', '', file);
-                          setUploading(false);
-                          if (audioInputRef.current) audioInputRef.current.value = '';
-                          if (!isStraightTalkComplete) {
-                            onMarkDiscoveryReady(lead.id, true);
-                          }
-                        }}
-                      />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 text-[9px] px-2 gap-1 text-muted-foreground"
-                        disabled={uploading}
-                        onClick={() => audioInputRef.current?.click()}
-                      >
-                        {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                        {uploading ? 'Uploading & Transcribing…' : 'Upload Full Zoom Recording (fallback)'}
-                      </Button>
-
-                      {/* Audio & Transcript Status */}
-                      {(() => {
-                        const leadInterviews = interviews.filter(i => i.assessment_id === lead.id);
-                        const withAudio = leadInterviews.filter(i => i.audio_file_url);
-                        const withTranscript = leadInterviews.filter(i => i.transcript);
-                        if (withAudio.length === 0) return null;
-                        const allTranscribed = withAudio.every(i => i.transcript);
-                        return (
-                          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium ${
-                            allTranscribed
-                              ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
-                              : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                          }`}>
-                            {allTranscribed ? (
-                              <>
-                                <Check className="w-3 h-3" />
-                                Audio uploaded & transcribed — ready for analysis
-                              </>
-                            ) : (
-                              <>
-                                <AlertCircle className="w-3 h-3" />
-                                {withAudio.length} audio uploaded, {withTranscript.length} transcribed — {withAudio.length - withTranscript.length} pending
-                              </>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </>
-                  )}
-
-                  {/* Straight Talk complete checkbox */}
-                  {lead.pipeline_stage === 'discovery_call' && (
-                    <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
-                      <input
-                        type="checkbox"
-                        checked={isStraightTalkComplete}
-                        onChange={(e) => onMarkDiscoveryReady(lead.id, e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-border accent-primary"
-                      />
-                      <span className="text-[10px] font-medium text-foreground">Straight Talk™ Complete</span>
-                    </div>
-                  )}
-
-                  {/* Booking & Self-Interview tools — only show when no booking exists yet */}
-                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && !hasInterviews && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => onSendSelfInterview(lead)}>
-                        <Mic className="w-3 h-3" /> Send Self-Interview
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => window.open(CALENDLY_URL, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Calendly
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => onSendDiscoveryInvite(lead)}>
-                        <Send className="w-3 h-3" /> Send Booking Link
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Self-Interview link (audio + resume) — only before ST is complete */}
-                  {['qualified', 'discovery_call'].includes(lead.pipeline_stage) && !isStraightTalkComplete && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => {
-                          navigator.clipboard.writeText(straightTalkUrl);
-                          setCopied(true);
-                          setTimeout(() => setCopied(false), 2000);
-                        }}>
-                        {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copied ? 'Copied!' : 'Self-Interview Link'}
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Green Light tools — show after Straight Talk complete at proposal stage */}
-                  {lead.pipeline_stage === 'proposal' && proposal && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}?admin=1`, '_blank')}>
-                        <Pencil className="w-3 h-3" /> Edit Green Light Doc
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => onSendProposal(lead)}>
-                        <Send className="w-3 h-3" /> {lead.proposal_sent_at ? 'Resend' : 'Send'}
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Signed — view doc */}
-                  {lead.pipeline_stage === 'signed' && proposal && (
-                    <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                      onClick={() => window.open(`${window.location.origin}/proposal/${proposal.id}`, '_blank')}>
-                      <Eye className="w-3 h-3" /> View Green Light Doc
-                    </Button>
-                  )}
-
-                  {/* Build stage */}
-                  {lead.pipeline_stage === ('build_refinement' as PipelineStage) && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1"
-                        onClick={() => window.open(CALENDLY_URL, '_blank')}>
-                        <ExternalLink className="w-3 h-3" /> Schedule Build Call
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Follow-up timers */}
-                  {lead.pipeline_stage === 'proposal' && (
-                    <div className="flex items-center gap-2 bg-secondary/50 rounded-md px-2 py-1.5">
-                      <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground">Proposal follow up</span>
-                      <Input type="number" min={1} max={30} defaultValue={lead.proposal_follow_up_days || 3}
-                        className="h-6 w-14 text-[10px] text-center"
-                        onBlur={(e) => onUpdateProposalFollowUp(lead.id, parseInt(e.target.value) || 3)} />
-                      <span className="text-[10px] text-muted-foreground">days</span>
-                    </div>
-                  )}
-
-                  {/* Stage reminder */}
-                  {['qualified', 'discovery_call', 'proposal'].includes(lead.pipeline_stage) && (
-                    <div className="flex flex-wrap items-center gap-1.5 bg-amber-500/5 border border-amber-500/20 rounded-md px-2 py-1.5">
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
-                        <span className="text-[10px] text-amber-700 whitespace-nowrap">Reminder</span>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Input type="number" min={1} max={720}
-                          defaultValue={(lead as any).stage_reminder_days || 72}
-                          className="h-6 w-12 text-[10px] text-center"
-                          onBlur={(e) => onScheduleReminder(lead.id, parseInt(e.target.value) || 72, null)} />
-                        <span className="text-[9px] text-muted-foreground">hrs</span>
-                      </div>
-                      {(lead as any).stage_reminder_sent && (
-                        <Badge variant="outline" className="text-[8px] h-4 bg-green-500/10 text-green-700 border-green-500/20 shrink-0">Sent ✓</Badge>
-                      )}
-                      <Button size="sm" variant="ghost" className="h-5 text-[9px] px-1.5 text-amber-700 shrink-0 ml-auto"
-                        onClick={() => onSendReminder(lead)}>
-                        <Send className="w-3 h-3" /> Now
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Move to stage */}
-                  <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-border">
-                    <span className="text-[10px] text-muted-foreground mr-1">Move:</span>
-                    {STAGES_FOR_MOVE.filter(s => s.key !== lead.pipeline_stage).map(s => (
-                      <button key={s.key} onClick={() => onMove(lead.id, s.key)}
-                        className="text-[9px] px-1.5 py-0.5 rounded-full border border-border hover:bg-secondary transition-colors">
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </Section>
-
-              {/* Bookings / Interviews — always show if any exist */}
-              {interviews.filter(i => i.assessment_id === lead.id).length > 0 && (
-                <Section label="Bookings" icon={Calendar} badge={`${interviews.filter(i => i.assessment_id === lead.id).length}`} defaultOpen={!isStraightTalkComplete}>
-                  <div className="space-y-2 py-1">
-                    {interviews.filter(i => i.assessment_id === lead.id).map((iv: any) => {
-                      const isPast = iv.scheduled_at && new Date(iv.scheduled_at).getTime() < Date.now();
-                      const statusLabel = iv.call_completed ? '✓ Completed' : isPast ? '⏰ Past Due' : 'Upcoming';
-                      const statusVariant = iv.call_completed ? 'default' : isPast ? 'destructive' : 'outline';
-                      return (
-                        <div key={iv.id} className="bg-secondary/50 rounded-md p-2 space-y-1 text-[11px]">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-foreground">{normalizeInterviewTitle(iv.title)}</span>
-                            <Badge variant={statusVariant as any} className="text-[8px] h-4">
-                              {statusLabel}
-                            </Badge>
-                          </div>
-                          {iv.scheduled_at && (
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              <span>{new Date(iv.scheduled_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                          )}
-                          {iv.zoom_link && !iv.call_completed && !isPast && (
-                            <div className="flex items-center gap-1.5">
-                              <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                              <a href={iv.zoom_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
-                                Join Zoom
-                              </a>
-                            </div>
-                          )}
-                          {iv.content && (
-                            <p className="text-muted-foreground">{iv.content}</p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Section>
-              )}
-
-              {/* Notes */}
-              <Section label="Notes" icon={MessageSquare} badge={notes.length > 0 ? `${notes.length}` : undefined}>
-                <div className="space-y-2 py-1">
-                  {notes.slice(0, 5).map(n => (
-                    <div key={n.id} className="flex items-start gap-2 text-[11px]">
-                      <span className="shrink-0">
-                        {n.note_type === 'question' ? '❓' : n.note_type === 'action' ? '⚡' : '💬'}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-foreground">{n.content}</p>
-                        <p className="text-[9px] text-muted-foreground">{formatDate(n.created_at)}</p>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="flex gap-1">
-                    <select value={noteType} onChange={e => setNoteType(e.target.value)}
-                      className="h-7 text-[10px] rounded-md border border-border bg-secondary px-1.5">
-                      <option value="comment">💬</option>
-                      <option value="question">❓</option>
-                      <option value="action">⚡</option>
-                    </select>
-                    <Input value={newNote} onChange={e => setNewNote(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleAddNote()}
-                      placeholder="Add note..." className="h-7 text-[10px] flex-1" />
-                    <Button size="sm" variant="outline" className="h-7 w-7 p-0" onClick={handleAddNote}
-                      disabled={addingNote || !newNote.trim()}>
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              </Section>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-
-      {/* Report Preview Dialog */}
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>ROI Report Preview — {lead.contact_name}</DialogTitle>
-          </DialogHeader>
-          {previewHtml ? (
-            <iframe
-              srcDoc={previewHtml}
-              className="w-full border rounded-lg"
-              style={{ minHeight: '600px' }}
-              title="Report Preview"
+        {/* Upload audio - only in discovery */}
+        {lead.pipeline_stage === 'discovery_call' && (
+          <>
+            <input
+              ref={audioInputRef}
+              type="file"
+              accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.mp4"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setUploading(true);
+                await onAddInterview(lead.id, 'Straight Talk Interview', '', file);
+                setUploading(false);
+                if (audioInputRef.current) audioInputRef.current.value = '';
+                if (!isStraightTalkComplete) onMarkDiscoveryReady(lead.id, true);
+              }}
             />
-          ) : (
-            <p className="text-sm text-muted-foreground">Loading…</p>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => audioInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+            </Button>
+          </>
+        )}
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+          onClick={() => onDeleteProject(lead.id)}
+        >
+          <Trash2 className="w-3 h-3" />
+        </Button>
+      </div>
+    </motion.div>
   );
 });
 LeadCard.displayName = 'LeadCard';
