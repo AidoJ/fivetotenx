@@ -267,7 +267,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
               />
             </div>
 
-            {/* Preview / Edit toggle */}
+            {/* Editable Preview / Raw HTML toggle */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Email Body</Label>
@@ -280,7 +280,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    Preview
+                    ✏️ Visual Editor
                   </button>
                   <button
                     onClick={() => setViewMode('edit')}
@@ -290,25 +290,41 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    Edit HTML
+                    &lt;/&gt; HTML
                   </button>
                 </div>
               </div>
 
               {viewMode === 'preview' ? (
-                <div className="rounded-lg border border-border bg-white overflow-hidden">
-                  <div className="bg-secondary/30 px-4 py-2 border-b border-border flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-destructive/60" />
-                    <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
-                    <div className="w-2 h-2 rounded-full bg-green-500/60" />
-                    <span className="text-[10px] text-muted-foreground ml-2">Email Preview</span>
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="bg-secondary/30 px-4 py-2 border-b border-border flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-destructive/60" />
+                      <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
+                      <div className="w-2 h-2 rounded-full bg-green-500/60" />
+                      <span className="text-[10px] text-muted-foreground ml-2">Click anywhere to edit — changes save automatically</span>
+                    </div>
                   </div>
-                  <iframe
-                    srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#333;padding:24px 32px;margin:0;background:#fff}table{border-collapse:collapse;width:100%;margin:12px 0}td,th{padding:8px 12px;border:1px solid #e5e7eb;text-align:left;font-size:13px}th{background:#f9fafb;font-weight:600}ul,ol{padding-left:20px}li{margin-bottom:6px}strong{color:#1a1a2e}h1,h2,h3{color:#1a1a2e}</style></head><body>${draft.body}</body></html>`}
-                    className="w-full border-0"
-                    style={{ minHeight: '400px', height: '500px' }}
-                    title="Email preview"
-                    sandbox="allow-same-origin"
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    dangerouslySetInnerHTML={{ __html: draft.body }}
+                    onBlur={e => {
+                      const newHtml = (e.target as HTMLDivElement).innerHTML;
+                      if (newHtml !== draft.body) {
+                        setDraft({ ...draft, body: newHtml });
+                        setConfirmSend(false);
+                      }
+                    }}
+                    className="outline-none min-h-[400px] max-h-[600px] overflow-y-auto"
+                    style={{
+                      fontFamily: 'Arial, Helvetica, sans-serif',
+                      fontSize: '14px',
+                      lineHeight: '1.6',
+                      color: '#333',
+                      padding: '24px 32px',
+                      background: '#fff',
+                    }}
                   />
                 </div>
               ) : (
