@@ -121,8 +121,10 @@ For each opportunity provide:
 - Impact category: "time_savings", "revenue_growth", "cost_reduction", "risk_mitigation", or "customer_experience"
 - Estimated annual impact in dollars (be specific based on their numbers)
 - Implementation difficulty: "easy", "medium", "hard"  
-- A 2-3 sentence explanation of the problem and how automation solves it
+- A 2-3 sentence explanation of the problem and how automation solves it. If the client mentioned this issue in their interview, quote their words.
 - A specific recommendation of what to build/automate
+
+When transcript data is available, the client's stated priorities and pain points should drive the ranking — not just the biggest dollar value. What the client cares about most should appear first.
 
 Return the TOP 5 as "big_hits" and the NEXT 5 as "quick_wins".`;
 
