@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
   Send, Loader2, FileText, Sparkles, ChevronDown, ChevronUp,
-  Mail, CheckCircle2, Edit3, RefreshCw, Clock, Handshake, Target, Rocket,
+  Mail, CheckCircle2, Edit3, RefreshCw, Clock, Handshake, Target, Rocket, Save,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,6 +71,7 @@ interface SentEmail {
   subject: string;
   sentAt: string;
   to: string;
+  body?: string;
 }
 
 const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
@@ -79,48 +80,118 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const [draft, setDraft] = useState<DraftEmail | null>(null);
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [sentEmails, setSentEmails] = useState<SentEmail[]>([]);
   const [confirmSend, setConfirmSend] = useState(false);
   const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview');
   const [expandedSent, setExpandedSent] = useState<string | null>(null);
+  const [draftNoteId, setDraftNoteId] = useState<string | null>(null);
 
-  // Load sent email history from lead_notes with note_type = 'email_sent'
+  // Load sent email history + saved drafts
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
         .from('lead_notes')
         .select('*')
         .eq('assessment_id', assessmentId)
-        .eq('note_type', 'email_sent')
+        .in('note_type', ['email_sent', 'email_draft'])
         .order('created_at', { ascending: false });
       if (data) {
-        setSentEmails(data.map((n: any) => {
+        const sent: SentEmail[] = [];
+        let savedDraft: DraftEmail | null = null;
+        let savedDraftNoteId: string | null = null;
+
+        for (const n of data) {
           try {
-            return JSON.parse(n.content);
+            const parsed = JSON.parse(n.content);
+            if (n.note_type === 'email_sent') {
+              sent.push(parsed);
+            } else if (n.note_type === 'email_draft' && !savedDraft) {
+              savedDraft = { subject: parsed.subject, body: parsed.body, templateKey: parsed.templateKey };
+              savedDraftNoteId = n.id;
+            }
           } catch {
-            return { templateKey: 'unknown', subject: n.content, sentAt: n.created_at, to: lead?.contact_email };
+            if (n.note_type === 'email_sent') {
+              sent.push({ templateKey: 'unknown', subject: n.content, sentAt: n.created_at, to: lead?.contact_email });
+            }
           }
-        }));
+        }
+        setSentEmails(sent);
+        if (savedDraft) {
+          setDraft(savedDraft);
+          setSelectedTemplate(savedDraft.templateKey);
+          setDraftNoteId(savedDraftNoteId);
+        }
       }
     };
     load();
   }, [assessmentId]);
 
+  const saveDraft = useCallback(async (draftToSave: DraftEmail) => {
+    setSaving(true);
+    try {
+      const payload = JSON.stringify({
+        templateKey: draftToSave.templateKey,
+        subject: draftToSave.subject,
+        body: draftToSave.body,
+        savedAt: new Date().toISOString(),
+      });
+
+      if (draftNoteId) {
+        await supabase.from('lead_notes').update({ content: payload }).eq('id', draftNoteId);
+      } else {
+        const { data } = await supabase.from('lead_notes').insert({
+          assessment_id: assessmentId,
+          note_type: 'email_draft',
+          content: payload,
+        }).select('id').single();
+        if (data) setDraftNoteId(data.id);
+      }
+      toast({ title: 'Draft saved ✅', description: 'Your edits have been saved.' });
+    } catch (err: any) {
+      toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
+    }
+    setSaving(false);
+  }, [assessmentId, draftNoteId, toast]);
+
+  const deleteDraftNote = async () => {
+    if (draftNoteId) {
+      await supabase.from('lead_notes').delete().eq('id', draftNoteId);
+      setDraftNoteId(null);
+    }
+  };
+
   const generateDraft = async (templateKey: string) => {
     setGenerating(true);
     setSelectedTemplate(templateKey);
     setConfirmSend(false);
+    // Delete old saved draft
+    await deleteDraftNote();
     try {
       const { data, error } = await supabase.functions.invoke('analyze-opportunities', {
         body: { assessmentId, mode: 'email_draft', templateKey },
       });
       if (error) throw error;
       if (!data?.email) throw new Error('No email content returned');
-      setDraft({
+      const newDraft: DraftEmail = {
         subject: data.email.subject,
         body: data.email.body,
         templateKey,
+      };
+      setDraft(newDraft);
+      // Auto-save new draft
+      const payload = JSON.stringify({
+        templateKey: newDraft.templateKey,
+        subject: newDraft.subject,
+        body: newDraft.body,
+        savedAt: new Date().toISOString(),
       });
+      const { data: noteData } = await supabase.from('lead_notes').insert({
+        assessment_id: assessmentId,
+        note_type: 'email_draft',
+        content: payload,
+      }).select('id').single();
+      if (noteData) setDraftNoteId(noteData.id);
     } catch (err: any) {
       toast({ title: 'Failed to generate draft', description: err.message, variant: 'destructive' });
     }
@@ -137,32 +208,32 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           subject: draft.subject,
           html: draft.body,
           fromName: 'Aidan Leonard',
+          cc: ['aidan@5to10x.app', 'eoghan@5to10x.app'],
         },
       });
       if (error) throw error;
 
-      // Record in lead_notes
-      await supabase.from('lead_notes').insert({
-        assessment_id: assessmentId,
-        note_type: 'email_sent',
-        content: JSON.stringify({
-          templateKey: draft.templateKey,
-          subject: draft.subject,
-          sentAt: new Date().toISOString(),
-          to: lead.contact_email,
-        }),
-      });
-
-      const sent: SentEmail = {
+      // Record sent email with full body
+      const sentPayload: SentEmail = {
         templateKey: draft.templateKey,
         subject: draft.subject,
         sentAt: new Date().toISOString(),
         to: lead.contact_email,
+        body: draft.body,
       };
-      setSentEmails(prev => [sent, ...prev]);
+      await supabase.from('lead_notes').insert({
+        assessment_id: assessmentId,
+        note_type: 'email_sent',
+        content: JSON.stringify(sentPayload),
+      });
+
+      // Delete draft note since it's been sent
+      await deleteDraftNote();
+
+      setSentEmails(prev => [sentPayload, ...prev]);
       setDraft(null);
       setSelectedTemplate(null);
-      toast({ title: 'Email sent ✅', description: `Sent to ${lead.contact_email}` });
+      toast({ title: 'Email sent ✅', description: `Sent to ${lead.contact_email} (cc: Aidan, Eoghan)` });
     } catch (err: any) {
       toast({ title: 'Send failed', description: err.message, variant: 'destructive' });
     }
@@ -179,12 +250,13 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           <Mail className="w-4 h-4 text-primary" /> Email Templates
         </h3>
         <p className="text-xs text-muted-foreground">
-          Select a template to auto-generate a personalised email from the client's data, transcripts, and analysis. You can edit before sending.
+          Select a template to auto-generate a personalised email. Drafts are saved automatically so you can navigate away and return.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {EMAIL_TEMPLATES.map((tmpl) => {
             const Icon = tmpl.icon;
             const wasSent = sentEmails.some(s => s.templateKey === tmpl.id);
+            const hasDraft = draft?.templateKey === tmpl.id;
             const isActive = selectedTemplate === tmpl.id;
             return (
               <button
@@ -202,11 +274,16 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                     <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-xs font-bold text-foreground">{tmpl.label}</p>
                       {wasSent && (
                         <Badge variant="outline" className="text-[9px] text-green-600 border-green-300 gap-0.5">
                           <CheckCircle2 className="w-2.5 h-2.5" /> Sent
+                        </Badge>
+                      )}
+                      {hasDraft && !isActive && (
+                        <Badge variant="outline" className="text-[9px] text-amber-600 border-amber-300 gap-0.5">
+                          <Edit3 className="w-2.5 h-2.5" /> Draft
                         </Badge>
                       )}
                     </div>
@@ -237,6 +314,15 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                 size="sm"
                 variant="outline"
                 className="h-7 text-[10px] gap-1"
+                onClick={() => saveDraft(draft)}
+                disabled={saving}
+              >
+                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save Draft
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-[10px] gap-1"
                 onClick={() => selectedTemplate && generateDraft(selectedTemplate)}
                 disabled={generating}
               >
@@ -246,7 +332,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                 size="sm"
                 variant="destructive"
                 className="h-7 text-[10px]"
-                onClick={() => { setDraft(null); setSelectedTemplate(null); }}
+                onClick={async () => { await deleteDraftNote(); setDraft(null); setSelectedTemplate(null); }}
               >
                 Discard
               </Button>
@@ -257,6 +343,10 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
             <div className="space-y-1">
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">To</Label>
               <Input value={lead?.contact_email || ''} disabled className="h-8 text-xs bg-secondary/50" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">CC</Label>
+              <Input value="aidan@5to10x.app, eoghan@5to10x.app" disabled className="h-8 text-xs bg-secondary/50" />
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Subject</Label>
@@ -302,7 +392,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                       <div className="w-2 h-2 rounded-full bg-destructive/60" />
                       <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
                       <div className="w-2 h-2 rounded-full bg-green-500/60" />
-                      <span className="text-[10px] text-muted-foreground ml-2">Click anywhere to edit — changes save automatically</span>
+                      <span className="text-[10px] text-muted-foreground ml-2">Click anywhere to edit — click Save Draft to persist</span>
                     </div>
                   </div>
                   <div
@@ -352,7 +442,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
             </label>
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-muted-foreground">
-                Emails are never sent automatically — you must review, edit, and confirm before sending.
+                A copy will be sent to aidan@5to10x.app and eoghan@5to10x.app for reference.
               </p>
               <Button
                 size="sm"
@@ -377,9 +467,13 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           <div className="space-y-2">
             {sentEmails.map((email, idx) => {
               const tmpl = EMAIL_TEMPLATES.find(t => t.id === email.templateKey);
+              const isExpanded = expandedSent === `${idx}`;
               return (
-                <div key={idx} className="rounded-lg border border-border bg-card p-3">
-                  <div className="flex items-center justify-between">
+                <div key={idx} className="rounded-lg border border-border bg-card">
+                  <button
+                    className="w-full p-3 flex items-center justify-between text-left"
+                    onClick={() => setExpandedSent(isExpanded ? null : `${idx}`)}
+                  >
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="text-[9px]">{tmpl?.label || email.templateKey}</Badge>
                       <span className="text-[11px] text-foreground font-medium truncate max-w-[300px]">{email.subject}</span>
@@ -387,8 +481,28 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground">{new Date(email.sentAt).toLocaleString()}</span>
                       <span className="text-[10px] text-muted-foreground">→ {email.to}</span>
+                      {email.body ? (
+                        isExpanded ? <ChevronUp className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                      ) : null}
                     </div>
-                  </div>
+                  </button>
+                  {isExpanded && email.body && (
+                    <div className="border-t border-border p-4">
+                      <div
+                        dangerouslySetInnerHTML={{ __html: email.body }}
+                        className="max-h-[500px] overflow-y-auto"
+                        style={{
+                          fontFamily: 'Arial, Helvetica, sans-serif',
+                          fontSize: '14px',
+                          lineHeight: '1.6',
+                          color: '#333',
+                          background: '#fff',
+                          padding: '16px',
+                          borderRadius: '8px',
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}
