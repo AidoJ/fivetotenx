@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { assessmentId } = await req.json();
+    const { assessmentId, mode, customPrompt } = await req.json();
     if (!assessmentId) throw new Error("assessmentId required");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
