@@ -78,12 +78,7 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
                 type: 'text',
                 text: 'Please transcribe this audio recording of a client interview. Capture all details accurately as this will be used for a business proposal.'
               },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: dataUrl,
-                }
-              }
+              audioContent
             ]
           }
         ],
