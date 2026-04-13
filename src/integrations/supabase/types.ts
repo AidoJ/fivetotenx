@@ -369,6 +369,7 @@ export type Database = {
           stage_reminder_days: number | null
           stage_reminder_scheduled_at: string | null
           stage_reminder_sent: boolean | null
+          tech_stack: Json | null
         }
         Insert: {
           business_name?: string | null
@@ -402,6 +403,7 @@ export type Database = {
           stage_reminder_days?: number | null
           stage_reminder_scheduled_at?: string | null
           stage_reminder_sent?: boolean | null
+          tech_stack?: Json | null
         }
         Update: {
           business_name?: string | null
@@ -435,6 +437,7 @@ export type Database = {
           stage_reminder_days?: number | null
           stage_reminder_scheduled_at?: string | null
           stage_reminder_sent?: boolean | null
+          tech_stack?: Json | null
         }
         Relationships: [
           {

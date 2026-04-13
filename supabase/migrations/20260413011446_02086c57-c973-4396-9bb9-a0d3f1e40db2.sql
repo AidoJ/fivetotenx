@@ -1,0 +1,1 @@
+ALTER TABLE public.roi_assessments ADD COLUMN tech_stack jsonb DEFAULT '{}'::jsonb;
