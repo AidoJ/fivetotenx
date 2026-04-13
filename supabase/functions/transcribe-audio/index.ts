@@ -44,17 +44,20 @@ Deno.serve(async (req) => {
       throw new Error('Audio file too large (>25MB). Please compress and re-upload.');
     }
 
-    // Chunked base64 encoding to avoid memory spikes
+    // Encode to base64 — chunk size MUST be multiple of 3 for correct concatenation
     let base64 = '';
-    const CHUNK = 32768;
+    const CHUNK = 32766; // multiple of 3
     for (let i = 0; i < audioBytes.length; i += CHUNK) {
       const chunk = audioBytes.subarray(i, Math.min(i + CHUNK, audioBytes.length));
-      base64 += btoa(String.fromCharCode(...chunk));
+      // Spread can OOM on large chunks, build string manually
+      let binaryStr = '';
+      for (let j = 0; j < chunk.length; j++) {
+        binaryStr += String.fromCharCode(chunk[j]);
+      }
+      base64 += btoa(binaryStr);
     }
 
-    const mimeType = getMimeType(audioUrl);
-    const dataUrl = `data:${mimeType};base64,${base64}`;
-    console.log('Base64 encoding complete, sending to AI gateway...');
+    console.log(`Base64 encoding complete (${(base64.length / 1024 / 1024).toFixed(1)}MB b64), sending to AI gateway...`);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -80,9 +83,12 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
                 text: 'Please transcribe this audio recording of a client interview. Capture all details accurately as this will be used for a business proposal.'
               },
               {
-                type: 'image_url',
-                image_url: {
-                  url: dataUrl,
+                type: 'input_audio',
+                input_audio: {
+                  data: base64,
+                  format: audioUrl.toLowerCase().includes('.mp3') ? 'mp3' : 
+                          audioUrl.toLowerCase().includes('.wav') ? 'wav' : 
+                          audioUrl.toLowerCase().includes('.m4a') ? 'mp4' : 'mp3',
                 }
               }
             ]
@@ -110,9 +116,11 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
     }
 
     const result = await response.json();
+    console.log('AI response status:', response.status, 'finish_reason:', result.choices?.[0]?.finish_reason);
     const transcript = result.choices?.[0]?.message?.content || '';
 
     if (!transcript) {
+      console.error('Empty transcript. Full response:', JSON.stringify(result).substring(0, 500));
       throw new Error('No transcript generated from audio');
     }
 
@@ -155,7 +163,7 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
     console.error('Transcription error:', error);
     const msg = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ success: false, error: msg }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
