@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import logo from '@/assets/logo-5to10x-color.webp';
 import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
 import OpportunityAnalysis from '@/components/admin/OpportunityAnalysis';
+import TimeTracker from '@/components/admin/TimeTracker';
 
 type Assessment = Tables<'roi_assessments'>;
 
@@ -593,6 +594,11 @@ const ClientDetail = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Time Tracking */}
+        <div className="mt-6">
+          <TimeTracker assessmentId={id!} />
+        </div>
       </div>
     </div>
   );

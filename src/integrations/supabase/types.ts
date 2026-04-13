@@ -643,6 +643,44 @@ export type Database = {
           },
         ]
       }
+      time_entries: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          date: string
+          hours: number
+          id: string
+          notes: string | null
+          team_member: string
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          date?: string
+          hours?: number
+          id?: string
+          notes?: string | null
+          team_member?: string
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          date?: string
+          hours?: number
+          id?: string
+          notes?: string | null
+          team_member?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_registrations: {
         Row: {
           business_name: string | null
