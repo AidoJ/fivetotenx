@@ -287,22 +287,29 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                           <FileText className="w-4 h-4 text-primary" /> Interview Transcripts
                         </h3>
                         {interviews.filter((i: any) => i.transcript).map((interview: any) => {
-                          // Parse transcript into paragraphs by splitting on speaker changes, long pauses, or double newlines
                           const rawText: string = interview.transcript || '';
-                          const paragraphs = rawText
-                            .split(/\n{2,}|(?=(?:Speaker|Interviewer|Interviewee|Host|Guest|Aidan|Eoghan|Julia|Owen|Q:|A:)\s*[:—-])/gi)
-                            .map((p: string) => p.trim())
-                            .filter((p: string) => p.length > 0);
                           
-                          // If no natural breaks found, split long text every ~3-4 sentences
-                          const formatted = paragraphs.length <= 1 && rawText.length > 300
-                            ? rawText.match(/[^.!?]*[.!?]+(?:\s|$)/g)?.reduce((acc: string[][], sentence: string, idx: number) => {
-                                const groupIdx = Math.floor(idx / 3);
-                                if (!acc[groupIdx]) acc[groupIdx] = [];
-                                acc[groupIdx].push(sentence);
-                                return acc;
-                              }, []).map((group: string[]) => group.join('')) || [rawText]
-                            : paragraphs;
+                          // Step 1: Try splitting on speaker labels first
+                          const speakerPattern = /(?=(?:Speaker\s*\d*|Interviewer|Interviewee|Host|Guest|Aidan|Eoghan|Julia|Owen|Q|A)\s*[:—-])/gi;
+                          let paragraphs = rawText.split(speakerPattern).map((p: string) => p.trim()).filter((p: string) => p.length > 0);
+                          
+                          // Step 2: If that didn't produce multiple segments, try newlines (single or double)
+                          if (paragraphs.length <= 1) {
+                            paragraphs = rawText.split(/\n+/).map((p: string) => p.trim()).filter((p: string) => p.length > 0);
+                          }
+                          
+                          // Step 3: For any paragraph that's still very long (>500 chars), auto-split every 3 sentences
+                          const formatted: string[] = [];
+                          for (const para of paragraphs) {
+                            if (para.length > 500) {
+                              const sentences = para.match(/[^.!?]*[.!?]+(?:\s|$)/g) || [para];
+                              for (let i = 0; i < sentences.length; i += 3) {
+                                formatted.push(sentences.slice(i, i + 3).join('').trim());
+                              }
+                            } else {
+                              formatted.push(para);
+                            }
+                          }
 
                           return (
                             <div key={interview.id} className="rounded-xl border border-border bg-card p-5 space-y-3">
