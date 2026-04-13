@@ -81,6 +81,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const [sending, setSending] = useState(false);
   const [sentEmails, setSentEmails] = useState<SentEmail[]>([]);
   const [confirmSend, setConfirmSend] = useState(false);
+  const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview');
   const [expandedSent, setExpandedSent] = useState<string | null>(null);
 
   // Load sent email history from lead_notes with note_type = 'email_sent'
