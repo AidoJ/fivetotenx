@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { assessmentId } = await req.json();
+    const { assessmentId, mode, customPrompt } = await req.json();
     if (!assessmentId) throw new Error("assessmentId required");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -89,16 +89,8 @@ serve(async (req) => {
 
     const hasTranscripts = !!transcriptTexts;
 
-    const prompt = `You are a business automation consultant for 5to10X. Analyze this client's data and identify the TOP 10 automation/efficiency opportunities.
-
-${hasTranscripts ? `⚠️ PRIORITY DATA SOURCE — INTERVIEW TRANSCRIPTS:
-The client's own words from recorded interviews are the MOST IMPORTANT data source. Their spoken priorities, frustrations, and goals should HEAVILY influence your analysis and ranking. Quote specific statements where relevant.
-
-${transcriptTexts}
-
----` : ''}
-
-CLIENT PROFILE:
+    // ── Build shared client context block ──
+    const clientContext = `CLIENT PROFILE:
 - Business: ${assessment.business_name || formData.businessName || 'Unknown'}
 - Industry: ${assessment.industry || formData.industry || 'Unknown'}
 - Monthly Revenue: $${formData.monthlyRevenue || 'Unknown'}
@@ -112,7 +104,233 @@ ${qaPairs.length > 0 ? qaPairs.join("\n\n") : "No questionnaire responses availa
 AI-EXTRACTED DISCOVERY ANSWERS:
 ${discoveryPairs.length > 0 ? discoveryPairs.join("\n\n") : "No extracted answers available."}
 
-${!hasTranscripts ? "INTERVIEW TRANSCRIPTS:\nNo transcripts available — analysis is based on form data and questionnaire responses only. Results may be less precise." : ''}
+${hasTranscripts ? `INTERVIEW TRANSCRIPTS (PRIMARY SOURCE — client's own words):
+${transcriptTexts}` : "No transcripts available."}`;
+
+    // ── Fetch deep dive & scoping for extra context ──
+    const [ddRes, scopeRes] = await Promise.all([
+      sb.from("deep_dive_submissions").select("*").eq("assessment_id", assessmentId).limit(1),
+      sb.from("scoping_responses").select("responses").eq("assessment_id", assessmentId).limit(1),
+    ]);
+    const deepDive = ddRes.data?.[0];
+    const scopeData = scopeRes.data?.[0]?.responses;
+
+    const existingToolsContext = [
+      deepDive?.current_tools ? `Current tools/platforms: ${deepDive.current_tools}` : null,
+      deepDive?.required_integrations?.length ? `Required integrations: ${deepDive.required_integrations.join(', ')}` : null,
+      deepDive?.current_website ? `Current website: ${deepDive.current_website}` : null,
+      deepDive?.must_have_features ? `Must-have features: ${deepDive.must_have_features}` : null,
+      deepDive?.nice_to_have_features ? `Nice-to-have: ${deepDive.nice_to_have_features}` : null,
+    ].filter(Boolean).join('\n');
+
+    // Get existing tech stack if saved
+    const existingTechStack = assessment.tech_stack as any || {};
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    // ────────────────────────────────────────────────────
+    // TECH STACK MODE
+    // ────────────────────────────────────────────────────
+    if (mode === "tech_stack") {
+      const analysisData = (assessment.discovery_answers as any)?._analysis;
+
+      const techPrompt = `You are a senior solutions architect and technology consultant for 5to10X, specialising in automation, compliance, and data security for ${assessment.industry || 'various'} industries.
+
+${clientContext}
+
+${existingToolsContext ? `\nEXISTING TOOLS & PLATFORMS THE CLIENT ALREADY USES:\n${existingToolsContext}` : ''}
+
+${analysisData ? `\nOPPORTUNITY ANALYSIS (already completed):
+Summary: ${analysisData.summary || 'N/A'}
+Big 5 opportunities: ${(analysisData.big_hits || []).map((h: any) => `${h.title}: ${h.recommendation}`).join('; ')}
+Quick wins: ${(analysisData.quick_wins || []).map((h: any) => `${h.title}: ${h.recommendation}`).join('; ')}` : ''}
+
+${customPrompt ? `\nADDITIONAL CONTEXT FROM ADMIN:\n${customPrompt}` : ''}
+
+INSTRUCTIONS:
+Perform a THOROUGH technology analysis covering:
+
+1. **EXISTING TOOLS AUDIT**: Review every tool/platform the client currently uses (e.g. Monday.com, RPData, RealWorks, ID4ME, CoreLogic, etc.). For each one:
+   - Assess if it should be KEPT, REPLACED, or INTEGRATED WITH
+   - Note API availability and integration complexity
+   - Flag any vendor lock-in risks
+
+2. **MARKET RESEARCH**: For each identified need/opportunity, research and recommend the BEST market tools available in the client's region (Australia/NZ focus where relevant). Consider:
+   - Industry-specific SaaS platforms (PropTech, FinTech, LegalTech, etc.)
+   - Automation platforms (Zapier, Make, n8n, etc.)
+   - AI-powered tools for document processing, data extraction, etc.
+   - CRM alternatives or enhancements
+   - Compare at least 2-3 options per category with pros/cons
+
+3. **COMPLIANCE & REGULATORY**:
+   - AML (Anti-Money Laundering) requirements — what tools handle AML/KYC checks automatically?
+   - Privacy legislation compliance (Australian Privacy Act, GDPR if applicable)
+   - Industry-specific regulations (e.g. real estate agent licensing, financial services)
+   - Audit trail and record-keeping requirements
+   - Electronic signature and identity verification compliance
+
+4. **DATA SECURITY & PII PROTECTION**:
+   - How to handle Personally Identifiable Information (PII) when using AI tools
+   - Data residency requirements (Australian data sovereignty)
+   - Encryption at rest and in transit recommendations
+   - Secure document autofill from data repositories — architecture for AI-driven contract population without exposing PII to third-party AI
+   - Role-based access control (RBAC) for sensitive data
+   - Data Loss Prevention (DLP) strategy
+   - Recommended secure vault / secrets management
+
+5. **RECOMMENDED ARCHITECTURE**:
+   - Frontend framework and why
+   - Backend/API layer
+   - Database with data classification tiers
+   - Hosting (consider data residency)
+   - Key integrations mapped to specific opportunities
+   - AI/ML pipeline architecture — how to use AI for document processing while keeping PII secure (e.g. tokenisation, on-premise models, redaction before API calls)
+
+6. **IMPLEMENTATION ROADMAP**:
+   - Phase 1 quick wins (tools that can be deployed in weeks)
+   - Phase 2 core platform build
+   - Phase 3 advanced automation and AI
+   - Migration strategy from existing tools`;
+
+      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: "You are a senior solutions architect specialising in business automation, compliance, and secure data architecture. Be extremely specific — name actual products, vendors, and pricing tiers. Consider the client's existing tools and regional market. Always address data security and PII protection." },
+            { role: "user", content: techPrompt },
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "recommend_tech_stack",
+              description: "Provide a comprehensive tech stack recommendation with compliance, security, and market analysis",
+              parameters: {
+                type: "object",
+                properties: {
+                  existing_tools_audit: {
+                    type: "array",
+                    description: "Audit of each tool the client currently uses",
+                    items: {
+                      type: "object",
+                      properties: {
+                        tool_name: { type: "string" },
+                        current_use: { type: "string" },
+                        verdict: { type: "string", enum: ["keep", "replace", "integrate", "enhance"] },
+                        reasoning: { type: "string" },
+                        integration_notes: { type: "string" },
+                      },
+                      required: ["tool_name", "verdict", "reasoning"],
+                    },
+                  },
+                  recommended_tools: {
+                    type: "array",
+                    description: "Market-researched tool recommendations for each need",
+                    items: {
+                      type: "object",
+                      properties: {
+                        category: { type: "string", description: "e.g. CRM, Document Automation, AML/KYC, etc." },
+                        primary_recommendation: { type: "string" },
+                        alternatives: { type: "string", description: "2-3 alternatives with brief comparison" },
+                        estimated_cost: { type: "string" },
+                        integration_complexity: { type: "string", enum: ["low", "medium", "high"] },
+                      },
+                      required: ["category", "primary_recommendation", "alternatives"],
+                    },
+                  },
+                  compliance: {
+                    type: "object",
+                    properties: {
+                      aml_strategy: { type: "string", description: "AML/KYC approach and recommended tools" },
+                      privacy_requirements: { type: "string", description: "Privacy act compliance approach" },
+                      industry_regulations: { type: "string", description: "Industry-specific regulatory needs" },
+                      audit_trail: { type: "string", description: "Record-keeping and audit approach" },
+                    },
+                    required: ["aml_strategy", "privacy_requirements"],
+                  },
+                  data_security: {
+                    type: "object",
+                    properties: {
+                      pii_handling: { type: "string", description: "Strategy for PII when using AI tools — tokenisation, redaction, on-prem models" },
+                      data_residency: { type: "string", description: "Data sovereignty and hosting location" },
+                      encryption: { type: "string", description: "Encryption strategy at rest and in transit" },
+                      ai_document_pipeline: { type: "string", description: "How to securely auto-fill contracts from data repos using AI without PII exposure" },
+                      rbac_strategy: { type: "string", description: "Role-based access control approach" },
+                      dlp_strategy: { type: "string", description: "Data loss prevention approach" },
+                    },
+                    required: ["pii_handling", "data_residency", "ai_document_pipeline"],
+                  },
+                  architecture: {
+                    type: "object",
+                    properties: {
+                      frontend: { type: "string" },
+                      backend: { type: "string" },
+                      database: { type: "string" },
+                      hosting: { type: "string" },
+                      integrations: { type: "string" },
+                      ai_ml_pipeline: { type: "string", description: "AI/ML architecture for document processing with PII protection" },
+                    },
+                    required: ["frontend", "backend", "database", "hosting", "integrations"],
+                  },
+                  implementation_roadmap: {
+                    type: "object",
+                    properties: {
+                      phase_1_quick_wins: { type: "string" },
+                      phase_2_core_build: { type: "string" },
+                      phase_3_advanced: { type: "string" },
+                      migration_strategy: { type: "string" },
+                    },
+                    required: ["phase_1_quick_wins", "phase_2_core_build", "phase_3_advanced"],
+                  },
+                  reasoning: { type: "string", description: "Executive summary of the tech stack strategy" },
+                },
+                required: ["existing_tools_audit", "recommended_tools", "compliance", "data_security", "architecture", "implementation_roadmap", "reasoning"],
+              },
+            },
+          }],
+          tool_choice: { type: "function", function: { name: "recommend_tech_stack" } },
+        }),
+      });
+
+      if (!aiRes.ok) {
+        const errText = await aiRes.text();
+        console.error("AI gateway error:", aiRes.status, errText);
+        if (aiRes.status === 429) throw new Error("Rate limited – please try again in a moment.");
+        if (aiRes.status === 402) throw new Error("AI credits exhausted – please top up in Settings.");
+        throw new Error(`AI analysis failed (${aiRes.status})`);
+      }
+
+      const aiData = await aiRes.json();
+      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+      if (!toolCall?.function?.arguments) throw new Error("No tech stack recommendation returned");
+
+      const techStack = JSON.parse(toolCall.function.arguments);
+      techStack.generated_at = new Date().toISOString();
+
+      // Save to assessment
+      await sb.from("roi_assessments")
+        .update({ tech_stack: techStack })
+        .eq("id", assessmentId);
+
+      return new Response(JSON.stringify({ success: true, techStack }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ────────────────────────────────────────────────────
+    // OPPORTUNITY ANALYSIS MODE (default)
+    // ────────────────────────────────────────────────────
+    const prompt = `You are a business automation consultant for 5to10X. Analyze this client's data and identify the TOP 10 automation/efficiency opportunities.
+
+${hasTranscripts ? `⚠️ PRIORITY DATA SOURCE — INTERVIEW TRANSCRIPTS:
+The client's own words from recorded interviews are the MOST IMPORTANT data source. Their spoken priorities, frustrations, and goals should HEAVILY influence your analysis and ranking. Quote specific statements where relevant.` : ''}
+
+${clientContext}
 
 Based on ALL available data (prioritising the client's own spoken words from transcripts when available), identify the opportunities ranked by potential impact (time saved, revenue gained, cost reduced, risk mitigated).
 
@@ -127,9 +345,6 @@ For each opportunity provide:
 When transcript data is available, the client's stated priorities and pain points should drive the ranking — not just the biggest dollar value. What the client cares about most should appear first.
 
 Return the TOP 5 as "big_hits" and the NEXT 5 as "quick_wins".`;
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
