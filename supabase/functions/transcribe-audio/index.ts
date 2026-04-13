@@ -115,9 +115,11 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
     }
 
     const result = await response.json();
+    console.log('AI response status:', response.status, 'finish_reason:', result.choices?.[0]?.finish_reason);
     const transcript = result.choices?.[0]?.message?.content || '';
 
     if (!transcript) {
+      console.error('Empty transcript. Full response:', JSON.stringify(result).substring(0, 500));
       throw new Error('No transcript generated from audio');
     }
 
