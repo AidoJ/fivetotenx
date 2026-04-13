@@ -323,6 +323,133 @@ Perform a THOROUGH technology analysis covering:
     }
 
     // ────────────────────────────────────────────────────
+    // EMAIL DRAFT MODE
+    // ────────────────────────────────────────────────────
+    if (mode === "email_draft") {
+      const { templateKey } = await req.clone().json().catch(() => ({}));
+      const analysisData = (assessment.discovery_answers as any)?._analysis;
+      const techStackData = assessment.tech_stack as any || {};
+
+      const templatePrompts: Record<string, string> = {
+        post_interview_thanks: `Write a professional but warm thank-you email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name} after a discovery interview.
+
+The email should:
+1. Thank them for their time and openness in discussing their business
+2. Reference 2-3 SPECIFIC points they raised in the interview (quote them if transcripts available)
+3. List clear ACTION ITEMS / COMMITMENTS from both parties:
+   - What WE (5to10X) committed to do next (e.g. "We will prepare a detailed analysis of…", "We will send through…")
+   - What THEY committed to provide (e.g. "You mentioned you'd send across…", "You'll check with your team about…")
+4. Set expectations for next steps and timeline
+5. Keep the tone professional yet personable — like a colleague, not a sales pitch
+
+Format as clean HTML email with proper paragraphs. Use a simple action items table or bullet list for commitments. Include a brief sign-off.`,
+
+        key_findings_proposal: `Write a professional email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name} presenting key findings from our analysis and proposing Phase 1.
+
+The email should:
+1. Open by referencing their key priorities and pain points (from transcripts/discovery)
+2. Present 3-5 KEY FINDINGS that are most important TO THE CLIENT (not just highest $ value — what they said matters most)
+3. For each finding, briefly explain: the problem, the impact, and what we'd build to solve it
+4. Present a clear PRIMARY GOAL for the engagement
+5. Detail PHASE 1 of the proposed build:
+   - What's included in Phase 1
+   - Expected timeline
+   - Key deliverables
+   - How it addresses their top priorities
+6. If tech stack analysis is available, mention key technology choices that support their needs
+7. End with a clear call-to-action (book a call to discuss, or confirm to proceed)
+
+Format as clean HTML with sections, using bold headings. Make it scannable. Include a "What's Next" section at the end.`,
+
+        project_kickoff: `Write a project kickoff email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name} confirming the engagement is starting.
+
+The email should:
+1. Express excitement about working together
+2. Confirm the agreed scope and primary objectives
+3. Outline the project timeline with key milestones
+4. Introduce the team (Aidan as CTO leading tech, Eoghan as CEO overseeing delivery)
+5. List immediate next steps (what happens this week/next week)
+6. Set communication expectations (how often updates, preferred channels)
+7. Note any items needed from the client to get started
+
+Format as clean HTML with a milestone timeline and clear action items.`,
+
+        progress_update: `Write a progress update email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name}.
+
+The email should:
+1. Summarise what has been delivered/completed since last update
+2. Show progress against the overall plan (reference Phase 1 objectives)
+3. Highlight any wins or positive outcomes already visible
+4. Note what's coming next (next sprint/phase priorities)
+5. Flag any blockers or decisions needed from the client
+6. Keep it concise but substantive — the client should feel informed and confident
+
+Format as clean HTML with a "Completed", "In Progress", and "Coming Next" structure.`,
+      };
+
+      const emailPrompt = templatePrompts[templateKey] || templatePrompts.post_interview_thanks;
+
+      const fullPrompt = `${emailPrompt}
+
+${clientContext}
+
+${analysisData ? `\nOPPORTUNITY ANALYSIS:
+Summary: ${analysisData.summary || 'N/A'}
+Top opportunities: ${(analysisData.big_hits || []).map((h: any) => `• ${h.title}: ${h.explanation} → ${h.recommendation}`).join('\n')}` : ''}
+
+${Object.keys(techStackData).length > 1 ? `\nTECH STACK ANALYSIS:
+${techStackData.reasoning || 'N/A'}
+Phase 1: ${techStackData.implementation_roadmap?.phase_1_quick_wins || 'N/A'}` : ''}`;
+
+      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: "You are a senior business consultant drafting client emails on behalf of Aidan Leonard, Co-Founder & CTO at 5to10X. Write in a professional, warm, direct tone. Be specific — reference actual data, quotes, and findings. Never be generic." },
+            { role: "user", content: fullPrompt },
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "draft_email",
+              description: "Generate a client email draft",
+              parameters: {
+                type: "object",
+                properties: {
+                  subject: { type: "string", description: "Email subject line — concise, specific, professional" },
+                  body: { type: "string", description: "Full email HTML body. Use clean HTML: <p>, <strong>, <ul>/<li>, <table> for action items. No inline styles on body — keep it simple and readable in any email client. Sign off as Aidan Leonard, Co-Founder & CTO, 5to10X." },
+                },
+                required: ["subject", "body"],
+              },
+            },
+          }],
+          tool_choice: { type: "function", function: { name: "draft_email" } },
+        }),
+      });
+
+      if (!aiRes.ok) {
+        const errText = await aiRes.text();
+        console.error("AI gateway error:", aiRes.status, errText);
+        throw new Error(`Email draft generation failed (${aiRes.status})`);
+      }
+
+      const aiData = await aiRes.json();
+      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+      if (!toolCall?.function?.arguments) throw new Error("No email draft returned");
+
+      const email = JSON.parse(toolCall.function.arguments);
+
+      return new Response(JSON.stringify({ success: true, email }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ────────────────────────────────────────────────────
     // OPPORTUNITY ANALYSIS MODE (default)
     // ────────────────────────────────────────────────────
     const prompt = `You are a business automation consultant for 5to10X. Analyze this client's data and identify the TOP 10 automation/efficiency opportunities.

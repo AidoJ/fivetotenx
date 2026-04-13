@@ -19,6 +19,7 @@ import DiscoveryAnswersViewer from '@/components/admin/DiscoveryAnswersViewer';
 import OpportunityAnalysis from '@/components/admin/OpportunityAnalysis';
 import TimeTracker from '@/components/admin/TimeTracker';
 import TechStackPanel from '@/components/admin/TechStackPanel';
+import CommsPanel from '@/components/admin/CommsPanel';
 
 type Assessment = Tables<'roi_assessments'>;
 
@@ -198,6 +199,9 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                 </TabsTrigger>
                 <TabsTrigger value="tech_stack" className="gap-1.5 text-xs">
                   <Zap className="w-3.5 h-3.5" /> Tech Stack
+                </TabsTrigger>
+                <TabsTrigger value="comms" className="gap-1.5 text-xs">
+                  <Send className="w-3.5 h-3.5" /> Comms
                 </TabsTrigger>
                 <TabsTrigger value="time" className="gap-1.5 text-xs">
                   <Clock className="w-3.5 h-3.5" /> Time
@@ -398,6 +402,11 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                     techStack={((lead as any).tech_stack && Object.keys((lead as any).tech_stack).length > 0) ? (lead as any).tech_stack : null}
                     onUpdate={(stack) => setLead({ ...lead, tech_stack: stack } as any)}
                   />
+                </TabsContent>
+
+                {/* ── COMMS TAB ── */}
+                <TabsContent value="comms" className="mt-4">
+                  <CommsPanel assessmentId={assessmentId} lead={lead} />
                 </TabsContent>
 
                 {/* ── TIME TAB ── */}
