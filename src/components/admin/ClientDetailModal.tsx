@@ -334,7 +334,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                             </div>
                           );
                         })}
-                        ))}
+                        
                       </div>
                     )}
 
