@@ -87,7 +87,16 @@ serve(async (req) => {
       }
     }
 
+    const hasTranscripts = !!transcriptTexts;
+
     const prompt = `You are a business automation consultant for 5to10X. Analyze this client's data and identify the TOP 10 automation/efficiency opportunities.
+
+${hasTranscripts ? `⚠️ PRIORITY DATA SOURCE — INTERVIEW TRANSCRIPTS:
+The client's own words from recorded interviews are the MOST IMPORTANT data source. Their spoken priorities, frustrations, and goals should HEAVILY influence your analysis and ranking. Quote specific statements where relevant.
+
+${transcriptTexts}
+
+---` : ''}
 
 CLIENT PROFILE:
 - Business: ${assessment.business_name || formData.businessName || 'Unknown'}
@@ -103,10 +112,9 @@ ${qaPairs.length > 0 ? qaPairs.join("\n\n") : "No questionnaire responses availa
 AI-EXTRACTED DISCOVERY ANSWERS:
 ${discoveryPairs.length > 0 ? discoveryPairs.join("\n\n") : "No extracted answers available."}
 
-INTERVIEW TRANSCRIPTS:
-${transcriptTexts || "No transcripts available."}
+${!hasTranscripts ? "INTERVIEW TRANSCRIPTS:\nNo transcripts available — analysis is based on form data and questionnaire responses only. Results may be less precise." : ''}
 
-Based on ALL available data, identify the opportunities ranked by potential impact (time saved, revenue gained, cost reduced, risk mitigated).
+Based on ALL available data (prioritising the client's own spoken words from transcripts when available), identify the opportunities ranked by potential impact (time saved, revenue gained, cost reduced, risk mitigated).`;
 
 For each opportunity provide:
 - A clear title (max 8 words)
