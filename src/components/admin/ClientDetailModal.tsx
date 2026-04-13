@@ -20,6 +20,7 @@ import OpportunityAnalysis from '@/components/admin/OpportunityAnalysis';
 import TimeTracker from '@/components/admin/TimeTracker';
 import TechStackPanel from '@/components/admin/TechStackPanel';
 import CommsPanel from '@/components/admin/CommsPanel';
+import ArtifactsPanel from '@/components/admin/ArtifactsPanel';
 
 type Assessment = Tables<'roi_assessments'>;
 
@@ -325,6 +326,9 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                         
                       </div>
                     )}
+
+                    {/* Artifacts */}
+                    <ArtifactsPanel assessmentId={assessmentId} />
 
                     {/* AI-extracted answers */}
                     <DiscoveryAnswersViewer
