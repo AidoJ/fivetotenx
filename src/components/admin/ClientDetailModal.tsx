@@ -289,25 +289,20 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                         {interviews.filter((i: any) => i.transcript).map((interview: any) => {
                           const rawText: string = interview.transcript || '';
                           
-                          // Step 1: Try splitting on speaker labels first
-                          const speakerPattern = /(?=(?:Speaker\s*\d*|Interviewer|Interviewee|Host|Guest|Aidan|Eoghan|Julia|Owen|Q|A)\s*[:—-])/gi;
-                          let paragraphs = rawText.split(speakerPattern).map((p: string) => p.trim()).filter((p: string) => p.length > 0);
+                          // Split on existing newlines first
+                          let chunks = rawText.split(/\n+/).map((p: string) => p.trim()).filter((p: string) => p.length > 0);
                           
-                          // Step 2: If that didn't produce multiple segments, try newlines (single or double)
-                          if (paragraphs.length <= 1) {
-                            paragraphs = rawText.split(/\n+/).map((p: string) => p.trim()).filter((p: string) => p.length > 0);
-                          }
-                          
-                          // Step 3: For any paragraph that's still very long (>500 chars), auto-split every 3 sentences
+                          // Then break any long chunks into ~3 sentence paragraphs
                           const formatted: string[] = [];
-                          for (const para of paragraphs) {
-                            if (para.length > 500) {
-                              const sentences = para.match(/[^.!?]*[.!?]+(?:\s|$)/g) || [para];
+                          for (const chunk of chunks) {
+                            if (chunk.length > 300) {
+                              const sentences = chunk.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [chunk];
                               for (let i = 0; i < sentences.length; i += 3) {
-                                formatted.push(sentences.slice(i, i + 3).join('').trim());
+                                const group = sentences.slice(i, i + 3).join('').trim();
+                                if (group) formatted.push(group);
                               }
                             } else {
-                              formatted.push(para);
+                              formatted.push(chunk);
                             }
                           }
 
@@ -317,26 +312,12 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                                 <h4 className="text-xs font-bold text-foreground">{interview.title}</h4>
                                 <span className="text-[10px] text-muted-foreground">{new Date(interview.created_at).toLocaleDateString()}</span>
                               </div>
-                              <div className="max-h-[500px] overflow-y-auto space-y-3 pr-2">
-                                {formatted.map((para: string, idx: number) => {
-                                  // Detect speaker labels and style them
-                                  const speakerMatch = para.match(/^(Speaker\s*\d*|Interviewer|Interviewee|Host|Guest|Aidan|Eoghan|Julia|Owen|Q|A)\s*[:—-]\s*/i);
-                                  if (speakerMatch) {
-                                    const speaker = speakerMatch[1];
-                                    const content = para.slice(speakerMatch[0].length);
-                                    return (
-                                      <div key={idx} className="text-xs text-foreground/80 leading-relaxed">
-                                        <span className="font-semibold text-primary text-[11px]">{speaker}:</span>{' '}
-                                        {content}
-                                      </div>
-                                    );
-                                  }
-                                  return (
-                                    <p key={idx} className="text-xs text-foreground/80 leading-relaxed">
-                                      {para}
-                                    </p>
-                                  );
-                                })}
+                              <div className="max-h-[500px] overflow-y-auto space-y-4 pr-2">
+                                {formatted.map((para: string, idx: number) => (
+                                  <p key={idx} className="text-xs text-foreground/80 leading-relaxed">
+                                  {para}
+                                </p>
+                                ))}
                               </div>
                             </div>
                           );
