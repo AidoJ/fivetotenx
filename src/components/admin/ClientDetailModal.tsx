@@ -20,6 +20,7 @@ import OpportunityAnalysis from '@/components/admin/OpportunityAnalysis';
 import TimeTracker from '@/components/admin/TimeTracker';
 import TechStackPanel from '@/components/admin/TechStackPanel';
 import CommsPanel from '@/components/admin/CommsPanel';
+import ArtifactsPanel from '@/components/admin/ArtifactsPanel';
 
 type Assessment = Tables<'roi_assessments'>;
 
