@@ -367,7 +367,7 @@ The email should:
 1. Express excitement about working together
 2. Confirm the agreed scope and primary objectives
 3. Outline the project timeline with key milestones
-4. Introduce the team (Aidan as CTO leading tech, Eoghan as CEO overseeing delivery)
+4. Introduce the team (Aidan as Business Analyst leading strategy, Eoghan as Engineering Build Advisor leading the technical build)
 5. List immediate next steps (what happens this week/next week)
 6. Set communication expectations (how often updates, preferred channels)
 7. Note any items needed from the client to get started
