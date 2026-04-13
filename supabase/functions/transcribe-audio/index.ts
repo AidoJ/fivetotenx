@@ -5,6 +5,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+function getMimeType(url: string): string {
+  const lower = url.toLowerCase();
+  if (lower.includes('.mp3')) return 'audio/mp3';
+  if (lower.includes('.m4a')) return 'audio/mp4';
+  if (lower.includes('.wav')) return 'audio/wav';
+  if (lower.includes('.ogg')) return 'audio/ogg';
+  if (lower.includes('.webm')) return 'audio/webm';
+  return 'audio/mp3';
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -22,10 +32,29 @@ Deno.serve(async (req) => {
     const { interviewId, audioUrl } = await req.json();
     if (!interviewId || !audioUrl) throw new Error('interviewId and audioUrl are required');
 
-    // Instead of downloading + base64 encoding the full file (which OOMs),
-    // pass the public URL directly to Gemini's native API which supports audio URLs.
-    // We use the Gemini REST API directly since the OpenAI-compat gateway
-    // doesn't support audio URLs in image_url fields.
+    // Download the audio file and convert to base64 data URL
+    console.log('Downloading audio from:', audioUrl);
+    const audioResponse = await fetch(audioUrl);
+    if (!audioResponse.ok) throw new Error(`Failed to download audio: ${audioResponse.status}`);
+
+    const audioBytes = new Uint8Array(await audioResponse.arrayBuffer());
+    console.log(`Audio size: ${(audioBytes.length / 1024 / 1024).toFixed(2)} MB`);
+
+    if (audioBytes.length > 25 * 1024 * 1024) {
+      throw new Error('Audio file too large (>25MB). Please compress and re-upload.');
+    }
+
+    // Chunked base64 encoding to avoid memory spikes
+    let base64 = '';
+    const CHUNK = 32768;
+    for (let i = 0; i < audioBytes.length; i += CHUNK) {
+      const chunk = audioBytes.subarray(i, Math.min(i + CHUNK, audioBytes.length));
+      base64 += btoa(String.fromCharCode(...chunk));
+    }
+
+    const mimeType = getMimeType(audioUrl);
+    const dataUrl = `data:${mimeType};base64,${base64}`;
+    console.log('Base64 encoding complete, sending to AI gateway...');
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -53,7 +82,7 @@ If there are key topics or action items mentioned, add a brief "KEY POINTS:" sec
               {
                 type: 'image_url',
                 image_url: {
-                  url: audioUrl,
+                  url: dataUrl,
                 }
               }
             ]
