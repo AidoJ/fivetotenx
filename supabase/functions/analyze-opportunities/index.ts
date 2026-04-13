@@ -87,7 +87,16 @@ serve(async (req) => {
       }
     }
 
+    const hasTranscripts = !!transcriptTexts;
+
     const prompt = `You are a business automation consultant for 5to10X. Analyze this client's data and identify the TOP 10 automation/efficiency opportunities.
+
+${hasTranscripts ? `⚠️ PRIORITY DATA SOURCE — INTERVIEW TRANSCRIPTS:
+The client's own words from recorded interviews are the MOST IMPORTANT data source. Their spoken priorities, frustrations, and goals should HEAVILY influence your analysis and ranking. Quote specific statements where relevant.
+
+${transcriptTexts}
+
+---` : ''}
 
 CLIENT PROFILE:
 - Business: ${assessment.business_name || formData.businessName || 'Unknown'}
@@ -103,18 +112,19 @@ ${qaPairs.length > 0 ? qaPairs.join("\n\n") : "No questionnaire responses availa
 AI-EXTRACTED DISCOVERY ANSWERS:
 ${discoveryPairs.length > 0 ? discoveryPairs.join("\n\n") : "No extracted answers available."}
 
-INTERVIEW TRANSCRIPTS:
-${transcriptTexts || "No transcripts available."}
+${!hasTranscripts ? "INTERVIEW TRANSCRIPTS:\nNo transcripts available — analysis is based on form data and questionnaire responses only. Results may be less precise." : ''}
 
-Based on ALL available data, identify the opportunities ranked by potential impact (time saved, revenue gained, cost reduced, risk mitigated).
+Based on ALL available data (prioritising the client's own spoken words from transcripts when available), identify the opportunities ranked by potential impact (time saved, revenue gained, cost reduced, risk mitigated).
 
 For each opportunity provide:
 - A clear title (max 8 words)
 - Impact category: "time_savings", "revenue_growth", "cost_reduction", "risk_mitigation", or "customer_experience"
 - Estimated annual impact in dollars (be specific based on their numbers)
 - Implementation difficulty: "easy", "medium", "hard"  
-- A 2-3 sentence explanation of the problem and how automation solves it
+- A 2-3 sentence explanation of the problem and how automation solves it. If the client mentioned this issue in their interview, quote their words.
 - A specific recommendation of what to build/automate
+
+When transcript data is available, the client's stated priorities and pain points should drive the ranking — not just the biggest dollar value. What the client cares about most should appear first.
 
 Return the TOP 5 as "big_hits" and the NEXT 5 as "quick_wins".`;
 

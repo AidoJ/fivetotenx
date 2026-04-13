@@ -1099,6 +1099,15 @@ const Admin = () => {
     let audioUrl: string | null = null;
 
     if (audioFile) {
+      const fileSizeMB = audioFile.size / (1024 * 1024);
+      if (fileSizeMB > 25) {
+        toast({ 
+          title: 'File too large', 
+          description: `${fileSizeMB.toFixed(0)}MB exceeds the 25MB limit. Please use Zoom's "Audio Only" (.m4a) export or compress the file.`, 
+          variant: 'destructive' 
+        });
+        return;
+      }
       const fileName = `${assessmentId}/${Date.now()}-${audioFile.name}`;
       const { error: uploadErr } = await supabase.storage
         .from('interview-audio')
