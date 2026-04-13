@@ -331,7 +331,7 @@ Perform a THOROUGH technology analysis covering:
       const techStackData = assessment.tech_stack as any || {};
 
       const templatePrompts: Record<string, string> = {
-        post_interview_thanks: `Write a professional but warm thank-you email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name} after a discovery interview.
+        post_interview_thanks: `Write a professional but warm thank-you email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} after a discovery interview.
 
 The email should:
 1. Thank them for their time and openness in discussing their business
@@ -344,7 +344,7 @@ The email should:
 
 Format as clean HTML email with proper paragraphs. Use a simple action items table or bullet list for commitments. Include a brief sign-off.`,
 
-        key_findings_proposal: `Write a professional email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name} presenting key findings from our analysis and proposing Phase 1.
+        key_findings_proposal: `Write a professional email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} presenting key findings from our analysis and proposing Phase 1.
 
 The email should:
 1. Open by referencing their key priorities and pain points (from transcripts/discovery)
@@ -361,20 +361,20 @@ The email should:
 
 Format as clean HTML with sections, using bold headings. Make it scannable. Include a "What's Next" section at the end.`,
 
-        project_kickoff: `Write a project kickoff email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name} confirming the engagement is starting.
+        project_kickoff: `Write a project kickoff email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} confirming the engagement is starting.
 
 The email should:
 1. Express excitement about working together
 2. Confirm the agreed scope and primary objectives
 3. Outline the project timeline with key milestones
-4. Introduce the team (Aidan as CTO leading tech, Eoghan as CEO overseeing delivery)
+4. Introduce the team (Aidan as Business Analyst leading strategy, Eoghan as Engineering Build Advisor leading the technical build)
 5. List immediate next steps (what happens this week/next week)
 6. Set communication expectations (how often updates, preferred channels)
 7. Note any items needed from the client to get started
 
 Format as clean HTML with a milestone timeline and clear action items.`,
 
-        progress_update: `Write a progress update email from Aidan Leonard (Co-Founder & CTO at 5to10X) to ${assessment.contact_name}.
+        progress_update: `Write a progress update email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name}.
 
 The email should:
 1. Summarise what has been delivered/completed since last update
@@ -410,7 +410,7 @@ Phase 1: ${techStackData.implementation_roadmap?.phase_1_quick_wins || 'N/A'}` :
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: `You are a senior business consultant drafting client emails on behalf of Aidan Leonard, Co-Founder & CTO at 5to10X. Write in a professional, warm, direct tone. Be specific — reference actual data, quotes, and findings. Never be generic.
+            { role: "system", content: `You are a senior business consultant drafting client emails on behalf of Aidan Leonard, Co-Founder & Business Analyst at 5to10X. Write in a professional, warm, direct tone. Be specific — reference actual data, quotes, and findings. Never be generic.
 
 CRITICAL HTML FORMATTING RULES — follow these EVERY time:
 - Use proper HTML: <p>, <strong>, <ul>/<li>, <h3> for section headings.
@@ -421,7 +421,7 @@ CRITICAL HTML FORMATTING RULES — follow these EVERY time:
   </table>
 - Never use markdown tables — always HTML tables with inline styles.
 - Keep the same table structure across all drafts for consistency.
-- Sign off as: Aidan Leonard, Co-Founder & CTO, 5to10X.` },
+- Sign off as: Aidan Leonard, Co-Founder & Business Analyst, 5to10X.` },
             { role: "user", content: fullPrompt },
           ],
           tools: [{
@@ -433,7 +433,7 @@ CRITICAL HTML FORMATTING RULES — follow these EVERY time:
                 type: "object",
                 properties: {
                   subject: { type: "string", description: "Email subject line — concise, specific, professional" },
-                  body: { type: "string", description: "Full email HTML body. Use clean HTML: <p>, <strong>, <ul>/<li>, <table> for action items. No inline styles on body — keep it simple and readable in any email client. Sign off as Aidan Leonard, Co-Founder & CTO, 5to10X." },
+                  body: { type: "string", description: "Full email HTML body. Use clean HTML: <p>, <strong>, <ul>/<li>, <table> for action items. No inline styles on body — keep it simple and readable in any email client. Sign off as Aidan Leonard, Co-Founder & Business Analyst, 5to10X." },
                 },
                 required: ["subject", "body"],
               },

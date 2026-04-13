@@ -866,7 +866,7 @@ const CoFoundersSection = () => {
   const founders = [
   {
     name: 'Eoghan Leonard',
-    role: 'Co-Founder - Principle Engineer',
+    role: 'Co-Founder - Engineering Build Advisor',
     image: headshotEoghan,
     bio: 'Eoghan has deep experience across Snowflake, dbt, Salesforce, and Fivetran, and has spent his career solving the kinds of data problems that quietly slow businesses down and keep owners up at night. His focus is on helping growing businesses move from scattered spreadsheets and disconnected systems to data that is clear, reliable, and easy to use when making important decisions.\n\nHe specialises in building modern data platforms that simply work. Rather than just installing tools, Eoghan designs practical systems that bring together information from across the business — sales, operations, finance, and marketing — so owners and managers can see what\'s really happening without spending hours chasing numbers.\n\nHis client work includes companies such as David Jones, Isuzu, and Xero, where he has helped solve complex data challenges and turn raw information into insights that support better decisions.\n\nAcross every project, his approach stays the same: understand the business first, then build the technology to support it. The goal is simple — create data systems that run quietly in the background so business owners can spend less time worrying about reports and more time focusing on growth.'
   },
