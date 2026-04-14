@@ -21,6 +21,7 @@ import TimeTracker from '@/components/admin/TimeTracker';
 import TechStackPanel from '@/components/admin/TechStackPanel';
 import CommsPanel from '@/components/admin/CommsPanel';
 import ArtifactsPanel from '@/components/admin/ArtifactsPanel';
+import ScopeRefinement from '@/components/admin/ScopeRefinement';
 
 type Assessment = Tables<'roi_assessments'>;
 
