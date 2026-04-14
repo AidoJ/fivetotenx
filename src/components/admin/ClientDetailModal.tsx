@@ -6,7 +6,7 @@ import { useQuestionRecorder } from '@/hooks/useQuestionRecorder';
 import {
   X, Save, Loader2, Building2, Users, DollarSign, Target,
   Clock, Globe, TrendingUp, ShoppingCart, BarChart3, Zap, Mail, Phone,
-  MessageSquare, Sparkles, Mic, Square, Send, FileText, Radar,
+  MessageSquare, Sparkles, Mic, Square, Send, FileText, Radar, Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
