@@ -380,6 +380,59 @@ export type Database = {
           },
         ]
       }
+      refinement_questions: {
+        Row: {
+          answer: string | null
+          assessment_id: string
+          category: string
+          created_at: string
+          id: string
+          priority: string
+          question: string
+          sort_order: number
+          source_context: string | null
+          source_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          assessment_id: string
+          category?: string
+          created_at?: string
+          id?: string
+          priority?: string
+          question: string
+          sort_order?: number
+          source_context?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          assessment_id?: string
+          category?: string
+          created_at?: string
+          id?: string
+          priority?: string
+          question?: string
+          sort_order?: number
+          source_context?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refinement_questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roi_assessments: {
         Row: {
           business_name: string | null
