@@ -419,6 +419,11 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                   </div>
                 </TabsContent>
 
+                {/* ── SCOPE REFINEMENT TAB ── */}
+                <TabsContent value="refinement" className="mt-4">
+                  <ScopeRefinement assessmentId={assessmentId} />
+                </TabsContent>
+
                 {/* ── ANALYSIS TAB ── */}
                 <TabsContent value="analysis" className="mt-4">
                   <OpportunityAnalysis
