@@ -6,7 +6,7 @@ import { useQuestionRecorder } from '@/hooks/useQuestionRecorder';
 import {
   X, Save, Loader2, Building2, Users, DollarSign, Target,
   Clock, Globe, TrendingUp, ShoppingCart, BarChart3, Zap, Mail, Phone,
-  MessageSquare, Sparkles, Mic, Square, Send, FileText, Radar,
+  MessageSquare, Sparkles, Mic, Square, Send, FileText, Radar, Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,7 @@ import TimeTracker from '@/components/admin/TimeTracker';
 import TechStackPanel from '@/components/admin/TechStackPanel';
 import CommsPanel from '@/components/admin/CommsPanel';
 import ArtifactsPanel from '@/components/admin/ArtifactsPanel';
+import ScopeRefinement from '@/components/admin/ScopeRefinement';
 
 type Assessment = Tables<'roi_assessments'>;
 
@@ -194,6 +195,9 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                 </TabsTrigger>
                 <TabsTrigger value="discovery" className="gap-1.5 text-xs">
                   <MessageSquare className="w-3.5 h-3.5" /> Discovery
+                </TabsTrigger>
+                <TabsTrigger value="refinement" className="gap-1.5 text-xs">
+                  <Search className="w-3.5 h-3.5" /> Scope Refinement
                 </TabsTrigger>
                 <TabsTrigger value="analysis" className="gap-1.5 text-xs">
                   <Sparkles className="w-3.5 h-3.5" /> Analysis
@@ -413,6 +417,11 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                       </div>
                     )}
                   </div>
+                </TabsContent>
+
+                {/* ── SCOPE REFINEMENT TAB ── */}
+                <TabsContent value="refinement" className="mt-4">
+                  <ScopeRefinement assessmentId={assessmentId} />
                 </TabsContent>
 
                 {/* ── ANALYSIS TAB ── */}
