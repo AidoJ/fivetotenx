@@ -196,6 +196,9 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                 <TabsTrigger value="discovery" className="gap-1.5 text-xs">
                   <MessageSquare className="w-3.5 h-3.5" /> Discovery
                 </TabsTrigger>
+                <TabsTrigger value="refinement" className="gap-1.5 text-xs">
+                  <Search className="w-3.5 h-3.5" /> Scope Refinement
+                </TabsTrigger>
                 <TabsTrigger value="analysis" className="gap-1.5 text-xs">
                   <Sparkles className="w-3.5 h-3.5" /> Analysis
                 </TabsTrigger>
