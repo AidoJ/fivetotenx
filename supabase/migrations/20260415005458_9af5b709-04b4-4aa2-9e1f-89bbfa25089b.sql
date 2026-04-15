@@ -1,0 +1,1 @@
+ALTER TABLE public.refinement_tokens ADD COLUMN question_ids uuid[] NOT NULL DEFAULT '{}';
