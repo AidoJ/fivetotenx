@@ -32,6 +32,38 @@ interface Props {
   assessmentId: string;
 }
 
+interface CompletenessItem {
+  present: boolean;
+  detail: string;
+}
+
+interface ReviewedSources {
+  transcripts: number;
+  notes: number;
+  deep_dive: boolean;
+  artifacts: {
+    total: number;
+    text: number;
+    links: number;
+    files: number;
+    images_reviewed: number;
+    link_previews: number;
+    text_file_previews: number;
+  };
+}
+
+const hasMeaningfulData = (value: unknown): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.some(hasMeaningfulData);
+  if (typeof value === 'object') return Object.values(value as Record<string, unknown>).some(hasMeaningfulData);
+  return true;
+};
+
+const formatCount = (count: number, singular: string, plural = `${singular}s`) => (
+  `${count} ${count === 1 ? singular : plural}`
+);
+
 const PRIORITY_CONFIG: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   blocker: { color: 'text-red-500 bg-red-500/10 border-red-500/20', icon: XCircle, label: 'Blocker' },
   important: { color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', icon: AlertTriangle, label: 'Important' },
@@ -60,6 +92,7 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [readiness, setReadiness] = useState<number | null>(null);
+  const [reviewedSources, setReviewedSources] = useState<ReviewedSources | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -67,7 +100,7 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
   const [answerDraft, setAnswerDraft] = useState('');
 
   // Data completeness check
-  const [completeness, setCompleteness] = useState<Record<string, boolean>>({});
+  const [completeness, setCompleteness] = useState<Record<string, CompletenessItem>>({});
 
   const loadQuestions = useCallback(async () => {
     const { data, error } = await supabase
@@ -85,21 +118,76 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
   }, [assessmentId]);
 
   const checkCompleteness = useCallback(async () => {
-    const [stRes, scopeRes, intRes, artRes, notesRes] = await Promise.all([
+    const [assessmentRes, stRes, scopeRes, intRes, artRes, notesRes, deepDiveRes] = await Promise.all([
+      supabase.from('roi_assessments').select('form_data, discovery_ready').eq('id', assessmentId).single(),
       supabase.from('straight_talk_responses').select('id').eq('assessment_id', assessmentId).limit(1),
       supabase.from('scoping_responses').select('id').eq('assessment_id', assessmentId).limit(1),
-      supabase.from('client_interviews').select('id, transcript').eq('assessment_id', assessmentId),
-      supabase.from('client_artifacts').select('id').eq('assessment_id', assessmentId),
+      supabase.from('client_interviews').select('id, transcript, content, call_completed').eq('assessment_id', assessmentId),
+      supabase.from('client_artifacts').select('id, artifact_type').eq('assessment_id', assessmentId),
       supabase.from('lead_notes').select('id').eq('assessment_id', assessmentId),
+      supabase.from('deep_dive_submissions').select('id').eq('assessment_id', assessmentId).limit(1),
     ]);
 
+    const assessment = assessmentRes.data as { form_data?: unknown; discovery_ready?: boolean | null } | null;
     const interviews = intRes.data || [];
+    const artifacts = artRes.data || [];
+    const notes = notesRes.data || [];
+    const hasTranscript = interviews.some((i: any) => Boolean(i.transcript?.trim()));
+    const hasInterviewContent = interviews.some((i: any) => i.call_completed || Boolean(i.transcript?.trim()) || Boolean(i.content?.trim()));
+    const realityCheckCaptured = hasMeaningfulData(assessment?.form_data) || (scopeRes.data?.length || 0) > 0;
+    const straightTalkCaptured = (stRes.data?.length || 0) > 0 || assessment?.discovery_ready === true || hasInterviewContent;
+
+    const artifactCounts = artifacts.reduce((acc: Record<string, number>, artifact: any) => {
+      const key = artifact.artifact_type || 'other';
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    const artifactDetailParts = [
+      artifactCounts.text ? formatCount(artifactCounts.text, 'note') : null,
+      artifactCounts.link ? formatCount(artifactCounts.link, 'link') : null,
+      artifactCounts.file ? formatCount(artifactCounts.file, 'file') : null,
+    ].filter(Boolean);
+
     setCompleteness({
-      'Reality Check™': (scopeRes.data?.length || 0) > 0,
-      'Straight Talk™': (stRes.data?.length || 0) > 0,
-      'Transcripts': interviews.some((i: any) => i.transcript),
-      'Artifacts': (artRes.data?.length || 0) > 0,
-      'Internal Notes': (notesRes.data?.length || 0) > 0,
+      'Reality Check™': {
+        present: realityCheckCaptured,
+        detail: realityCheckCaptured
+          ? (scopeRes.data?.length || 0) > 0
+            ? 'Industry questionnaire responses found'
+            : 'Assessment form data found'
+          : 'No assessment or industry responses found',
+      },
+      'Straight Talk™ / Call': {
+        present: straightTalkCaptured,
+        detail: hasTranscript
+          ? 'Transcript found, so the call is treated as completed'
+          : (stRes.data?.length || 0) > 0
+            ? 'Straight Talk™ responses found'
+            : hasInterviewContent
+              ? 'Interview record found'
+              : 'No questionnaire or call record found',
+      },
+      'Transcripts': {
+        present: hasTranscript,
+        detail: hasTranscript
+          ? formatCount(interviews.filter((i: any) => Boolean(i.transcript?.trim())).length, 'transcript')
+          : 'No transcript attached yet',
+      },
+      'Artifacts': {
+        present: artifacts.length > 0,
+        detail: artifacts.length > 0
+          ? artifactDetailParts.join(' • ')
+          : 'No notes, links, or files added',
+      },
+      'Internal Notes': {
+        present: notes.length > 0,
+        detail: notes.length > 0 ? formatCount(notes.length, 'note') : 'No internal notes yet',
+      },
+      'Deep Dive': {
+        present: (deepDiveRes.data?.length || 0) > 0,
+        detail: (deepDiveRes.data?.length || 0) > 0 ? 'Submission found' : 'No Deep Dive submission',
+      },
     });
   }, [assessmentId]);
 
@@ -119,7 +207,9 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
 
       setSummary(data.summary);
       setReadiness(data.build_readiness_percent);
+      setReviewedSources(data.reviewed_sources ?? null);
       await loadQuestions();
+      await checkCompleteness();
       toast({ title: `Scope refinement complete — ${data.questions_count} gaps identified` });
     } catch (err: any) {
       toast({ title: 'Analysis failed', description: err.message, variant: 'destructive' });
@@ -133,6 +223,7 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
     setQuestions([]);
     setSummary(null);
     setReadiness(null);
+    setReviewedSources(null);
     await runAnalysis();
   };
 
@@ -193,14 +284,17 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
           <Search className="w-4 h-4 text-primary" /> Data Completeness Audit
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {Object.entries(completeness).map(([label, present]) => (
-            <div key={label} className={`rounded-lg p-3 border text-center ${present ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
+          {Object.entries(completeness).map(([label, item]) => (
+            <div key={label} className={`rounded-lg p-3 border text-center ${item.present ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
               <div className="flex items-center justify-center gap-1.5 mb-1">
-                {present ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <XCircle className="w-4 h-4 text-red-400" />}
+                {item.present ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <XCircle className="w-4 h-4 text-red-400" />}
               </div>
               <p className="text-[10px] font-medium text-foreground">{label}</p>
-              <p className={`text-[9px] ${present ? 'text-green-600' : 'text-red-400'}`}>
-                {present ? 'Available' : 'Missing'}
+              <p className={`text-[9px] ${item.present ? 'text-green-600' : 'text-red-400'}`}>
+                {item.present ? 'Available' : 'Missing'}
+              </p>
+              <p className="mt-1 text-[9px] leading-snug text-muted-foreground">
+                {item.detail}
               </p>
             </div>
           ))}
@@ -221,7 +315,7 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
             )}
             <Button size="sm" className="text-xs gap-1.5" onClick={runAnalysis} disabled={analyzing}>
               {analyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-              {questions.length > 0 ? 'Add More Gaps' : 'Run Gap Analysis'}
+              {questions.length > 0 ? 'Refresh Analysis' : 'Run Gap Analysis'}
             </Button>
           </div>
         </div>
@@ -242,6 +336,21 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
         {summary && (
           <div className="rounded-lg bg-secondary/50 p-4 border border-border">
             <p className="text-xs text-foreground/80 leading-relaxed">{summary}</p>
+            {reviewedSources && (
+              <div className="mt-3 rounded-lg border border-border bg-background/60 p-3 text-[11px] text-muted-foreground">
+                Reviewed {formatCount(reviewedSources.transcripts, 'transcript')}, {formatCount(reviewedSources.notes, 'internal note')}, {formatCount(reviewedSources.artifacts.total, 'artifact')}
+                {reviewedSources.artifacts.total > 0 && (
+                  <span>
+                    {` (${reviewedSources.artifacts.text} notes, ${reviewedSources.artifacts.links} links, ${reviewedSources.artifacts.files} files`}
+                    {reviewedSources.artifacts.link_previews > 0 ? `, ${reviewedSources.artifacts.link_previews} fetched link previews` : ''}
+                    {reviewedSources.artifacts.text_file_previews > 0 ? `, ${reviewedSources.artifacts.text_file_previews} text-file previews` : ''}
+                    {reviewedSources.artifacts.images_reviewed > 0 ? `, ${reviewedSources.artifacts.images_reviewed} images reviewed` : ''}
+                    )
+                  </span>
+                )}
+                {reviewedSources.deep_dive ? ' • Deep Dive included' : ''}.
+              </div>
+            )}
           </div>
         )}
 
