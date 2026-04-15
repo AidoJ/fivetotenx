@@ -30,6 +30,7 @@ serve(async (req) => {
       .insert({
         assessment_id: assessmentId,
         questions_sent: questionIds.length,
+        question_ids: questionIds,
       })
       .select("token")
       .single();

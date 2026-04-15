@@ -27,6 +27,7 @@ interface TokenData {
   assessment_id: string;
   expires_at: string;
   used: boolean;
+  question_ids: string[];
 }
 
 const PRIORITY_CONFIG: Record<string, { color: string; icon: React.ElementType; label: string }> = {
@@ -78,12 +79,17 @@ const RefinementPortal: React.FC = () => {
       .single();
     if (assessment) setBusinessName((assessment as any).business_name || '');
 
-    // Fetch sent questions
+    // Fetch only questions linked to this token
+    const tokenQuestionIds = td.question_ids || [];
+    if (tokenQuestionIds.length === 0) {
+      setStatus('error');
+      return;
+    }
+
     const { data: qData } = await supabase
       .from('refinement_questions' as any)
       .select('*')
-      .eq('assessment_id', td.assessment_id)
-      .eq('sent_to_client', true)
+      .in('id', tokenQuestionIds)
       .order('sort_order');
 
     if (qData) {
