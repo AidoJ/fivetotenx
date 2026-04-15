@@ -105,8 +105,10 @@ serve(async (req) => {
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 32px 0;">
-              <a href="${portalUrl}" style="display: inline-block; background: linear-gradient(135deg, #6b46c1, #d63384); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-size: 15px; font-weight: 600; letter-spacing: 0.3px;">
-                Answer Questions →
+              <a href="${portalUrl}" style="display: inline-block; background-color: #6b46c1; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-size: 15px; font-weight: 600; letter-spacing: 0.3px; mso-padding-alt: 0; text-align: center;">
+                <!--[if mso]><i style="letter-spacing: 40px; mso-font-width: -100%; mso-text-raise: 30pt;">&nbsp;</i><![endif]-->
+                <span style="mso-text-raise: 15pt; color: #ffffff;">Answer Questions →</span>
+                <!--[if mso]><i style="letter-spacing: 40px; mso-font-width: -100%;">&nbsp;</i><![endif]-->
               </a>
             </div>
 
