@@ -1366,18 +1366,18 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-[1600px] mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="5to10X" className="h-12 w-auto" />
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <img src={logo} alt="5to10X" className="h-8 sm:h-12 w-auto" />
             <div>
-              <h1 className="text-base font-display font-bold text-foreground">Pipeline Dashboard</h1>
-              <p className="text-xs text-muted-foreground">{leads.length} leads · {qualifiedCount} qualified · {formatCurrency(totalImpact)} total pipeline</p>
+              <h1 className="text-sm sm:text-base font-display font-bold text-foreground">Pipeline Dashboard</h1>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">{leads.length} leads · {qualifiedCount} qualified · {formatCurrency(totalImpact)} total pipeline</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{session.user.email}</span>
-            <Button variant="outline" size="sm" onClick={fetchLeads}>Refresh</Button>
-            <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>Sign Out</Button>
+            <span className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-none">{session.user.email}</span>
+            <Button variant="outline" size="sm" className="text-xs h-7 sm:h-9" onClick={fetchLeads}>Refresh</Button>
+            <Button variant="ghost" size="sm" className="text-xs h-7 sm:h-9" onClick={() => supabase.auth.signOut()}>Sign Out</Button>
           </div>
         </div>
       </header>
