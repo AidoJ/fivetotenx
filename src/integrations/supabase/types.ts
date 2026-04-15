@@ -389,6 +389,7 @@ export type Database = {
           id: string
           priority: string
           question: string
+          sent_at: string | null
           sent_to_client: boolean
           sort_order: number
           source_context: string | null
@@ -404,6 +405,7 @@ export type Database = {
           id?: string
           priority?: string
           question: string
+          sent_at?: string | null
           sent_to_client?: boolean
           sort_order?: number
           source_context?: string | null
@@ -419,6 +421,7 @@ export type Database = {
           id?: string
           priority?: string
           question?: string
+          sent_at?: string | null
           sent_to_client?: boolean
           sort_order?: number
           source_context?: string | null
