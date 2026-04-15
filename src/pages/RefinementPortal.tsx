@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
-const LOGO_URL = 'https://hfszmulinpwzmroqemke.supabase.co/storage/v1/object/public/email-assets//logo-5to10x-dark.png';
+const LOGO_URL = 'https://hfszmulinpwzmroqemke.supabase.co/storage/v1/object/public/email-assets/logo-5to10x.png';
 
 const BRAND = {
   blue: '#1789CE',
@@ -46,14 +46,18 @@ const PRIORITY_CONFIG: Record<string, { bg: string; text: string; icon: React.El
 };
 
 const StatusScreen = ({ icon: Icon, iconBg, iconColor, title, subtitle }: { icon: React.ElementType; iconBg: string; iconColor: string; title: string; subtitle: string }) => (
-  <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
-    <div className="max-w-md text-center space-y-5">
-      <img src={LOGO_URL} alt="5to10X" className="h-8 mx-auto" />
-      <div className={`w-16 h-16 rounded-full mx-auto flex items-center justify-center ${iconBg}`}>
-        <Icon className={`w-8 h-8 ${iconColor}`} />
+  <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="bg-[#0f0a1e] px-6 py-4 flex justify-center">
+      <img src={LOGO_URL} alt="5to10X" className="h-8" />
+    </div>
+    <div className="flex-1 flex items-center justify-center p-6">
+      <div className="max-w-md text-center space-y-5">
+        <div className={`w-16 h-16 rounded-full mx-auto flex items-center justify-center ${iconBg}`}>
+          <Icon className={`w-8 h-8 ${iconColor}`} />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        <p className="text-gray-500 text-sm leading-relaxed">{subtitle}</p>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-      <p className="text-gray-500 text-sm leading-relaxed">{subtitle}</p>
     </div>
   </div>
 );
