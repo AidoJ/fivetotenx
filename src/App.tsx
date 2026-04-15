@@ -10,7 +10,7 @@ import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
 // ScopingQuestionnaire retired — Game Plan merged into Straight Talk
 import StraightTalk from "./pages/StraightTalk";
-import ClientDetail from "./pages/ClientDetail";
+import SelfInterview from "./pages/SelfInterview";
 import RefinementPortal from "./pages/RefinementPortal";
 
 const queryClient = new QueryClient();
