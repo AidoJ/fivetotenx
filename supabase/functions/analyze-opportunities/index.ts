@@ -25,20 +25,15 @@ serve(async (req) => {
       .single();
     if (aErr || !assessment) throw new Error("Assessment not found");
 
-    // Fetch straight talk responses
-    const { data: stData } = await sb
-      .from("straight_talk_responses")
-      .select("*")
-      .eq("assessment_id", assessmentId)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    // Fetch transcripts
-    const { data: interviews } = await sb
-      .from("client_interviews")
-      .select("transcript, title")
-      .eq("assessment_id", assessmentId)
-      .not("transcript", "is", null);
+    // Fetch all supplementary data in parallel
+    const [stRes, interviewRes, artifactRes, notesRes] = await Promise.all([
+      sb.from("straight_talk_responses").select("*").eq("assessment_id", assessmentId).order("created_at", { ascending: false }).limit(1),
+      sb.from("client_interviews").select("transcript, title").eq("assessment_id", assessmentId).not("transcript", "is", null),
+      sb.from("client_artifacts").select("*").eq("assessment_id", assessmentId),
+      sb.from("lead_notes").select("*").eq("assessment_id", assessmentId),
+    ]);
+    const stData = stRes.data;
+    const interviews = interviewRes.data;
 
     // Fetch questions for context
     const industryId = assessment.industry_id;
