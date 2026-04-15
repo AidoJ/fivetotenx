@@ -159,7 +159,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-6xl max-h-[92vh] overflow-hidden p-0 gap-0">
+      <DialogContent className="w-[95vw] max-w-6xl max-h-[92vh] overflow-hidden p-0 gap-0">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -167,14 +167,14 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
         ) : lead && formData ? (
           <div className="flex flex-col h-[92vh] max-h-[92vh]">
             {/* Header */}
-            <div className="flex items-center gap-4 px-6 py-4 border-b border-border bg-card shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-card shrink-0">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-foreground truncate">{lead.contact_name}</h2>
-                  {lead.business_name && <span className="text-sm text-muted-foreground">· {lead.business_name}</span>}
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <h2 className="text-base sm:text-lg font-bold text-foreground truncate">{lead.contact_name}</h2>
+                  {lead.business_name && <span className="text-xs sm:text-sm text-muted-foreground">· {lead.business_name}</span>}
                   <Badge variant="outline" className="text-[10px] capitalize">{lead.pipeline_stage.replace(/_/g, ' ')}</Badge>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-muted-foreground mt-0.5">
                   <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {lead.contact_email}</span>
                   {lead.contact_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {lead.contact_phone}</span>}
                   {lead.industry && <span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {lead.industry}</span>}
@@ -190,34 +190,36 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
 
             {/* Tabs Content */}
             <Tabs defaultValue="overview" className="flex-1 flex flex-col overflow-hidden">
-              <TabsList className="bg-secondary/50 p-1 mx-6 mt-4 shrink-0">
-                <TabsTrigger value="overview" className="gap-1.5 text-xs">
-                  <Radar className="w-3.5 h-3.5" /> Overview
-                </TabsTrigger>
-                <TabsTrigger value="discovery" className="gap-1.5 text-xs">
-                  <MessageSquare className="w-3.5 h-3.5" /> Discovery
-                </TabsTrigger>
-                <TabsTrigger value="refinement" className="gap-1.5 text-xs">
-                  <Search className="w-3.5 h-3.5" /> Scope Refinement
-                </TabsTrigger>
-                <TabsTrigger value="analysis" className="gap-1.5 text-xs">
-                  <Sparkles className="w-3.5 h-3.5" /> Analysis
-                </TabsTrigger>
-                <TabsTrigger value="proposal" className="gap-1.5 text-xs">
-                  <FileText className="w-3.5 h-3.5" /> Proposal
-                </TabsTrigger>
-                <TabsTrigger value="tech_stack" className="gap-1.5 text-xs">
-                  <Zap className="w-3.5 h-3.5" /> Tech Stack
-                </TabsTrigger>
-                <TabsTrigger value="comms" className="gap-1.5 text-xs">
-                  <Send className="w-3.5 h-3.5" /> Comms
-                </TabsTrigger>
-                <TabsTrigger value="time" className="gap-1.5 text-xs">
-                  <Clock className="w-3.5 h-3.5" /> Time
-                </TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto shrink-0 mx-2 sm:mx-6 mt-3 sm:mt-4">
+                <TabsList className="bg-secondary/50 p-1 inline-flex w-auto min-w-full sm:w-auto">
+                  <TabsTrigger value="overview" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <Radar className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Overview
+                  </TabsTrigger>
+                  <TabsTrigger value="discovery" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <MessageSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Discovery
+                  </TabsTrigger>
+                  <TabsTrigger value="refinement" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <Search className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Scope
+                  </TabsTrigger>
+                  <TabsTrigger value="analysis" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Analysis
+                  </TabsTrigger>
+                  <TabsTrigger value="proposal" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Proposal
+                  </TabsTrigger>
+                  <TabsTrigger value="tech_stack" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Tech
+                  </TabsTrigger>
+                  <TabsTrigger value="comms" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <Send className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Comms
+                  </TabsTrigger>
+                  <TabsTrigger value="time" className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
+                    <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Time
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-              <div className="flex-1 overflow-y-auto px-6 pb-6">
+              <div className="flex-1 overflow-y-auto px-3 sm:px-6 pb-6">
                 {/* ── OVERVIEW TAB ── */}
                 <TabsContent value="overview" className="mt-4">
                   <div className="space-y-6">
