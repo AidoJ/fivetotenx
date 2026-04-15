@@ -10,7 +10,6 @@ import Admin from "./pages/Admin";
 import Proposal from "./pages/Proposal";
 // ScopingQuestionnaire retired — Game Plan merged into Straight Talk
 import StraightTalk from "./pages/StraightTalk";
-import ClientDetail from "./pages/ClientDetail";
 import SelfInterview from "./pages/SelfInterview";
 import RefinementPortal from "./pages/RefinementPortal";
 
@@ -28,7 +27,6 @@ const App = () => (
           <Route path="/straight-talk" element={<StraightTalk />} />
           {/* /scoping route retired — Game Plan merged into Straight Talk */}
           <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/client/:id" element={<ClientDetail />} />
           <Route path="/proposal/:id" element={<Proposal />} />
           <Route path="/self-interview" element={<SelfInterview />} />
           <Route path="/refinement/:token" element={<RefinementPortal />} />
