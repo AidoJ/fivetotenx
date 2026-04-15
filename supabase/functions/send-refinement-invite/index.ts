@@ -70,10 +70,8 @@ serve(async (req) => {
       <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
         <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
           <!-- Header -->
-          <div style="background: linear-gradient(135deg, #6b46c1, #d63384); padding: 32px; text-align: center;">
-            <img src="https://hfszmulinpwzmroqemke.supabase.co/storage/v1/object/public/email-assets/logo-5to10x-white-strap.png" alt="5to10X" style="height: 40px; margin-bottom: 16px;" />
-            <h1 style="color: #ffffff; font-size: 20px; margin: 0; font-weight: 700;">Scope Refinement</h1>
-            <p style="color: rgba(255,255,255,0.85); font-size: 13px; margin: 8px 0 0;">We need a few more details</p>
+          <div style="background-color: #6b46c1; padding: 32px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0; font-weight: 700;">We need just a few more details</h1>
           </div>
 
           <!-- Body -->
