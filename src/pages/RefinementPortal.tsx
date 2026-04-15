@@ -175,6 +175,25 @@ const RefinementPortal: React.FC = () => {
         .update({ used: true } as any)
         .eq('token', token);
 
+      // Notify admin
+      const { data: assessment } = await supabase
+        .from('roi_assessments')
+        .select('contact_name, contact_email, business_name')
+        .eq('id', assessmentId)
+        .single();
+      if (assessment) {
+        await supabase.functions.invoke('notify-admin', {
+          body: {
+            eventType: 'refinement_submitted',
+            leadName: (assessment as any).contact_name,
+            leadEmail: (assessment as any).contact_email,
+            businessName: (assessment as any).business_name || businessName,
+            assessmentId,
+            details: { answeredCount, totalQuestions: questions.length },
+          },
+        });
+      }
+
       setSubmitted(true);
     } catch (err: any) {
       toast({ title: 'Submit failed', description: err.message, variant: 'destructive' });

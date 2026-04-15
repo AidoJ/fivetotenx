@@ -108,6 +108,7 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
   const [addingCustom, setAddingCustom] = useState(false);
   const [customQuestion, setCustomQuestion] = useState('');
   const [customCategory, setCustomCategory] = useState('General');
+  const [clientResponseInfo, setClientResponseInfo] = useState<{ answeredAt: string; answered: number; total: number } | null>(null);
 
   // Data completeness check
   const [completeness, setCompleteness] = useState<Record<string, CompletenessItem>>({});
@@ -119,10 +120,26 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
       .eq('assessment_id', assessmentId)
       .order('sort_order');
     if (!error && data) {
-      setQuestions(data as any);
-      // Auto-expand all categories
-      const cats = new Set((data as any[]).map((q: any) => q.category));
+      const qs = data as any[];
+      setQuestions(qs);
+      const cats = new Set(qs.map((q: any) => q.category));
       setExpandedCategories(cats);
+
+      // Check for client responses
+      const sentQs = qs.filter((q: any) => q.sent_to_client);
+      if (sentQs.length > 0) {
+        const answeredQs = sentQs.filter((q: any) => q.status === 'answered');
+        if (answeredQs.length > 0) {
+          const latestAnswer = answeredQs.reduce((latest: any, q: any) =>
+            new Date(q.updated_at) > new Date(latest.updated_at) ? q : latest
+          );
+          setClientResponseInfo({
+            answeredAt: latestAnswer.updated_at,
+            answered: answeredQs.length,
+            total: sentQs.length,
+          });
+        }
+      }
     }
     setLoading(false);
   }, [assessmentId]);
@@ -373,6 +390,26 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
           ))}
         </div>
       </div>
+
+      {/* Client Response Banner */}
+      {clientResponseInfo && (
+        <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Client responded — {clientResponseInfo.answered}/{clientResponseInfo.total} questions answered
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                Received {new Date(clientResponseInfo.answeredAt).toLocaleDateString('en-AU', { dateStyle: 'medium' })} at {new Date(clientResponseInfo.answeredAt).toLocaleTimeString('en-AU', { timeStyle: 'short' })}
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={runAnalysis} disabled={analyzing}>
+            <Sparkles className="w-3.5 h-3.5" /> Re-analyse with answers
+          </Button>
+        </div>
+      )}
 
       {/* Build Readiness + Actions */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
