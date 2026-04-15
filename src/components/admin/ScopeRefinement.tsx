@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Loader2, AlertTriangle, CheckCircle2, Circle, XCircle,
   Search, Sparkles, ChevronDown, ChevronRight, MessageSquare,
-  FileText, Mic, Link2, Brain, Send, Pencil,
+  FileText, Mic, Link2, Brain, Send, Pencil, Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -730,6 +730,20 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
                                   Reopen
                                 </Button>
                               )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 text-[10px] px-2 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                                onClick={async () => {
+                                  const { error } = await supabase.from('refinement_questions' as any).delete().eq('id', q.id);
+                                  if (!error) {
+                                    setQuestions(prev => prev.filter(x => x.id !== q.id));
+                                    toast({ title: 'Question deleted' });
+                                  }
+                                }}
+                              >
+                                <Trash2 className="w-3 h-3" /> Delete
+                              </Button>
                             </div>
                           )}
                         </div>
