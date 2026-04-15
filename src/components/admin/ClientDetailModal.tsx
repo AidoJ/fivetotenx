@@ -22,6 +22,7 @@ import TechStackPanel from '@/components/admin/TechStackPanel';
 import CommsPanel from '@/components/admin/CommsPanel';
 import ArtifactsPanel from '@/components/admin/ArtifactsPanel';
 import ScopeRefinement from '@/components/admin/ScopeRefinement';
+import ProposalBuilder from '@/components/admin/ProposalBuilder';
 
 type Assessment = Tables<'roi_assessments'>;
 
@@ -201,6 +202,9 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                 </TabsTrigger>
                 <TabsTrigger value="analysis" className="gap-1.5 text-xs">
                   <Sparkles className="w-3.5 h-3.5" /> Analysis
+                </TabsTrigger>
+                <TabsTrigger value="proposal" className="gap-1.5 text-xs">
+                  <FileText className="w-3.5 h-3.5" /> Proposal
                 </TabsTrigger>
                 <TabsTrigger value="tech_stack" className="gap-1.5 text-xs">
                   <Zap className="w-3.5 h-3.5" /> Tech Stack
@@ -438,6 +442,18 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                       const updated = { ...(lead.discovery_answers as any || {}), _analysis: analysis };
                       setLead({ ...lead, discovery_answers: updated as any });
                     }}
+                  />
+                </TabsContent>
+
+                {/* ── PROPOSAL BUILDER TAB ── */}
+                <TabsContent value="proposal" className="mt-4">
+                  <ProposalBuilder
+                    assessmentId={assessmentId}
+                    analysis={((lead.discovery_answers as any)?._analysis) || null}
+                    roiResults={roiResults}
+                    contactName={lead.contact_name}
+                    businessName={lead.business_name || ''}
+                    contactEmail={lead.contact_email}
                   />
                 </TabsContent>
 
