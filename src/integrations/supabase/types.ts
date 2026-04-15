@@ -389,6 +389,7 @@ export type Database = {
           id: string
           priority: string
           question: string
+          sent_to_client: boolean
           sort_order: number
           source_context: string | null
           source_type: string
@@ -403,6 +404,7 @@ export type Database = {
           id?: string
           priority?: string
           question: string
+          sent_to_client?: boolean
           sort_order?: number
           source_context?: string | null
           source_type?: string
@@ -417,6 +419,7 @@ export type Database = {
           id?: string
           priority?: string
           question?: string
+          sent_to_client?: boolean
           sort_order?: number
           source_context?: string | null
           source_type?: string
@@ -426,6 +429,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "refinement_questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refinement_tokens: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          questions_sent: number
+          token: string
+          used: boolean
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          questions_sent?: number
+          token?: string
+          used?: boolean
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          questions_sent?: number
+          token?: string
+          used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refinement_tokens_assessment_id_fkey"
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "roi_assessments"
