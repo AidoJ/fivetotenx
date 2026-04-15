@@ -202,16 +202,20 @@ const RefinementPortal: React.FC = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
-        <div className="max-w-md text-center space-y-5">
-          <img src={LOGO_URL} alt="5to10X" className="h-8 mx-auto" />
-          <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center bg-green-50">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <div className="bg-[#0f0a1e] px-6 py-4 flex justify-center">
+          <img src={LOGO_URL} alt="5to10X" className="h-8" />
+        </div>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md text-center space-y-5">
+            <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center bg-green-50">
+              <CheckCircle2 className="w-10 h-10 text-green-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Thank You!</h1>
+            <p className="text-gray-500 text-sm leading-relaxed">
+              Your responses have been submitted successfully. Our team will review them and continue refining your project scope.
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Thank You!</h1>
-          <p className="text-gray-500 text-sm leading-relaxed">
-            Your responses have been submitted successfully. Our team will review them and continue refining your project scope.
-          </p>
         </div>
       </div>
     );
@@ -222,19 +226,19 @@ const RefinementPortal: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-10 bg-[#0f0a1e] shadow-sm">
+        <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <img src={LOGO_URL} alt="5to10X" className="h-7" />
-            <div className="w-px h-6 bg-gray-200" />
+            <div className="w-px h-6 bg-white/20" />
             <div>
-              <h1 className="text-sm font-bold text-gray-900">Scope Refinement</h1>
-              {businessName && <p className="text-[11px] text-gray-500">{businessName}</p>}
+              <h1 className="text-sm font-bold text-white">Scope Refinement</h1>
+              {businessName && <p className="text-[11px] text-white/60">{businessName}</p>}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-gray-400">{answeredCount}/{questions.length}</span>
-            <div className="w-24 h-1.5 rounded-full overflow-hidden bg-gray-200">
+            <span className="text-[11px] text-white/50">{answeredCount}/{questions.length}</span>
+            <div className="w-24 h-1.5 rounded-full overflow-hidden bg-white/10">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${progress}%`, background: BRAND.purple }}
