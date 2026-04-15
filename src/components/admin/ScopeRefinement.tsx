@@ -9,6 +9,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -26,10 +28,14 @@ interface RefinementQuestion {
   answer: string | null;
   sort_order: number;
   created_at: string;
+  sent_to_client?: boolean;
 }
 
 interface Props {
   assessmentId: string;
+  contactEmail?: string;
+  contactName?: string;
+  businessName?: string;
 }
 
 interface CompletenessItem {
@@ -40,7 +46,6 @@ interface CompletenessItem {
 interface ReviewedSources {
   transcripts: number;
   notes: number;
-  deep_dive: boolean;
   artifacts: {
     total: number;
     text: number;
@@ -85,7 +90,7 @@ const SOURCE_ICONS: Record<string, React.ElementType> = {
   ai_detected: Sparkles,
 };
 
-const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
+const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactName, businessName }) => {
   const { toast } = useToast();
   const [questions, setQuestions] = useState<RefinementQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,6 +103,11 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
   const [answerDraft, setAnswerDraft] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sendingToClient, setSendingToClient] = useState(false);
+  const [addingCustom, setAddingCustom] = useState(false);
+  const [customQuestion, setCustomQuestion] = useState('');
+  const [customCategory, setCustomCategory] = useState('General');
 
   // Data completeness check
   const [completeness, setCompleteness] = useState<Record<string, CompletenessItem>>({});
@@ -118,14 +128,13 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
   }, [assessmentId]);
 
   const checkCompleteness = useCallback(async () => {
-    const [assessmentRes, stRes, scopeRes, intRes, artRes, notesRes, deepDiveRes] = await Promise.all([
+    const [assessmentRes, stRes, scopeRes, intRes, artRes, notesRes] = await Promise.all([
       supabase.from('roi_assessments').select('form_data, discovery_ready').eq('id', assessmentId).single(),
       supabase.from('straight_talk_responses').select('id').eq('assessment_id', assessmentId).limit(1),
       supabase.from('scoping_responses').select('id').eq('assessment_id', assessmentId).limit(1),
       supabase.from('client_interviews').select('id, transcript, content, call_completed').eq('assessment_id', assessmentId),
       supabase.from('client_artifacts').select('id, artifact_type').eq('assessment_id', assessmentId),
       supabase.from('lead_notes').select('id').eq('assessment_id', assessmentId),
-      supabase.from('deep_dive_submissions').select('id').eq('assessment_id', assessmentId).limit(1),
     ]);
 
     const assessment = assessmentRes.data as { form_data?: unknown; discovery_ready?: boolean | null } | null;
@@ -183,10 +192,6 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
       'Internal Notes': {
         present: notes.length > 0,
         detail: notes.length > 0 ? formatCount(notes.length, 'note') : 'No internal notes yet',
-      },
-      'Deep Dive': {
-        present: (deepDiveRes.data?.length || 0) > 0,
-        detail: (deepDiveRes.data?.length || 0) > 0 ? 'Submission found' : 'No Deep Dive submission',
       },
     });
   }, [assessmentId]);
@@ -276,6 +281,74 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
     );
   }
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllUnanswered = () => {
+    const unanswered = questions.filter(q => q.status === 'unanswered').map(q => q.id);
+    setSelectedIds(new Set(unanswered));
+  };
+
+  const addCustomQuestion = async () => {
+    if (!customQuestion.trim()) return;
+    const sortOrder = questions.length;
+    const { data, error } = await supabase.from('refinement_questions' as any).insert({
+      assessment_id: assessmentId,
+      question: customQuestion.trim(),
+      category: customCategory.trim() || 'General',
+      priority: 'important',
+      status: 'unanswered',
+      source_type: 'manual',
+      sort_order: sortOrder,
+    } as any).select().single();
+    if (!error && data) {
+      setQuestions(prev => [...prev, data as any]);
+      setCustomQuestion('');
+      setAddingCustom(false);
+      toast({ title: 'Custom question added' });
+    }
+  };
+
+  const sendToClient = async () => {
+    if (selectedIds.size === 0) {
+      toast({ title: 'Select at least one question', variant: 'destructive' });
+      return;
+    }
+    if (!contactEmail) {
+      toast({ title: 'No client email on file', variant: 'destructive' });
+      return;
+    }
+    setSendingToClient(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-refinement-invite', {
+        body: {
+          assessmentId,
+          questionIds: Array.from(selectedIds),
+          contactEmail,
+          contactName: contactName || 'there',
+          businessName: businessName || '',
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      await supabase.from('refinement_questions' as any)
+        .update({ sent_to_client: true } as any)
+        .in('id', Array.from(selectedIds));
+      setQuestions(prev => prev.map(q => selectedIds.has(q.id) ? { ...q, sent_to_client: true } : q));
+      setSelectedIds(new Set());
+      toast({ title: `Sent ${selectedIds.size} questions to ${contactEmail}` });
+    } catch (err: any) {
+      toast({ title: 'Failed to send', description: err.message, variant: 'destructive' });
+    }
+    setSendingToClient(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Data Completeness Audit */}
@@ -348,7 +421,7 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
                     )
                   </span>
                 )}
-                {reviewedSources.deep_dive ? ' • Deep Dive included' : ''}.
+                .
               </div>
             )}
           </div>
@@ -366,7 +439,7 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
       {questions.length > 0 && (
         <div className="space-y-4">
           {/* Filters */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Select value={filterPriority} onValueChange={setFilterPriority}>
               <SelectTrigger className="w-[140px] h-8 text-xs">
                 <SelectValue placeholder="Priority" />
@@ -389,10 +462,52 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
                 <SelectItem value="not_applicable">N/A</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-xs text-muted-foreground ml-auto">
-              {filtered.length} of {totalQ} questions shown
-            </span>
+            <div className="flex items-center gap-2 ml-auto">
+              <span className="text-xs text-muted-foreground">
+                {filtered.length} of {totalQ} shown
+              </span>
+              {selectedIds.size > 0 && (
+                <Button size="sm" className="h-7 text-[10px] gap-1 px-3" onClick={sendToClient} disabled={sendingToClient}>
+                  {sendingToClient ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                  Send {selectedIds.size} to Client
+                </Button>
+              )}
+              <Button size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={selectAllUnanswered}>
+                Select Unanswered
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 text-[10px] px-2 gap-1" onClick={() => setAddingCustom(true)}>
+                + Custom Q
+              </Button>
+            </div>
           </div>
+
+          {/* Add custom question inline */}
+          {addingCustom && (
+            <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-foreground">Add Custom Question</span>
+                <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setAddingCustom(false)}>Cancel</Button>
+              </div>
+              <Textarea
+                placeholder="Type your question…"
+                value={customQuestion}
+                onChange={e => setCustomQuestion(e.target.value)}
+                rows={2}
+                className="text-xs"
+              />
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Category (e.g. Workflow)"
+                  value={customCategory}
+                  onChange={e => setCustomCategory(e.target.value)}
+                  className="h-7 text-xs w-48"
+                />
+                <Button size="sm" className="h-7 text-[10px] gap-1" onClick={addCustomQuestion} disabled={!customQuestion.trim()}>
+                  <CheckCircle2 className="w-3 h-3" /> Add
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Grouped Questions */}
           {Object.entries(grouped).map(([category, catQuestions]) => {
@@ -432,9 +547,17 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId }) => {
                       return (
                         <div key={q.id} className="px-5 py-4 space-y-2">
                           <div className="flex items-start gap-3">
-                            <PriIcon className={`w-4 h-4 mt-0.5 shrink-0 ${q.priority === 'blocker' ? 'text-red-500' : q.priority === 'important' ? 'text-amber-500' : 'text-blue-500'}`} />
+                            <Checkbox
+                              checked={selectedIds.has(q.id)}
+                              onCheckedChange={() => toggleSelect(q.id)}
+                              className="mt-1 shrink-0"
+                            />
+                            <PriIcon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${q.priority === 'blocker' ? 'text-red-500' : q.priority === 'important' ? 'text-amber-500' : 'text-blue-500'}`} />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-foreground font-medium leading-snug">{q.question}</p>
+                              {q.sent_to_client && (
+                                <Badge variant="outline" className="text-[8px] mt-1 text-primary border-primary/30">Sent to Client</Badge>
+                              )}
                               {q.source_context && (
                                 <div className="mt-1.5 flex items-start gap-1.5">
                                   <SourceIcon className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0" />
