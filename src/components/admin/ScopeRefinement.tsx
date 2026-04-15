@@ -264,6 +264,15 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
     setAnswerDraft('');
   };
 
+  const saveQuestionText = async (id: string) => {
+    if (!questionDraft.trim()) return;
+    await supabase.from('refinement_questions' as any).update({ question: questionDraft.trim() } as any).eq('id', id);
+    setQuestions(prev => prev.map(q => q.id === id ? { ...q, question: questionDraft.trim() } : q));
+    setEditingQuestionId(null);
+    setQuestionDraft('');
+    toast({ title: 'Question updated' });
+  };
+
   const toggleCategory = (cat: string) => {
     setExpandedCategories(prev => {
       const next = new Set(prev);
