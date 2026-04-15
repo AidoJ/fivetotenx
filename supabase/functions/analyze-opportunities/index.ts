@@ -84,6 +84,19 @@ serve(async (req) => {
 
     const hasTranscripts = !!transcriptTexts;
 
+    // Build artifact context
+    const truncate = (s: string, max = 4000) => s.length > max ? s.slice(0, max) + '…[truncated]' : s;
+    const artifactChunks = (artifactRes.data || []).map((a: any) => {
+      const title = a.title || a.file_name || 'Untitled';
+      if (a.artifact_type === 'text') return `[Note] ${title}: ${truncate(a.content || '')}`;
+      if (a.artifact_type === 'link') return `[Link] ${title}: ${a.content || ''}`;
+      if (a.artifact_type === 'file') return `[File] ${title}: ${a.file_name || ''}${a.file_url ? ` (${a.file_url})` : ''}`;
+      return null;
+    }).filter(Boolean);
+
+    // Build internal notes context
+    const notesText = (notesRes.data || []).map((n: any) => `[${n.note_type}] ${n.content}`).join("\n");
+
     // ── Build shared client context block ──
     const clientContext = `CLIENT PROFILE:
 - Business: ${assessment.business_name || formData.businessName || 'Unknown'}
@@ -100,7 +113,13 @@ AI-EXTRACTED DISCOVERY ANSWERS:
 ${discoveryPairs.length > 0 ? discoveryPairs.join("\n\n") : "No extracted answers available."}
 
 ${hasTranscripts ? `INTERVIEW TRANSCRIPTS (PRIMARY SOURCE — client's own words):
-${transcriptTexts}` : "No transcripts available."}`;
+${transcriptTexts}` : "No transcripts available."}
+
+CLIENT ARTIFACTS (uploaded notes, links, and files):
+${artifactChunks.length > 0 ? artifactChunks.join("\n\n") : "No artifacts available."}
+
+INTERNAL NOTES:
+${notesText || "No internal notes."}`;
 
     // ── Fetch deep dive & scoping for extra context ──
     const [ddRes, scopeRes] = await Promise.all([
