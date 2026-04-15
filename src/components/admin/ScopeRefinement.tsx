@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Loader2, AlertTriangle, CheckCircle2, Circle, XCircle,
   Search, Sparkles, ChevronDown, ChevronRight, MessageSquare,
-  FileText, Mic, Link2, Brain, Send,
+  FileText, Mic, Link2, Brain, Send, Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -678,6 +678,14 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
                           {/* Action buttons */}
                           {!isEditing && (
                             <div className="flex items-center gap-2 pl-7">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 text-[10px] gap-1 px-2"
+                                onClick={() => { setEditingQuestionId(q.id); setQuestionDraft(q.question); }}
+                              >
+                                <Pencil className="w-3 h-3" /> Edit Q
+                              </Button>
                               {q.status !== 'answered' && (
                                 <Button
                                   size="sm"
