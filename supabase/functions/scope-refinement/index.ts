@@ -372,9 +372,33 @@ Perform a comprehensive scope refinement analysis. Find every evidence-backed ga
 
     const results = JSON.parse(toolCall.function.arguments);
 
-    await sb.from("refinement_questions").delete().eq("assessment_id", assessmentId);
+    // Preserve questions that have been answered, edited, or manually added
+    const { data: existingQuestions } = await sb
+      .from("refinement_questions")
+      .select("*")
+      .eq("assessment_id", assessmentId);
 
-    // Save questions to the database
+    const preservedQuestions = (existingQuestions || []).filter((q: any) =>
+      q.status === "answered" ||
+      q.status === "n/a" ||
+      q.source_type === "manual" ||
+      q.answer !== null ||
+      q.sent_to_client === true
+    );
+
+    const preservedIds = new Set(preservedQuestions.map((q: any) => q.id));
+
+    // Only delete unanswered, unedited AI questions
+    const idsToDelete = (existingQuestions || [])
+      .filter((q: any) => !preservedIds.has(q.id))
+      .map((q: any) => q.id);
+
+    if (idsToDelete.length > 0) {
+      await sb.from("refinement_questions").delete().in("id", idsToDelete);
+    }
+
+    // Insert new AI questions, offset sort_order after preserved ones
+    const sortOffset = preservedQuestions.length;
     const questionsToInsert = (results.questions || []).map((q: any, idx: number) => ({
       assessment_id: assessmentId,
       question: q.question,
@@ -383,7 +407,7 @@ Perform a comprehensive scope refinement analysis. Find every evidence-backed ga
       category: q.category,
       priority: q.priority,
       status: "unanswered",
-      sort_order: idx,
+      sort_order: sortOffset + idx,
     }));
 
     if (questionsToInsert.length > 0) {
