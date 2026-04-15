@@ -29,6 +29,7 @@ interface RefinementQuestion {
   sort_order: number;
   created_at: string;
   sent_to_client?: boolean;
+  sent_at?: string | null;
 }
 
 interface Props {
@@ -365,10 +366,11 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
+      const sentAt = new Date().toISOString();
       await supabase.from('refinement_questions' as any)
-        .update({ sent_to_client: true } as any)
+        .update({ sent_to_client: true, sent_at: sentAt } as any)
         .in('id', Array.from(selectedIds));
-      setQuestions(prev => prev.map(q => selectedIds.has(q.id) ? { ...q, sent_to_client: true } : q));
+      setQuestions(prev => prev.map(q => selectedIds.has(q.id) ? { ...q, sent_to_client: true, sent_at: sentAt } : q));
       setSelectedIds(new Set());
       toast({ title: `Sent ${selectedIds.size} questions to ${contactEmail}` });
     } catch (err: any) {
@@ -630,7 +632,9 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
                                 </p>
                               )}
                               {q.sent_to_client && (
-                                <Badge variant="outline" className="text-[8px] mt-1 text-primary border-primary/30">Sent to Client</Badge>
+                                <Badge variant="outline" className="text-[8px] mt-1 text-primary border-primary/30">
+                                  Sent to Client{q.sent_at ? ` · ${new Date(q.sent_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })} ${new Date(q.sent_at).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}` : ''}
+                                </Badge>
                               )}
                               {q.source_context && (
                                 <div className="mt-1.5 flex items-start gap-1.5">

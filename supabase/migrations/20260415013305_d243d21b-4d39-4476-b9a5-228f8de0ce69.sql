@@ -1,0 +1,1 @@
+ALTER TABLE public.refinement_questions ADD COLUMN sent_at timestamp with time zone DEFAULT NULL;
