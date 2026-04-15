@@ -105,6 +105,28 @@ Deno.serve(async (req) => {
         `;
         break;
 
+      case 'refinement_submitted':
+        shouldNotify = true;
+        subject = `📝 Refinement Answers Received: ${leadName || 'Unknown'} — ${businessName || 'Unknown Business'}`;
+        bodyHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #1a1a2e; color: white; padding: 20px 25px; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0; font-size: 20px;">📝 Scope Refinement Answers Received</h1>
+            </div>
+            <div style="padding: 25px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+              <p style="font-size: 16px; color: #333;"><strong>${leadName || 'Unknown'}</strong> has submitted their scope refinement answers.</p>
+              <table style="width: 100%; margin: 15px 0; font-size: 14px; color: #555;">
+                <tr><td style="padding: 5px 0;"><strong>Business:</strong></td><td>${businessName || '—'}</td></tr>
+                <tr><td style="padding: 5px 0;"><strong>Email:</strong></td><td>${leadEmail || '—'}</td></tr>
+                ${details?.answeredCount != null ? `<tr><td style="padding: 5px 0;"><strong>Answered:</strong></td><td>${details.answeredCount} of ${details.totalQuestions} questions</td></tr>` : ''}
+              </table>
+              <p style="font-size: 14px; color: #555;">Review their answers in the Scope Refinement tab to update your analysis.</p>
+              <a href="https://fivetotenx.lovable.app/admin" style="display: inline-block; background-color: #6b46c1; color: #ffffff; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;">Review Answers</a>
+            </div>
+          </div>
+        `;
+        break;
+
       default:
         return new Response(JSON.stringify({ success: false, error: `Unknown event type: ${eventType}` }), {
           status: 400,
