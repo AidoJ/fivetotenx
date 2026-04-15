@@ -1382,18 +1382,20 @@ const Admin = () => {
         </div>
       </header>
 
-      <main className="max-w-[1600px] mx-auto p-4">
+      <main className="max-w-[1600px] mx-auto p-2 sm:p-4 overflow-x-hidden">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setPipelineFilter(null); if (v === 'emails' && templates.length === 0) fetchTemplates(); }} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="dashboard" className="gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</TabsTrigger>
-            <TabsTrigger value="pipeline" className="gap-2"><Users className="w-4 h-4" />Pipeline</TabsTrigger>
-            <TabsTrigger value="call-guide" className="gap-2"><ClipboardCheck className="w-4 h-4" />Call Guide</TabsTrigger>
-            <TabsTrigger value="tasks" className="gap-2"><ListTodo className="w-4 h-4" />Tasks</TabsTrigger>
-            <TabsTrigger value="emails" className="gap-2"><FileText className="w-4 h-4" />Email Templates</TabsTrigger>
-            <TabsTrigger value="settings" className="gap-2"><Wrench className="w-4 h-4" />Settings</TabsTrigger>
-            <TabsTrigger value="scoping" className="gap-2"><ClipboardList className="w-4 h-4" />Scoping Q's</TabsTrigger>
-            <TabsTrigger value="training" className="gap-2"><GraduationCap className="w-4 h-4" />Training</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-2 px-2">
+            <TabsList className="inline-flex w-auto min-w-full sm:w-auto">
+              <TabsTrigger value="dashboard" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><LayoutDashboard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Dashboard</TabsTrigger>
+              <TabsTrigger value="pipeline" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Pipeline</TabsTrigger>
+              <TabsTrigger value="call-guide" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><ClipboardCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Call Guide</TabsTrigger>
+              <TabsTrigger value="tasks" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><ListTodo className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Tasks</TabsTrigger>
+              <TabsTrigger value="emails" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Emails</TabsTrigger>
+              <TabsTrigger value="settings" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><Wrench className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Settings</TabsTrigger>
+              <TabsTrigger value="scoping" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Scoping</TabsTrigger>
+              <TabsTrigger value="training" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Training</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="dashboard">
             <PipelineDashboard leads={leads} deepDives={deepDives} interviews={interviews} proposals={proposals} scopingResponses={scopingResponses} onStageClick={(stage) => { const groupId = PIPELINE_GROUPS.find(g => g.stages.includes(stage))?.id || stage; setPipelineFilter(groupId); setActiveTab('pipeline'); }} />
