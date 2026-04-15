@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Eye, Plus, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw,
-  Trash2, FolderOpen,
+  Trash2, FolderOpen, MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -158,10 +158,28 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
   const [uploading, setUploading] = useState(false);
   const audioInputRef = useRef<HTMLInputElement>(null);
 
+  const [refinementStatus, setRefinementStatus] = useState<{ answered: number; total: number } | null>(null);
+
   const roi = lead.roi_results as any;
   const hasInterviews = interviews.filter(i => i.assessment_id === lead.id).length > 0;
   const isStraightTalkComplete = (lead as any).discovery_ready === true;
   const slaColor = getSlaColor(lead);
+
+  // Check refinement question status
+  React.useEffect(() => {
+    const checkRefinement = async () => {
+      const { data } = await supabase
+        .from('refinement_questions' as any)
+        .select('status, sent_to_client')
+        .eq('assessment_id', lead.id)
+        .eq('sent_to_client', true);
+      if (data && (data as any[]).length > 0) {
+        const answered = (data as any[]).filter((q: any) => q.status === 'answered').length;
+        setRefinementStatus({ answered, total: (data as any[]).length });
+      }
+    };
+    checkRefinement();
+  }, [lead.id]);
 
   const nextAction = getNextAction(lead, deepDive, proposal, hasInterviews, isStraightTalkComplete);
 
@@ -230,6 +248,22 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
           </span>
         )}
       </div>
+
+      {/* Refinement status */}
+      {refinementStatus && (
+        <div className="px-4 pb-1.5">
+          <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-medium ${
+            refinementStatus.answered === refinementStatus.total
+              ? 'bg-emerald-500/10 text-emerald-600'
+              : refinementStatus.answered > 0
+                ? 'bg-amber-500/10 text-amber-600'
+                : 'bg-muted text-muted-foreground'
+          }`}>
+            <MessageSquare className="w-2.5 h-2.5" />
+            Refinement: {refinementStatus.answered}/{refinementStatus.total} answered
+          </div>
+        </div>
+      )}
 
       {/* Audio status */}
       {withAudio.length > 0 && (
