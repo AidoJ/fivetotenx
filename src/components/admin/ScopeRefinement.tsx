@@ -602,7 +602,33 @@ const ScopeRefinement: React.FC<Props> = ({ assessmentId, contactEmail, contactN
                             />
                             <PriIcon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${q.priority === 'blocker' ? 'text-red-500' : q.priority === 'important' ? 'text-amber-500' : 'text-blue-500'}`} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-foreground font-medium leading-snug">{q.question}</p>
+                              {editingQuestionId === q.id ? (
+                                <div className="space-y-2">
+                                  <Textarea
+                                    value={questionDraft}
+                                    onChange={e => setQuestionDraft(e.target.value)}
+                                    rows={2}
+                                    className="text-sm bg-secondary border-border resize-none"
+                                    autoFocus
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button size="sm" className="h-6 text-[10px] gap-1" onClick={() => saveQuestionText(q.id)}>
+                                      <CheckCircle2 className="w-3 h-3" /> Save
+                                    </Button>
+                                    <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => { setEditingQuestionId(null); setQuestionDraft(''); }}>
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p
+                                  className="text-sm text-foreground font-medium leading-snug cursor-pointer hover:text-primary transition-colors"
+                                  onDoubleClick={() => { setEditingQuestionId(q.id); setQuestionDraft(q.question); }}
+                                  title="Double-click to edit"
+                                >
+                                  {q.question}
+                                </p>
+                              )}
                               {q.sent_to_client && (
                                 <Badge variant="outline" className="text-[8px] mt-1 text-primary border-primary/30">Sent to Client</Badge>
                               )}
