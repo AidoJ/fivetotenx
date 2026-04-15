@@ -442,6 +442,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          question_ids: string[]
           questions_sent: number
           token: string
           used: boolean
@@ -451,6 +452,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          question_ids?: string[]
           questions_sent?: number
           token?: string
           used?: boolean
@@ -460,6 +462,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          question_ids?: string[]
           questions_sent?: number
           token?: string
           used?: boolean
