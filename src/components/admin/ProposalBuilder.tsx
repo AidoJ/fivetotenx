@@ -31,11 +31,12 @@ interface BuildItem extends Opportunity {
 
 interface Props {
   assessmentId: string;
-  analysis: { big_hits: Opportunity[]; quick_wins: Opportunity[]; summary: string; total_potential_impact: number } | null;
+  analysis: { big_hits: Opportunity[]; quick_wins: Opportunity[]; summary: string; total_potential_impact: number; generated_at?: string } | null;
   roiResults: any;
   contactName: string;
   businessName: string;
   contactEmail: string;
+  techStack?: { generated_at?: string } | null;
 }
 
 const GST_RATE = 0.10;
@@ -55,7 +56,7 @@ const autoEstimateCost = (opp: Opportunity, totalImpact: number, buildCostMid: n
   return Math.max(2000, Math.round(share * buildCostMid / 500) * 500);
 };
 
-const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, contactName, businessName, contactEmail }) => {
+const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, contactName, businessName, contactEmail, techStack }) => {
   const { toast } = useToast();
   const [items, setItems] = useState<BuildItem[]>([]);
   const [saving, setSaving] = useState(false);
@@ -359,6 +360,30 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           </div>
         </div>
       </div>
+
+      {/* Stale warning */}
+      {existingProposal && (() => {
+        const proposalSavedAt = new Date(existingProposal.created_at).getTime();
+        const analysisAt = analysis?.generated_at ? new Date(analysis.generated_at).getTime() : 0;
+        const techAt = techStack?.generated_at ? new Date(techStack.generated_at).getTime() : 0;
+        const newest = Math.max(analysisAt, techAt);
+        if (!newest || newest <= proposalSavedAt) return null;
+        const what: string[] = [];
+        if (analysisAt > proposalSavedAt) what.push('Opportunity Analysis');
+        if (techAt > proposalSavedAt) what.push('Tech Stack');
+        return (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+            <div className="flex-1 text-xs">
+              <p className="font-bold text-amber-700">Proposal is out of date</p>
+              <p className="text-amber-700/80 mt-0.5">
+                {what.join(' & ')} {what.length > 1 ? 'have' : 'has'} been updated since this proposal was last saved
+                ({new Date(newest).toLocaleString('en-AU')}). Click <strong>Save Proposal</strong> to refresh, then re-send.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Actions */}
       <div className="flex items-center gap-3 justify-end">

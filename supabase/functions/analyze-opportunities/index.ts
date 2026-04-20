@@ -574,6 +574,7 @@ Return the TOP 5 as "big_hits" and the NEXT 5 as "quick_wins".`;
     if (!toolCall?.function?.arguments) throw new Error("No analysis returned from AI");
 
     const analysis = JSON.parse(toolCall.function.arguments);
+    analysis.generated_at = new Date().toISOString();
 
     // Save to assessment
     await sb

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { maybeAutoRegenerateProposal } from '@/lib/proposalBuilder';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -106,7 +107,11 @@ const TechStackPanel = ({ assessmentId, techStack, onUpdate }: Props) => {
 
       const stackData = { ...data.techStack, generated_at: new Date().toISOString() };
       onUpdate(stackData);
-      toast({ title: 'Tech stack analysis generated ✅' });
+      const regenerated = await maybeAutoRegenerateProposal(assessmentId);
+      toast({
+        title: 'Tech stack analysis generated ✅',
+        description: regenerated ? 'Proposal auto-regenerated with new tech stack.' : undefined,
+      });
     } catch (err: any) {
       toast({ title: 'Generation failed', description: err.message, variant: 'destructive' });
     }

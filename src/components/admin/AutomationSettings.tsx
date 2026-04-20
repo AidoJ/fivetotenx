@@ -18,6 +18,7 @@ interface AutomationConfig {
   auto_send_invite_on_qualify: boolean;
   auto_send_gameplan_on_st_complete: boolean;
   auto_prepare_proposal_on_gp_complete: boolean;
+  auto_regenerate_proposal_on_analysis_update: boolean;
   admin_notify_on_booking: boolean;
   admin_notify_on_gp_complete: boolean;
   admin_notify_on_proposal_accepted: boolean;
@@ -31,6 +32,7 @@ const DEFAULT_CONFIG: AutomationConfig = {
   auto_send_invite_on_qualify: true,
   auto_send_gameplan_on_st_complete: true,
   auto_prepare_proposal_on_gp_complete: false,
+  auto_regenerate_proposal_on_analysis_update: false,
   admin_notify_on_booking: true,
   admin_notify_on_gp_complete: true,
   admin_notify_on_proposal_accepted: true,
@@ -234,6 +236,31 @@ const AutomationSettings = () => {
           <Switch
             checked={config.auto_prepare_proposal_on_gp_complete}
             onCheckedChange={(v) => updateField('auto_prepare_proposal_on_gp_complete', v)}
+          />
+        </div>
+      </div>
+
+      {/* Auto-Regenerate Proposal on Analysis Update */}
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <RotateCcw className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-display font-bold text-foreground">Auto-Regenerate Proposal on Analysis Update</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                When the Opportunity Analysis or Tech Stack Analysis is re-run for a client that already has a proposal,
+                automatically rebuild <code className="text-[10px]">proposal_data</code> from the latest results. The proposal is <strong>not</strong> re-sent — admin must still click "Send to Client".
+              </p>
+              <Badge variant="outline" className="text-[9px] mt-1 bg-primary/10 text-primary border-primary/20">
+                Only affects clients with an existing saved proposal
+              </Badge>
+            </div>
+          </div>
+          <Switch
+            checked={config.auto_regenerate_proposal_on_analysis_update}
+            onCheckedChange={(v) => updateField('auto_regenerate_proposal_on_analysis_update', v)}
           />
         </div>
       </div>
