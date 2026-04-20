@@ -196,9 +196,16 @@ const TechStackPanel = ({ assessmentId, techStack, onUpdate }: Props) => {
             </p>
           )}
         </div>
-        <Button variant="outline" size="sm" onClick={handleGenerate} disabled={generating} className="gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleGenerate}
+          disabled={generating}
+          className="gap-1.5"
+          title="Re-run analysis based on the latest proposal scope, opportunities, and discovery data"
+        >
           {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-          Re-generate
+          Re-run from latest scope
         </Button>
       </div>
 
