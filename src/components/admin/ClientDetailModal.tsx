@@ -456,6 +456,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ assessmentId, ope
                     contactName={lead.contact_name}
                     businessName={lead.business_name || ''}
                     contactEmail={lead.contact_email}
+                    techStack={(lead as any).tech_stack || null}
                   />
                 </TabsContent>
 
