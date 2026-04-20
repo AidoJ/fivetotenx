@@ -124,3 +124,30 @@ export const maybeAutoRegenerateProposal = async (assessmentId: string): Promise
     return false;
   }
 };
+
+/**
+ * If the auto-rerun-tech-stack toggle is enabled, invoke the analyze-opportunities
+ * edge function in tech_stack mode. Returns true if a rerun was triggered.
+ */
+export const maybeAutoRerunTechStack = async (assessmentId: string): Promise<boolean> => {
+  try {
+    const { data: settings } = await supabase
+      .from('automation_settings')
+      .select('auto_rerun_tech_stack_on_proposal_save')
+      .limit(1)
+      .single();
+    if (!settings?.auto_rerun_tech_stack_on_proposal_save) return false;
+
+    const { error } = await supabase.functions.invoke('analyze-opportunities', {
+      body: { assessmentId, mode: 'tech_stack' },
+    });
+    if (error) {
+      console.error('Auto-rerun tech stack failed:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Auto-rerun tech stack failed:', err);
+    return false;
+  }
+};

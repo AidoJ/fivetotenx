@@ -19,6 +19,7 @@ interface AutomationConfig {
   auto_send_gameplan_on_st_complete: boolean;
   auto_prepare_proposal_on_gp_complete: boolean;
   auto_regenerate_proposal_on_analysis_update: boolean;
+  auto_rerun_tech_stack_on_proposal_save: boolean;
   admin_notify_on_booking: boolean;
   admin_notify_on_gp_complete: boolean;
   admin_notify_on_proposal_accepted: boolean;
@@ -33,6 +34,7 @@ const DEFAULT_CONFIG: AutomationConfig = {
   auto_send_gameplan_on_st_complete: true,
   auto_prepare_proposal_on_gp_complete: false,
   auto_regenerate_proposal_on_analysis_update: false,
+  auto_rerun_tech_stack_on_proposal_save: false,
   admin_notify_on_booking: true,
   admin_notify_on_gp_complete: true,
   admin_notify_on_proposal_accepted: true,
