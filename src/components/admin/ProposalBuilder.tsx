@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { maybeAutoRerunTechStack } from '@/lib/proposalBuilder';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -165,6 +166,10 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         if (data) setExistingProposal(data);
       }
       toast({ title: 'Proposal saved ✅' });
+      const reran = await maybeAutoRerunTechStack(assessmentId);
+      if (reran) {
+        toast({ title: 'Tech Stack analysis re-running…', description: 'Refresh the Tech Stack tab in a moment to see the updated recommendations.' });
+      }
     } catch (err: any) {
       toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
     }

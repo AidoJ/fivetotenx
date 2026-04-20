@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
   Zap, Target, Send, FileText, Bell, Mail, Save, Loader2, RotateCcw,
-  ChevronRight, Shield
+  ChevronRight, Shield, Server
 } from 'lucide-react';
 
 interface AutomationConfig {
@@ -19,6 +19,7 @@ interface AutomationConfig {
   auto_send_gameplan_on_st_complete: boolean;
   auto_prepare_proposal_on_gp_complete: boolean;
   auto_regenerate_proposal_on_analysis_update: boolean;
+  auto_rerun_tech_stack_on_proposal_save: boolean;
   admin_notify_on_booking: boolean;
   admin_notify_on_gp_complete: boolean;
   admin_notify_on_proposal_accepted: boolean;
@@ -33,6 +34,7 @@ const DEFAULT_CONFIG: AutomationConfig = {
   auto_send_gameplan_on_st_complete: true,
   auto_prepare_proposal_on_gp_complete: false,
   auto_regenerate_proposal_on_analysis_update: false,
+  auto_rerun_tech_stack_on_proposal_save: false,
   admin_notify_on_booking: true,
   admin_notify_on_gp_complete: true,
   admin_notify_on_proposal_accepted: true,
@@ -261,6 +263,31 @@ const AutomationSettings = () => {
           <Switch
             checked={config.auto_regenerate_proposal_on_analysis_update}
             onCheckedChange={(v) => updateField('auto_regenerate_proposal_on_analysis_update', v)}
+          />
+        </div>
+      </div>
+
+      {/* Auto-Re-run Tech Stack on Proposal Save */}
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Server className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-display font-bold text-foreground">Auto Re-run Tech Stack After Proposal Save</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                When a proposal is saved, automatically re-run the Tech Stack Analysis so recommendations reflect the
+                final scope of included opportunities. The new analysis runs in the background — refresh the Tech Stack tab to view it.
+              </p>
+              <Badge variant="outline" className="text-[9px] mt-1 bg-primary/10 text-primary border-primary/20">
+                A manual "Re-run from latest scope" button is also available in the Tech Stack tab
+              </Badge>
+            </div>
+          </div>
+          <Switch
+            checked={config.auto_rerun_tech_stack_on_proposal_save}
+            onCheckedChange={(v) => updateField('auto_rerun_tech_stack_on_proposal_save', v)}
           />
         </div>
       </div>
