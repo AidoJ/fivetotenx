@@ -459,13 +459,23 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
       })()}
 
       {/* Actions */}
-      <div className="flex items-center gap-3 justify-end">
+      <div className="flex items-center gap-3 justify-end flex-wrap">
         {existingProposal && (
           <Badge variant="outline" className="text-[10px] text-muted-foreground">
             <CheckCircle2 className="w-3 h-3 mr-1" />
             Last saved {new Date(existingProposal.created_at).toLocaleDateString('en-AU')}
           </Badge>
         )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-muted-foreground"
+          onClick={handleResetToDefaults}
+          disabled={saving || !analysis}
+          title="Discard your manual edits and rebuild items, costs and weeks from the latest AI analysis"
+        >
+          <RotateCcw className="w-4 h-4" /> Reset to AI defaults
+        </Button>
         <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Proposal
