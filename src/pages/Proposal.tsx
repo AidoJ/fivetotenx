@@ -578,6 +578,98 @@ const Proposal = () => {
             </div>
           </section>
 
+          {/* 4b. Build Scope Selector — client picks which items to include */}
+          {hasSelectableItems && (
+            <section className="mb-10">
+              <SectionTitle icon={Sparkles} number={5} title="Choose Your Build Scope" />
+              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  We've recommended {proposalItems.length} items based on your assessment.
+                  {proposal.accepted
+                    ? ' You selected the following scope at acceptance:'
+                    : ' Tick the items you want to proceed with — your investment, payment schedule and timeline below will update live.'}
+                </p>
+
+                <div className="space-y-2">
+                  {proposalItems.map((item, idx) => {
+                    const isSelected = selectedItemIdx.has(idx);
+                    const isLocked = !!item.locked;
+                    const disabled = !!proposal.accepted || isLocked;
+                    return (
+                      <label
+                        key={idx}
+                        htmlFor={`scope-item-${idx}`}
+                        className={`block rounded-lg border p-3 transition-all ${disabled ? 'cursor-default' : 'cursor-pointer'} ${isSelected ? 'border-primary/40 bg-primary/5' : 'border-border bg-secondary/20 opacity-70'}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <Checkbox
+                            id={`scope-item-${idx}`}
+                            checked={isSelected}
+                            disabled={disabled}
+                            onCheckedChange={() => toggleSelectedItem(idx)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-bold text-foreground">{item.title}</span>
+                              {item._type && (
+                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                                  {item._type === 'big_hit' ? '🎯 Big Hit' : '⚡ Quick Win'}
+                                </span>
+                              )}
+                              {isLocked && (
+                                <span className="text-[10px] uppercase tracking-wider text-primary border border-primary/30 bg-primary/10 rounded px-1.5 py-0.5 inline-flex items-center gap-1">
+                                  <Lock className="w-2.5 h-2.5" /> Included
+                                </span>
+                              )}
+                            </div>
+                            {item.explanation && (
+                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.explanation}</p>
+                            )}
+                            <div className="flex items-center gap-4 mt-2 text-xs">
+                              <span className="font-semibold text-foreground">{formatCurrency(item.cost ?? 0)}</span>
+                              {typeof item.weeks === 'number' && item.weeks > 0 && (
+                                <span className="text-muted-foreground inline-flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {item.weeks}w
+                                </span>
+                              )}
+                              {typeof item.estimated_annual_impact === 'number' && item.estimated_annual_impact > 0 && (
+                                <span className="text-muted-foreground">
+                                  ↑ {formatCurrency(item.estimated_annual_impact)}/yr impact
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                {/* Live selection summary */}
+                <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 mt-2">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Your selection</p>
+                      <p className="text-sm font-bold text-foreground">{selectedItemIdx.size} of {proposalItems.length} items · ~{selectionTotals.totalWeeks} weeks</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Investment (inc GST)</p>
+                      <p className="text-2xl font-bold text-primary">{formatCurrency(selectionTotals.totalIncGst)}</p>
+                      <p className="text-[10px] text-muted-foreground">{formatCurrency(selectionTotals.subtotalExGst)} ex GST + {formatCurrency(selectionTotals.gst)} GST</p>
+                    </div>
+                  </div>
+                </div>
+
+                {!proposal.accepted && (
+                  <p className="text-[11px] text-muted-foreground italic">
+                    Your selection is locked in when you click <strong>Accept Proposal</strong> at the bottom of this page.
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* 5. Project Timeline */}
           <section className="mb-10 page-break">
             <SectionTitle icon={Clock} number={5} title="Project Timeline" />
