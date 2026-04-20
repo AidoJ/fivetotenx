@@ -710,8 +710,12 @@ const Proposal = () => {
             <SectionTitle icon={DollarSign} number={6} title="Investment" />
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <div className="text-center bg-primary/5 rounded-lg p-6 border border-primary/20">
-                <p className="text-xs text-muted-foreground mb-2">Total Project Investment</p>
-                {editing ? (
+                <p className="text-xs text-muted-foreground mb-2">
+                  {hasSelectableItems ? 'Total Project Investment (inc GST, based on your selection)' : 'Total Project Investment'}
+                </p>
+                {hasSelectableItems ? (
+                  <p className="text-3xl font-bold text-primary">{formatCurrency(selectionTotals.totalIncGst)}</p>
+                ) : editing ? (
                   <div className="flex items-center justify-center gap-2">
                     <span className="text-2xl font-bold text-primary">$</span>
                     <Input type="number" value={content.investmentAmount} onChange={e => setContent({ ...content, investmentAmount: parseInt(e.target.value) || 0 })}
