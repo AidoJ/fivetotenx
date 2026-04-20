@@ -756,7 +756,7 @@ const Proposal = () => {
                         <>
                           <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">{ps.percentage}%</div>
                           <div>
-                            <p className="text-sm font-semibold text-foreground">{ps.label} – {formatCurrency(content.investmentAmount * ps.percentage / 100)}</p>
+                            <p className="text-sm font-semibold text-foreground">{ps.label} – {formatCurrency((hasSelectableItems ? selectionTotals.subtotalExGst : content.investmentAmount) * ps.percentage / 100)}</p>
                             <p className="text-xs text-muted-foreground">{ps.description}</p>
                           </div>
                         </>
