@@ -223,10 +223,63 @@ const Proposal = () => {
         customSections: pData.customSections || [],
       });
 
+      // Initialize selectable items: prefer the client's prior saved selection,
+      // otherwise default to all items selected.
+      const items: ProposalItem[] = Array.isArray(pData.items) ? pData.items : [];
+      const cs = (prop as any).client_selection || {};
+      if (Array.isArray(cs.selected_indexes) && cs.selected_indexes.length > 0) {
+        setSelectedItemIdx(new Set(cs.selected_indexes as number[]));
+      } else {
+        setSelectedItemIdx(new Set(items.map((_, i) => i)));
+      }
+
       setLoading(false);
     };
     fetchData();
   }, [id]);
+
+  // ----- Client-selectable items helpers -----
+  const proposalItems: ProposalItem[] = useMemo(() => {
+    const pData = proposal?.proposal_data || {};
+    return Array.isArray(pData.items) ? (pData.items as ProposalItem[]) : [];
+  }, [proposal]);
+
+  const hasSelectableItems = proposalItems.length > 0;
+
+  const toggleSelectedItem = (idx: number) => {
+    if (proposal?.accepted) return;
+    const item = proposalItems[idx];
+    if (item?.locked) return;
+    setSelectedItemIdx(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  };
+
+  const selectionTotals = useMemo(() => {
+    const GST_RATE = 0.10;
+    const DEPOSIT_PCT = 0.10;
+    const MVP_PCT = 0.50;
+    const subtotalExGst = proposalItems
+      .filter((_, i) => selectedItemIdx.has(i))
+      .reduce((sum, i) => sum + (typeof i.cost === 'number' ? i.cost : 0), 0);
+    const gst = Math.round(subtotalExGst * GST_RATE);
+    const totalIncGst = subtotalExGst + gst;
+    const deposit = Math.round(subtotalExGst * DEPOSIT_PCT);
+    const mvp = Math.round(subtotalExGst * MVP_PCT);
+    const final = subtotalExGst - deposit - mvp;
+    let maxBigHit = 0;
+    let quickWinWeeks = 0;
+    proposalItems.forEach((i, idx) => {
+      if (!selectedItemIdx.has(idx)) return;
+      const w = typeof i.weeks === 'number' ? i.weeks : 0;
+      if (i._type === 'big_hit') maxBigHit = Math.max(maxBigHit, w);
+      else quickWinWeeks += w * 0.5;
+    });
+    const totalWeeks = Math.ceil(maxBigHit + quickWinWeeks) || 0;
+    return { subtotalExGst, gst, totalIncGst, deposit, mvp, final, totalWeeks };
+  }, [proposalItems, selectedItemIdx]);
 
   const handleSave = async () => {
     if (!proposal || !content) return;
