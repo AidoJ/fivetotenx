@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Loader2, Save, Send, DollarSign, Clock, FileText,
-  Calculator, CheckCircle2, Sparkles, AlertTriangle,
+  Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
 } from 'lucide-react';
 
 interface Opportunity {
@@ -28,6 +28,10 @@ interface BuildItem extends Opportunity {
   estimatedWeeks: number;
   manualCost: string;
   manualWeeks: string;
+  // _type kept on the object for grouping/timeline math
+  _type?: 'big_hit' | 'quick_win';
+  // If true, client cannot deselect this item on the proposal page
+  locked?: boolean;
 }
 
 interface Props {
@@ -68,29 +72,78 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const buildCostMid = roiResults?.pricing?.buildCost || 15000;
   const totalImpact = analysis?.total_potential_impact || roiResults?.totalAnnualImpact || 0;
 
-  useEffect(() => {
-    if (!analysis) return;
+  // Build a fresh items list from the latest analysis (used as a fallback or via Reset)
+  const buildItemsFromAnalysis = () => {
+    if (!analysis) return [] as BuildItem[];
     const allOpps = [
-      ...(analysis.big_hits || []).map(o => ({ ...o, _type: 'big_hit' })),
-      ...(analysis.quick_wins || []).map(o => ({ ...o, _type: 'quick_win' })),
+      ...(analysis.big_hits || []).map(o => ({ ...o, _type: 'big_hit' as const })),
+      ...(analysis.quick_wins || []).map(o => ({ ...o, _type: 'quick_win' as const })),
     ];
-    setItems(allOpps.map(opp => ({
+    return allOpps.map(opp => ({
       ...opp,
       included: true,
       estimatedCost: autoEstimateCost(opp, totalImpact, buildCostMid),
       estimatedWeeks: difficultyWeeks[opp.difficulty] || 4,
       manualCost: '',
       manualWeeks: '',
-    })));
-    setKeyFindings(analysis.summary || '');
-  }, [analysis]);
+      locked: false,
+    })) as BuildItem[];
+  };
 
-  // Load existing proposal
+  // Load existing proposal first; fall back to building from analysis if none saved.
   useEffect(() => {
-    supabase.from('proposals').select('*').eq('assessment_id', assessmentId)
-      .order('created_at', { ascending: false }).limit(1).single()
-      .then(({ data }) => { if (data) setExistingProposal(data); });
-  }, [assessmentId]);
+    let cancelled = false;
+    (async () => {
+      const { data: existing } = await supabase
+        .from('proposals')
+        .select('*')
+        .eq('assessment_id', assessmentId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) return;
+
+      if (existing && existing.proposal_data && Array.isArray((existing.proposal_data as any).items) && (existing.proposal_data as any).items.length > 0) {
+        // Hydrate from saved proposal_data so admin edits persist across mounts.
+        setExistingProposal(existing);
+        const pData = existing.proposal_data as any;
+        setKeyFindings(pData.keyFindings || analysis?.summary || '');
+        setItems((pData.items as any[]).map((i: any) => ({
+          title: i.title,
+          impact_category: i.impact_category,
+          estimated_annual_impact: i.estimated_annual_impact,
+          difficulty: i.difficulty,
+          explanation: i.explanation,
+          recommendation: i.recommendation,
+          included: true,
+          estimatedCost: typeof i.cost === 'number' ? i.cost : autoEstimateCost(i, totalImpact, buildCostMid),
+          estimatedWeeks: typeof i.weeks === 'number' ? i.weeks : (difficultyWeeks[i.difficulty] || 4),
+          manualCost: '',
+          manualWeeks: '',
+          _type: i._type || 'big_hit',
+          locked: !!i.locked,
+        })));
+      } else if (analysis) {
+        if (existing) setExistingProposal(existing);
+        setItems(buildItemsFromAnalysis());
+        setKeyFindings(analysis.summary || '');
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assessmentId, analysis]);
+
+  const handleResetToDefaults = () => {
+    if (!analysis) return;
+    if (!window.confirm('Reset all items, costs, weeks and key findings to the latest AI defaults? Your manual edits will be lost.')) return;
+    setItems(buildItemsFromAnalysis());
+    setKeyFindings(analysis.summary || '');
+    toast({ title: 'Reset to AI defaults', description: 'Click Save Proposal to persist.' });
+  };
+
+  const toggleLocked = (idx: number) => {
+    setItems(prev => prev.map((it, i) => i === idx ? { ...it, locked: !it.locked } : it));
+  };
 
   const included = useMemo(() => items.filter(i => i.included), [items]);
 
@@ -127,7 +180,10 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Preserve any client-facing narrative/legal fields already saved on this proposal
+      const existingData = (existingProposal?.proposal_data as any) || {};
       const proposalData = {
+        ...existingData,
         keyFindings,
         items: included.map(i => ({
           title: i.title,
@@ -138,6 +194,8 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           recommendation: i.recommendation,
           cost: i.manualCost ? parseFloat(i.manualCost) : i.estimatedCost,
           weeks: i.manualWeeks ? parseFloat(i.manualWeeks) : i.estimatedWeeks,
+          _type: i._type || 'big_hit',
+          locked: !!i.locked,
         })),
         totals: {
           subtotalExGst: totalExGst,
@@ -153,6 +211,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           mvp: { percent: MVP_PCT * 100, amount: mvp, label: 'On MVP Achieved & Reviewed' },
           final: { percent: FINAL_PCT * 100, amount: final, label: 'On Handover of Final Build' },
         },
+        manually_edited_at: new Date().toISOString(),
       };
 
       if (existingProposal) {
