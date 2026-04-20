@@ -63,6 +63,7 @@ export type Database = {
           admin_notify_on_proposal_accepted: boolean
           auto_prepare_proposal_on_gp_complete: boolean
           auto_qualify_enabled: boolean
+          auto_regenerate_proposal_on_analysis_update: boolean
           auto_send_gameplan_on_st_complete: boolean
           auto_send_invite_on_qualify: boolean
           created_at: string
@@ -77,6 +78,7 @@ export type Database = {
           admin_notify_on_proposal_accepted?: boolean
           auto_prepare_proposal_on_gp_complete?: boolean
           auto_qualify_enabled?: boolean
+          auto_regenerate_proposal_on_analysis_update?: boolean
           auto_send_gameplan_on_st_complete?: boolean
           auto_send_invite_on_qualify?: boolean
           created_at?: string
@@ -91,6 +93,7 @@ export type Database = {
           admin_notify_on_proposal_accepted?: boolean
           auto_prepare_proposal_on_gp_complete?: boolean
           auto_qualify_enabled?: boolean
+          auto_regenerate_proposal_on_analysis_update?: boolean
           auto_send_gameplan_on_st_complete?: boolean
           auto_send_invite_on_qualify?: boolean
           created_at?: string
