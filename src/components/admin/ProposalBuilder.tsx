@@ -345,6 +345,15 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
                         <span className="text-[10px] text-muted-foreground">
                           = {formatCurrency(cost)} · {weeks}w
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleLocked(idx)}
+                          className={`ml-auto inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] transition-colors ${item.locked ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border bg-secondary/50 text-muted-foreground hover:bg-secondary'}`}
+                          title={item.locked ? 'Mandatory — client cannot deselect' : 'Optional — client can deselect on the proposal page'}
+                        >
+                          {item.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                          {item.locked ? 'Mandatory' : 'Client can deselect'}
+                        </button>
                       </div>
                     )}
                   </div>
