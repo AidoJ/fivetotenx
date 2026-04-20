@@ -299,12 +299,37 @@ const Proposal = () => {
   const handleAccept = async () => {
     if (!proposal) return;
     setAccepting(true);
-    await supabase.from('proposals').update({ accepted: true, accepted_at: new Date().toISOString() }).eq('id', proposal.id);
+
+    // Build the client_selection snapshot — what the client actually picked + final $ at time of accept.
+    const selectedIndexes = Array.from(selectedItemIdx).sort((a, b) => a - b);
+    const selectedItems = selectedIndexes.map(i => proposalItems[i]).filter(Boolean);
+    const clientSelection = hasSelectableItems
+      ? {
+          selected_indexes: selectedIndexes,
+          selected_items: selectedItems.map(i => ({
+            title: i.title,
+            cost: i.cost ?? 0,
+            weeks: i.weeks ?? 0,
+            _type: i._type,
+            estimated_annual_impact: i.estimated_annual_impact ?? 0,
+          })),
+          totals: selectionTotals,
+          accepted_at: new Date().toISOString(),
+        }
+      : { accepted_at: new Date().toISOString() };
+
+    await supabase.from('proposals')
+      .update({
+        accepted: true,
+        accepted_at: new Date().toISOString(),
+        client_selection: clientSelection as any,
+      })
+      .eq('id', proposal.id);
     await supabase.from('roi_assessments').update({ pipeline_stage: 'signed' as any }).eq('id', proposal.assessment_id);
-    setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString() } : null);
+    setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString(), client_selection: clientSelection } : null);
     setAccepting(false);
 
-    // Fire admin notification for proposal acceptance
+    // Fire admin notification for proposal acceptance, including chosen items + final totals.
     try {
       const { data: assessment } = await supabase
         .from('roi_assessments')
@@ -320,6 +345,14 @@ const Proposal = () => {
             leadEmail: assessment.contact_email,
             businessName: assessment.business_name,
             assessmentId: proposal.assessment_id,
+            details: hasSelectableItems ? {
+              selectedItems: selectedItems.map(i => ({ title: i.title, cost: i.cost ?? 0 })),
+              itemsSelected: selectedItems.length,
+              itemsOffered: proposalItems.length,
+              totalIncGst: selectionTotals.totalIncGst,
+              subtotalExGst: selectionTotals.subtotalExGst,
+              totalWeeks: selectionTotals.totalWeeks,
+            } : undefined,
           },
         }).catch(err => console.error('Admin notification failed:', err));
       }
