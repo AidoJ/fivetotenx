@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen } from 'lucide-react';
+import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/logo-5to10x-color.webp';
 
@@ -12,9 +13,23 @@ interface ProposalData {
   id: string;
   assessment_id: string;
   proposal_data: any;
+  client_selection: any;
   sent_at: string;
   accepted: boolean;
   accepted_at: string | null;
+}
+
+interface ProposalItem {
+  title: string;
+  impact_category?: string;
+  estimated_annual_impact?: number;
+  difficulty?: string;
+  explanation?: string;
+  recommendation?: string;
+  cost?: number;
+  weeks?: number;
+  _type?: 'big_hit' | 'quick_win';
+  locked?: boolean;
 }
 
 interface AssessmentData {
@@ -127,6 +142,8 @@ const Proposal = () => {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [content, setContent] = useState<EditableContent | null>(null);
+  // Client-selectable items: indices of items the client has chosen to include
+  const [selectedItemIdx, setSelectedItemIdx] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -206,10 +223,63 @@ const Proposal = () => {
         customSections: pData.customSections || [],
       });
 
+      // Initialize selectable items: prefer the client's prior saved selection,
+      // otherwise default to all items selected.
+      const items: ProposalItem[] = Array.isArray(pData.items) ? pData.items : [];
+      const cs = (prop as any).client_selection || {};
+      if (Array.isArray(cs.selected_indexes) && cs.selected_indexes.length > 0) {
+        setSelectedItemIdx(new Set(cs.selected_indexes as number[]));
+      } else {
+        setSelectedItemIdx(new Set(items.map((_, i) => i)));
+      }
+
       setLoading(false);
     };
     fetchData();
   }, [id]);
+
+  // ----- Client-selectable items helpers -----
+  const proposalItems: ProposalItem[] = useMemo(() => {
+    const pData = proposal?.proposal_data || {};
+    return Array.isArray(pData.items) ? (pData.items as ProposalItem[]) : [];
+  }, [proposal]);
+
+  const hasSelectableItems = proposalItems.length > 0;
+
+  const toggleSelectedItem = (idx: number) => {
+    if (proposal?.accepted) return;
+    const item = proposalItems[idx];
+    if (item?.locked) return;
+    setSelectedItemIdx(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  };
+
+  const selectionTotals = useMemo(() => {
+    const GST_RATE = 0.10;
+    const DEPOSIT_PCT = 0.10;
+    const MVP_PCT = 0.50;
+    const subtotalExGst = proposalItems
+      .filter((_, i) => selectedItemIdx.has(i))
+      .reduce((sum, i) => sum + (typeof i.cost === 'number' ? i.cost : 0), 0);
+    const gst = Math.round(subtotalExGst * GST_RATE);
+    const totalIncGst = subtotalExGst + gst;
+    const deposit = Math.round(subtotalExGst * DEPOSIT_PCT);
+    const mvp = Math.round(subtotalExGst * MVP_PCT);
+    const final = subtotalExGst - deposit - mvp;
+    let maxBigHit = 0;
+    let quickWinWeeks = 0;
+    proposalItems.forEach((i, idx) => {
+      if (!selectedItemIdx.has(idx)) return;
+      const w = typeof i.weeks === 'number' ? i.weeks : 0;
+      if (i._type === 'big_hit') maxBigHit = Math.max(maxBigHit, w);
+      else quickWinWeeks += w * 0.5;
+    });
+    const totalWeeks = Math.ceil(maxBigHit + quickWinWeeks) || 0;
+    return { subtotalExGst, gst, totalIncGst, deposit, mvp, final, totalWeeks };
+  }, [proposalItems, selectedItemIdx]);
 
   const handleSave = async () => {
     if (!proposal || !content) return;
@@ -229,12 +299,37 @@ const Proposal = () => {
   const handleAccept = async () => {
     if (!proposal) return;
     setAccepting(true);
-    await supabase.from('proposals').update({ accepted: true, accepted_at: new Date().toISOString() }).eq('id', proposal.id);
+
+    // Build the client_selection snapshot — what the client actually picked + final $ at time of accept.
+    const selectedIndexes = Array.from(selectedItemIdx).sort((a, b) => a - b);
+    const selectedItems = selectedIndexes.map(i => proposalItems[i]).filter(Boolean);
+    const clientSelection = hasSelectableItems
+      ? {
+          selected_indexes: selectedIndexes,
+          selected_items: selectedItems.map(i => ({
+            title: i.title,
+            cost: i.cost ?? 0,
+            weeks: i.weeks ?? 0,
+            _type: i._type,
+            estimated_annual_impact: i.estimated_annual_impact ?? 0,
+          })),
+          totals: selectionTotals,
+          accepted_at: new Date().toISOString(),
+        }
+      : { accepted_at: new Date().toISOString() };
+
+    await supabase.from('proposals')
+      .update({
+        accepted: true,
+        accepted_at: new Date().toISOString(),
+        client_selection: clientSelection as any,
+      })
+      .eq('id', proposal.id);
     await supabase.from('roi_assessments').update({ pipeline_stage: 'signed' as any }).eq('id', proposal.assessment_id);
-    setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString() } : null);
+    setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString(), client_selection: clientSelection } : null);
     setAccepting(false);
 
-    // Fire admin notification for proposal acceptance
+    // Fire admin notification for proposal acceptance, including chosen items + final totals.
     try {
       const { data: assessment } = await supabase
         .from('roi_assessments')
@@ -250,6 +345,14 @@ const Proposal = () => {
             leadEmail: assessment.contact_email,
             businessName: assessment.business_name,
             assessmentId: proposal.assessment_id,
+            details: hasSelectableItems ? {
+              selectedItems: selectedItems.map(i => ({ title: i.title, cost: i.cost ?? 0 })),
+              itemsSelected: selectedItems.length,
+              itemsOffered: proposalItems.length,
+              totalIncGst: selectionTotals.totalIncGst,
+              subtotalExGst: selectionTotals.subtotalExGst,
+              totalWeeks: selectionTotals.totalWeeks,
+            } : undefined,
           },
         }).catch(err => console.error('Admin notification failed:', err));
       }
@@ -475,6 +578,98 @@ const Proposal = () => {
             </div>
           </section>
 
+          {/* 4b. Build Scope Selector — client picks which items to include */}
+          {hasSelectableItems && (
+            <section className="mb-10">
+              <SectionTitle icon={Sparkles} number={5} title="Choose Your Build Scope" />
+              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  We've recommended {proposalItems.length} items based on your assessment.
+                  {proposal.accepted
+                    ? ' You selected the following scope at acceptance:'
+                    : ' Tick the items you want to proceed with — your investment, payment schedule and timeline below will update live.'}
+                </p>
+
+                <div className="space-y-2">
+                  {proposalItems.map((item, idx) => {
+                    const isSelected = selectedItemIdx.has(idx);
+                    const isLocked = !!item.locked;
+                    const disabled = !!proposal.accepted || isLocked;
+                    return (
+                      <label
+                        key={idx}
+                        htmlFor={`scope-item-${idx}`}
+                        className={`block rounded-lg border p-3 transition-all ${disabled ? 'cursor-default' : 'cursor-pointer'} ${isSelected ? 'border-primary/40 bg-primary/5' : 'border-border bg-secondary/20 opacity-70'}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <Checkbox
+                            id={`scope-item-${idx}`}
+                            checked={isSelected}
+                            disabled={disabled}
+                            onCheckedChange={() => toggleSelectedItem(idx)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-bold text-foreground">{item.title}</span>
+                              {item._type && (
+                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                                  {item._type === 'big_hit' ? '🎯 Big Hit' : '⚡ Quick Win'}
+                                </span>
+                              )}
+                              {isLocked && (
+                                <span className="text-[10px] uppercase tracking-wider text-primary border border-primary/30 bg-primary/10 rounded px-1.5 py-0.5 inline-flex items-center gap-1">
+                                  <Lock className="w-2.5 h-2.5" /> Included
+                                </span>
+                              )}
+                            </div>
+                            {item.explanation && (
+                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.explanation}</p>
+                            )}
+                            <div className="flex items-center gap-4 mt-2 text-xs">
+                              <span className="font-semibold text-foreground">{formatCurrency(item.cost ?? 0)}</span>
+                              {typeof item.weeks === 'number' && item.weeks > 0 && (
+                                <span className="text-muted-foreground inline-flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {item.weeks}w
+                                </span>
+                              )}
+                              {typeof item.estimated_annual_impact === 'number' && item.estimated_annual_impact > 0 && (
+                                <span className="text-muted-foreground">
+                                  ↑ {formatCurrency(item.estimated_annual_impact)}/yr impact
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                {/* Live selection summary */}
+                <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 mt-2">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Your selection</p>
+                      <p className="text-sm font-bold text-foreground">{selectedItemIdx.size} of {proposalItems.length} items · ~{selectionTotals.totalWeeks} weeks</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Investment (inc GST)</p>
+                      <p className="text-2xl font-bold text-primary">{formatCurrency(selectionTotals.totalIncGst)}</p>
+                      <p className="text-[10px] text-muted-foreground">{formatCurrency(selectionTotals.subtotalExGst)} ex GST + {formatCurrency(selectionTotals.gst)} GST</p>
+                    </div>
+                  </div>
+                </div>
+
+                {!proposal.accepted && (
+                  <p className="text-[11px] text-muted-foreground italic">
+                    Your selection is locked in when you click <strong>Accept Proposal</strong> at the bottom of this page.
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* 5. Project Timeline */}
           <section className="mb-10 page-break">
             <SectionTitle icon={Clock} number={5} title="Project Timeline" />
@@ -515,8 +710,12 @@ const Proposal = () => {
             <SectionTitle icon={DollarSign} number={6} title="Investment" />
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <div className="text-center bg-primary/5 rounded-lg p-6 border border-primary/20">
-                <p className="text-xs text-muted-foreground mb-2">Total Project Investment</p>
-                {editing ? (
+                <p className="text-xs text-muted-foreground mb-2">
+                  {hasSelectableItems ? 'Total Project Investment (inc GST, based on your selection)' : 'Total Project Investment'}
+                </p>
+                {hasSelectableItems ? (
+                  <p className="text-3xl font-bold text-primary">{formatCurrency(selectionTotals.totalIncGst)}</p>
+                ) : editing ? (
                   <div className="flex items-center justify-center gap-2">
                     <span className="text-2xl font-bold text-primary">$</span>
                     <Input type="number" value={content.investmentAmount} onChange={e => setContent({ ...content, investmentAmount: parseInt(e.target.value) || 0 })}
@@ -557,7 +756,7 @@ const Proposal = () => {
                         <>
                           <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">{ps.percentage}%</div>
                           <div>
-                            <p className="text-sm font-semibold text-foreground">{ps.label} – {formatCurrency(content.investmentAmount * ps.percentage / 100)}</p>
+                            <p className="text-sm font-semibold text-foreground">{ps.label} – {formatCurrency((hasSelectableItems ? selectionTotals.subtotalExGst : content.investmentAmount) * ps.percentage / 100)}</p>
                             <p className="text-xs text-muted-foreground">{ps.description}</p>
                           </div>
                         </>

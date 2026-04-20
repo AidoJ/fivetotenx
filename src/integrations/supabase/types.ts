@@ -353,6 +353,7 @@ export type Database = {
           accepted: boolean | null
           accepted_at: string | null
           assessment_id: string
+          client_selection: Json
           created_at: string
           id: string
           proposal_data: Json
@@ -362,6 +363,7 @@ export type Database = {
           accepted?: boolean | null
           accepted_at?: string | null
           assessment_id: string
+          client_selection?: Json
           created_at?: string
           id?: string
           proposal_data?: Json
@@ -371,6 +373,7 @@ export type Database = {
           accepted?: boolean | null
           accepted_at?: string | null
           assessment_id?: string
+          client_selection?: Json
           created_at?: string
           id?: string
           proposal_data?: Json

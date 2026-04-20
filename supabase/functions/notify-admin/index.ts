@@ -84,8 +84,18 @@ Deno.serve(async (req) => {
         `;
         break;
 
-      case 'proposal_accepted':
+      case 'proposal_accepted': {
         shouldNotify = settings.admin_notify_on_proposal_accepted;
+        const sel = details?.selectedItems as Array<{ title: string; cost: number }> | undefined;
+        const itemsRows = Array.isArray(sel) && sel.length
+          ? sel.map(s => `<tr><td style="padding: 4px 0; color: #555;">${s.title}</td><td style="padding: 4px 0; text-align: right; color: #1a1a2e; font-weight: 600;">$${(s.cost || 0).toLocaleString()}</td></tr>`).join('')
+          : '';
+        const totalLine = details?.totalIncGst != null
+          ? `<p style="font-size: 16px; color: #1a1a2e; margin: 12px 0 4px;"><strong>Final accepted total:</strong> $${Number(details.totalIncGst).toLocaleString()} inc GST</p>`
+          : '';
+        const scopeLine = details?.itemsSelected != null
+          ? `<p style="font-size: 13px; color: #555; margin: 0 0 12px;">Client selected <strong>${details.itemsSelected} of ${details.itemsOffered}</strong> proposed items · ~${details.totalWeeks ?? '?'} weeks</p>`
+          : '';
         subject = `🎉 Proposal Accepted: ${leadName || 'Unknown'} — ${businessName || 'Unknown Business'}`;
         bodyHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -98,12 +108,16 @@ Deno.serve(async (req) => {
                 <tr><td style="padding: 5px 0;"><strong>Business:</strong></td><td>${businessName || '—'}</td></tr>
                 <tr><td style="padding: 5px 0;"><strong>Email:</strong></td><td>${leadEmail || '—'}</td></tr>
               </table>
+              ${scopeLine}
+              ${itemsRows ? `<table style="width: 100%; margin: 8px 0 12px; font-size: 13px; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">${itemsRows}</table>` : ''}
+              ${totalLine}
               <p style="font-size: 14px; color: #73AD12; font-weight: bold;">Time to start the Build™ phase! 🚀</p>
               <a href="https://fivetotenx.lovable.app/admin" style="display: inline-block; background: #1789CE; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;">View in Dashboard</a>
             </div>
           </div>
         `;
         break;
+      }
 
       case 'refinement_submitted':
         shouldNotify = true;
