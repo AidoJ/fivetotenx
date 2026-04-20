@@ -142,6 +142,8 @@ const Proposal = () => {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [content, setContent] = useState<EditableContent | null>(null);
+  // Client-selectable items: indices of items the client has chosen to include
+  const [selectedItemIdx, setSelectedItemIdx] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
