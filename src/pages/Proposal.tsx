@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen } from 'lucide-react';
+import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/logo-5to10x-color.webp';
 
@@ -12,9 +13,23 @@ interface ProposalData {
   id: string;
   assessment_id: string;
   proposal_data: any;
+  client_selection: any;
   sent_at: string;
   accepted: boolean;
   accepted_at: string | null;
+}
+
+interface ProposalItem {
+  title: string;
+  impact_category?: string;
+  estimated_annual_impact?: number;
+  difficulty?: string;
+  explanation?: string;
+  recommendation?: string;
+  cost?: number;
+  weeks?: number;
+  _type?: 'big_hit' | 'quick_win';
+  locked?: boolean;
 }
 
 interface AssessmentData {
