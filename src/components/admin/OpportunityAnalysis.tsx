@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { maybeAutoRegenerateProposal } from '@/lib/proposalBuilder';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -104,7 +105,11 @@ const OpportunityAnalysis = ({ assessmentId, existingAnalysis, onUpdate }: Props
       if (data?.error) throw new Error(data.error);
       if (data?.analysis) {
         onUpdate(data.analysis);
-        toast({ title: 'Analysis complete ✅', description: `Found ${(data.analysis.big_hits?.length || 0) + (data.analysis.quick_wins?.length || 0)} opportunities.` });
+        const regenerated = await maybeAutoRegenerateProposal(assessmentId);
+        toast({
+          title: 'Analysis complete ✅',
+          description: `Found ${(data.analysis.big_hits?.length || 0) + (data.analysis.quick_wins?.length || 0)} opportunities.${regenerated ? ' Proposal auto-regenerated.' : ''}`,
+        });
       }
     } catch (err: any) {
       toast({ title: 'Analysis failed', description: err.message, variant: 'destructive' });

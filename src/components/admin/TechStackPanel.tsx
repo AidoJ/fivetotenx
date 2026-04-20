@@ -106,7 +106,11 @@ const TechStackPanel = ({ assessmentId, techStack, onUpdate }: Props) => {
 
       const stackData = { ...data.techStack, generated_at: new Date().toISOString() };
       onUpdate(stackData);
-      toast({ title: 'Tech stack analysis generated ✅' });
+      const regenerated = await maybeAutoRegenerateProposal(assessmentId);
+      toast({
+        title: 'Tech stack analysis generated ✅',
+        description: regenerated ? 'Proposal auto-regenerated with new tech stack.' : undefined,
+      });
     } catch (err: any) {
       toast({ title: 'Generation failed', description: err.message, variant: 'destructive' });
     }
