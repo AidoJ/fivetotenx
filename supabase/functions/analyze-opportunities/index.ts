@@ -12,97 +12,6 @@ const formatCurrency = (value: unknown) => {
   return `$${Math.round(safeAmount).toLocaleString("en-AU")}`;
 };
 
-const escapeHtml = (value: unknown) => String(value ?? "")
-  .replace(/&/g, "&amp;")
-  .replace(/</g, "&lt;")
-  .replace(/>/g, "&gt;")
-  .replace(/\"/g, "&quot;")
-  .replace(/'/g, "&#39;");
-
-const buildProposalDraftEmail = ({
-  contactName,
-  businessName,
-  proposalId,
-  proposalData,
-  analysisSummary,
-}: {
-  contactName: string;
-  businessName: string;
-  proposalId: string;
-  proposalData: Record<string, any>;
-  analysisSummary?: string;
-}) => {
-  const firstName = (contactName || "there").split(" ")[0] || "there";
-  const proposalUrl = `https://5to10x.app/proposal/${proposalId}`;
-  const items = Array.isArray(proposalData.items) ? proposalData.items : [];
-  const totals = proposalData.totals || {};
-  const fee = proposalData.feeStructure || null;
-  const keyFindings = proposalData.keyFindings || analysisSummary || "";
-  const primaryGoal = proposalData.primaryGoal || "Deliver a focused Phase 1 build that removes friction and improves profitability.";
-
-  const itemRows = items.length > 0
-    ? items.map((item: any) => `
-      <tr>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;">
-          <div style="font-weight:700;color:#1e3a5f;">${escapeHtml(item.title || "Phase 1 item")}</div>
-          ${item.recommendation ? `<div style="margin-top:4px;color:#475569;font-size:13px;line-height:1.5;">${escapeHtml(item.recommendation)}</div>` : ""}
-        </td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;text-align:center;color:#475569;font-size:13px;white-space:nowrap;">${escapeHtml(item.weeks ? `${item.weeks} weeks` : "TBC")}</td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;text-align:right;color:#1e3a5f;font-weight:700;white-space:nowrap;">${formatCurrency(item.cost)}</td>
-      </tr>`).join("")
-    : `<tr><td colspan="3" style="padding:12px 14px;color:#475569;">We have prepared a tailored Phase 1 scope ready for review at the link below.</td></tr>`;
-
-  const paymentSchedule = fee ? `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 0;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
-      <tr>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;color:#1e3a5f;font-weight:600;">${escapeHtml(fee.deposit?.label || "Deposit")} (${escapeHtml(fee.deposit?.percent || 10)}%)</td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(fee.deposit?.amount)}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;color:#1e3a5f;font-weight:600;">${escapeHtml(fee.mvp?.label || "MVP milestone")} (${escapeHtml(fee.mvp?.percent || 50)}%)</td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(fee.mvp?.amount)}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 14px;color:#1e3a5f;font-weight:600;">${escapeHtml(fee.final?.label || "Final delivery")} (${escapeHtml(fee.final?.percent || 40)}%)</td>
-        <td style="padding:12px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(fee.final?.amount)}</td>
-      </tr>
-    </table>` : "";
-
-  const subject = `Phase 1 proposal for ${businessName}`;
-  const body = `
-    <p>Hi ${escapeHtml(firstName)},</p>
-    <p>Based on what you shared with us, we have pulled your current key findings and packaged the recommended Phase 1 build into a review-ready proposal for <strong>${escapeHtml(businessName)}</strong>.</p>
-    ${keyFindings ? `<h3 style="margin:24px 0 10px;color:#1e3a5f;">Key findings</h3><p>${escapeHtml(keyFindings)}</p>` : ""}
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">Primary goal</h3>
-    <p>${escapeHtml(primaryGoal)}</p>
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">Phase 1 scope</h3>
-    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin:0 0 16px;">
-      <tr>
-        <th style="padding:12px 14px;background:#f8fafc;color:#1e3a5f;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e2e8f0;">Included item</th>
-        <th style="padding:12px 14px;background:#f8fafc;color:#1e3a5f;text-align:center;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e2e8f0;">Timeline</th>
-        <th style="padding:12px 14px;background:#f8fafc;color:#1e3a5f;text-align:right;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e2e8f0;">Cost</th>
-      </tr>
-      ${itemRows}
-    </table>
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">Investment summary</h3>
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:10px;overflow:hidden;">
-      <tr><td style="padding:10px 14px;color:#475569;">Subtotal (ex GST)</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(totals.subtotalExGst)}</td></tr>
-      <tr><td style="padding:10px 14px;color:#475569;">GST</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(totals.gst)}</td></tr>
-      <tr><td style="padding:10px 14px;color:#1e3a5f;font-weight:700;">Total investment (inc GST)</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-size:16px;font-weight:800;">${formatCurrency(totals.totalIncGst)}</td></tr>
-      <tr><td style="padding:10px 14px;color:#475569;">Estimated build timeline</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${escapeHtml(totals.totalWeeks ? `${totals.totalWeeks} weeks` : "TBC")}</td></tr>
-    </table>
-    ${paymentSchedule}
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">What’s next</h3>
-    <p>You can review the full proposal, check the scope, and move forward here:</p>
-    <p><a href="${proposalUrl}" style="display:inline-block;padding:14px 22px;background:#1e3a5f;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:700;">Review your proposal</a></p>
-    <p style="word-break:break-all;color:#64748b;font-size:12px;">${proposalUrl}</p>
-    <p>If you'd like, we can talk through the scope line by line and adjust the rollout before you confirm.</p>
-    <p>Regards,<br />Aidan Leonard<br />Co-Founder &amp; Business Analyst<br />5to10X</p>
-  `;
-
-  return { subject, body };
-};
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -442,11 +351,6 @@ Perform a THOROUGH technology analysis covering:
       const tplKey = templateKey || 'post_interview_thanks';
       const analysisData = (assessment.discovery_answers as any)?._analysis;
       const techStackData = assessment.tech_stack as any || {};
-
-      if (tplKey === "key_findings_proposal" && latestProposal?.id) {
-        const proposalDraft = buildProposalDraftEmail({
-          contactName: assessment.contact_name || "there",
-          businessName: assessment.business_name || formData.businessName || "your business",
           proposalId: latestProposal.id,
           proposalData: (latestProposal.proposal_data as Record<string, any>) || {},
           analysisSummary: analysisData?.summary,
