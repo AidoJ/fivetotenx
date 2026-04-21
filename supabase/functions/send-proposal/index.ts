@@ -465,6 +465,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: fromField,
         to: [assessment.contact_email],
+        ...(ccList.length > 0 ? { cc: ccList } : {}),
         subject,
         html: emailHtml,
       }),
