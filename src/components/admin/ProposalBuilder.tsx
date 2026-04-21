@@ -486,26 +486,54 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         </div>
       )}
 
-      {/* Key Findings */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-3">
         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-          <FileText className="w-4 h-4 text-primary" /> Key Findings
+          <FileText className="w-4 h-4 text-primary" /> 1. Project Overview
         </h3>
         <Textarea
-          value={keyFindings}
-          onChange={e => setKeyFindings(e.target.value)}
-          rows={4}
+          value={projectOverview}
+          onChange={e => setProjectOverview(e.target.value)}
+          rows={5}
           className="text-xs bg-secondary border-border resize-none"
-          placeholder="Summary of key findings from the analysis…"
+          placeholder="Write the client-facing project overview…"
           disabled={isReadOnly}
         />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+          <div className="rounded-lg border border-border bg-secondary/30 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Annual Impact</p>
+            <p className="text-sm font-bold text-foreground">{formatCurrency(roiResults?.totalAnnualImpact || 0)}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/30 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Projected ROI</p>
+            <p className="text-sm font-bold text-foreground">{Math.round(roiResults?.roiPercentage || 0)}%</p>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/30 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Break-even</p>
+            <p className="text-sm font-bold text-foreground">{Math.round(roiResults?.breakEvenMonths || 0)} months</p>
+          </div>
+          <div className="rounded-lg border border-border bg-secondary/30 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Prepared For</p>
+            <p className="text-sm font-bold text-foreground">{businessName || contactName}</p>
+          </div>
+        </div>
+        <div className="rounded-lg border border-border bg-secondary/20 p-4 space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Key Findings</p>
+          <Textarea
+            value={keyFindings}
+            onChange={e => setKeyFindings(e.target.value)}
+            rows={4}
+            className="text-xs bg-background border-border resize-none"
+            placeholder="Summary of key findings from the analysis…"
+            disabled={isReadOnly}
+          />
+        </div>
       </div>
 
       {/* Build Scope Selector */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" /> Phase 1 — Build Scope
+            <Sparkles className="w-4 h-4 text-primary" /> 2. Build Scope
           </h3>
           <Badge variant="outline" className="text-[10px]">
             {included.length} of {items.length} included
@@ -586,12 +614,84 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         </div>
       </div>
 
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+            <Server className="w-4 h-4 text-primary" /> 3. Recommended Tech Stack
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefreshTechFromTab} disabled={isReadOnly} className="gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Refresh from Tech Stack tab
+            </Button>
+            <Button variant="ghost" size="sm" onClick={addTechRow} disabled={isReadOnly} className="gap-1.5">
+              <Plus className="w-3.5 h-3.5" /> Add tool
+            </Button>
+          </div>
+        </div>
+
+        {techRows.length === 0 ? (
+          <div className="rounded-lg border border-border bg-secondary/20 p-4 text-xs text-muted-foreground">
+            No tech stack rows yet — refresh from the Tech Stack tab or add them manually.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {techRows.map((row, idx) => (
+              <div key={`${row.name}-${idx}`} className="grid grid-cols-12 gap-2 rounded-lg border border-border bg-secondary/20 p-3">
+                <Input value={row.name} onChange={e => updateTechRow(idx, { name: e.target.value })} placeholder="Name" className="col-span-3 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
+                <Input value={row.category} onChange={e => updateTechRow(idx, { category: e.target.value })} placeholder="Category" className="col-span-2 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
+                <Input value={row.purpose} onChange={e => updateTechRow(idx, { purpose: e.target.value })} placeholder="Purpose" className="col-span-4 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
+                <Select value={row.status} onValueChange={(value) => updateTechRow(idx, { status: value as TechStackItem['status'] })} disabled={isReadOnly}>
+                  <SelectTrigger className="col-span-2 h-8 text-xs bg-background border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="keep">Keep</SelectItem>
+                    <SelectItem value="replace">Replace</SelectItem>
+                    <SelectItem value="integrate">Integrate</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="ghost" size="sm" onClick={() => removeTechRow(idx)} disabled={isReadOnly} className="col-span-1 h-8 px-0">
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="w-full text-xs">
+            <thead className="bg-secondary/40 text-muted-foreground uppercase tracking-wider">
+              <tr>
+                <th className="px-3 py-2 text-left">Name</th>
+                <th className="px-3 py-2 text-left">Category</th>
+                <th className="px-3 py-2 text-left">Purpose</th>
+                <th className="px-3 py-2 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {techRows.map((row, idx) => (
+                <tr key={`preview-${row.name}-${idx}`} className="border-t border-border">
+                  <td className="px-3 py-2 font-semibold text-foreground">{row.name || '—'}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{row.category || '—'}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{row.purpose || '—'}</td>
+                  <td className="px-3 py-2">
+                    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${techStatusBadge[row.status || 'keep']}`}>
+                      {row.status || 'keep'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Totals & Fee Structure */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Investment Summary */}
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Calculator className="w-4 h-4 text-primary" /> Investment Summary
+            <Calculator className="w-4 h-4 text-primary" /> 4. Investment Summary
           </h3>
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
@@ -617,7 +717,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         {/* Fee Structure */}
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-primary" /> Proposed Fee Structure
+            <DollarSign className="w-4 h-4 text-primary" /> 4. Payment Schedule
           </h3>
           <div className="space-y-3">
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
@@ -656,6 +756,18 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         </div>
       </div>
 
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+          <FileText className="w-4 h-4 text-primary" /> 5. Initial Engagement Agreement
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          This proposal uses the current master agreement from the legal documents table{legalDoc?.version ? ` (v${legalDoc.version})` : ''}.
+        </p>
+        <div className="max-h-[320px] overflow-y-auto rounded-lg border border-border bg-secondary/20 p-4 text-xs leading-relaxed whitespace-pre-wrap text-foreground">
+          {legalDoc?.content || 'No current agreement found.'}
+        </div>
+      </div>
+
       {/* Stale warning */}
       {existingProposal && (() => {
         const proposalSavedAt = new Date(existingProposal.created_at).getTime();
@@ -687,6 +799,13 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
             <CheckCircle2 className="w-3 h-3 mr-1" />
             Last saved {new Date(existingProposal.created_at).toLocaleDateString('en-AU')}
           </Badge>
+        )}
+        {existingProposal && (
+          <a href={`/proposal/${existingProposal.id}?admin=1`} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Printer className="w-4 h-4" /> Open admin / print
+            </Button>
+          </a>
         )}
         <Button
           variant="ghost"
