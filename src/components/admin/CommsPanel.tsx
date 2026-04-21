@@ -226,7 +226,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
 
       if (draft.templateKey === 'key_findings_proposal') {
         const { data, error } = await supabase.functions.invoke('send-proposal', {
-          body: { assessmentId },
+          body: { assessmentId, cc: ['aidan@5to10x.app', 'eoghan@5to10x.app'] },
         });
         if (error) throw error;
         if (!data?.success || !data?.providerId) throw new Error(data?.error || 'Proposal email was not accepted by the mail provider');
