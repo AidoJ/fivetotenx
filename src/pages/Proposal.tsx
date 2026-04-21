@@ -482,6 +482,8 @@ const Proposal = () => {
 
   const roi = assessment.roi_results as any;
   const businessName = assessment.business_name || 'your business';
+  const showClientEditFlow = !isAdmin && !proposal.accepted && !proposal.superseded_by && initialAction !== 'accept';
+  const showClientAcceptFlow = !isAdmin && !proposal.accepted && !proposal.superseded_by && initialAction === 'accept';
 
   return (
     <>
