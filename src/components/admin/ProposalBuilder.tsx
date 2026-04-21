@@ -322,6 +322,14 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
 
   return (
     <div className="space-y-6">
+      {/* Signed Agreement card (shown once client has signed) */}
+      {existingProposal?.agreement_accepted_at && (
+        <SignedAgreementCard
+          proposal={existingProposal}
+          onCountersigned={() => loadRevisions(existingProposal.id)}
+        />
+      )}
+
       {/* Revisions toolbar */}
       {revisions.length > 0 && (
         <div className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center gap-3">
