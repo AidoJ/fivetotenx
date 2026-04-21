@@ -135,27 +135,30 @@ const BulletList = ({ items }: { items: string[] }) => (
 
 const Proposal = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const urlToken = searchParams.get('t') || '';
+  const initialAction = searchParams.get('action');
   const [proposal, setProposal] = useState<ProposalData | null>(null);
   const [assessment, setAssessment] = useState<AssessmentData | null>(null);
   const [deepDive, setDeepDive] = useState<DeepDiveData | null>(null);
   const [interviews, setInterviews] = useState<InterviewData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [accepting, setAccepting] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [requestingRevision, setRequestingRevision] = useState(false);
+  const [signingOpen, setSigningOpen] = useState(false);
   const [content, setContent] = useState<EditableContent | null>(null);
   // Client-selectable items: indices of items the client has chosen to include
   const [selectedItemIdx, setSelectedItemIdx] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check URL param for admin mode (set when opened from admin dashboard)
     const params = new URLSearchParams(window.location.search);
     if (params.get('admin') === '1') {
       setIsAdmin(true);
     }
-    // Also check Supabase auth session
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) setIsAdmin(true);
     });
@@ -164,6 +167,33 @@ const Proposal = () => {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Validate proposal access token (admins bypass)
+  useEffect(() => {
+    if (!id) return;
+    if (isAdmin) {
+      setTokenValid(true);
+      return;
+    }
+    if (!urlToken) {
+      setTokenValid(false);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from('proposal_tokens')
+        .select('proposal_id, expires_at')
+        .eq('token', urlToken)
+        .eq('proposal_id', id)
+        .maybeSingle();
+      if (data && new Date(data.expires_at) > new Date()) {
+        setTokenValid(true);
+      } else {
+        setTokenValid(false);
+      }
+    })();
+  }, [id, urlToken, isAdmin]);
+
 
   useEffect(() => {
     const fetchData = async () => {
