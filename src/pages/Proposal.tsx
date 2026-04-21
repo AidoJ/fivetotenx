@@ -1014,18 +1014,4 @@ const Proposal = () => {
 
 export default Proposal;
 
-          {/* Footer */}
-          <footer className="border-t border-border pt-6 mt-10 flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="5to10X" className="h-6 opacity-50" />
-              <span>5to10X — App Development & Automation</span>
-            </div>
-            <span>grow@5to10x.app</span>
-          </footer>
-        </div>
-      </div>
-    </>
-  );
-};
-
 export default Proposal;
