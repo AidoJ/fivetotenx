@@ -230,9 +230,7 @@ Deno.serve(async (req) => {
     const contactName = assessment.contact_name || '';
     const firstName = (contactName || 'there').split(' ')[0] || 'there';
 
-    const fallbackOrigin = 'https://5to10x.app';
-    const originHeader = req.headers.get('origin');
-    const refererHeader = req.headers.get('referer');
+    // (origin/referer headers are intentionally ignored — see appOrigin below)
     // Always use the canonical production domain in client-facing emails.
     // Origin/Referer will be the admin's lovable preview URL when sent from
     // the admin app, which would send clients to the wrong site.
