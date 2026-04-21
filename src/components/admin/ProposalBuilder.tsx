@@ -321,6 +321,82 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
 
   return (
     <div className="space-y-6">
+      {/* Revisions toolbar */}
+      {revisions.length > 0 && (
+        <div className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <History className="w-4 h-4 text-primary" />
+            <span className="font-bold text-foreground">Revisions</span>
+            <span>· {revisions.length} total</span>
+          </div>
+          <Select value={selectedRevisionId || ''} onValueChange={(v) => setSelectedRevisionId(v)}>
+            <SelectTrigger className="h-8 w-[280px] text-xs bg-secondary border-border">
+              <SelectValue placeholder="Select revision" />
+            </SelectTrigger>
+            <SelectContent>
+              {revisions.map((r) => {
+                const isLatest = latestRevision?.id === r.id;
+                const sent = r.delivered_at ? new Date(r.delivered_at).toLocaleDateString('en-AU') : null;
+                const accepted = r.accepted ? ' · accepted' : '';
+                return (
+                  <SelectItem key={r.id} value={r.id} className="text-xs">
+                    v{r.revision || 1}
+                    {isLatest ? ' (current)' : ''}
+                    {sent ? ` · sent ${sent}` : ' · draft'}
+                    {accepted}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          {existingProposal && (
+            <a
+              href={`/proposal/${existingProposal.id}?admin=1`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[11px] text-primary hover:underline"
+            >
+              <ExternalLink className="w-3 h-3" /> Open client view
+            </a>
+          )}
+          <div className="ml-auto flex items-center gap-2">
+            {isReadOnly && (
+              <Badge variant="outline" className="text-[10px] gap-1 border-amber-400/50 text-amber-700 bg-amber-500/5">
+                <Eye className="w-3 h-3" /> Read only — superseded
+              </Badge>
+            )}
+            {isLatestSelected && latestIsDelivered && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={handleCreateNewRevision}
+                disabled={creatingRevision}
+                title="Clone this revision into an editable v(n+1) draft. The current version becomes superseded."
+              >
+                {creatingRevision ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                Create new revision
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Read-only banner for superseded / non-latest revisions */}
+      {isReadOnly && existingProposal && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+          <div className="flex-1 text-xs">
+            <p className="font-bold text-amber-700">
+              Viewing v{existingProposal.revision || 1} — read only
+            </p>
+            <p className="text-amber-700/80 mt-0.5">
+              This revision has been superseded by a newer version. Switch to the current revision in the dropdown above to edit, or click <strong>Create new revision</strong> on the latest to start a new draft.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Key Findings */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-3">
         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -332,6 +408,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           rows={4}
           className="text-xs bg-secondary border-border resize-none"
           placeholder="Summary of key findings from the analysis…"
+          disabled={isReadOnly}
         />
       </div>
 
