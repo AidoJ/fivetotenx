@@ -506,6 +506,9 @@ interface ProposalRecord {
   assessment_id: string;
   proposal_data: any;
   sent_at: string;
+  created_at?: string;
+  delivered_at?: string | null;
+  revision?: number;
   accepted: boolean;
   accepted_at: string | null;
 }
@@ -1030,7 +1033,7 @@ const Admin = () => {
         proposal_data: JSON.parse(JSON.stringify(proposalData)),
       }).select().single();
       if (error) throw error;
-      setProposals(prev => [...prev, data as ProposalRecord]);
+      setProposals(prev => [data as ProposalRecord, ...prev]);
       toast({ title: 'Proposal Draft Created ✅', description: 'Synthesised from Reality Check™, Straight Talk™ & opportunity analysis. Opening for review...' });
       window.open(`${window.location.origin}/proposal/${data.id}?admin=1`, '_blank');
     } catch (err: any) {
@@ -1039,7 +1042,17 @@ const Admin = () => {
   };
 
   const handleSendProposal = async (lead: Assessment) => {
-    const existingProposal = proposals.find(p => p.assessment_id === lead.id);
+    const existingProposal = proposals
+      .filter(p => p.assessment_id === lead.id)
+      .sort((a, b) => {
+        const revisionDiff = (b.revision || 1) - (a.revision || 1);
+        if (revisionDiff !== 0) return revisionDiff;
+
+        const createdA = new Date(a.created_at || a.sent_at || 0).getTime();
+        const createdB = new Date(b.created_at || b.sent_at || 0).getTime();
+        return createdB - createdA;
+      })[0];
+
     if (!existingProposal) {
       toast({ title: 'Error', description: 'Please prepare the proposal first.', variant: 'destructive' });
       return;
