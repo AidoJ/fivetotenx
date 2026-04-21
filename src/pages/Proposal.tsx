@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles, Send } from 'lucide-react';
+import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ interface ProposalData {
   sent_at: string;
   accepted: boolean;
   accepted_at: string | null;
+  client_revision_requested_at?: string | null;
+  countersigned_at?: string | null;
   revision?: number;
   superseded_by?: string | null;
 }
@@ -132,6 +134,53 @@ const BulletList = ({ items }: { items: string[] }) => (
     ))}
   </ul>
 );
+
+const ProposalStageTracker = ({ proposal, editMode }: { proposal: ProposalData; editMode: boolean }) => {
+  const activeStage = proposal.countersigned_at
+    ? 4
+    : proposal.accepted
+      ? 3
+      : proposal.superseded_by || proposal.client_revision_requested_at || (proposal.revision || 1) > 1 || editMode
+        ? 2
+        : 1;
+
+  const stages = [
+    { key: 'sent', label: 'Proposal sent', helper: `v${proposal.revision || 1}` },
+    { key: 'scope', label: 'Scope review', helper: proposal.superseded_by ? 'Revised' : 'Select items' },
+    { key: 'sign', label: 'Ready to sign', helper: proposal.accepted ? 'Signed' : 'Awaiting signature' },
+    { key: 'done', label: 'Fully executed', helper: proposal.countersigned_at ? 'Completed' : 'Countersign pending' },
+  ];
+
+  return (
+    <div className="mb-8 rounded-lg border border-border bg-card p-5">
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Proposal status</p>
+          <p className="text-sm text-foreground">Track exactly where this proposal is in the review and sign-off flow.</p>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-4">
+        {stages.map((stage, index) => {
+          const stageNumber = index + 1;
+          const isComplete = stageNumber < activeStage;
+          const isCurrent = stageNumber === activeStage;
+          return (
+            <div
+              key={stage.key}
+              className={`rounded-lg border p-4 ${isComplete || isCurrent ? 'border-primary/30 bg-primary/5' : 'border-border bg-secondary/20'}`}
+            >
+              <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold border border-border bg-background text-foreground">
+                {stageNumber}
+              </div>
+              <p className="text-sm font-semibold text-foreground">{stage.label}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stage.helper}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Proposal = () => {
   const { id } = useParams<{ id: string }>();
@@ -433,6 +482,8 @@ const Proposal = () => {
 
   const roi = assessment.roi_results as any;
   const businessName = assessment.business_name || 'your business';
+  const showClientEditFlow = !isAdmin && !proposal.accepted && !proposal.superseded_by && initialAction !== 'accept';
+  const showClientAcceptFlow = !isAdmin && !proposal.accepted && !proposal.superseded_by && initialAction === 'accept';
 
   return (
     <>
@@ -499,7 +550,7 @@ const Proposal = () => {
 
           {/* Accepted banner */}
           {proposal.accepted && (
-            <div className="flex items-center gap-3 bg-green-500/10 text-green-700 border border-green-500/20 rounded-lg px-5 py-3 mb-8">
+            <div className="flex items-center gap-3 bg-primary/10 text-primary border border-primary/20 rounded-lg px-5 py-3 mb-8">
               <CheckCircle2 className="w-5 h-5" />
               <div>
                 <p className="font-semibold text-sm">Proposal Accepted</p>
@@ -507,6 +558,8 @@ const Proposal = () => {
               </div>
             </div>
           )}
+
+          <ProposalStageTracker proposal={proposal} editMode={showClientEditFlow} />
 
           {/* 1. Project Overview */}
           <section className="mb-10">
@@ -644,7 +697,7 @@ const Proposal = () => {
           </section>
 
           {/* 4b. Build Scope Selector — client picks which items to include */}
-          {hasSelectableItems && (
+          {hasSelectableItems && (isAdmin || showClientEditFlow || proposal.accepted) && (
             <section className="mb-10">
               <SectionTitle icon={Sparkles} number={5} title="Choose Your Build Scope" />
               <div className="bg-card border border-border rounded-lg p-6 space-y-4">
@@ -679,7 +732,7 @@ const Proposal = () => {
                               <span className="text-sm font-bold text-foreground">{item.title}</span>
                               {item._type && (
                                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
-                                  {item._type === 'big_hit' ? '🎯 Big Hit' : '⚡ Quick Win'}
+                                  {item._type === 'big_hit' ? 'Big Hit' : 'Quick Win'}
                                 </span>
                               )}
                               {isLocked && (
@@ -698,11 +751,6 @@ const Proposal = () => {
                                   <Clock className="w-3 h-3" /> {item.weeks}w
                                 </span>
                               )}
-                              {typeof item.estimated_annual_impact === 'number' && item.estimated_annual_impact > 0 && (
-                                <span className="text-muted-foreground">
-                                  ↑ {formatCurrency(item.estimated_annual_impact)}/yr impact
-                                </span>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -711,7 +759,6 @@ const Proposal = () => {
                   })}
                 </div>
 
-                {/* Live selection summary */}
                 <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 mt-2">
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
@@ -725,12 +772,6 @@ const Proposal = () => {
                     </div>
                   </div>
                 </div>
-
-                {!proposal.accepted && (
-                  <p className="text-[11px] text-muted-foreground italic">
-                    Your selection is locked in when you click <strong>Accept Proposal</strong> at the bottom of this page.
-                  </p>
-                )}
               </div>
             </section>
           )}
@@ -934,31 +975,35 @@ const Proposal = () => {
             </div>
           </section>
 
-          {/* Accept / Revise CTA */}
-          {!proposal.accepted && !proposal.superseded_by && (
+          {!proposal.accepted && !proposal.superseded_by && showClientEditFlow && (
             <div className="print:hidden text-center py-8 space-y-4">
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handleRequestRevision}
-                  disabled={requestingRevision}
-                  className="gap-2 text-base px-8 py-6"
-                >
-                  {requestingRevision ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                  Send Me This Revised Proposal
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={openSigning}
-                  className="gap-2 text-base px-10 py-6 bg-green-600 hover:bg-green-700"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  Accept &amp; Sign Proposal
-                </Button>
-              </div>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleRequestRevision}
+                disabled={requestingRevision}
+                className="gap-2 text-base px-8 py-6"
+              >
+                {requestingRevision ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                Send Me This Revised Proposal
+              </Button>
               <p className="text-xs text-muted-foreground max-w-lg mx-auto">
-                <strong>Send revision:</strong> we'll generate a new proposal version reflecting your selections and email it back to you. <strong>Accept &amp; Sign:</strong> opens the engagement agreement for electronic signature.
+                We’ll generate a new revision from your selected scope and email the updated proposal back to you.
+              </p>
+            </div>
+          )}
+          {!proposal.accepted && !proposal.superseded_by && showClientAcceptFlow && (
+            <div className="print:hidden text-center py-8 space-y-4">
+              <Button
+                size="lg"
+                onClick={openSigning}
+                className="gap-2 text-base px-10 py-6"
+              >
+                <CheckCircle2 className="w-5 h-5" />
+                Accept &amp; Sign Proposal
+              </Button>
+              <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+                This opens the engagement agreement and signature flow for this proposal version.
               </p>
             </div>
           )}
