@@ -136,8 +136,11 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { assessmentId, proposalId, previewOnly } = await req.json();
+    const { assessmentId, proposalId, previewOnly, cc } = await req.json();
     if (!assessmentId) throw new Error('assessmentId is required');
+    const ccList: string[] = Array.isArray(cc)
+      ? cc.filter((e: any) => typeof e === 'string' && e.includes('@'))
+      : [];
 
     const { data: assessment, error: assessErr } = await supabase
       .from('roi_assessments')
@@ -462,6 +465,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: fromField,
         to: [assessment.contact_email],
+        ...(ccList.length > 0 ? { cc: ccList } : {}),
         subject,
         html: emailHtml,
       }),
