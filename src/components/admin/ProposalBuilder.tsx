@@ -14,6 +14,7 @@ import {
   Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
   History, Plus, Eye, ExternalLink,
 } from 'lucide-react';
+import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
 
 interface Opportunity {
   title: string;
