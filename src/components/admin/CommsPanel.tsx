@@ -72,6 +72,7 @@ interface SentEmail {
   sentAt: string;
   to: string;
   body?: string;
+  providerId?: string;
 }
 
 type SavedDraftPayload = DraftEmail & {
@@ -228,7 +229,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           body: { assessmentId },
         });
         if (error) throw error;
-        if (!data?.success) throw new Error(data?.error || 'Failed to send secure proposal email');
+        if (!data?.success || !data?.providerId) throw new Error(data?.error || 'Proposal email was not accepted by the mail provider');
 
         sentPayload = {
           templateKey: draft.templateKey,
@@ -236,9 +237,10 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           sentAt: new Date().toISOString(),
           to: lead.contact_email,
           body: data.email?.body || draft.body,
+          providerId: data.providerId,
         };
       } else {
-        const { error } = await supabase.functions.invoke('send-report', {
+        const { data, error } = await supabase.functions.invoke('send-report', {
           body: {
             to: lead.contact_email,
             subject: draft.subject,
@@ -248,6 +250,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           },
         });
         if (error) throw error;
+        if (!data?.success || !data?.id) throw new Error(data?.error || 'Email was not accepted by the mail provider');
 
         sentPayload = {
           templateKey: draft.templateKey,
@@ -255,6 +258,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           sentAt: new Date().toISOString(),
           to: lead.contact_email,
           body: draft.body,
+          providerId: data.id,
         };
       }
 
