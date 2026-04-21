@@ -131,7 +131,9 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
               const draftPayload = parsed as SavedDraftPayload;
               const savedAt = draftPayload.savedAt ? new Date(draftPayload.savedAt).getTime() : new Date(n.created_at).getTime();
               const isStaleProposalDraft = draftPayload.templateKey === 'key_findings_proposal' && latestProposalTs > 0 && savedAt < latestProposalTs;
-              if (isStaleProposalDraft) continue;
+              const isLegacyProposalDraft = draftPayload.templateKey === 'key_findings_proposal'
+                && (!draftPayload.body?.includes('/proposal/') || !draftPayload.body?.toLowerCase().includes('total investment'));
+              if (isStaleProposalDraft || isLegacyProposalDraft) continue;
 
               savedDraft = { subject: draftPayload.subject, body: draftPayload.body, templateKey: draftPayload.templateKey };
               savedDraftNoteId = n.id;
