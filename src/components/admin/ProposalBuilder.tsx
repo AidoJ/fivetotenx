@@ -604,14 +604,14 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           size="sm"
           className="gap-1.5 text-muted-foreground"
           onClick={handleResetToDefaults}
-          disabled={saving || !analysis}
+          disabled={saving || !analysis || isReadOnly}
           title="Discard your manual edits and rebuild items, costs and weeks from the latest AI analysis"
         >
           <RotateCcw className="w-4 h-4" /> Reset to AI defaults
         </Button>
-        <Button size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
+        <Button size="sm" className="gap-1.5" onClick={handleSave} disabled={saving || isReadOnly}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Save Proposal
+          {isReadOnly ? 'Read only' : 'Save Proposal'}
         </Button>
       </div>
     </div>
