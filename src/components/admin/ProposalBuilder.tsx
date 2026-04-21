@@ -476,13 +476,9 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         >
           <RotateCcw className="w-4 h-4" /> Reset to AI defaults
         </Button>
-        <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
+        <Button size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Proposal
-        </Button>
-        <Button size="sm" className="gap-1.5" onClick={handleSend} disabled={sending || !existingProposal}>
-          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          Send to Client
         </Button>
       </div>
     </div>
