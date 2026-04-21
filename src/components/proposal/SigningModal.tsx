@@ -347,17 +347,21 @@ const SigningModal = ({
                     </Button>
                   </div>
                   <div className="border-2 border-dashed border-border rounded-lg bg-white">
-                    {/* @ts-ignore react-signature-canvas types missing penColor in some versions */}
-                    <SignatureCanvas
-                      ref={sigCanvasRef as any}
-                      penColor="#1e3a5f"
-                      onEnd={() => setHasDrawnSignature(!sigCanvasRef.current?.isEmpty())}
-                      canvasProps={{
-                        width: 600,
-                        height: 160,
-                        className: 'w-full h-40 rounded-lg',
-                      }}
-                    />
+                    {(() => {
+                      const SC = SignatureCanvas as any;
+                      return (
+                        <SC
+                          ref={sigCanvasRef}
+                          penColor="#1e3a5f"
+                          onEnd={() => setHasDrawnSignature(!sigCanvasRef.current?.isEmpty())}
+                          canvasProps={{
+                            width: 600,
+                            height: 160,
+                            className: 'w-full h-40 rounded-lg',
+                          }}
+                        />
+                      );
+                    })()}
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-1">
                     Use your mouse or finger to draw your signature in the box above.
