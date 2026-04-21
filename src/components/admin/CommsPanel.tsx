@@ -124,15 +124,16 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
 
         for (const n of data) {
           try {
-            const parsed = JSON.parse(n.content) as SavedDraftPayload;
+            const parsed = JSON.parse(n.content) as SavedDraftPayload | SentEmail;
             if (n.note_type === 'email_sent') {
-              sent.push(parsed);
+              sent.push(parsed as SentEmail);
             } else if (n.note_type === 'email_draft' && !savedDraft) {
-              const savedAt = parsed.savedAt ? new Date(parsed.savedAt).getTime() : new Date(n.created_at).getTime();
-              const isStaleProposalDraft = parsed.templateKey === 'key_findings_proposal' && latestProposalTs > 0 && savedAt < latestProposalTs;
+              const draftPayload = parsed as SavedDraftPayload;
+              const savedAt = draftPayload.savedAt ? new Date(draftPayload.savedAt).getTime() : new Date(n.created_at).getTime();
+              const isStaleProposalDraft = draftPayload.templateKey === 'key_findings_proposal' && latestProposalTs > 0 && savedAt < latestProposalTs;
               if (isStaleProposalDraft) continue;
 
-              savedDraft = { subject: parsed.subject, body: parsed.body, templateKey: parsed.templateKey };
+              savedDraft = { subject: draftPayload.subject, body: draftPayload.body, templateKey: draftPayload.templateKey };
               savedDraftNoteId = n.id;
             }
           } catch {
