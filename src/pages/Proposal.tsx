@@ -17,6 +17,8 @@ interface ProposalData {
   sent_at: string;
   accepted: boolean;
   accepted_at: string | null;
+  revision?: number;
+  superseded_by?: string | null;
 }
 
 interface ProposalItem {
