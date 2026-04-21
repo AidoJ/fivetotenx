@@ -74,6 +74,10 @@ interface SentEmail {
   body?: string;
 }
 
+type SavedDraftPayload = DraftEmail & {
+  savedAt?: string;
+};
+
 const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -90,12 +94,29 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   // Load sent email history + saved drafts
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
-        .from('lead_notes')
-        .select('*')
-        .eq('assessment_id', assessmentId)
-        .in('note_type', ['email_sent', 'email_draft'])
-        .order('created_at', { ascending: false });
+      const [{ data }, { data: proposalRows }] = await Promise.all([
+        supabase
+          .from('lead_notes')
+          .select('*')
+          .eq('assessment_id', assessmentId)
+          .in('note_type', ['email_sent', 'email_draft'])
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('proposals')
+          .select('created_at, delivered_at')
+          .eq('assessment_id', assessmentId)
+          .order('revision', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(1),
+      ]);
+
+      const latestProposalTs = proposalRows?.[0]
+        ? Math.max(
+            new Date(proposalRows[0].created_at || 0).getTime(),
+            new Date(proposalRows[0].delivered_at || 0).getTime(),
+          )
+        : 0;
+
       if (data) {
         const sent: SentEmail[] = [];
         let savedDraft: DraftEmail | null = null;
@@ -103,10 +124,14 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
 
         for (const n of data) {
           try {
-            const parsed = JSON.parse(n.content);
+            const parsed = JSON.parse(n.content) as SavedDraftPayload;
             if (n.note_type === 'email_sent') {
               sent.push(parsed);
             } else if (n.note_type === 'email_draft' && !savedDraft) {
+              const savedAt = parsed.savedAt ? new Date(parsed.savedAt).getTime() : new Date(n.created_at).getTime();
+              const isStaleProposalDraft = parsed.templateKey === 'key_findings_proposal' && latestProposalTs > 0 && savedAt < latestProposalTs;
+              if (isStaleProposalDraft) continue;
+
               savedDraft = { subject: parsed.subject, body: parsed.body, templateKey: parsed.templateKey };
               savedDraftNoteId = n.id;
             }
