@@ -231,7 +231,6 @@ Deno.serve(async (req) => {
       ? `https://5to10x.app/proposal/${proposal.id}?preview=1`
       : `https://5to10x.app/proposal/${proposal.id}?t=${token}`;
     const viewUrl = baseUrl;
-    const acceptUrl = `${baseUrl}&action=accept`;
 
     const subject = isRevised
       ? `[Revised v${revision}] ${firstName}, your updated proposal for ${businessName}`
@@ -332,31 +331,19 @@ Deno.serve(async (req) => {
         <tr>
           <td align="center" style="padding:0 8px 12px;">
             <!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:54px;v-text-anchor:middle;width:240px;" arcsize="20%" stroke="f" fillcolor="${AMBER}">
+            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:54px;v-text-anchor:middle;width:280px;" arcsize="20%" stroke="f" fillcolor="${PURPLE}">
               <w:anchorlock/>
-              <center style="color:#1e293b;font-family:Georgia,serif;font-size:16px;font-weight:bold;">Edit Proposal</center>
+              <center style="color:#ffffff;font-family:Georgia,serif;font-size:16px;font-weight:bold;">View Proposal</center>
             </v:roundrect>
             <![endif]-->
             <!--[if !mso]><!-- -->
-            <a href="${viewUrl}" style="display:inline-block;padding:16px 38px;background:${AMBER};color:#1e293b;text-decoration:none;border-radius:10px;font-weight:800;font-size:15px;border:1px solid #d4a000;">Edit Proposal</a>
-            <!--<![endif]-->
-          </td>
-          <td align="center" style="padding:0 8px 12px;">
-            <!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${acceptUrl}" style="height:54px;v-text-anchor:middle;width:240px;" arcsize="20%" stroke="f" fillcolor="${PURPLE}">
-              <w:anchorlock/>
-              <center style="color:#ffffff;font-family:Georgia,serif;font-size:16px;font-weight:bold;">Accept Proposal</center>
-            </v:roundrect>
-            <![endif]-->
-            <!--[if !mso]><!-- -->
-            <a href="${acceptUrl}" style="display:inline-block;padding:16px 38px;background:${PURPLE};color:#ffffff;text-decoration:none;border-radius:10px;font-weight:800;font-size:15px;border:1px solid ${PURPLE_DARK};">Accept Proposal</a>
+            <a href="${viewUrl}" style="display:inline-block;padding:16px 44px;background:${PURPLE};color:#ffffff;text-decoration:none;border-radius:10px;font-weight:800;font-size:16px;border:1px solid ${PURPLE_DARK};">View Proposal</a>
             <!--<![endif]-->
           </td>
         </tr>
       </table>
       <p style="text-align:center;margin:6px 0 0;color:${MUTED};font-size:12px;line-height:1.6;">
-        <strong>Edit</strong> lets you deselect optional items or request a revision.<br>
-        <strong>Accept</strong> opens the short Initial AI Consultancy Engagement Agreement to sign electronically.
+        Open the proposal to review the scope, then choose <strong>Edit Scope</strong> to adjust items or <strong>Accept &amp; Sign</strong> to approve.
       </p>`;
 
     const emailHtml = `<!DOCTYPE html>
