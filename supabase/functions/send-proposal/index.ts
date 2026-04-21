@@ -5,80 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const fmt = (n: number) => `$${Math.round(n || 0).toLocaleString()}`;
-
-const buildItemsTableHtml = (items: any[]) => {
-  if (!items || items.length === 0) return '';
-  const rows = items.map((it: any) => {
-    const tag = it.locked
-      ? `<span style="display:inline-block;padding:2px 8px;background:#1e3a5f;color:#fff;font-size:10px;border-radius:4px;letter-spacing:0.5px;">INCLUDED</span>`
-      : `<span style="display:inline-block;padding:2px 8px;background:#e0f2fe;color:#075985;font-size:10px;border-radius:4px;letter-spacing:0.5px;">OPTIONAL</span>`;
-    return `
-      <tr>
-        <td style="padding:12px 8px;border-bottom:1px solid #e2e8f0;vertical-align:top;">
-          <div style="color:#1e3a5f;font-weight:600;font-size:14px;margin-bottom:4px;">${it.title || 'Item'}</div>
-          <div>${tag}</div>
-        </td>
-        <td style="padding:12px 8px;border-bottom:1px solid #e2e8f0;text-align:right;color:#1e3a5f;font-weight:600;font-size:14px;white-space:nowrap;vertical-align:top;">
-          ${fmt(it.cost || 0)}
-        </td>
-      </tr>`;
-  }).join('');
-  return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-collapse:collapse;">
-      <thead>
-        <tr>
-          <th style="text-align:left;padding:8px;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #1e3a5f;">Scope Item</th>
-          <th style="text-align:right;padding:8px;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #1e3a5f;">Cost (ex GST)</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-};
-
-const buildSummaryHtml = (totals: any, fee: any) => {
-  if (!totals) return '';
-  return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:#f8fafc;border-radius:10px;overflow:hidden;">
-      <tr>
-        <td style="padding:16px 20px;">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr><td style="color:#64748b;font-size:13px;padding:4px 0;">Subtotal (ex GST)</td><td style="text-align:right;color:#1e3a5f;font-size:13px;font-weight:600;padding:4px 0;">${fmt(totals.subtotalExGst)}</td></tr>
-            <tr><td style="color:#64748b;font-size:13px;padding:4px 0;">GST (10%)</td><td style="text-align:right;color:#1e3a5f;font-size:13px;font-weight:600;padding:4px 0;">${fmt(totals.gst)}</td></tr>
-            <tr><td colspan="2" style="border-top:1px solid #e2e8f0;padding:4px 0;"></td></tr>
-            <tr><td style="color:#1e3a5f;font-size:15px;font-weight:700;padding:6px 0;">Total Investment (inc GST)</td><td style="text-align:right;color:#1e3a5f;font-size:18px;font-weight:700;padding:6px 0;">${fmt(totals.totalIncGst)}</td></tr>
-            ${totals.totalWeeks ? `<tr><td style="color:#64748b;font-size:12px;padding:4px 0;">Estimated build timeline</td><td style="text-align:right;color:#475569;font-size:12px;padding:4px 0;">${totals.totalWeeks} weeks</td></tr>` : ''}
-          </table>
-        </td>
-      </tr>
-    </table>
-    ${fee ? `
-    <p style="color:#1e3a5f;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Payment Schedule</p>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
-      <tr>
-        <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
-          <div style="color:#1e3a5f;font-size:13px;font-weight:600;">${fee.deposit?.label || 'Deposit'} (${fee.deposit?.percent || 10}%)</div>
-        </td>
-        <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;color:#1e3a5f;font-size:14px;font-weight:700;">${fmt(fee.deposit?.amount || 0)}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
-          <div style="color:#1e3a5f;font-size:13px;font-weight:600;">${fee.mvp?.label || 'MVP'} (${fee.mvp?.percent || 50}%)</div>
-        </td>
-        <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;color:#1e3a5f;font-size:14px;font-weight:700;">${fmt(fee.mvp?.amount || 0)}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 16px;">
-          <div style="color:#1e3a5f;font-size:13px;font-weight:600;">${fee.final?.label || 'Final'} (${fee.final?.percent || 40}%)</div>
-        </td>
-        <td style="padding:12px 16px;text-align:right;color:#1e3a5f;font-size:14px;font-weight:700;">${fmt(fee.final?.amount || 0)}</td>
-      </tr>
-    </table>` : ''}
-    <p style="color:#64748b;font-size:12px;line-height:1.6;margin:0 0 24px;font-style:italic;">
-      The figures above assume the full proposed scope. On the proposal page you can deselect any <strong>Optional</strong> items — the totals and payment schedule will update live before you accept.
-    </p>`;
-};
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -149,78 +75,39 @@ Deno.serve(async (req) => {
       proposal = newRow;
     }
 
-    const { data: template } = await supabase
-      .from('email_templates')
-      .select('*')
-      .eq('template_key', 'proposal-email')
+    // Generate a fresh client access token for this proposal.
+    const { data: tokenRow, error: tokenErr } = await supabase
+      .from('proposal_tokens')
+      .insert({ proposal_id: proposal.id })
+      .select('token')
       .single();
+    if (tokenErr || !tokenRow) throw new Error(`Failed to create proposal token: ${tokenErr?.message}`);
+    const token = tokenRow.token;
 
-    const proposalData = (proposal.proposal_data || {}) as any;
-    const items = proposalData.items || [];
-    const totals = proposalData.totals || null;
-    const fee = proposalData.feeStructure || null;
     const revision = proposal.revision || 1;
     const isRevised = revision > 1;
-
-    const proposalUrl = `https://5to10x.app/proposal/${proposal.id}`;
-    const contactName = assessment.contact_name || '';
     const businessName = assessment.business_name || 'your business';
-    const firstName = (contactName || '').split(' ')[0];
-    const revisionLabel = isRevised ? ` (Revised — v${revision})` : '';
+    const contactName = assessment.contact_name || '';
+    const firstName = (contactName || 'there').split(' ')[0] || 'there';
 
-    const itemsTableHtml = buildItemsTableHtml(items);
-    const summaryHtml = buildSummaryHtml(totals, fee);
-    const totalIncGst = totals ? fmt(totals.totalIncGst) : 'Custom';
-    const subtotalExGst = totals ? fmt(totals.subtotalExGst) : '';
-    const gstAmount = totals ? fmt(totals.gst) : '';
-    const depositAmount = fee?.deposit ? fmt(fee.deposit.amount) : '';
-    const mvpAmount = fee?.mvp ? fmt(fee.mvp.amount) : '';
-    const finalAmount = fee?.final ? fmt(fee.final.amount) : '';
-    const totalWeeks = totals?.totalWeeks ? `${totals.totalWeeks} weeks` : '';
+    const baseUrl = `https://5to10x.app/proposal/${proposal.id}?t=${token}`;
+    const viewUrl = baseUrl;
+    const acceptUrl = `${baseUrl}&action=accept`;
 
-    let emailHtml: string;
-    let subject: string;
-    let fromField: string;
+    const subject = isRevised
+      ? `[Revised v${revision}] ${firstName}, your updated proposal for ${businessName}`
+      : `${firstName}, your custom proposal for ${businessName} is ready`;
+
+    const fromField = '5to10X <grow@5to10x.app>';
 
     const revisionBannerHtml = isRevised
       ? `<div style="margin:0 0 20px;padding:12px 16px;background:#fef3c7;border-left:4px solid #d97706;border-radius:6px;">
            <p style="margin:0;color:#92400e;font-size:13px;font-weight:600;">This is a revised proposal (v${revision}).</p>
-           <p style="margin:4px 0 0;color:#92400e;font-size:12px;">It replaces any earlier version we sent. The link below opens this revision.</p>
+           <p style="margin:4px 0 0;color:#92400e;font-size:12px;">It replaces any earlier version we sent. Click below to open the latest version.</p>
          </div>`
       : '';
 
-    if (template) {
-      emailHtml = template.html_body
-        .replace(/\{\{contactName\}\}/g, firstName)
-        .replace(/\{\{businessName\}\}/g, businessName)
-        .replace(/\{\{proposalUrl\}\}/g, proposalUrl)
-        .replace(/\{\{itemsTable\}\}/g, itemsTableHtml)
-        .replace(/\{\{summary\}\}/g, summaryHtml)
-        .replace(/\{\{revisionBanner\}\}/g, revisionBannerHtml)
-        .replace(/\{\{revisionLabel\}\}/g, revisionLabel)
-        .replace(/\{\{totalIncGst\}\}/g, totalIncGst)
-        .replace(/\{\{subtotalExGst\}\}/g, subtotalExGst)
-        .replace(/\{\{gst\}\}/g, gstAmount)
-        .replace(/\{\{deposit\}\}/g, depositAmount)
-        .replace(/\{\{mvp\}\}/g, mvpAmount)
-        .replace(/\{\{final\}\}/g, finalAmount)
-        .replace(/\{\{totalWeeks\}\}/g, totalWeeks)
-        .replace(/\{\{buildRange\}\}/g, totalIncGst);
-      subject = template.subject
-        .replace(/\{\{contactName\}\}/g, firstName)
-        .replace(/\{\{businessName\}\}/g, businessName)
-        .replace(/\{\{revisionLabel\}\}/g, revisionLabel);
-      // If the saved subject doesn't include {{revisionLabel}}, append for revisions.
-      if (isRevised && !subject.includes(`v${revision}`)) {
-        subject = `[Revised v${revision}] ${subject}`;
-      }
-      fromField = `${template.from_name} <${template.from_email}>`;
-    } else {
-      subject = isRevised
-        ? `[Revised v${revision}] ${firstName}, your updated app proposal for ${businessName}`
-        : `${firstName}, your custom app proposal for ${businessName} is ready`;
-      fromField = '5to10X <grow@5to10x.app>';
-      emailHtml = `<!DOCTYPE html>
+    const emailHtml = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;background:#f8fafc;font-family:Georgia,'Times New Roman',serif;">
@@ -236,17 +123,25 @@ Deno.serve(async (req) => {
           <p style="color:#334155;font-size:15px;line-height:1.8;margin:0 0 16px;">Hi ${firstName},</p>
           <p style="color:#334155;font-size:15px;line-height:1.8;margin:0 0 24px;">
             ${isRevised
-              ? `Following our latest discussion, we have updated the proposal for <strong>${businessName}</strong>. Here is the revised scope and investment:`
-              : `Based on your Reality Check™ assessment and Straight Talk™ conversation, we've prepared a tailored proposal for <strong>${businessName}</strong>. Here's the proposed scope and investment:`}
+              ? `Following our latest discussion, we have updated the proposal for <strong>${businessName}</strong>. It is ready for you to review.`
+              : `Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared a tailored Phase 1 proposal for <strong>${businessName}</strong>.`}
           </p>
-          ${itemsTableHtml}
-          ${summaryHtml}
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr><td align="center">
-              <a href="${proposalUrl}" style="display:inline-block;padding:16px 40px;background:#1e3a5f;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:700;font-size:16px;">View &amp; Customise Your Proposal →</a>
-            </td></tr>
+          <p style="color:#334155;font-size:15px;line-height:1.8;margin:0 0 28px;">
+            On the proposal page you can review the full scope, deselect any <strong>optional</strong> items to refine the build, and either request a revision or accept it directly. If you accept, you will be guided through our short Initial AI Consultancy Engagement Agreement and asked to sign electronically.
+          </p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
+            <tr>
+              <td align="center">
+                <a href="${viewUrl}" style="display:inline-block;padding:16px 36px;background:#1e3a5f;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:0 8px 12px;">View &amp; Customise Proposal</a>
+                <a href="${acceptUrl}" style="display:inline-block;padding:16px 36px;background:#16a34a;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:0 8px 12px;">Accept This Proposal →</a>
+              </td>
+            </tr>
           </table>
-          <p style="color:#64748b;font-size:12px;margin:24px 0 0;text-align:center;">Adjust your scope, accept, or print as PDF from the proposal page.</p>
+
+          <p style="color:#94a3b8;font-size:11px;line-height:1.6;margin:24px 0 0;text-align:center;">
+            This personalised link is valid for 14 days. If you have any questions, just reply to this email.
+          </p>
         </td></tr>
         <tr><td style="padding:20px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
           <p style="color:#1e3a5f;font-size:14px;font-weight:700;margin:0 0 4px;">You're not buying tech. You're buying profit.</p>
@@ -257,7 +152,6 @@ Deno.serve(async (req) => {
   </table>
 </body>
 </html>`;
-    }
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -290,6 +184,8 @@ Deno.serve(async (req) => {
       proposalId: proposal.id,
       revision,
       isRevised,
+      token,
+      viewUrl,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
