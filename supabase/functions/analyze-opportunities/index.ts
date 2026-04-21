@@ -12,97 +12,6 @@ const formatCurrency = (value: unknown) => {
   return `$${Math.round(safeAmount).toLocaleString("en-AU")}`;
 };
 
-const escapeHtml = (value: unknown) => String(value ?? "")
-  .replace(/&/g, "&amp;")
-  .replace(/</g, "&lt;")
-  .replace(/>/g, "&gt;")
-  .replace(/\"/g, "&quot;")
-  .replace(/'/g, "&#39;");
-
-const buildProposalDraftEmail = ({
-  contactName,
-  businessName,
-  proposalId,
-  proposalData,
-  analysisSummary,
-}: {
-  contactName: string;
-  businessName: string;
-  proposalId: string;
-  proposalData: Record<string, any>;
-  analysisSummary?: string;
-}) => {
-  const firstName = (contactName || "there").split(" ")[0] || "there";
-  const proposalUrl = `https://5to10x.app/proposal/${proposalId}`;
-  const items = Array.isArray(proposalData.items) ? proposalData.items : [];
-  const totals = proposalData.totals || {};
-  const fee = proposalData.feeStructure || null;
-  const keyFindings = proposalData.keyFindings || analysisSummary || "";
-  const primaryGoal = proposalData.primaryGoal || "Deliver a focused Phase 1 build that removes friction and improves profitability.";
-
-  const itemRows = items.length > 0
-    ? items.map((item: any) => `
-      <tr>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;">
-          <div style="font-weight:700;color:#1e3a5f;">${escapeHtml(item.title || "Phase 1 item")}</div>
-          ${item.recommendation ? `<div style="margin-top:4px;color:#475569;font-size:13px;line-height:1.5;">${escapeHtml(item.recommendation)}</div>` : ""}
-        </td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;text-align:center;color:#475569;font-size:13px;white-space:nowrap;">${escapeHtml(item.weeks ? `${item.weeks} weeks` : "TBC")}</td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;text-align:right;color:#1e3a5f;font-weight:700;white-space:nowrap;">${formatCurrency(item.cost)}</td>
-      </tr>`).join("")
-    : `<tr><td colspan="3" style="padding:12px 14px;color:#475569;">We have prepared a tailored Phase 1 scope ready for review at the link below.</td></tr>`;
-
-  const paymentSchedule = fee ? `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 0;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
-      <tr>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;color:#1e3a5f;font-weight:600;">${escapeHtml(fee.deposit?.label || "Deposit")} (${escapeHtml(fee.deposit?.percent || 10)}%)</td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(fee.deposit?.amount)}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;color:#1e3a5f;font-weight:600;">${escapeHtml(fee.mvp?.label || "MVP milestone")} (${escapeHtml(fee.mvp?.percent || 50)}%)</td>
-        <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(fee.mvp?.amount)}</td>
-      </tr>
-      <tr>
-        <td style="padding:12px 14px;color:#1e3a5f;font-weight:600;">${escapeHtml(fee.final?.label || "Final delivery")} (${escapeHtml(fee.final?.percent || 40)}%)</td>
-        <td style="padding:12px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(fee.final?.amount)}</td>
-      </tr>
-    </table>` : "";
-
-  const subject = `Phase 1 proposal for ${businessName}`;
-  const body = `
-    <p>Hi ${escapeHtml(firstName)},</p>
-    <p>Based on what you shared with us, we have pulled your current key findings and packaged the recommended Phase 1 build into a review-ready proposal for <strong>${escapeHtml(businessName)}</strong>.</p>
-    ${keyFindings ? `<h3 style="margin:24px 0 10px;color:#1e3a5f;">Key findings</h3><p>${escapeHtml(keyFindings)}</p>` : ""}
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">Primary goal</h3>
-    <p>${escapeHtml(primaryGoal)}</p>
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">Phase 1 scope</h3>
-    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin:0 0 16px;">
-      <tr>
-        <th style="padding:12px 14px;background:#f8fafc;color:#1e3a5f;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e2e8f0;">Included item</th>
-        <th style="padding:12px 14px;background:#f8fafc;color:#1e3a5f;text-align:center;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e2e8f0;">Timeline</th>
-        <th style="padding:12px 14px;background:#f8fafc;color:#1e3a5f;text-align:right;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e2e8f0;">Cost</th>
-      </tr>
-      ${itemRows}
-    </table>
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">Investment summary</h3>
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:10px;overflow:hidden;">
-      <tr><td style="padding:10px 14px;color:#475569;">Subtotal (ex GST)</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(totals.subtotalExGst)}</td></tr>
-      <tr><td style="padding:10px 14px;color:#475569;">GST</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${formatCurrency(totals.gst)}</td></tr>
-      <tr><td style="padding:10px 14px;color:#1e3a5f;font-weight:700;">Total investment (inc GST)</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-size:16px;font-weight:800;">${formatCurrency(totals.totalIncGst)}</td></tr>
-      <tr><td style="padding:10px 14px;color:#475569;">Estimated build timeline</td><td style="padding:10px 14px;text-align:right;color:#1e3a5f;font-weight:700;">${escapeHtml(totals.totalWeeks ? `${totals.totalWeeks} weeks` : "TBC")}</td></tr>
-    </table>
-    ${paymentSchedule}
-    <h3 style="margin:24px 0 10px;color:#1e3a5f;">What’s next</h3>
-    <p>You can review the full proposal, check the scope, and move forward here:</p>
-    <p><a href="${proposalUrl}" style="display:inline-block;padding:14px 22px;background:#1e3a5f;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:700;">Review your proposal</a></p>
-    <p style="word-break:break-all;color:#64748b;font-size:12px;">${proposalUrl}</p>
-    <p>If you'd like, we can talk through the scope line by line and adjust the rollout before you confirm.</p>
-    <p>Regards,<br />Aidan Leonard<br />Co-Founder &amp; Business Analyst<br />5to10X</p>
-  `;
-
-  return { subject, body };
-};
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -443,20 +352,6 @@ Perform a THOROUGH technology analysis covering:
       const analysisData = (assessment.discovery_answers as any)?._analysis;
       const techStackData = assessment.tech_stack as any || {};
 
-      if (tplKey === "key_findings_proposal" && latestProposal?.id) {
-        const proposalDraft = buildProposalDraftEmail({
-          contactName: assessment.contact_name || "there",
-          businessName: assessment.business_name || formData.businessName || "your business",
-          proposalId: latestProposal.id,
-          proposalData: (latestProposal.proposal_data as Record<string, any>) || {},
-          analysisSummary: analysisData?.summary,
-        });
-
-        return new Response(JSON.stringify({ success: true, email: proposalDraft }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
       const templatePrompts: Record<string, string> = {
         post_interview_thanks: `Write a professional but warm thank-you email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} after a discovery interview.
 
@@ -471,22 +366,19 @@ The email should:
 
 Format as clean HTML email with proper paragraphs. Use a simple action items table or bullet list for commitments. Include a brief sign-off.`,
 
-        key_findings_proposal: `Write a professional email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} presenting key findings from our analysis and proposing Phase 1.
+        key_findings_proposal: `Write a SHORT, narrative email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} that introduces their personalised proposal.
+
+CRITICAL: Do NOT invent or list scope items, costs, timelines, or payment schedules. The proposal page already contains all of that — your job is to give a brief, warm narrative that points them to it.
 
 The email should:
-1. Open by referencing their key priorities and pain points (from transcripts/discovery)
-2. Present 3-5 KEY FINDINGS that are most important TO THE CLIENT (not just highest $ value — what they said matters most)
-3. For each finding, briefly explain: the problem, the impact, and what we'd build to solve it
-4. Present a clear PRIMARY GOAL for the engagement
-5. Detail PHASE 1 of the proposed build:
-   - What's included in Phase 1
-   - Expected timeline
-   - Key deliverables
-   - How it addresses their top priorities
-6. If tech stack analysis is available, mention key technology choices that support their needs
-7. End with a clear call-to-action (book a call to discuss, or confirm to proceed)
+1. Open with a warm acknowledgement referencing 1-2 specific things they shared (from transcripts or discovery) — show we listened.
+2. State the PRIMARY GOAL of this engagement in one sentence.
+3. Mention 2-3 KEY FINDINGS in one short paragraph each — what we heard, why it matters. Do NOT include $ figures or weeks.
+4. Explain in one sentence that we have prepared a tailored Phase 1 proposal for them to review and adjust.
+5. End with a clear call-to-action: "Click the button below to review your proposal — you can deselect any optional items, request a revision, or accept it directly."
+6. Note: the email's actual proposal link and Accept button are added automatically by the system — do NOT include any URLs, prices, or signature blocks yourself. Just write the body copy.
 
-Format as clean HTML with sections, using bold headings. Make it scannable. Include a "What's Next" section at the end.`,
+Format as clean HTML with <p>, <strong>, and <h3> only. Keep it under 250 words. Sign off as Aidan Leonard, Co-Founder & Business Analyst, 5to10X.`,
 
         project_kickoff: `Write a project kickoff email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} confirming the engagement is starting.
 
