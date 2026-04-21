@@ -351,15 +351,6 @@ Perform a THOROUGH technology analysis covering:
       const tplKey = templateKey || 'post_interview_thanks';
       const analysisData = (assessment.discovery_answers as any)?._analysis;
       const techStackData = assessment.tech_stack as any || {};
-          proposalId: latestProposal.id,
-          proposalData: (latestProposal.proposal_data as Record<string, any>) || {},
-          analysisSummary: analysisData?.summary,
-        });
-
-        return new Response(JSON.stringify({ success: true, email: proposalDraft }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
 
       const templatePrompts: Record<string, string> = {
         post_interview_thanks: `Write a professional but warm thank-you email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} after a discovery interview.
