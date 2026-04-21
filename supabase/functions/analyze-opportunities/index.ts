@@ -375,22 +375,19 @@ The email should:
 
 Format as clean HTML email with proper paragraphs. Use a simple action items table or bullet list for commitments. Include a brief sign-off.`,
 
-        key_findings_proposal: `Write a professional email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} presenting key findings from our analysis and proposing Phase 1.
+        key_findings_proposal: `Write a SHORT, narrative email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} that introduces their personalised proposal.
+
+CRITICAL: Do NOT invent or list scope items, costs, timelines, or payment schedules. The proposal page already contains all of that — your job is to give a brief, warm narrative that points them to it.
 
 The email should:
-1. Open by referencing their key priorities and pain points (from transcripts/discovery)
-2. Present 3-5 KEY FINDINGS that are most important TO THE CLIENT (not just highest $ value — what they said matters most)
-3. For each finding, briefly explain: the problem, the impact, and what we'd build to solve it
-4. Present a clear PRIMARY GOAL for the engagement
-5. Detail PHASE 1 of the proposed build:
-   - What's included in Phase 1
-   - Expected timeline
-   - Key deliverables
-   - How it addresses their top priorities
-6. If tech stack analysis is available, mention key technology choices that support their needs
-7. End with a clear call-to-action (book a call to discuss, or confirm to proceed)
+1. Open with a warm acknowledgement referencing 1-2 specific things they shared (from transcripts or discovery) — show we listened.
+2. State the PRIMARY GOAL of this engagement in one sentence.
+3. Mention 2-3 KEY FINDINGS in one short paragraph each — what we heard, why it matters. Do NOT include $ figures or weeks.
+4. Explain in one sentence that we have prepared a tailored Phase 1 proposal for them to review and adjust.
+5. End with a clear call-to-action: "Click the button below to review your proposal — you can deselect any optional items, request a revision, or accept it directly."
+6. Note: the email's actual proposal link and Accept button are added automatically by the system — do NOT include any URLs, prices, or signature blocks yourself. Just write the body copy.
 
-Format as clean HTML with sections, using bold headings. Make it scannable. Include a "What's Next" section at the end.`,
+Format as clean HTML with <p>, <strong>, and <h3> only. Keep it under 250 words. Sign off as Aidan Leonard, Co-Founder & Business Analyst, 5to10X.`,
 
         project_kickoff: `Write a project kickoff email from Aidan Leonard (Co-Founder & Business Analyst at 5to10X) to ${assessment.contact_name} confirming the engagement is starting.
 

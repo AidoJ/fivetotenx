@@ -94,28 +94,12 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   // Load sent email history + saved drafts
   useEffect(() => {
     const load = async () => {
-      const [{ data }, { data: proposalRows }] = await Promise.all([
-        supabase
-          .from('lead_notes')
-          .select('*')
-          .eq('assessment_id', assessmentId)
-          .in('note_type', ['email_sent', 'email_draft'])
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('proposals')
-          .select('created_at, delivered_at')
-          .eq('assessment_id', assessmentId)
-          .order('revision', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(1),
-      ]);
-
-      const latestProposalTs = proposalRows?.[0]
-        ? Math.max(
-            new Date(proposalRows[0].created_at || 0).getTime(),
-            new Date(proposalRows[0].delivered_at || 0).getTime(),
-          )
-        : 0;
+      const { data } = await supabase
+        .from('lead_notes')
+        .select('*')
+        .eq('assessment_id', assessmentId)
+        .in('note_type', ['email_sent', 'email_draft'])
+        .order('created_at', { ascending: false });
 
       if (data) {
         const sent: SentEmail[] = [];
@@ -129,12 +113,6 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
               sent.push(parsed as SentEmail);
             } else if (n.note_type === 'email_draft' && !savedDraft) {
               const draftPayload = parsed as SavedDraftPayload;
-              const savedAt = draftPayload.savedAt ? new Date(draftPayload.savedAt).getTime() : new Date(n.created_at).getTime();
-              const isStaleProposalDraft = draftPayload.templateKey === 'key_findings_proposal' && latestProposalTs > 0 && savedAt < latestProposalTs;
-              const isLegacyProposalDraft = draftPayload.templateKey === 'key_findings_proposal'
-                && (!draftPayload.body?.includes('/proposal/') || !draftPayload.body?.toLowerCase().includes('total investment'));
-              if (isStaleProposalDraft || isLegacyProposalDraft) continue;
-
               savedDraft = { subject: draftPayload.subject, body: draftPayload.body, templateKey: draftPayload.templateKey };
               savedDraftNoteId = n.id;
             }
