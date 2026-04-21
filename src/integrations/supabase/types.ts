@@ -348,44 +348,148 @@ export type Database = {
           },
         ]
       }
+      legal_documents: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_current: boolean
+          key: string
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          key: string
+          title: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          key?: string
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      proposal_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          proposal_id: string
+          token: string
+          used: boolean
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          proposal_id: string
+          token?: string
+          used?: boolean
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          proposal_id?: string
+          token?: string
+          used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_tokens_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposals: {
         Row: {
           accepted: boolean | null
           accepted_at: string | null
+          agreement_accepted_at: string | null
+          agreement_accepted_items: Json | null
+          agreement_accepted_total: number | null
+          agreement_signer_ip: string | null
+          agreement_signer_name: string | null
+          agreement_signer_signature: string | null
+          agreement_version: string | null
           assessment_id: string
+          client_revision_requested_at: string | null
           client_selection: Json
+          countersigned_at: string | null
+          countersigner_name: string | null
+          countersigner_signature: string | null
           created_at: string
           delivered_at: string | null
           id: string
           proposal_data: Json
           revision: number
           sent_at: string
+          signed_pdf_url: string | null
           superseded_by: string | null
         }
         Insert: {
           accepted?: boolean | null
           accepted_at?: string | null
+          agreement_accepted_at?: string | null
+          agreement_accepted_items?: Json | null
+          agreement_accepted_total?: number | null
+          agreement_signer_ip?: string | null
+          agreement_signer_name?: string | null
+          agreement_signer_signature?: string | null
+          agreement_version?: string | null
           assessment_id: string
+          client_revision_requested_at?: string | null
           client_selection?: Json
+          countersigned_at?: string | null
+          countersigner_name?: string | null
+          countersigner_signature?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: string
           proposal_data?: Json
           revision?: number
           sent_at?: string
+          signed_pdf_url?: string | null
           superseded_by?: string | null
         }
         Update: {
           accepted?: boolean | null
           accepted_at?: string | null
+          agreement_accepted_at?: string | null
+          agreement_accepted_items?: Json | null
+          agreement_accepted_total?: number | null
+          agreement_signer_ip?: string | null
+          agreement_signer_name?: string | null
+          agreement_signer_signature?: string | null
+          agreement_version?: string | null
           assessment_id?: string
+          client_revision_requested_at?: string | null
           client_selection?: Json
+          countersigned_at?: string | null
+          countersigner_name?: string | null
+          countersigner_signature?: string | null
           created_at?: string
           delivered_at?: string | null
           id?: string
           proposal_data?: Json
           revision?: number
           sent_at?: string
+          signed_pdf_url?: string | null
           superseded_by?: string | null
         }
         Relationships: [
