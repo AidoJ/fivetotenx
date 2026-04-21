@@ -559,7 +559,7 @@ const Proposal = () => {
             </div>
           )}
 
-          <ProposalStageTracker proposal={proposal} editMode={showClientEditFlow} />
+          {!showClientEditFlow && <ProposalStageTracker proposal={proposal} editMode={showClientEditFlow} />}
 
           {/* 1. Project Overview */}
           <section className="mb-10">
@@ -878,102 +878,106 @@ const Proposal = () => {
             </div>
           </section>
 
-          {/* 7. Client Responsibilities */}
-          <section className="mb-10">
-            <SectionTitle icon={Users} number={7} title="Client Responsibilities" />
-            <div className="bg-card border border-border rounded-lg p-6">
-              <p className="text-sm text-muted-foreground mb-3">To ensure successful delivery, the Client agrees to:</p>
-              {editing ? (
-                <EditableList items={content.clientResponsibilities} onChange={items => setContent({ ...content, clientResponsibilities: items })} placeholder="Responsibility" />
-              ) : (
-                <BulletList items={content.clientResponsibilities} />
-              )}
-              <p className="text-xs text-muted-foreground mt-4 italic">Delays in providing required information may result in project timeline adjustments.</p>
-            </div>
-          </section>
-
-          {/* Custom Sections */}
-          {content.customSections.map((section, i) => (
-            <section key={`custom-${i}`} className="mb-10">
-              {editing ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Input value={section.title} onChange={e => { const u = [...content.customSections]; u[i] = { ...u[i], title: e.target.value }; setContent({ ...content, customSections: u }); }} className="text-xl font-bold" />
-                    <Button size="sm" variant="destructive" onClick={() => setContent({ ...content, customSections: content.customSections.filter((_, j) => j !== i) })} className="h-8 w-8 p-0"><X className="w-4 h-4" /></Button>
-                  </div>
-                  <Textarea value={section.body} onChange={e => { const u = [...content.customSections]; u[i] = { ...u[i], body: e.target.value }; setContent({ ...content, customSections: u }); }} className="text-sm min-h-[80px]" />
+          {!showClientEditFlow && (
+            <>
+              {/* 7. Client Responsibilities */}
+              <section className="mb-10">
+                <SectionTitle icon={Users} number={7} title="Client Responsibilities" />
+                <div className="bg-card border border-border rounded-lg p-6">
+                  <p className="text-sm text-muted-foreground mb-3">To ensure successful delivery, the Client agrees to:</p>
+                  {editing ? (
+                    <EditableList items={content.clientResponsibilities} onChange={items => setContent({ ...content, clientResponsibilities: items })} placeholder="Responsibility" />
+                  ) : (
+                    <BulletList items={content.clientResponsibilities} />
+                  )}
+                  <p className="text-xs text-muted-foreground mt-4 italic">Delays in providing required information may result in project timeline adjustments.</p>
                 </div>
-              ) : (
-                <>
-                  <h2 className="text-xl font-display font-bold text-foreground mb-4">{section.title}</h2>
+              </section>
+
+              {/* Custom Sections */}
+              {content.customSections.map((section, i) => (
+                <section key={`custom-${i}`} className="mb-10">
+                  {editing ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Input value={section.title} onChange={e => { const u = [...content.customSections]; u[i] = { ...u[i], title: e.target.value }; setContent({ ...content, customSections: u }); }} className="text-xl font-bold" />
+                        <Button size="sm" variant="destructive" onClick={() => setContent({ ...content, customSections: content.customSections.filter((_, j) => j !== i) })} className="h-8 w-8 p-0"><X className="w-4 h-4" /></Button>
+                      </div>
+                      <Textarea value={section.body} onChange={e => { const u = [...content.customSections]; u[i] = { ...u[i], body: e.target.value }; setContent({ ...content, customSections: u }); }} className="text-sm min-h-[80px]" />
+                    </div>
+                  ) : (
+                    <>
+                      <h2 className="text-xl font-display font-bold text-foreground mb-4">{section.title}</h2>
+                      <div className="bg-card border border-border rounded-lg p-6">
+                        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{section.body}</p>
+                      </div>
+                    </>
+                  )}
+                </section>
+              ))}
+              {editing && (
+                <div className="mb-10">
+                  <Button variant="outline" onClick={() => setContent({ ...content, customSections: [...content.customSections, { title: 'New Section', body: '' }] })} className="gap-2 text-sm">+ Add Custom Section</Button>
+                </div>
+              )}
+
+              {/* 8-17: Legal / Terms Sections */}
+              {[
+                { num: 8, icon: Wrench, title: 'Variations', field: 'variations' as const },
+                { num: 9, icon: Shield, title: 'Third-Party Services', field: 'thirdPartyServices' as const },
+                { num: 10, icon: BookOpen, title: 'Intellectual Property', field: 'intellectualProperty' as const },
+                { num: 11, icon: Lock, title: 'Confidentiality', field: 'confidentiality' as const },
+                { num: 12, icon: Shield, title: 'Data Protection', field: 'dataProtection' as const },
+                { num: 13, icon: AlertTriangle, title: 'Limitation of Liability', field: 'limitationOfLiability' as const },
+                { num: 14, icon: DollarSign, title: 'ROI Estimates', field: 'roiDisclaimer' as const },
+                { num: 15, icon: Gavel, title: 'Termination', field: 'termination' as const },
+                { num: 16, icon: Scale, title: 'Governing Law', field: 'governingLaw' as const },
+              ].map(({ num, icon, title, field }) => (
+                <section key={field} className="mb-8">
+                  <SectionTitle icon={icon} number={num} title={title} />
                   <div className="bg-card border border-border rounded-lg p-6">
-                    <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{section.body}</p>
+                    {editing ? (
+                      <Textarea value={content[field]} onChange={e => setContent({ ...content, [field]: e.target.value })} className="text-sm min-h-[80px]" />
+                    ) : (
+                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{content[field]}</p>
+                    )}
                   </div>
-                </>
-              )}
-            </section>
-          ))}
-          {editing && (
-            <div className="mb-10">
-              <Button variant="outline" onClick={() => setContent({ ...content, customSections: [...content.customSections, { title: 'New Section', body: '' }] })} className="gap-2 text-sm">+ Add Custom Section</Button>
-            </div>
+                </section>
+              ))}
+
+              {/* 17. Acceptance */}
+              <section className="mb-10 page-break">
+                <SectionTitle icon={CheckCircle2} number={17} title="Acceptance of Proposal" />
+                <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    By accepting this proposal, the Client confirms they understand the scope and investment, agree to the terms outlined in this document, and authorise the Developer to commence work upon receipt of the deposit.
+                  </p>
+
+                  {proposal.accepted ? (
+                    <div className="flex items-center gap-3 bg-green-500/10 text-green-700 border border-green-500/20 rounded-lg px-5 py-4">
+                      <CheckCircle2 className="w-6 h-6" />
+                      <div>
+                        <p className="font-bold">Accepted by {assessment.contact_name}</p>
+                        {proposal.accepted_at && <p className="text-sm opacity-80">{formatDate(proposal.accepted_at)}</p>}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="print:hidden grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-border">
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Client</p>
+                        <p className="text-sm text-foreground font-semibold">{assessment.contact_name}</p>
+                        <p className="text-sm text-muted-foreground">{businessName}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Developer</p>
+                        <p className="text-sm text-foreground font-semibold">5to10X</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            </>
           )}
-
-          {/* 8-17: Legal / Terms Sections */}
-          {[
-            { num: 8, icon: Wrench, title: 'Variations', field: 'variations' as const },
-            { num: 9, icon: Shield, title: 'Third-Party Services', field: 'thirdPartyServices' as const },
-            { num: 10, icon: BookOpen, title: 'Intellectual Property', field: 'intellectualProperty' as const },
-            { num: 11, icon: Lock, title: 'Confidentiality', field: 'confidentiality' as const },
-            { num: 12, icon: Shield, title: 'Data Protection', field: 'dataProtection' as const },
-            { num: 13, icon: AlertTriangle, title: 'Limitation of Liability', field: 'limitationOfLiability' as const },
-            { num: 14, icon: DollarSign, title: 'ROI Estimates', field: 'roiDisclaimer' as const },
-            { num: 15, icon: Gavel, title: 'Termination', field: 'termination' as const },
-            { num: 16, icon: Scale, title: 'Governing Law', field: 'governingLaw' as const },
-          ].map(({ num, icon, title, field }) => (
-            <section key={field} className="mb-8">
-              <SectionTitle icon={icon} number={num} title={title} />
-              <div className="bg-card border border-border rounded-lg p-6">
-                {editing ? (
-                  <Textarea value={content[field]} onChange={e => setContent({ ...content, [field]: e.target.value })} className="text-sm min-h-[80px]" />
-                ) : (
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{content[field]}</p>
-                )}
-              </div>
-            </section>
-          ))}
-
-          {/* 17. Acceptance */}
-          <section className="mb-10 page-break">
-            <SectionTitle icon={CheckCircle2} number={17} title="Acceptance of Proposal" />
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                By accepting this proposal, the Client confirms they understand the scope and investment, agree to the terms outlined in this document, and authorise the Developer to commence work upon receipt of the deposit.
-              </p>
-
-              {proposal.accepted ? (
-                <div className="flex items-center gap-3 bg-green-500/10 text-green-700 border border-green-500/20 rounded-lg px-5 py-4">
-                  <CheckCircle2 className="w-6 h-6" />
-                  <div>
-                    <p className="font-bold">Accepted by {assessment.contact_name}</p>
-                    {proposal.accepted_at && <p className="text-sm opacity-80">{formatDate(proposal.accepted_at)}</p>}
-                  </div>
-                </div>
-              ) : (
-                <div className="print:hidden grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-border">
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Client</p>
-                    <p className="text-sm text-foreground font-semibold">{assessment.contact_name}</p>
-                    <p className="text-sm text-muted-foreground">{businessName}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Developer</p>
-                    <p className="text-sm text-foreground font-semibold">5to10X</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
 
           {!proposal.accepted && !proposal.superseded_by && showClientEditFlow && (
             <div className="print:hidden text-center py-8 space-y-4">
