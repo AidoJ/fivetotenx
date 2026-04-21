@@ -109,41 +109,58 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     })) as BuildItem[];
   };
 
-  // Load existing proposal first; fall back to building from analysis if none saved.
+  // Load all revisions for this assessment, hydrate the latest by default.
+  const loadRevisions = async (preferredId?: string | null) => {
+    const { data: rows } = await supabase
+      .from('proposals')
+      .select('*')
+      .eq('assessment_id', assessmentId)
+      .order('revision', { ascending: false })
+      .order('created_at', { ascending: false });
+    const list = rows || [];
+    setRevisions(list);
+    if (list.length === 0) {
+      setSelectedRevisionId(null);
+      return null;
+    }
+    const targetId = preferredId && list.some(r => r.id === preferredId)
+      ? preferredId
+      : list[0].id; // newest by revision
+    setSelectedRevisionId(targetId);
+    return list.find(r => r.id === targetId) || list[0];
+  };
+
+  const hydrateFromProposalRow = (row: any) => {
+    const pData = (row?.proposal_data as any) || {};
+    if (Array.isArray(pData.items) && pData.items.length > 0) {
+      setKeyFindings(pData.keyFindings || analysis?.summary || '');
+      setItems((pData.items as any[]).map((i: any) => ({
+        title: i.title,
+        impact_category: i.impact_category,
+        estimated_annual_impact: i.estimated_annual_impact,
+        difficulty: i.difficulty,
+        explanation: i.explanation,
+        recommendation: i.recommendation,
+        included: true,
+        estimatedCost: typeof i.cost === 'number' ? i.cost : autoEstimateCost(i, totalImpact, buildCostMid),
+        estimatedWeeks: typeof i.weeks === 'number' ? i.weeks : (difficultyWeeks[i.difficulty] || 4),
+        manualCost: '',
+        manualWeeks: '',
+        _type: i._type || 'big_hit',
+        locked: !!i.locked,
+      })));
+    }
+  };
+
+  // Initial load: revisions + hydrate the selected one (or fall back to analysis).
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: existing } = await supabase
-        .from('proposals')
-        .select('*')
-        .eq('assessment_id', assessmentId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const target = await loadRevisions();
       if (cancelled) return;
-
-      if (existing && existing.proposal_data && Array.isArray((existing.proposal_data as any).items) && (existing.proposal_data as any).items.length > 0) {
-        // Hydrate from saved proposal_data so admin edits persist across mounts.
-        setExistingProposal(existing);
-        const pData = existing.proposal_data as any;
-        setKeyFindings(pData.keyFindings || analysis?.summary || '');
-        setItems((pData.items as any[]).map((i: any) => ({
-          title: i.title,
-          impact_category: i.impact_category,
-          estimated_annual_impact: i.estimated_annual_impact,
-          difficulty: i.difficulty,
-          explanation: i.explanation,
-          recommendation: i.recommendation,
-          included: true,
-          estimatedCost: typeof i.cost === 'number' ? i.cost : autoEstimateCost(i, totalImpact, buildCostMid),
-          estimatedWeeks: typeof i.weeks === 'number' ? i.weeks : (difficultyWeeks[i.difficulty] || 4),
-          manualCost: '',
-          manualWeeks: '',
-          _type: i._type || 'big_hit',
-          locked: !!i.locked,
-        })));
+      if (target && target.proposal_data && Array.isArray((target.proposal_data as any).items) && (target.proposal_data as any).items.length > 0) {
+        hydrateFromProposalRow(target);
       } else if (analysis) {
-        if (existing) setExistingProposal(existing);
         setItems(buildItemsFromAnalysis());
         setKeyFindings(analysis.summary || '');
       }
@@ -151,6 +168,40 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assessmentId, analysis]);
+
+  // When the user picks a different revision in the dropdown, re-hydrate the editor.
+  useEffect(() => {
+    if (existingProposal) hydrateFromProposalRow(existingProposal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRevisionId]);
+
+  const handleCreateNewRevision = async () => {
+    if (!latestRevision) return;
+    const newRev = (latestRevision.revision || 1) + 1;
+    if (!window.confirm(`Create revision v${newRev}? It will be cloned from the latest revision and become an editable draft. The previous revision will be marked as superseded.`)) return;
+    setCreatingRevision(true);
+    try {
+      const { data: newRow, error } = await supabase
+        .from('proposals')
+        .insert({
+          assessment_id: assessmentId,
+          proposal_data: latestRevision.proposal_data || {},
+          client_selection: {},
+          revision: newRev,
+          accepted: false,
+          accepted_at: null,
+        })
+        .select()
+        .single();
+      if (error || !newRow) throw new Error(error?.message || 'Failed to create revision');
+      await supabase.from('proposals').update({ superseded_by: newRow.id }).eq('id', latestRevision.id);
+      await loadRevisions(newRow.id);
+      toast({ title: `Revision v${newRev} created`, description: 'Edit and Save, then send from the Comms tab.' });
+    } catch (err: any) {
+      toast({ title: 'Failed to create revision', description: err.message, variant: 'destructive' });
+    }
+    setCreatingRevision(false);
+  };
 
   const handleResetToDefaults = () => {
     if (!analysis) return;
