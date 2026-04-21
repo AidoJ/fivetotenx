@@ -94,14 +94,19 @@ export const maybeAutoRegenerateProposal = async (assessmentId: string): Promise
       .single();
     if (!settings?.auto_regenerate_proposal_on_analysis_update) return false;
 
+    // Only auto-regenerate the latest non-superseded, undelivered draft.
+    // Once a proposal has been delivered, edits should create a new revision via Send.
     const { data: proposal } = await supabase
       .from('proposals')
-      .select('id')
+      .select('id, delivered_at, superseded_by')
       .eq('assessment_id', assessmentId)
+      .is('superseded_by', null)
+      .order('revision', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
     if (!proposal) return false;
+    if (proposal.delivered_at) return false; // never overwrite a sent revision
 
     const { data: assessment } = await supabase
       .from('roi_assessments')
