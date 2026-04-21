@@ -284,16 +284,20 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         manually_edited_at: new Date().toISOString(),
       };
 
+      let savedId: string | null = null;
       if (existingProposal) {
         await supabase.from('proposals').update({ proposal_data: proposalData as any }).eq('id', existingProposal.id);
-        setExistingProposal({ ...existingProposal, proposal_data: proposalData });
+        savedId = existingProposal.id;
       } else {
         const { data } = await supabase.from('proposals').insert({
           assessment_id: assessmentId,
           proposal_data: proposalData as any,
+          revision: 1,
         }).select().single();
-        if (data) setExistingProposal(data);
+        if (data) savedId = data.id;
       }
+      // Re-pull all revisions so dropdown reflects latest state.
+      await loadRevisions(savedId);
       toast({ title: 'Proposal saved ✅' });
       const reran = await maybeAutoRerunTechStack(assessmentId);
       if (reran) {
@@ -303,24 +307,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
       toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
-  };
-
-  const handleSend = async () => {
-    if (!existingProposal) {
-      toast({ title: 'Save the proposal first', variant: 'destructive' });
-      return;
-    }
-    setSending(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('send-proposal', {
-        body: { assessmentId, proposalId: existingProposal.id },
-      });
-      if (error) throw error;
-      toast({ title: 'Proposal sent to client ✅' });
-    } catch (err: any) {
-      toast({ title: 'Send failed', description: err.message, variant: 'destructive' });
-    }
-    setSending(false);
   };
 
   if (!analysis) {
