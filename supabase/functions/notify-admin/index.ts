@@ -141,6 +141,70 @@ Deno.serve(async (req) => {
         `;
         break;
 
+      case 'proposal_revision_requested': {
+        shouldNotify = true;
+        const sel = details?.selectedItems as Array<{ title: string; cost: number }> | undefined;
+        const itemsRows = Array.isArray(sel) && sel.length
+          ? sel.map(s => `<tr><td style="padding: 4px 0; color: #555;">${s.title}</td><td style="padding: 4px 0; text-align: right; color: #1a1a2e; font-weight: 600;">$${(s.cost || 0).toLocaleString()}</td></tr>`).join('')
+          : '';
+        const totalLine = details?.totalIncGst != null
+          ? `<p style="font-size: 16px; color: #1a1a2e; margin: 12px 0 4px;"><strong>Requested total:</strong> $${Number(details.totalIncGst).toLocaleString()} inc GST</p>`
+          : '';
+        subject = `✏️ Revised Proposal Requested: ${leadName || 'Unknown'} — ${businessName || 'Unknown Business'}`;
+        bodyHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #1a1a2e; color: white; padding: 20px 25px; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0; font-size: 20px;">✏️ Client Requested a Revised Proposal</h1>
+            </div>
+            <div style="padding: 25px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+              <p style="font-size: 16px; color: #333;"><strong>${leadName || 'Unknown'}</strong> has refined the scope and asked us to send a revised proposal.</p>
+              <table style="width: 100%; margin: 15px 0; font-size: 14px; color: #555;">
+                <tr><td style="padding: 5px 0;"><strong>Business:</strong></td><td>${businessName || '—'}</td></tr>
+                <tr><td style="padding: 5px 0;"><strong>Email:</strong></td><td>${leadEmail || '—'}</td></tr>
+                ${details?.itemsSelected != null ? `<tr><td style="padding: 5px 0;"><strong>Selected:</strong></td><td>${details.itemsSelected} of ${details.itemsOffered} items · ~${details.totalWeeks ?? '?'} weeks</td></tr>` : ''}
+              </table>
+              ${itemsRows ? `<table style="width: 100%; margin: 8px 0 12px; font-size: 13px; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">${itemsRows}</table>` : ''}
+              ${totalLine}
+              <p style="font-size: 13px; color: #555; margin: 12px 0;">Open the lead in Admin, review the new selection, then click <strong>Send Proposal</strong> to issue the revised version.</p>
+              <a href="https://fivetotenx.lovable.app/admin" style="display: inline-block; background: #d97706; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;">Review &amp; Send Revision</a>
+            </div>
+          </div>
+        `;
+        break;
+      }
+
+      case 'agreement_signed': {
+        shouldNotify = true;
+        const totalLine = details?.totalIncGst != null
+          ? `<p style="font-size: 16px; color: #1a1a2e; margin: 12px 0 4px;"><strong>Signed amount:</strong> $${Number(details.totalIncGst).toLocaleString()} inc GST</p>`
+          : '';
+        const pdfLine = details?.signedPdfUrl
+          ? `<p style="margin: 12px 0;"><a href="${details.signedPdfUrl}" style="color: #1789CE; text-decoration: underline;">📄 Download client-signed agreement (PDF)</a></p>`
+          : '';
+        subject = `✍️ Client Signed Agreement: ${leadName || 'Unknown'} — ${businessName || 'Unknown Business'}`;
+        bodyHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #1a1a2e; color: white; padding: 20px 25px; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0; font-size: 20px;">✍️ Engagement Agreement Signed by Client</h1>
+            </div>
+            <div style="padding: 25px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+              <p style="font-size: 16px; color: #333;"><strong>${leadName || 'Unknown'}</strong> has accepted the proposal and signed the Initial AI Consultancy Engagement Agreement.</p>
+              <table style="width: 100%; margin: 15px 0; font-size: 14px; color: #555;">
+                <tr><td style="padding: 5px 0;"><strong>Business:</strong></td><td>${businessName || '—'}</td></tr>
+                <tr><td style="padding: 5px 0;"><strong>Email:</strong></td><td>${leadEmail || '—'}</td></tr>
+                ${details?.signerName ? `<tr><td style="padding: 5px 0;"><strong>Signed by:</strong></td><td>${details.signerName}</td></tr>` : ''}
+                ${details?.signedAt ? `<tr><td style="padding: 5px 0;"><strong>Signed at:</strong></td><td>${new Date(details.signedAt).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}</td></tr>` : ''}
+              </table>
+              ${totalLine}
+              ${pdfLine}
+              <p style="font-size: 14px; color: #d97706; font-weight: bold; margin-top: 16px;">⚠️ Action required: Aidan to countersign in the Admin Proposals tab.</p>
+              <a href="https://fivetotenx.lovable.app/admin" style="display: inline-block; background: #1789CE; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;">Open Admin to Countersign</a>
+            </div>
+          </div>
+        `;
+        break;
+      }
+
       default:
         return new Response(JSON.stringify({ success: false, error: `Unknown event type: ${eventType}` }), {
           status: 400,
