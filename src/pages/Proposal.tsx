@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles, Send } from 'lucide-react';
+import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ interface ProposalData {
   sent_at: string;
   accepted: boolean;
   accepted_at: string | null;
+  client_revision_requested_at?: string | null;
+  countersigned_at?: string | null;
   revision?: number;
   superseded_by?: string | null;
 }
@@ -132,6 +134,53 @@ const BulletList = ({ items }: { items: string[] }) => (
     ))}
   </ul>
 );
+
+const ProposalStageTracker = ({ proposal, editMode }: { proposal: ProposalData; editMode: boolean }) => {
+  const activeStage = proposal.countersigned_at
+    ? 4
+    : proposal.accepted
+      ? 3
+      : proposal.superseded_by || proposal.client_revision_requested_at || (proposal.revision || 1) > 1 || editMode
+        ? 2
+        : 1;
+
+  const stages = [
+    { key: 'sent', label: 'Proposal sent', helper: `v${proposal.revision || 1}` },
+    { key: 'scope', label: 'Scope review', helper: proposal.superseded_by ? 'Revised' : 'Select items' },
+    { key: 'sign', label: 'Ready to sign', helper: proposal.accepted ? 'Signed' : 'Awaiting signature' },
+    { key: 'done', label: 'Fully executed', helper: proposal.countersigned_at ? 'Completed' : 'Countersign pending' },
+  ];
+
+  return (
+    <div className="mb-8 rounded-lg border border-border bg-card p-5">
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Proposal status</p>
+          <p className="text-sm text-foreground">Track exactly where this proposal is in the review and sign-off flow.</p>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-4">
+        {stages.map((stage, index) => {
+          const stageNumber = index + 1;
+          const isComplete = stageNumber < activeStage;
+          const isCurrent = stageNumber === activeStage;
+          return (
+            <div
+              key={stage.key}
+              className={`rounded-lg border p-4 ${isComplete || isCurrent ? 'border-primary/30 bg-primary/5' : 'border-border bg-secondary/20'}`}
+            >
+              <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold border border-border bg-background text-foreground">
+                {stageNumber}
+              </div>
+              <p className="text-sm font-semibold text-foreground">{stage.label}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stage.helper}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Proposal = () => {
   const { id } = useParams<{ id: string }>();
