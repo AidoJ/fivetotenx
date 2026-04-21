@@ -67,9 +67,26 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const { toast } = useToast();
   const [items, setItems] = useState<BuildItem[]>([]);
   const [saving, setSaving] = useState(false);
-  const [sending, setSending] = useState(false);
   const [keyFindings, setKeyFindings] = useState('');
-  const [existingProposal, setExistingProposal] = useState<any>(null);
+  const [revisions, setRevisions] = useState<any[]>([]);
+  const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
+  const [creatingRevision, setCreatingRevision] = useState(false);
+
+  // The currently-loaded proposal row (selected via dropdown).
+  const existingProposal = useMemo(
+    () => revisions.find(r => r.id === selectedRevisionId) || null,
+    [revisions, selectedRevisionId],
+  );
+
+  // Latest revision = highest revision number, regardless of superseded.
+  const latestRevision = useMemo(() => {
+    if (revisions.length === 0) return null;
+    return [...revisions].sort((a, b) => (b.revision || 1) - (a.revision || 1))[0];
+  }, [revisions]);
+
+  const isLatestSelected = !!existingProposal && !!latestRevision && existingProposal.id === latestRevision.id;
+  const isReadOnly = !!existingProposal && (!isLatestSelected || !!existingProposal.superseded_by);
+  const latestIsDelivered = !!latestRevision?.delivered_at;
 
   const buildCostMid = roiResults?.pricing?.buildCost || 15000;
   const totalImpact = analysis?.total_potential_impact || roiResults?.totalAnnualImpact || 0;
