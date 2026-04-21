@@ -143,12 +143,18 @@ Deno.serve(async (req) => {
       .eq('id', proposalId);
 
     // 6. Regenerate the tech stack so it matches the revised build scope.
-    //    Non-blocking: if it fails we still send the revised proposal.
+    //    AWAIT this so the revised proposal email includes the updated tech stack.
+    //    The new scope was persisted in step 5, so analyze-opportunities will pick
+    //    it up from latestProposal.proposal_data.items.
     try {
-      const { error: techErr } = await supabase.functions.invoke('analyze-opportunities', {
+      const { data: techData, error: techErr } = await supabase.functions.invoke('analyze-opportunities', {
         body: { assessmentId: prop.assessment_id, mode: 'tech_stack' },
       });
-      if (techErr) console.error('Tech stack regen failed (non-fatal):', techErr);
+      if (techErr) {
+        console.error('Tech stack regen failed (non-fatal):', techErr);
+      } else {
+        console.log('Tech stack regenerated for revised scope at:', (techData as any)?.techStack?.generated_at);
+      }
     } catch (e) {
       console.error('Tech stack regen threw (non-fatal):', e);
     }

@@ -157,16 +157,28 @@ ${notesText || "No internal notes."}`;
     if (mode === "tech_stack") {
       const analysisData = (assessment.discovery_answers as any)?._analysis;
 
+      // Pull the CURRENT selected build scope from the latest proposal so the
+      // tech stack reflects what the client has actually agreed to build.
+      const proposalData: any = latestProposal?.proposal_data || {};
+      const scopeItems: any[] = Array.isArray(proposalData.items) ? proposalData.items : [];
+      const scopeContext = scopeItems.length > 0
+        ? `\nCURRENT AGREED BUILD SCOPE (from latest proposal revision ${latestProposal?.revision ?? ''}):
+${scopeItems.map((it: any, idx: number) => `${idx + 1}. ${it.title}${it.recommendation ? ` — ${it.recommendation}` : ''}${it.cost ? ` (build cost ${formatCurrency(it.cost)})` : ''}`).join('\n')}
+
+IMPORTANT: Tailor the tech stack STRICTLY to deliver these scoped items. Do not recommend tools for opportunities the client has DESELECTED. If a previously-recommended tool is no longer needed because the related scope item was dropped, omit it.`
+        : '';
+
       const techPrompt = `You are a senior solutions architect and technology consultant for 5to10X, specialising in automation, compliance, and data security for ${assessment.industry || 'various'} industries.
 
 ${clientContext}
 
 ${existingToolsContext ? `\nEXISTING TOOLS & PLATFORMS THE CLIENT ALREADY USES:\n${existingToolsContext}` : ''}
 
-${analysisData ? `\nOPPORTUNITY ANALYSIS (already completed):
+${analysisData ? `\nOPPORTUNITY ANALYSIS (full set considered):
 Summary: ${analysisData.summary || 'N/A'}
 Big 5 opportunities: ${(analysisData.big_hits || []).map((h: any) => `${h.title}: ${h.recommendation}`).join('; ')}
 Quick wins: ${(analysisData.quick_wins || []).map((h: any) => `${h.title}: ${h.recommendation}`).join('; ')}` : ''}
+${scopeContext}
 
 ${customPrompt ? `\nADDITIONAL CONTEXT FROM ADMIN:\n${customPrompt}` : ''}
 
