@@ -227,9 +227,22 @@ Deno.serve(async (req) => {
     const contactName = assessment.contact_name || '';
     const firstName = (contactName || 'there').split(' ')[0] || 'there';
 
+    const fallbackOrigin = 'https://5to10x.app';
+    const originHeader = req.headers.get('origin');
+    const refererHeader = req.headers.get('referer');
+    const appOrigin = (() => {
+      try {
+        if (originHeader && /^https?:\/\//.test(originHeader)) return new URL(originHeader).origin;
+        if (refererHeader && /^https?:\/\//.test(refererHeader)) return new URL(refererHeader).origin;
+      } catch {
+        // fall back to the canonical site below
+      }
+      return fallbackOrigin;
+    })();
+
     const baseUrl = previewOnly
-      ? `https://5to10x.app/proposal/${proposal.id}?preview=1`
-      : `https://5to10x.app/proposal/${proposal.id}?t=${token}`;
+      ? `${appOrigin}/proposal/${proposal.id}?preview=1`
+      : `${appOrigin}/proposal/${proposal.id}?t=${token}`;
     const viewUrl = baseUrl;
 
     const subject = isRevised

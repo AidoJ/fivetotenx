@@ -175,6 +175,7 @@ const Proposal = () => {
   const urlToken = searchParams.get('t') || '';
   const initialAction = searchParams.get('action'); // 'edit' | 'accept' | null
   const isAdminQuery = searchParams.get('admin') === '1';
+  const forceClientView = searchParams.get('client') === '1';
 
   const { toast } = useToast();
   const [proposal, setProposal] = useState<ProposalRow | null>(null);
@@ -319,7 +320,7 @@ const Proposal = () => {
   }, [proposalItems, selectedItemIdx]);
 
   // Determine the active mode
-  const mode: Mode = isAdminUser ? 'admin' : clientMode;
+  const mode: Mode = !forceClientView && isAdminUser ? 'admin' : clientMode;
 
   // Auto-open signing modal in accept mode
   useEffect(() => {
@@ -572,7 +573,11 @@ const Proposal = () => {
                 <p className="font-bold text-amber-700">This proposal has been replaced by a newer version</p>
                 <p className="text-amber-700/80 mt-1">
                   You're viewing v{proposal.revision || 1}. A revised proposal has been sent — please check your inbox for the latest version, or{' '}
-                  <a href={`/proposal/${proposal.superseded_by}${urlToken ? '' : ''}`} className="underline font-medium">view the latest revision</a>.
+                  {forceClientView && isAdminUser ? (
+                    <a href={`/proposal/${proposal.superseded_by}?client=1`} className="underline font-medium">view the latest revision</a>
+                  ) : (
+                    'use the latest link from your email'
+                  )}.
                 </p>
               </div>
             </div>
