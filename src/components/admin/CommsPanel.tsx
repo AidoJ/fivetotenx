@@ -221,25 +221,43 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
     if (!draft || !lead) return;
     setSending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-report', {
-        body: {
-          to: lead.contact_email,
-          subject: draft.subject,
-          html: draft.body,
-          fromName: 'Aidan Leonard',
-          cc: ['aidan@5to10x.app', 'eoghan@5to10x.app'],
-        },
-      });
-      if (error) throw error;
+      let sentPayload: SentEmail;
 
-      // Record sent email with full body
-      const sentPayload: SentEmail = {
-        templateKey: draft.templateKey,
-        subject: draft.subject,
-        sentAt: new Date().toISOString(),
-        to: lead.contact_email,
-        body: draft.body,
-      };
+      if (draft.templateKey === 'key_findings_proposal') {
+        const { data, error } = await supabase.functions.invoke('send-proposal', {
+          body: { assessmentId },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'Failed to send secure proposal email');
+
+        sentPayload = {
+          templateKey: draft.templateKey,
+          subject: data.email?.subject || draft.subject,
+          sentAt: new Date().toISOString(),
+          to: lead.contact_email,
+          body: data.email?.body || draft.body,
+        };
+      } else {
+        const { error } = await supabase.functions.invoke('send-report', {
+          body: {
+            to: lead.contact_email,
+            subject: draft.subject,
+            html: draft.body,
+            fromName: 'Aidan Leonard',
+            cc: ['aidan@5to10x.app', 'eoghan@5to10x.app'],
+          },
+        });
+        if (error) throw error;
+
+        sentPayload = {
+          templateKey: draft.templateKey,
+          subject: draft.subject,
+          sentAt: new Date().toISOString(),
+          to: lead.contact_email,
+          body: draft.body,
+        };
+      }
+
       await supabase.from('lead_notes').insert({
         assessment_id: assessmentId,
         note_type: 'email_sent',
