@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Loader2, Save, DollarSign, Clock, FileText,
   Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
-  History, Plus, Eye, ExternalLink,
+  History, Plus, Eye, ExternalLink, Server, Printer,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
 
@@ -37,6 +37,13 @@ interface BuildItem extends Opportunity {
   locked?: boolean;
 }
 
+interface TechStackItem {
+  name: string;
+  category: string;
+  purpose: string;
+  status: 'keep' | 'replace' | 'integrate';
+}
+
 interface Props {
   assessmentId: string;
   analysis: { big_hits: Opportunity[]; quick_wins: Opportunity[]; summary: string; total_potential_impact: number; generated_at?: string } | null;
@@ -44,7 +51,7 @@ interface Props {
   contactName: string;
   businessName: string;
   contactEmail: string;
-  techStack?: { generated_at?: string } | null;
+  techStack?: any;
 }
 
 const GST_RATE = 0.10;
@@ -64,11 +71,51 @@ const autoEstimateCost = (opp: Opportunity, totalImpact: number, buildCostMid: n
   return Math.max(2000, Math.round(share * buildCostMid / 500) * 500);
 };
 
+const deriveTechStackRows = (techStack: any): TechStackItem[] => {
+  if (!techStack || typeof techStack !== 'object') return [];
+  if (Array.isArray(techStack.proposal_rows)) {
+    return (techStack.proposal_rows as TechStackItem[]).filter((row) => row && row.name);
+  }
+
+  const rows: TechStackItem[] = [];
+  const audit = Array.isArray(techStack.existing_tools_audit) ? techStack.existing_tools_audit : [];
+  audit.forEach((tool: any) => {
+    const verdict = String(tool.verdict || 'keep').toLowerCase();
+    rows.push({
+      name: tool.tool_name || 'Unnamed tool',
+      category: tool.category || 'Existing Tool',
+      purpose: tool.current_use || tool.reasoning || '',
+      status: verdict === 'replace' ? 'replace' : verdict === 'integrate' ? 'integrate' : 'keep',
+    });
+  });
+
+  const recommendations = Array.isArray(techStack.recommended_tools) ? techStack.recommended_tools : [];
+  recommendations.forEach((tool: any) => {
+    rows.push({
+      name: tool.primary_recommendation || tool.category || 'Recommended tool',
+      category: tool.category || 'New',
+      purpose: tool.alternatives ? `Alternatives: ${tool.alternatives}` : '',
+      status: 'integrate',
+    });
+  });
+
+  return rows;
+};
+
+const techStatusBadge: Record<TechStackItem['status'], string> = {
+  keep: 'bg-green-500/10 text-green-700 border-green-500/30',
+  replace: 'bg-red-500/10 text-red-700 border-red-500/30',
+  integrate: 'bg-blue-500/10 text-blue-700 border-blue-500/30',
+};
+
 const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, contactName, businessName, contactEmail, techStack }) => {
   const { toast } = useToast();
   const [items, setItems] = useState<BuildItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [keyFindings, setKeyFindings] = useState('');
+  const [projectOverview, setProjectOverview] = useState('');
+  const [techRows, setTechRows] = useState<TechStackItem[]>([]);
+  const [legalDoc, setLegalDoc] = useState<{ content: string; version: string } | null>(null);
   const [revisions, setRevisions] = useState<any[]>([]);
   const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
   const [creatingRevision, setCreatingRevision] = useState(false);
@@ -133,6 +180,13 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
 
   const hydrateFromProposalRow = (row: any) => {
     const pData = (row?.proposal_data as any) || {};
+    setProjectOverview(
+      typeof pData.projectOverview === 'string' && pData.projectOverview.trim().length > 0
+        ? pData.projectOverview
+        : `Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared a Phase 1 build for ${businessName || 'this client'}, focused on the highest-leverage opportunities identified in the analysis.`
+    );
+    const savedTechRows = Array.isArray(pData.techStackRows) ? pData.techStackRows as TechStackItem[] : null;
+    setTechRows(savedTechRows && savedTechRows.length > 0 ? savedTechRows : deriveTechStackRows(techStack));
     if (Array.isArray(pData.items) && pData.items.length > 0) {
       setKeyFindings(pData.keyFindings || analysis?.summary || '');
       setItems((pData.items as any[]).map((i: any) => ({
@@ -157,18 +211,31 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const target = await loadRevisions();
+      const [target, legalRes] = await Promise.all([
+        loadRevisions(),
+        supabase
+          .from('legal_documents')
+          .select('content, version')
+          .eq('key', 'initial-engagement')
+          .eq('is_current', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
       if (cancelled) return;
+      if (legalRes.data) setLegalDoc(legalRes.data as { content: string; version: string });
       if (target && target.proposal_data && Array.isArray((target.proposal_data as any).items) && (target.proposal_data as any).items.length > 0) {
         hydrateFromProposalRow(target);
       } else if (analysis) {
         setItems(buildItemsFromAnalysis());
         setKeyFindings(analysis.summary || '');
+        setProjectOverview(`Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared a Phase 1 build for ${businessName || 'this client'}, focused on the highest-leverage opportunities identified in the analysis.`);
+        setTechRows(deriveTechStackRows(techStack));
       }
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assessmentId, analysis]);
+  }, [assessmentId, analysis, businessName, techStack]);
 
   // When the user picks a different revision in the dropdown, re-hydrate the editor.
   useEffect(() => {
@@ -248,6 +315,17 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
   };
 
+  const updateTechRow = (idx: number, patch: Partial<TechStackItem>) => {
+    setTechRows((prev) => prev.map((row, rowIdx) => rowIdx === idx ? { ...row, ...patch } : row));
+  };
+
+  const addTechRow = () => setTechRows((prev) => [...prev, { name: '', category: '', purpose: '', status: 'keep' }]);
+  const removeTechRow = (idx: number) => setTechRows((prev) => prev.filter((_, rowIdx) => rowIdx !== idx));
+  const handleRefreshTechFromTab = () => {
+    setTechRows(deriveTechStackRows(techStack));
+    toast({ title: 'Tech stack refreshed', description: 'Click Save Proposal to keep these rows.' });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -256,6 +334,8 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
       const proposalData = {
         ...existingData,
         keyFindings,
+        projectOverview,
+        techStackRows: techRows,
         items: included.map(i => ({
           title: i.title,
           impact_category: i.impact_category,
