@@ -142,10 +142,21 @@ Deno.serve(async (req) => {
       .update({ proposal_data: newProposalData })
       .eq('id', proposalId);
 
-    // 6. Invoke send-proposal — this clones to a new revision (because delivered_at is set),
+    // 6. Regenerate the tech stack so it matches the revised build scope.
+    //    Non-blocking: if it fails we still send the revised proposal.
+    try {
+      const { error: techErr } = await supabase.functions.invoke('analyze-opportunities', {
+        body: { assessmentId: prop.assessment_id, mode: 'tech_stack' },
+      });
+      if (techErr) console.error('Tech stack regen failed (non-fatal):', techErr);
+    } catch (e) {
+      console.error('Tech stack regen threw (non-fatal):', e);
+    }
+
+    // 7. Invoke send-proposal — this clones to a new revision (because delivered_at is set),
     //    generates a fresh access token, and emails the client the revised proposal.
     const { data: sendResult, error: sendErr } = await supabase.functions.invoke('send-proposal', {
-      body: { assessmentId: prop.assessment_id, proposalId },
+      body: { assessmentId: prop.assessment_id, proposalId, cc: ['aidan@5to10x.app', 'eoghan@5to10x.app'] },
     });
 
     if (sendErr) {
