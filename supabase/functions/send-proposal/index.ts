@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { assessmentId, proposalId } = await req.json();
+    const { assessmentId, proposalId, previewOnly } = await req.json();
     if (!assessmentId) throw new Error('assessmentId is required');
 
     const { data: assessment, error: assessErr } = await supabase
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
 
     // Revision logic: if the targeted proposal has already been delivered,
     // clone it into a new revision so the previously-sent version stays intact.
-    if (proposal.delivered_at) {
+    if (proposal.delivered_at && !previewOnly) {
       // For the diff, the "previous" is the one we're about to clone from.
       previousProposal = { proposal_data: proposal.proposal_data, revision: proposal.revision || 1 };
 
@@ -213,14 +213,18 @@ Deno.serve(async (req) => {
       proposal = newRow;
     }
 
-    // Generate a fresh client access token for this proposal.
-    const { data: tokenRow, error: tokenErr } = await supabase
-      .from('proposal_tokens')
-      .insert({ proposal_id: proposal.id })
-      .select('token')
-      .single();
-    if (tokenErr || !tokenRow) throw new Error(`Failed to create proposal token: ${tokenErr?.message}`);
-    const token = tokenRow.token;
+    // Generate a fresh client access token for sent emails only.
+    const token = previewOnly
+      ? 'preview'
+      : await (async () => {
+          const { data: tokenRow, error: tokenErr } = await supabase
+            .from('proposal_tokens')
+            .insert({ proposal_id: proposal.id })
+            .select('token')
+            .single();
+          if (tokenErr || !tokenRow) throw new Error(`Failed to create proposal token: ${tokenErr?.message}`);
+          return tokenRow.token;
+        })();
 
     const revision = proposal.revision || 1;
     const isRevised = revision > 1;
@@ -228,7 +232,9 @@ Deno.serve(async (req) => {
     const contactName = assessment.contact_name || '';
     const firstName = (contactName || 'there').split(' ')[0] || 'there';
 
-    const baseUrl = `https://5to10x.app/proposal/${proposal.id}?t=${token}`;
+    const baseUrl = previewOnly
+      ? `https://5to10x.app/proposal/${proposal.id}?preview=1`
+      : `https://5to10x.app/proposal/${proposal.id}?t=${token}`;
     const viewUrl = baseUrl;
     const acceptUrl = `${baseUrl}&action=accept`;
 
@@ -434,6 +440,24 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
+    if (previewOnly) {
+      return new Response(JSON.stringify({
+        success: true,
+        proposalId: proposal.id,
+        revision,
+        isRevised,
+        viewUrl,
+        itemsIncluded: includedCount,
+        itemsRemoved: removedItems.length,
+        email: {
+          subject,
+          body: emailHtml,
+        },
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -468,6 +492,10 @@ Deno.serve(async (req) => {
       viewUrl,
       itemsIncluded: includedCount,
       itemsRemoved: removedItems.length,
+      email: {
+        subject,
+        body: emailHtml,
+      },
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
