@@ -403,8 +403,33 @@ const Proposal = () => {
     setContent({ ...content, paymentStructure: updated });
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
-  if (!proposal || !assessment || !content) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Proposal not found.</p></div>;
+  // Auto-open signing modal when ?action=accept arrives via the email CTA.
+  useEffect(() => {
+    if (initialAction === 'accept' && tokenValid && !loading && proposal && !proposal.accepted && !proposal.superseded_by) {
+      setSigningOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAction, tokenValid, loading, proposal?.id]);
+
+  if (loading || tokenValid === null) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+  if (!proposal || !assessment || !content) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Proposal not found.</p></div>;
+  }
+  if (!isAdmin && tokenValid === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="max-w-md text-center space-y-3">
+          <Lock className="w-10 h-10 text-muted-foreground mx-auto" />
+          <h1 className="text-2xl font-bold text-foreground">Access link required</h1>
+          <p className="text-sm text-muted-foreground">
+            This proposal can only be opened from the personalised link we emailed you. If your link has expired or you can't find the email, please reply to <a href="mailto:grow@5to10x.app" className="underline">grow@5to10x.app</a> and we'll send you a fresh one.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const roi = assessment.roi_results as any;
   const businessName = assessment.business_name || 'your business';
