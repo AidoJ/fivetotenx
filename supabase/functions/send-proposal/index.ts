@@ -6,9 +6,9 @@ const corsHeaders = {
 };
 
 // Brand colours (match landing page pipeline)
-const PURPLE = '#4a1a3d';      // Accept Proposal — dark plum
-const PURPLE_DARK = '#3a1430';
-const AMBER = '#f5b700';       // Edit Proposal — gold
+const PURPLE = '#6d3ce8';      // Accept Proposal — vibrant violet (matches pipeline)
+const PURPLE_DARK = '#5a2dd1';
+const AMBER = '#f59e0b';       // Edit Proposal — warm orange
 const NAVY = '#1e3a5f';
 const TEXT = '#334155';
 const MUTED = '#64748b';
@@ -75,11 +75,6 @@ const renderItemCard = (item: any, opts: { removed?: boolean } = {}) => {
         <tr>
           <td style="vertical-align:top;">
             <div style="font-size:15px;font-weight:700;${titleStyle}line-height:1.35;margin:0 0 8px;">${escapeHtml(item.title || 'Untitled item')}</div>
-            <div style="margin:0 0 10px;">
-              ${impactBadge(item.impact_category || '')}
-              ${difficultyBadge(item.difficulty || '')}
-              ${impactValueBadge(Number(item.estimated_annual_impact) || 0)}
-            </div>
           </td>
           <td style="vertical-align:top;text-align:right;white-space:nowrap;padding-left:12px;">
             ${removedTag}
