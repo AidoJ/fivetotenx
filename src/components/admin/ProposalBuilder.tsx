@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Loader2, Save, DollarSign, Clock, FileText,
   Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
-  History, Plus, Eye, ExternalLink, Server, Printer,
+  History, Plus, Eye, ExternalLink, Server, Printer, X,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
 
