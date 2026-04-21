@@ -355,9 +355,12 @@ export type Database = {
           assessment_id: string
           client_selection: Json
           created_at: string
+          delivered_at: string | null
           id: string
           proposal_data: Json
+          revision: number
           sent_at: string
+          superseded_by: string | null
         }
         Insert: {
           accepted?: boolean | null
@@ -365,9 +368,12 @@ export type Database = {
           assessment_id: string
           client_selection?: Json
           created_at?: string
+          delivered_at?: string | null
           id?: string
           proposal_data?: Json
+          revision?: number
           sent_at?: string
+          superseded_by?: string | null
         }
         Update: {
           accepted?: boolean | null
@@ -375,9 +381,12 @@ export type Database = {
           assessment_id?: string
           client_selection?: Json
           created_at?: string
+          delivered_at?: string | null
           id?: string
           proposal_data?: Json
+          revision?: number
           sent_at?: string
+          superseded_by?: string | null
         }
         Relationships: [
           {
@@ -385,6 +394,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "roi_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "proposals"
             referencedColumns: ["id"]
           },
         ]

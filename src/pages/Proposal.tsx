@@ -17,6 +17,8 @@ interface ProposalData {
   sent_at: string;
   accepted: boolean;
   accepted_at: string | null;
+  revision?: number;
+  superseded_by?: string | null;
 }
 
 interface ProposalItem {
@@ -410,6 +412,18 @@ const Proposal = () => {
 
       <div className="min-h-screen bg-background text-foreground [--muted-foreground:230_20%_25%]">
         <div className="max-w-3xl mx-auto px-8 py-12">
+          {proposal.superseded_by && (
+            <div className="print:hidden mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+              <div className="flex-1 text-sm">
+                <p className="font-bold text-amber-700">This proposal has been replaced by a newer version</p>
+                <p className="text-amber-700/80 mt-1">
+                  You're viewing v{proposal.revision || 1}. A revised proposal has been sent — please check your inbox for the latest version, or{' '}
+                  <a href={`/proposal/${proposal.superseded_by}`} className="underline font-medium">view the latest revision</a>.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -870,13 +884,20 @@ const Proposal = () => {
           </section>
 
           {/* Accept CTA */}
-          {!proposal.accepted && (
+          {!proposal.accepted && !proposal.superseded_by && (
             <div className="print:hidden text-center py-8">
               <Button size="lg" onClick={handleAccept} disabled={accepting} className="gap-2 text-base px-10 py-6">
                 {accepting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 Accept Proposal
               </Button>
               <p className="text-xs text-muted-foreground mt-3">By accepting, you agree to the terms outlined above.</p>
+            </div>
+          )}
+          {!proposal.accepted && proposal.superseded_by && (
+            <div className="print:hidden text-center py-8">
+              <p className="text-sm text-muted-foreground">
+                Acceptance is disabled — a revised proposal has been issued. Please use the latest version.
+              </p>
             </div>
           )}
 

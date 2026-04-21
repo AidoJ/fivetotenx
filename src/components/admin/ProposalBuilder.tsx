@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Loader2, Save, Send, DollarSign, Clock, FileText,
+  Loader2, Save, DollarSign, Clock, FileText,
   Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
+  History, Plus, Eye, ExternalLink,
 } from 'lucide-react';
 
 interface Opportunity {
@@ -65,9 +67,26 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const { toast } = useToast();
   const [items, setItems] = useState<BuildItem[]>([]);
   const [saving, setSaving] = useState(false);
-  const [sending, setSending] = useState(false);
   const [keyFindings, setKeyFindings] = useState('');
-  const [existingProposal, setExistingProposal] = useState<any>(null);
+  const [revisions, setRevisions] = useState<any[]>([]);
+  const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
+  const [creatingRevision, setCreatingRevision] = useState(false);
+
+  // The currently-loaded proposal row (selected via dropdown).
+  const existingProposal = useMemo(
+    () => revisions.find(r => r.id === selectedRevisionId) || null,
+    [revisions, selectedRevisionId],
+  );
+
+  // Latest revision = highest revision number, regardless of superseded.
+  const latestRevision = useMemo(() => {
+    if (revisions.length === 0) return null;
+    return [...revisions].sort((a, b) => (b.revision || 1) - (a.revision || 1))[0];
+  }, [revisions]);
+
+  const isLatestSelected = !!existingProposal && !!latestRevision && existingProposal.id === latestRevision.id;
+  const isReadOnly = !!existingProposal && (!isLatestSelected || !!existingProposal.superseded_by);
+  const latestIsDelivered = !!latestRevision?.delivered_at;
 
   const buildCostMid = roiResults?.pricing?.buildCost || 15000;
   const totalImpact = analysis?.total_potential_impact || roiResults?.totalAnnualImpact || 0;
@@ -90,41 +109,58 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     })) as BuildItem[];
   };
 
-  // Load existing proposal first; fall back to building from analysis if none saved.
+  // Load all revisions for this assessment, hydrate the latest by default.
+  const loadRevisions = async (preferredId?: string | null) => {
+    const { data: rows } = await supabase
+      .from('proposals')
+      .select('*')
+      .eq('assessment_id', assessmentId)
+      .order('revision', { ascending: false })
+      .order('created_at', { ascending: false });
+    const list = rows || [];
+    setRevisions(list);
+    if (list.length === 0) {
+      setSelectedRevisionId(null);
+      return null;
+    }
+    const targetId = preferredId && list.some(r => r.id === preferredId)
+      ? preferredId
+      : list[0].id; // newest by revision
+    setSelectedRevisionId(targetId);
+    return list.find(r => r.id === targetId) || list[0];
+  };
+
+  const hydrateFromProposalRow = (row: any) => {
+    const pData = (row?.proposal_data as any) || {};
+    if (Array.isArray(pData.items) && pData.items.length > 0) {
+      setKeyFindings(pData.keyFindings || analysis?.summary || '');
+      setItems((pData.items as any[]).map((i: any) => ({
+        title: i.title,
+        impact_category: i.impact_category,
+        estimated_annual_impact: i.estimated_annual_impact,
+        difficulty: i.difficulty,
+        explanation: i.explanation,
+        recommendation: i.recommendation,
+        included: true,
+        estimatedCost: typeof i.cost === 'number' ? i.cost : autoEstimateCost(i, totalImpact, buildCostMid),
+        estimatedWeeks: typeof i.weeks === 'number' ? i.weeks : (difficultyWeeks[i.difficulty] || 4),
+        manualCost: '',
+        manualWeeks: '',
+        _type: i._type || 'big_hit',
+        locked: !!i.locked,
+      })));
+    }
+  };
+
+  // Initial load: revisions + hydrate the selected one (or fall back to analysis).
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: existing } = await supabase
-        .from('proposals')
-        .select('*')
-        .eq('assessment_id', assessmentId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const target = await loadRevisions();
       if (cancelled) return;
-
-      if (existing && existing.proposal_data && Array.isArray((existing.proposal_data as any).items) && (existing.proposal_data as any).items.length > 0) {
-        // Hydrate from saved proposal_data so admin edits persist across mounts.
-        setExistingProposal(existing);
-        const pData = existing.proposal_data as any;
-        setKeyFindings(pData.keyFindings || analysis?.summary || '');
-        setItems((pData.items as any[]).map((i: any) => ({
-          title: i.title,
-          impact_category: i.impact_category,
-          estimated_annual_impact: i.estimated_annual_impact,
-          difficulty: i.difficulty,
-          explanation: i.explanation,
-          recommendation: i.recommendation,
-          included: true,
-          estimatedCost: typeof i.cost === 'number' ? i.cost : autoEstimateCost(i, totalImpact, buildCostMid),
-          estimatedWeeks: typeof i.weeks === 'number' ? i.weeks : (difficultyWeeks[i.difficulty] || 4),
-          manualCost: '',
-          manualWeeks: '',
-          _type: i._type || 'big_hit',
-          locked: !!i.locked,
-        })));
+      if (target && target.proposal_data && Array.isArray((target.proposal_data as any).items) && (target.proposal_data as any).items.length > 0) {
+        hydrateFromProposalRow(target);
       } else if (analysis) {
-        if (existing) setExistingProposal(existing);
         setItems(buildItemsFromAnalysis());
         setKeyFindings(analysis.summary || '');
       }
@@ -132,6 +168,40 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assessmentId, analysis]);
+
+  // When the user picks a different revision in the dropdown, re-hydrate the editor.
+  useEffect(() => {
+    if (existingProposal) hydrateFromProposalRow(existingProposal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRevisionId]);
+
+  const handleCreateNewRevision = async () => {
+    if (!latestRevision) return;
+    const newRev = (latestRevision.revision || 1) + 1;
+    if (!window.confirm(`Create revision v${newRev}? It will be cloned from the latest revision and become an editable draft. The previous revision will be marked as superseded.`)) return;
+    setCreatingRevision(true);
+    try {
+      const { data: newRow, error } = await supabase
+        .from('proposals')
+        .insert({
+          assessment_id: assessmentId,
+          proposal_data: latestRevision.proposal_data || {},
+          client_selection: {},
+          revision: newRev,
+          accepted: false,
+          accepted_at: null,
+        })
+        .select()
+        .single();
+      if (error || !newRow) throw new Error(error?.message || 'Failed to create revision');
+      await supabase.from('proposals').update({ superseded_by: newRow.id }).eq('id', latestRevision.id);
+      await loadRevisions(newRow.id);
+      toast({ title: `Revision v${newRev} created`, description: 'Edit and Save, then send from the Comms tab.' });
+    } catch (err: any) {
+      toast({ title: 'Failed to create revision', description: err.message, variant: 'destructive' });
+    }
+    setCreatingRevision(false);
+  };
 
   const handleResetToDefaults = () => {
     if (!analysis) return;
@@ -214,16 +284,20 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         manually_edited_at: new Date().toISOString(),
       };
 
+      let savedId: string | null = null;
       if (existingProposal) {
         await supabase.from('proposals').update({ proposal_data: proposalData as any }).eq('id', existingProposal.id);
-        setExistingProposal({ ...existingProposal, proposal_data: proposalData });
+        savedId = existingProposal.id;
       } else {
         const { data } = await supabase.from('proposals').insert({
           assessment_id: assessmentId,
           proposal_data: proposalData as any,
+          revision: 1,
         }).select().single();
-        if (data) setExistingProposal(data);
+        if (data) savedId = data.id;
       }
+      // Re-pull all revisions so dropdown reflects latest state.
+      await loadRevisions(savedId);
       toast({ title: 'Proposal saved ✅' });
       const reran = await maybeAutoRerunTechStack(assessmentId);
       if (reran) {
@@ -233,24 +307,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
       toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
-  };
-
-  const handleSend = async () => {
-    if (!existingProposal) {
-      toast({ title: 'Save the proposal first', variant: 'destructive' });
-      return;
-    }
-    setSending(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('send-proposal', {
-        body: { assessmentId, proposalId: existingProposal.id },
-      });
-      if (error) throw error;
-      toast({ title: 'Proposal sent to client ✅' });
-    } catch (err: any) {
-      toast({ title: 'Send failed', description: err.message, variant: 'destructive' });
-    }
-    setSending(false);
   };
 
   if (!analysis) {
@@ -265,6 +321,82 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
 
   return (
     <div className="space-y-6">
+      {/* Revisions toolbar */}
+      {revisions.length > 0 && (
+        <div className="rounded-xl border border-border bg-card p-4 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <History className="w-4 h-4 text-primary" />
+            <span className="font-bold text-foreground">Revisions</span>
+            <span>· {revisions.length} total</span>
+          </div>
+          <Select value={selectedRevisionId || ''} onValueChange={(v) => setSelectedRevisionId(v)}>
+            <SelectTrigger className="h-8 w-[280px] text-xs bg-secondary border-border">
+              <SelectValue placeholder="Select revision" />
+            </SelectTrigger>
+            <SelectContent>
+              {revisions.map((r) => {
+                const isLatest = latestRevision?.id === r.id;
+                const sent = r.delivered_at ? new Date(r.delivered_at).toLocaleDateString('en-AU') : null;
+                const accepted = r.accepted ? ' · accepted' : '';
+                return (
+                  <SelectItem key={r.id} value={r.id} className="text-xs">
+                    v{r.revision || 1}
+                    {isLatest ? ' (current)' : ''}
+                    {sent ? ` · sent ${sent}` : ' · draft'}
+                    {accepted}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          {existingProposal && (
+            <a
+              href={`/proposal/${existingProposal.id}?admin=1`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[11px] text-primary hover:underline"
+            >
+              <ExternalLink className="w-3 h-3" /> Open client view
+            </a>
+          )}
+          <div className="ml-auto flex items-center gap-2">
+            {isReadOnly && (
+              <Badge variant="outline" className="text-[10px] gap-1 border-amber-400/50 text-amber-700 bg-amber-500/5">
+                <Eye className="w-3 h-3" /> Read only — superseded
+              </Badge>
+            )}
+            {isLatestSelected && latestIsDelivered && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={handleCreateNewRevision}
+                disabled={creatingRevision}
+                title="Clone this revision into an editable v(n+1) draft. The current version becomes superseded."
+              >
+                {creatingRevision ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                Create new revision
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Read-only banner for superseded / non-latest revisions */}
+      {isReadOnly && existingProposal && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+          <div className="flex-1 text-xs">
+            <p className="font-bold text-amber-700">
+              Viewing v{existingProposal.revision || 1} — read only
+            </p>
+            <p className="text-amber-700/80 mt-0.5">
+              This revision has been superseded by a newer version. Switch to the current revision in the dropdown above to edit, or click <strong>Create new revision</strong> on the latest to start a new draft.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Key Findings */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-3">
         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -276,6 +408,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           rows={4}
           className="text-xs bg-secondary border-border resize-none"
           placeholder="Summary of key findings from the analysis…"
+          disabled={isReadOnly}
         />
       </div>
 
@@ -471,14 +604,14 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           size="sm"
           className="gap-1.5 text-muted-foreground"
           onClick={handleResetToDefaults}
-          disabled={saving || !analysis}
+          disabled={saving || !analysis || isReadOnly}
           title="Discard your manual edits and rebuild items, costs and weeks from the latest AI analysis"
         >
           <RotateCcw className="w-4 h-4" /> Reset to AI defaults
         </Button>
-        <Button size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
+        <Button size="sm" className="gap-1.5" onClick={handleSave} disabled={saving || isReadOnly}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Save Proposal
+          {isReadOnly ? 'Read only' : 'Save Proposal'}
         </Button>
       </div>
     </div>
