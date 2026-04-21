@@ -550,7 +550,7 @@ const Proposal = () => {
 
           {/* Accepted banner */}
           {proposal.accepted && (
-            <div className="flex items-center gap-3 bg-green-500/10 text-green-700 border border-green-500/20 rounded-lg px-5 py-3 mb-8">
+            <div className="flex items-center gap-3 bg-primary/10 text-primary border border-primary/20 rounded-lg px-5 py-3 mb-8">
               <CheckCircle2 className="w-5 h-5" />
               <div>
                 <p className="font-semibold text-sm">Proposal Accepted</p>
@@ -558,6 +558,8 @@ const Proposal = () => {
               </div>
             </div>
           )}
+
+          <ProposalStageTracker proposal={proposal} editMode={showClientEditFlow} />
 
           {/* 1. Project Overview */}
           <section className="mb-10">
@@ -695,7 +697,7 @@ const Proposal = () => {
           </section>
 
           {/* 4b. Build Scope Selector — client picks which items to include */}
-          {hasSelectableItems && (
+          {hasSelectableItems && (isAdmin || showClientEditFlow || proposal.accepted) && (
             <section className="mb-10">
               <SectionTitle icon={Sparkles} number={5} title="Choose Your Build Scope" />
               <div className="bg-card border border-border rounded-lg p-6 space-y-4">
@@ -730,7 +732,7 @@ const Proposal = () => {
                               <span className="text-sm font-bold text-foreground">{item.title}</span>
                               {item._type && (
                                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
-                                  {item._type === 'big_hit' ? '🎯 Big Hit' : '⚡ Quick Win'}
+                                  {item._type === 'big_hit' ? 'Big Hit' : 'Quick Win'}
                                 </span>
                               )}
                               {isLocked && (
@@ -749,11 +751,6 @@ const Proposal = () => {
                                   <Clock className="w-3 h-3" /> {item.weeks}w
                                 </span>
                               )}
-                              {typeof item.estimated_annual_impact === 'number' && item.estimated_annual_impact > 0 && (
-                                <span className="text-muted-foreground">
-                                  ↑ {formatCurrency(item.estimated_annual_impact)}/yr impact
-                                </span>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -762,7 +759,6 @@ const Proposal = () => {
                   })}
                 </div>
 
-                {/* Live selection summary */}
                 <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 mt-2">
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
@@ -776,12 +772,6 @@ const Proposal = () => {
                     </div>
                   </div>
                 </div>
-
-                {!proposal.accepted && (
-                  <p className="text-[11px] text-muted-foreground italic">
-                    Your selection is locked in when you click <strong>Accept Proposal</strong> at the bottom of this page.
-                  </p>
-                )}
               </div>
             </section>
           )}
@@ -985,31 +975,35 @@ const Proposal = () => {
             </div>
           </section>
 
-          {/* Accept / Revise CTA */}
-          {!proposal.accepted && !proposal.superseded_by && (
+          {!proposal.accepted && !proposal.superseded_by && showClientEditFlow && (
             <div className="print:hidden text-center py-8 space-y-4">
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handleRequestRevision}
-                  disabled={requestingRevision}
-                  className="gap-2 text-base px-8 py-6"
-                >
-                  {requestingRevision ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                  Send Me This Revised Proposal
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={openSigning}
-                  className="gap-2 text-base px-10 py-6 bg-green-600 hover:bg-green-700"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  Accept &amp; Sign Proposal
-                </Button>
-              </div>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleRequestRevision}
+                disabled={requestingRevision}
+                className="gap-2 text-base px-8 py-6"
+              >
+                {requestingRevision ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                Send Me This Revised Proposal
+              </Button>
               <p className="text-xs text-muted-foreground max-w-lg mx-auto">
-                <strong>Send revision:</strong> we'll generate a new proposal version reflecting your selections and email it back to you. <strong>Accept &amp; Sign:</strong> opens the engagement agreement for electronic signature.
+                We’ll generate a new revision from your selected scope and email the updated proposal back to you.
+              </p>
+            </div>
+          )}
+          {!proposal.accepted && !proposal.superseded_by && showClientAcceptFlow && (
+            <div className="print:hidden text-center py-8 space-y-4">
+              <Button
+                size="lg"
+                onClick={openSigning}
+                className="gap-2 text-base px-10 py-6"
+              >
+                <CheckCircle2 className="w-5 h-5" />
+                Accept &amp; Sign Proposal
+              </Button>
+              <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+                This opens the engagement agreement and signature flow for this proposal version.
               </p>
             </div>
           )}
