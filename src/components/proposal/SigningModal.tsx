@@ -116,15 +116,17 @@ const SigningModal = ({
     const total = formatCurrency(totals.totalIncGst);
     const subtotal = formatCurrency(totals.subtotalExGst);
     const gst = formatCurrency(totals.gst);
-    return agreementContent
-      .replaceAll('{{CLIENT_NAME}}', clientName)
-      .replaceAll('{{BUSINESS_NAME}}', businessName)
-      .replaceAll('{{CLIENT_EMAIL}}', clientEmail)
-      .replaceAll('{{TOTAL_INC_GST}}', total)
-      .replaceAll('{{SUBTOTAL_EX_GST}}', subtotal)
-      .replaceAll('{{GST}}', gst)
-      .replaceAll('{{TOTAL_WEEKS}}', String(totals.totalWeeks))
-      .replaceAll('{{DATE}}', todayStr);
+    const replaceAll = (s: string, find: string, repl: string) => s.split(find).join(repl);
+    let out = agreementContent;
+    out = replaceAll(out, '{{CLIENT_NAME}}', clientName);
+    out = replaceAll(out, '{{BUSINESS_NAME}}', businessName);
+    out = replaceAll(out, '{{CLIENT_EMAIL}}', clientEmail);
+    out = replaceAll(out, '{{TOTAL_INC_GST}}', total);
+    out = replaceAll(out, '{{SUBTOTAL_EX_GST}}', subtotal);
+    out = replaceAll(out, '{{GST}}', gst);
+    out = replaceAll(out, '{{TOTAL_WEEKS}}', String(totals.totalWeeks));
+    out = replaceAll(out, '{{DATE}}', todayStr);
+    return out;
   }, [agreementContent, clientName, businessName, clientEmail, totals, todayStr]);
 
   const handleScroll = () => {
@@ -345,8 +347,9 @@ const SigningModal = ({
                     </Button>
                   </div>
                   <div className="border-2 border-dashed border-border rounded-lg bg-white">
+                    {/* @ts-ignore react-signature-canvas types missing penColor in some versions */}
                     <SignatureCanvas
-                      ref={sigCanvasRef}
+                      ref={sigCanvasRef as any}
                       penColor="#1e3a5f"
                       onEnd={() => setHasDrawnSignature(!sigCanvasRef.current?.isEmpty())}
                       canvasProps={{
