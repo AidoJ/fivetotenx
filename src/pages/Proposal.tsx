@@ -299,69 +299,64 @@ const Proposal = () => {
     setSaving(false);
   };
 
-  const handleAccept = async () => {
+  const refreshProposal = async () => {
+    if (!id) return;
+    const { data } = await supabase.from('proposals').select('*').eq('id', id).single();
+    if (data) setProposal(data as ProposalData);
+  };
+
+  const openSigning = () => {
     if (!proposal) return;
-    setAccepting(true);
-
-    // Build the client_selection snapshot — what the client actually picked + final $ at time of accept.
-    const selectedIndexes = Array.from(selectedItemIdx).sort((a, b) => a - b);
-    const selectedItems = selectedIndexes.map(i => proposalItems[i]).filter(Boolean);
-    const clientSelection = hasSelectableItems
-      ? {
-          selected_indexes: selectedIndexes,
-          selected_items: selectedItems.map(i => ({
-            title: i.title,
-            cost: i.cost ?? 0,
-            weeks: i.weeks ?? 0,
-            _type: i._type,
-            estimated_annual_impact: i.estimated_annual_impact ?? 0,
-          })),
-          totals: selectionTotals,
-          accepted_at: new Date().toISOString(),
-        }
-      : { accepted_at: new Date().toISOString() };
-
-    await supabase.from('proposals')
-      .update({
-        accepted: true,
-        accepted_at: new Date().toISOString(),
-        client_selection: clientSelection as any,
-      })
-      .eq('id', proposal.id);
-    await supabase.from('roi_assessments').update({ pipeline_stage: 'signed' as any }).eq('id', proposal.assessment_id);
-    setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString(), client_selection: clientSelection } : null);
-    setAccepting(false);
-
-    // Fire admin notification for proposal acceptance, including chosen items + final totals.
-    try {
-      const { data: assessment } = await supabase
-        .from('roi_assessments')
-        .select('contact_name, contact_email, business_name')
-        .eq('id', proposal.assessment_id)
-        .single();
-
-      if (assessment) {
-        supabase.functions.invoke('notify-admin', {
-          body: {
-            eventType: 'proposal_accepted',
-            leadName: assessment.contact_name,
-            leadEmail: assessment.contact_email,
-            businessName: assessment.business_name,
-            assessmentId: proposal.assessment_id,
-            details: hasSelectableItems ? {
-              selectedItems: selectedItems.map(i => ({ title: i.title, cost: i.cost ?? 0 })),
-              itemsSelected: selectedItems.length,
-              itemsOffered: proposalItems.length,
-              totalIncGst: selectionTotals.totalIncGst,
-              subtotalExGst: selectionTotals.subtotalExGst,
-              totalWeeks: selectionTotals.totalWeeks,
-            } : undefined,
-          },
-        }).catch(err => console.error('Admin notification failed:', err));
-      }
-    } catch (err) {
-      console.error('Failed to send acceptance notification:', err);
+    if (hasSelectableItems && selectedItemIdx.size === 0) {
+      toast({
+        title: 'Select at least one item',
+        description: 'Tick the items you want to proceed with before accepting.',
+        variant: 'destructive',
+      });
+      return;
     }
+    setSigningOpen(true);
+  };
+
+  const handleRequestRevision = async () => {
+    if (!proposal || !id) return;
+    if (!urlToken && !isAdmin) {
+      toast({ title: 'Missing access token', description: 'Please open this proposal from the email link we sent you.', variant: 'destructive' });
+      return;
+    }
+    setRequestingRevision(true);
+    const selectedIndexes = Array.from(selectedItemIdx).sort((a, b) => a - b);
+    const selectedItems = selectedIndexes.map(i => proposalItems[i]).filter(Boolean).map(i => ({
+      title: i.title,
+      cost: i.cost ?? 0,
+      weeks: i.weeks ?? 0,
+      _type: i._type,
+      estimated_annual_impact: i.estimated_annual_impact ?? 0,
+    }));
+
+    const { data, error } = await supabase.functions.invoke('request-proposal-revision', {
+      body: {
+        proposalId: id,
+        token: urlToken || 'admin-bypass',
+        selectedIndexes,
+        selectedItems,
+        totals: selectionTotals,
+      },
+    });
+    setRequestingRevision(false);
+    if (error || !(data as any)?.success) {
+      toast({
+        title: 'Could not send revision request',
+        description: (data as any)?.error || error?.message || 'Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    await refreshProposal();
+    toast({
+      title: 'Revision request sent ✅',
+      description: 'Our team has been notified and will follow up shortly.',
+    });
   };
 
   const updateTimeline = (index: number, field: string, value: string) => {
