@@ -174,9 +174,15 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
     // Delete old saved draft
     await deleteDraftNote();
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-opportunities', {
-        body: { assessmentId, mode: 'email_draft', templateKey },
-      });
+      const isProposalTemplate = templateKey === 'key_findings_proposal';
+      const { data, error } = await supabase.functions.invoke(
+        isProposalTemplate ? 'send-proposal' : 'analyze-opportunities',
+        {
+          body: isProposalTemplate
+            ? { assessmentId, previewOnly: true }
+            : { assessmentId, mode: 'email_draft', templateKey },
+        }
+      );
       if (error) throw error;
       if (!data?.email) throw new Error('No email content returned');
       const newDraft: DraftEmail = {
@@ -199,7 +205,14 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
       }).select('id').single();
       if (noteData) setDraftNoteId(noteData.id);
     } catch (err: any) {
-      toast({ title: 'Failed to generate draft', description: err.message, variant: 'destructive' });
+      const timedOut = String(err?.message || '').includes('IDLE_TIMEOUT') || String(err?.message || '').includes('504');
+      toast({
+        title: 'Failed to generate draft',
+        description: timedOut
+          ? 'The old draft generator timed out. I switched this template to the direct proposal preview path — please try again.'
+          : err.message,
+        variant: 'destructive',
+      });
     }
     setGenerating(false);
   };
