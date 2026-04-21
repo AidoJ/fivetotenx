@@ -934,14 +934,32 @@ const Proposal = () => {
             </div>
           </section>
 
-          {/* Accept CTA */}
+          {/* Accept / Revise CTA */}
           {!proposal.accepted && !proposal.superseded_by && (
-            <div className="print:hidden text-center py-8">
-              <Button size="lg" onClick={handleAccept} disabled={accepting} className="gap-2 text-base px-10 py-6">
-                {accepting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-                Accept Proposal
-              </Button>
-              <p className="text-xs text-muted-foreground mt-3">By accepting, you agree to the terms outlined above.</p>
+            <div className="print:hidden text-center py-8 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleRequestRevision}
+                  disabled={requestingRevision}
+                  className="gap-2 text-base px-8 py-6"
+                >
+                  {requestingRevision ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                  Send Me This Revised Proposal
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={openSigning}
+                  className="gap-2 text-base px-10 py-6 bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  Accept &amp; Sign Proposal
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+                <strong>Send revision:</strong> we'll generate a new proposal version reflecting your selections and email it back to you. <strong>Accept &amp; Sign:</strong> opens the engagement agreement for electronic signature.
+              </p>
             </div>
           )}
           {!proposal.accepted && proposal.superseded_by && (
@@ -951,6 +969,50 @@ const Proposal = () => {
               </p>
             </div>
           )}
+
+          {/* Footer */}
+          <footer className="border-t border-border pt-6 mt-10 flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <img src={logo} alt="5to10X" className="h-6 opacity-50" />
+              <span>5to10X — App Development &amp; Automation</span>
+            </div>
+            <span>grow@5to10x.app</span>
+          </footer>
+        </div>
+      </div>
+
+      {/* DocuSign-style signing modal */}
+      <SigningModal
+        open={signingOpen}
+        onClose={() => setSigningOpen(false)}
+        proposalId={proposal.id}
+        assessmentId={proposal.assessment_id}
+        token={urlToken || 'admin-bypass'}
+        clientName={assessment.contact_name}
+        clientEmail={assessment.contact_email}
+        businessName={businessName}
+        selectedItems={(hasSelectableItems
+          ? Array.from(selectedItemIdx).sort((a, b) => a - b).map(i => proposalItems[i]).filter(Boolean)
+          : []
+        ).map(i => ({
+          title: i.title,
+          cost: i.cost ?? 0,
+          weeks: i.weeks ?? 0,
+          estimated_annual_impact: i.estimated_annual_impact ?? 0,
+        }))}
+        totals={{
+          subtotalExGst: hasSelectableItems ? selectionTotals.subtotalExGst : (content?.investmentAmount || 0),
+          gst: hasSelectableItems ? selectionTotals.gst : Math.round((content?.investmentAmount || 0) * 0.10),
+          totalIncGst: hasSelectableItems ? selectionTotals.totalIncGst : Math.round((content?.investmentAmount || 0) * 1.10),
+          totalWeeks: hasSelectableItems ? selectionTotals.totalWeeks : 0,
+        }}
+        onAccepted={refreshProposal}
+      />
+    </>
+  );
+};
+
+export default Proposal;
 
           {/* Footer */}
           <footer className="border-t border-border pt-6 mt-10 flex items-center justify-between text-xs text-muted-foreground">
