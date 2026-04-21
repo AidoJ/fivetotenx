@@ -1013,5 +1013,3 @@ const Proposal = () => {
 };
 
 export default Proposal;
-
-export default Proposal;
