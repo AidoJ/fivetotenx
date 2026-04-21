@@ -188,11 +188,14 @@ Deno.serve(async (req) => {
       previousProposal = { proposal_data: proposal.proposal_data, revision: proposal.revision || 1 };
 
       const newRevision = (proposal.revision || 1) + 1;
+      // Strip stale techStackRows from the cloned data so the proposal page
+      // re-derives them from the freshly-regenerated assessment.tech_stack.
+      const { techStackRows: _stale, ...clonedData } = (proposal.proposal_data || {}) as any;
       const { data: newRow, error: cloneErr } = await supabase
         .from('proposals')
         .insert({
           assessment_id: assessmentId,
-          proposal_data: proposal.proposal_data,
+          proposal_data: clonedData,
           client_selection: {},
           revision: newRevision,
           accepted: false,
