@@ -359,13 +359,13 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
             </SelectContent>
           </Select>
           {existingProposal && (
-            <a
-              href={`/proposal/${existingProposal.id}?admin=1`}
+              <a
+                href={`/proposal/${existingProposal.id}?client=1`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-[11px] text-primary hover:underline"
             >
-              <ExternalLink className="w-3 h-3" /> Open client view
+                <ExternalLink className="w-3 h-3" /> Open client preview
             </a>
           )}
           <div className="ml-auto flex items-center gap-2">
