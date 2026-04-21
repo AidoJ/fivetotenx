@@ -884,13 +884,20 @@ const Proposal = () => {
           </section>
 
           {/* Accept CTA */}
-          {!proposal.accepted && (
+          {!proposal.accepted && !proposal.superseded_by && (
             <div className="print:hidden text-center py-8">
               <Button size="lg" onClick={handleAccept} disabled={accepting} className="gap-2 text-base px-10 py-6">
                 {accepting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 Accept Proposal
               </Button>
               <p className="text-xs text-muted-foreground mt-3">By accepting, you agree to the terms outlined above.</p>
+            </div>
+          )}
+          {!proposal.accepted && proposal.superseded_by && (
+            <div className="print:hidden text-center py-8">
+              <p className="text-sm text-muted-foreground">
+                Acceptance is disabled — a revised proposal has been issued. Please use the latest version.
+              </p>
             </div>
           )}
 
