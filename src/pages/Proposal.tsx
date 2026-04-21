@@ -433,8 +433,8 @@ const Proposal = () => {
     }
     await refreshProposal();
     toast({
-      title: 'Revision request sent ✅',
-      description: 'Our team has been notified and will follow up shortly.',
+      title: 'Revised proposal sent ✅',
+      description: 'A new version has been emailed to you. Please check your inbox for the latest link.',
     });
   };
 
