@@ -175,7 +175,10 @@ const Proposal = () => {
   const urlToken = searchParams.get('t') || '';
   const initialAction = searchParams.get('action'); // 'edit' | 'accept' | null
   const isAdminQuery = searchParams.get('admin') === '1';
-  const forceClientView = searchParams.get('client') === '1';
+  // Anyone opening a tokenised client link sees the client view, even if they're
+  // signed in as an admin (e.g. Eoghan opening the email he was CC'd on).
+  // To get the admin editor, use ?admin=1 explicitly.
+  const forceClientView = searchParams.get('client') === '1' || (!!urlToken && !isAdminQuery);
 
   const { toast } = useToast();
   const [proposal, setProposal] = useState<ProposalRow | null>(null);
