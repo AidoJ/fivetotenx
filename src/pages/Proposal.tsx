@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles } from 'lucide-react';
+import { Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Calendar, Pencil, Save, X, Shield, FileText, Scale, Lock, AlertTriangle, Gavel, Users, BookOpen, Sparkles, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/logo-5to10x-color.webp';
+import SigningModal from '@/components/proposal/SigningModal';
 
 interface ProposalData {
   id: string;
@@ -134,27 +135,30 @@ const BulletList = ({ items }: { items: string[] }) => (
 
 const Proposal = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const urlToken = searchParams.get('t') || '';
+  const initialAction = searchParams.get('action');
   const [proposal, setProposal] = useState<ProposalData | null>(null);
   const [assessment, setAssessment] = useState<AssessmentData | null>(null);
   const [deepDive, setDeepDive] = useState<DeepDiveData | null>(null);
   const [interviews, setInterviews] = useState<InterviewData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [accepting, setAccepting] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [requestingRevision, setRequestingRevision] = useState(false);
+  const [signingOpen, setSigningOpen] = useState(false);
   const [content, setContent] = useState<EditableContent | null>(null);
   // Client-selectable items: indices of items the client has chosen to include
   const [selectedItemIdx, setSelectedItemIdx] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check URL param for admin mode (set when opened from admin dashboard)
     const params = new URLSearchParams(window.location.search);
     if (params.get('admin') === '1') {
       setIsAdmin(true);
     }
-    // Also check Supabase auth session
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) setIsAdmin(true);
     });
@@ -163,6 +167,33 @@ const Proposal = () => {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Validate proposal access token (admins bypass)
+  useEffect(() => {
+    if (!id) return;
+    if (isAdmin) {
+      setTokenValid(true);
+      return;
+    }
+    if (!urlToken) {
+      setTokenValid(false);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from('proposal_tokens')
+        .select('proposal_id, expires_at')
+        .eq('token', urlToken)
+        .eq('proposal_id', id)
+        .maybeSingle();
+      if (data && new Date(data.expires_at) > new Date()) {
+        setTokenValid(true);
+      } else {
+        setTokenValid(false);
+      }
+    })();
+  }, [id, urlToken, isAdmin]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -298,69 +329,64 @@ const Proposal = () => {
     setSaving(false);
   };
 
-  const handleAccept = async () => {
+  const refreshProposal = async () => {
+    if (!id) return;
+    const { data } = await supabase.from('proposals').select('*').eq('id', id).single();
+    if (data) setProposal(data as ProposalData);
+  };
+
+  const openSigning = () => {
     if (!proposal) return;
-    setAccepting(true);
-
-    // Build the client_selection snapshot — what the client actually picked + final $ at time of accept.
-    const selectedIndexes = Array.from(selectedItemIdx).sort((a, b) => a - b);
-    const selectedItems = selectedIndexes.map(i => proposalItems[i]).filter(Boolean);
-    const clientSelection = hasSelectableItems
-      ? {
-          selected_indexes: selectedIndexes,
-          selected_items: selectedItems.map(i => ({
-            title: i.title,
-            cost: i.cost ?? 0,
-            weeks: i.weeks ?? 0,
-            _type: i._type,
-            estimated_annual_impact: i.estimated_annual_impact ?? 0,
-          })),
-          totals: selectionTotals,
-          accepted_at: new Date().toISOString(),
-        }
-      : { accepted_at: new Date().toISOString() };
-
-    await supabase.from('proposals')
-      .update({
-        accepted: true,
-        accepted_at: new Date().toISOString(),
-        client_selection: clientSelection as any,
-      })
-      .eq('id', proposal.id);
-    await supabase.from('roi_assessments').update({ pipeline_stage: 'signed' as any }).eq('id', proposal.assessment_id);
-    setProposal(prev => prev ? { ...prev, accepted: true, accepted_at: new Date().toISOString(), client_selection: clientSelection } : null);
-    setAccepting(false);
-
-    // Fire admin notification for proposal acceptance, including chosen items + final totals.
-    try {
-      const { data: assessment } = await supabase
-        .from('roi_assessments')
-        .select('contact_name, contact_email, business_name')
-        .eq('id', proposal.assessment_id)
-        .single();
-
-      if (assessment) {
-        supabase.functions.invoke('notify-admin', {
-          body: {
-            eventType: 'proposal_accepted',
-            leadName: assessment.contact_name,
-            leadEmail: assessment.contact_email,
-            businessName: assessment.business_name,
-            assessmentId: proposal.assessment_id,
-            details: hasSelectableItems ? {
-              selectedItems: selectedItems.map(i => ({ title: i.title, cost: i.cost ?? 0 })),
-              itemsSelected: selectedItems.length,
-              itemsOffered: proposalItems.length,
-              totalIncGst: selectionTotals.totalIncGst,
-              subtotalExGst: selectionTotals.subtotalExGst,
-              totalWeeks: selectionTotals.totalWeeks,
-            } : undefined,
-          },
-        }).catch(err => console.error('Admin notification failed:', err));
-      }
-    } catch (err) {
-      console.error('Failed to send acceptance notification:', err);
+    if (hasSelectableItems && selectedItemIdx.size === 0) {
+      toast({
+        title: 'Select at least one item',
+        description: 'Tick the items you want to proceed with before accepting.',
+        variant: 'destructive',
+      });
+      return;
     }
+    setSigningOpen(true);
+  };
+
+  const handleRequestRevision = async () => {
+    if (!proposal || !id) return;
+    if (!urlToken && !isAdmin) {
+      toast({ title: 'Missing access token', description: 'Please open this proposal from the email link we sent you.', variant: 'destructive' });
+      return;
+    }
+    setRequestingRevision(true);
+    const selectedIndexes = Array.from(selectedItemIdx).sort((a, b) => a - b);
+    const selectedItems = selectedIndexes.map(i => proposalItems[i]).filter(Boolean).map(i => ({
+      title: i.title,
+      cost: i.cost ?? 0,
+      weeks: i.weeks ?? 0,
+      _type: i._type,
+      estimated_annual_impact: i.estimated_annual_impact ?? 0,
+    }));
+
+    const { data, error } = await supabase.functions.invoke('request-proposal-revision', {
+      body: {
+        proposalId: id,
+        token: urlToken || 'admin-bypass',
+        selectedIndexes,
+        selectedItems,
+        totals: selectionTotals,
+      },
+    });
+    setRequestingRevision(false);
+    if (error || !(data as any)?.success) {
+      toast({
+        title: 'Could not send revision request',
+        description: (data as any)?.error || error?.message || 'Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    await refreshProposal();
+    toast({
+      title: 'Revision request sent ✅',
+      description: 'Our team has been notified and will follow up shortly.',
+    });
   };
 
   const updateTimeline = (index: number, field: string, value: string) => {
@@ -377,8 +403,33 @@ const Proposal = () => {
     setContent({ ...content, paymentStructure: updated });
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
-  if (!proposal || !assessment || !content) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Proposal not found.</p></div>;
+  // Auto-open signing modal when ?action=accept arrives via the email CTA.
+  useEffect(() => {
+    if (initialAction === 'accept' && tokenValid && !loading && proposal && !proposal.accepted && !proposal.superseded_by) {
+      setSigningOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAction, tokenValid, loading, proposal?.id]);
+
+  if (loading || tokenValid === null) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+  if (!proposal || !assessment || !content) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Proposal not found.</p></div>;
+  }
+  if (!isAdmin && tokenValid === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="max-w-md text-center space-y-3">
+          <Lock className="w-10 h-10 text-muted-foreground mx-auto" />
+          <h1 className="text-2xl font-bold text-foreground">Access link required</h1>
+          <p className="text-sm text-muted-foreground">
+            This proposal can only be opened from the personalised link we emailed you. If your link has expired or you can't find the email, please reply to <a href="mailto:grow@5to10x.app" className="underline">grow@5to10x.app</a> and we'll send you a fresh one.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const roi = assessment.roi_results as any;
   const businessName = assessment.business_name || 'your business';
@@ -883,14 +934,32 @@ const Proposal = () => {
             </div>
           </section>
 
-          {/* Accept CTA */}
+          {/* Accept / Revise CTA */}
           {!proposal.accepted && !proposal.superseded_by && (
-            <div className="print:hidden text-center py-8">
-              <Button size="lg" onClick={handleAccept} disabled={accepting} className="gap-2 text-base px-10 py-6">
-                {accepting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-                Accept Proposal
-              </Button>
-              <p className="text-xs text-muted-foreground mt-3">By accepting, you agree to the terms outlined above.</p>
+            <div className="print:hidden text-center py-8 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleRequestRevision}
+                  disabled={requestingRevision}
+                  className="gap-2 text-base px-8 py-6"
+                >
+                  {requestingRevision ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                  Send Me This Revised Proposal
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={openSigning}
+                  className="gap-2 text-base px-10 py-6 bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  Accept &amp; Sign Proposal
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+                <strong>Send revision:</strong> we'll generate a new proposal version reflecting your selections and email it back to you. <strong>Accept &amp; Sign:</strong> opens the engagement agreement for electronic signature.
+              </p>
             </div>
           )}
           {!proposal.accepted && proposal.superseded_by && (
@@ -905,12 +974,40 @@ const Proposal = () => {
           <footer className="border-t border-border pt-6 mt-10 flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <img src={logo} alt="5to10X" className="h-6 opacity-50" />
-              <span>5to10X — App Development & Automation</span>
+              <span>5to10X — App Development &amp; Automation</span>
             </div>
             <span>grow@5to10x.app</span>
           </footer>
         </div>
       </div>
+
+      {/* DocuSign-style signing modal */}
+      <SigningModal
+        open={signingOpen}
+        onClose={() => setSigningOpen(false)}
+        proposalId={proposal.id}
+        assessmentId={proposal.assessment_id}
+        token={urlToken || 'admin-bypass'}
+        clientName={assessment.contact_name}
+        clientEmail={assessment.contact_email}
+        businessName={businessName}
+        selectedItems={(hasSelectableItems
+          ? Array.from(selectedItemIdx).sort((a, b) => a - b).map(i => proposalItems[i]).filter(Boolean)
+          : []
+        ).map(i => ({
+          title: i.title,
+          cost: i.cost ?? 0,
+          weeks: i.weeks ?? 0,
+          estimated_annual_impact: i.estimated_annual_impact ?? 0,
+        }))}
+        totals={{
+          subtotalExGst: hasSelectableItems ? selectionTotals.subtotalExGst : (content?.investmentAmount || 0),
+          gst: hasSelectableItems ? selectionTotals.gst : Math.round((content?.investmentAmount || 0) * 0.10),
+          totalIncGst: hasSelectableItems ? selectionTotals.totalIncGst : Math.round((content?.investmentAmount || 0) * 1.10),
+          totalWeeks: hasSelectableItems ? selectionTotals.totalWeeks : 0,
+        }}
+        onAccepted={refreshProposal}
+      />
     </>
   );
 };

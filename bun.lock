@@ -36,6 +36,7 @@
         "@supabase/supabase-js": "^2.98.0",
         "@swc/core-linux-x64-musl": "^1.15.18",
         "@tanstack/react-query": "^5.83.0",
+        "@types/react-signature-canvas": "1.0.5",
         "@vitejs/plugin-react": "^4",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -52,7 +53,7 @@
         "react-hook-form": "^7.61.1",
         "react-resizable-panels": "^2.1.9",
         "react-router-dom": "^6.30.1",
-        "react-signature-canvas": "1.0.7",
+        "react-signature-canvas": "1.0.6",
         "recharts": "^2.15.4",
         "sonner": "^1.7.4",
         "tailwind-merge": "^2.6.0",
@@ -481,6 +482,10 @@
     "@types/react": ["@types/react@18.3.23", "", { "dependencies": { "@types/prop-types": "*", "csstype": "^3.0.2" } }, "sha512-/LDXMQh55EzZQ0uVAZmKKhfENivEvWz6E+EYzh+/MCjMhNsotd+ZHhBGIjFDTi6+fz0OhQQQLbTgdQIxxCsC0w=="],
 
     "@types/react-dom": ["@types/react-dom@18.3.7", "", { "peerDependencies": { "@types/react": "^18.0.0" } }, "sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ=="],
+
+    "@types/react-signature-canvas": ["@types/react-signature-canvas@1.0.5", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@types/react-signature-canvas/-/react-signature-canvas-1.0.5.tgz", { "dependencies": { "@types/react": "*", "@types/signature_pad": "*" } }, "sha512-jzqEeDR6kxxhg1Ck462zH+C+qMu8hoV5zz0hqnQCp0Q0tHuFEAN2/f0c4NlHyDUfAALX+HPi+eK5SBRdqsEeEg=="],
+
+    "@types/signature_pad": ["@types/signature_pad@4.0.0", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@types/signature_pad/-/signature_pad-4.0.0.tgz", { "dependencies": { "signature_pad": "*" } }, "sha512-uvyInmPxfG4fMz9DN7QSxNcF6O9tOtt98z6sMjP0SSFyiF7RxgfeSww+jVjkQtcvEBqR5bjVinMqxBDRP1nnmg=="],
 
     "@types/ws": ["@types/ws@8.18.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg=="],
 
@@ -1006,7 +1011,7 @@
 
     "react-router-dom": ["react-router-dom@6.30.1", "", { "dependencies": { "@remix-run/router": "1.23.0", "react-router": "6.30.1" }, "peerDependencies": { "react": ">=16.8", "react-dom": ">=16.8" } }, "sha512-llKsgOkZdbPU1Eg3zK8lCn+sjD9wMRZZPuzmdWWX5SUs8OFkN5HnFVC0u5KMeMaC9aoancFI/KoLuKPqN+hxHw=="],
 
-    "react-signature-canvas": ["react-signature-canvas@1.0.7", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/react-signature-canvas/-/react-signature-canvas-1.0.7.tgz", { "dependencies": { "signature_pad": "^2.3.2", "trim-canvas": "^0.1.0" }, "peerDependencies": { "prop-types": "^15.5.8", "react": "0.14 - 19", "react-dom": "0.14 - 19" } }, "sha512-yo0x0uTMVmcClaqryuQu6F8xEVapk5zdM9/nuQ7GalDJWccoVNZPMmCFGK7U5r3I0mrEHPB9E5/rFSYUgZcfmA=="],
+    "react-signature-canvas": ["react-signature-canvas@1.0.6", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/react-signature-canvas/-/react-signature-canvas-1.0.6.tgz", { "dependencies": { "signature_pad": "^2.3.2", "trim-canvas": "^0.1.0" }, "peerDependencies": { "prop-types": "^15.5.8", "react": "0.14 - 18", "react-dom": "0.14 - 18" } }, "sha512-NoMHomYu9HxFeLjUGbIeV9abPdWSROfFxFNDekGdwmmaIx+w5ziOEiU2C34X0Ao4GxFnwqyUy/BpYlA4lCD1CA=="],
 
     "react-smooth": ["react-smooth@4.0.4", "", { "dependencies": { "fast-equals": "^5.0.1", "prop-types": "^15.8.1", "react-transition-group": "^4.4.5" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-gnGKTpYwqL0Iii09gHobNolvX4Kiq4PKx6eWBCYYix+8cdw+cGo3do906l1NBPKkSWx1DghC1dlWG9L2uGd61Q=="],
 
