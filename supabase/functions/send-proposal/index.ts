@@ -472,6 +472,11 @@ Deno.serve(async (req) => {
       throw new Error(`Resend error: ${errBody}`);
     }
 
+    const resendData = await res.json();
+    if (!resendData?.id) {
+      throw new Error('Mail provider did not return a delivery id');
+    }
+
     const deliveredAt = new Date().toISOString();
     await supabase
       .from('proposals')
@@ -483,6 +488,7 @@ Deno.serve(async (req) => {
       proposalId: proposal.id,
       revision,
       isRevised,
+      providerId: resendData.id,
       token,
       viewUrl,
       itemsIncluded: includedCount,

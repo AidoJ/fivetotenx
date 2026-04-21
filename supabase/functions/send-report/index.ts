@@ -59,6 +59,9 @@ serve(async (req) => {
         console.error('Resend API error:', resendData);
         throw new Error(`Email sending failed: ${JSON.stringify(resendData)}`);
       }
+      if (!resendData?.id) {
+        throw new Error('Mail provider did not return a delivery id');
+      }
       return new Response(JSON.stringify({ success: true, id: resendData.id }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
