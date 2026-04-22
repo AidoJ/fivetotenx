@@ -282,6 +282,28 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
     setSending(false);
   };
 
+  // Send the proposal email to the internal team (Aidan + Eoghan) for review
+  // BEFORE it goes to the client. Does NOT mark the proposal as delivered.
+  const sendInternalDraft = async () => {
+    if (!draft || draft.templateKey !== 'key_findings_proposal') return;
+    setSendingInternalDraft(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-proposal', {
+        body: { assessmentId, draftToTeamOnly: true },
+      });
+      if (error) throw error;
+      if (!data?.success || !data?.providerId) throw new Error(data?.error || 'Internal draft was not accepted by the mail provider');
+      const recipients = Array.isArray(data.sentTo) ? data.sentTo.join(', ') : 'aidan@5to10x.app, eoghan@5to10x.app';
+      toast({
+        title: 'Draft sent for internal review ✅',
+        description: `Sent to ${recipients}. The client has NOT received this — review and then click Send Email when ready.`,
+      });
+    } catch (err: any) {
+      toast({ title: 'Internal draft send failed', description: err.message, variant: 'destructive' });
+    }
+    setSendingInternalDraft(false);
+  };
+
   const templateMeta = EMAIL_TEMPLATES.find(t => t.id === selectedTemplate);
 
   return (
