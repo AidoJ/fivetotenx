@@ -247,7 +247,7 @@ Perform a THOROUGH technology analysis covering:
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.5-pro",
           messages: [
             { role: "system", content: "You are a senior solutions architect specialising in business automation, compliance, and secure data architecture. Be extremely specific — name actual products, vendors, and pricing tiers. Consider the client's existing tools and regional market. Always address data security and PII protection." },
             { role: "user", content: techPrompt },
