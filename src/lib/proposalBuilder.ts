@@ -205,7 +205,7 @@ export const maybeAutoRegenerateProposal = async (assessmentId: string): Promise
 
     const { data: assessment } = await supabase
       .from('roi_assessments')
-      .select('roi_results, discovery_answers')
+      .select('roi_results, discovery_answers, contact_name, business_name')
       .eq('id', assessmentId)
       .single();
     if (!assessment) return false;
@@ -213,7 +213,12 @@ export const maybeAutoRegenerateProposal = async (assessmentId: string): Promise
     const analysis = (assessment.discovery_answers as any)?._analysis as Analysis | undefined;
     if (!analysis) return false;
 
-    const newProposalData = buildProposalData(analysis, assessment.roi_results);
+    const newProposalData = buildProposalData(
+      analysis,
+      assessment.roi_results,
+      assessment.contact_name || '',
+      assessment.business_name || '',
+    );
     await supabase
       .from('proposals')
       .update({ proposal_data: newProposalData as any, created_at: new Date().toISOString() })
