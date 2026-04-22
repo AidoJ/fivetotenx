@@ -238,7 +238,7 @@ Perform a THOROUGH technology analysis covering:
    - Estimated TOTAL monthly running cost (range, AUD)
    - Estimated one-off setup/build cost band (AUD)
    - "Best for" line (who this tier suits)
-   - "Trade-offs" line (what they give up vs the next tier up)
+   - "Trade-offs" line (what they give up vs the next tier up)`;
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
