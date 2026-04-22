@@ -283,7 +283,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const mvp = Math.round(totalExGst * MVP_PCT);
   const final = totalExGst - deposit - mvp;
 
-  const totalWeeks = useMemo(() => {
+  const autoTotalWeeks = useMemo(() => {
     // Parallel tracks: big hits run concurrently, quick wins overlap
     let maxBigHit = 0;
     let quickWinWeeks = 0;
@@ -294,6 +294,12 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     });
     return Math.ceil(maxBigHit + quickWinWeeks) || 0;
   }, [included]);
+
+  // Effective timeline shown in Investment Summary: manual override wins if set.
+  const totalWeeks = useMemo(() => {
+    const m = parseFloat(manualTotalWeeks);
+    return Number.isFinite(m) && m > 0 ? m : autoTotalWeeks;
+  }, [manualTotalWeeks, autoTotalWeeks]);
 
   const toggleItem = (idx: number) => {
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, included: !it.included } : it));
@@ -367,6 +373,12 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           mvp,
           final,
           totalWeeks,
+          // Persist whether the timeline was manually overridden so it
+          // survives reloads and re-saves without falling back to auto-calc.
+          manualTotalWeeks: (() => {
+            const m = parseFloat(manualTotalWeeks);
+            return Number.isFinite(m) && m > 0 ? m : null;
+          })(),
         },
         feeStructure: {
           deposit: { percent: DEPOSIT_PCT * 100, amount: deposit, label: 'Commitment Deposit', when: 'On commencement — kicks off discovery session and build' },
@@ -678,9 +690,30 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
               <span className="font-bold text-primary text-lg">{formatCurrency(totalIncGst)}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            Estimated timeline: <strong className="text-foreground">{totalWeeks} weeks</strong>
+          <div className="space-y-1.5">
+            <Label className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              Estimated timeline (weeks)
+            </Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                step={0.5}
+                value={manualTotalWeeks}
+                onChange={e => setManualTotalWeeks(e.target.value)}
+                placeholder={`Auto: ${autoTotalWeeks}`}
+                className="h-8 text-xs bg-background border-border w-28"
+              />
+              <span className="text-xs text-muted-foreground">
+                {manualTotalWeeks && parseFloat(manualTotalWeeks) > 0
+                  ? <>Showing <strong className="text-foreground">{totalWeeks} weeks</strong> (manual override · auto would be {autoTotalWeeks})</>
+                  : <>Showing <strong className="text-foreground">{autoTotalWeeks} weeks</strong> (auto from item difficulty)</>}
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Leave blank to auto-calculate from item difficulty. Set a value to match your Delivery Phases narrative.
+            </p>
           </div>
         </div>
 
