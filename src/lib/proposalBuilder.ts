@@ -87,6 +87,13 @@ export const buildDefaultNarrative = (
     'A nominated reviewer for sign-off during the parallel-run phase.',
   ];
 
+  const delivery_phases = [
+    { weeks: 'Week 1', title: 'Discovery & Specification', body: 'Working session with you and the nominated reviewer to confirm the workflow we are automating, verify field mapping against live data, and finalise the compliance checklist. We produce a signed-off field specification before any build begins.' },
+    { weeks: 'Weeks 2–3', title: 'Core Build', body: 'Automation layer configured and connected to the agreed inputs. Integration with your existing systems built and tested against real sample data from your environment.' },
+    { weeks: 'Weeks 4–5', title: 'Validation & Review Interface', body: 'Validation rules implemented (missing fields flagged before review). Reviewer interface built and deployed — audit log live, notifications configured. End-to-end tested with real data.' },
+    { weeks: 'Weeks 6–8', title: 'Parallel Run & Go-Live', body: 'The automated system runs alongside the existing manual process. You and the reviewer validate output accuracy on real cases. Edge cases are resolved as they appear. When you sign off, the system goes live and the manual workflow is retired.' },
+  ];
+
   const oversight_note = 'The automated system produces drafts for your team to review. Nothing is sent to a customer or counterparty without human approval. During the parallel run, exception handling stays manual until you have validated accuracy on real cases. We are replacing the data-entry burden — not the compliance review.';
 
   const closing_paragraph = `Any questions before you decide, reply directly to this email. We can begin discovery within a week of sign-off.`;
@@ -97,6 +104,7 @@ export const buildDefaultNarrative = (
     highlight_box,
     what_this_means,
     what_we_need_from_you,
+    delivery_phases,
     oversight_note,
     closing_paragraph,
   };
