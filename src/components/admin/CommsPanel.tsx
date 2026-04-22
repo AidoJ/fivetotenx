@@ -81,6 +81,20 @@ type SavedDraftPayload = DraftEmail & {
   savedAt?: string;
 };
 
+const ToolbarBtn: React.FC<{ onClick: () => void; title: string; children: React.ReactNode }> = ({ onClick, title, children }) => (
+  <button
+    type="button"
+    onMouseDown={e => e.preventDefault()} // keep selection in editor
+    onClick={onClick}
+    title={title}
+    className="inline-flex items-center justify-center h-7 w-7 rounded text-foreground hover:bg-secondary"
+  >
+    {children}
+  </button>
+);
+
+const Sep: React.FC = () => <span className="w-px h-5 bg-border mx-0.5" />;
+
 const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
