@@ -552,6 +552,12 @@ Deno.serve(async (req) => {
 
     const recipientList = isInternalDraft ? internalRecipients : [assessment.contact_email];
 
+    // Allow the admin Comms panel to override subject/body with the edited draft.
+    const finalSubject = hasOverrideSubject
+      ? (isInternalDraft ? `[INTERNAL DRAFT — DO NOT FORWARD] ${overrideSubject}` : overrideSubject)
+      : subject;
+    const finalHtml = hasOverrideHtml ? overrideHtml : emailHtml;
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -562,8 +568,8 @@ Deno.serve(async (req) => {
         from: fromField,
         to: recipientList,
         ...(!isInternalDraft && ccList.length > 0 ? { cc: ccList } : {}),
-        subject,
-        html: emailHtml,
+        subject: finalSubject,
+        html: finalHtml,
       }),
     });
 
