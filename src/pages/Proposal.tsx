@@ -191,11 +191,7 @@ const Proposal = () => {
     initialAction === 'edit' ? 'edit' : initialAction === 'accept' ? 'accept' : 'view',
   );
 
-  // Admin editing state
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [projectOverview, setProjectOverview] = useState('');
-  const [techRows, setTechRows] = useState<TechStackItem[]>([]);
+  // (Admin editing now happens entirely in ProposalBuilder; this page is render-only for narrative)
 
   // Selection / signing state
   const [selectedItemIdx, setSelectedItemIdx] = useState<Set<number>>(new Set());
