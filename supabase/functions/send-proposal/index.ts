@@ -272,9 +272,16 @@ Deno.serve(async (req) => {
     const needs: string[] = Array.isArray(proposalData.what_we_need_from_you)
       ? proposalData.what_we_need_from_you.filter((s: any) => typeof s === 'string' && s.trim())
       : [];
-    const phases: { weeks?: string; title?: string; body?: string }[] = Array.isArray(proposalData.delivery_phases)
+    const savedPhases: { weeks?: string; title?: string; body?: string }[] = Array.isArray(proposalData.delivery_phases)
       ? proposalData.delivery_phases.filter((p: any) => p && (p.weeks || p.title || p.body))
       : [];
+    const defaultPhases = [
+      { weeks: 'Week 1', title: 'Discovery & Specification', body: 'Working session with you and the nominated reviewer to confirm the workflow we are automating, verify field mapping against live data, and finalise the compliance checklist. We produce a signed-off field specification before any build begins.' },
+      { weeks: 'Weeks 2–3', title: 'Core Build', body: 'Automation layer configured and connected to the agreed inputs. Integration with your existing systems built and tested against real sample data from your environment.' },
+      { weeks: 'Weeks 4–5', title: 'Validation & Review Interface', body: 'Validation rules implemented (missing fields flagged before review). Reviewer interface built and deployed — audit log live, notifications configured. End-to-end tested with real data.' },
+      { weeks: 'Weeks 6–8', title: 'Parallel Run & Go-Live', body: 'The automated system runs alongside the existing manual process. You and the reviewer validate output accuracy on real cases. Edge cases are resolved as they appear. When you sign off, the system goes live and the manual workflow is retired.' },
+    ];
+    const phases = savedPhases.length > 0 ? savedPhases : defaultPhases;
     const oversight: string = proposalData.oversight_note || '';
     const closing: string = proposalData.closing_paragraph
       || `Any questions before you decide, just reply directly to this email. We can begin discovery within a week of sign-off.`;
