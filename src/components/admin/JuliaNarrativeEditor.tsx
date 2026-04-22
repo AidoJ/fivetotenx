@@ -181,25 +181,32 @@ const JuliaNarrativeEditor: React.FC<Props> = ({ value, onChange, disabled, onAu
           <p className="text-[11px] text-muted-foreground italic">No items — add the access, sample data and reviewers we need to start.</p>
         )}
         {value.what_we_need_from_you.map((n, idx) => (
-          <div key={idx} className="flex items-center gap-2">
-            <Input
+          <div key={idx} className="flex items-start gap-2">
+            <div className="flex flex-col items-center pt-2 shrink-0">
+              <span className="text-[10px] font-bold text-muted-foreground tabular-nums">{idx + 1}.</span>
+            </div>
+            <Textarea
               value={n}
               onChange={e => updateNeed(idx, e.target.value)}
-              placeholder="e.g. API access to Monday.com"
-              className="text-xs bg-background border-border"
+              placeholder={"e.g. API access to Monday.com\n— admin token, sandbox board, and a named reviewer for sign-off."}
+              rows={3}
+              className="text-xs bg-background border-border resize-y min-h-[72px]"
               disabled={disabled}
             />
             <button
               type="button"
               onClick={() => removeNeed(idx)}
               disabled={disabled}
-              className="text-muted-foreground hover:text-destructive shrink-0"
+              className="text-muted-foreground hover:text-destructive shrink-0 mt-2"
               title="Remove"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
+        <p className="text-[10px] text-muted-foreground italic">
+          Tip: each item supports multiple lines. Use line breaks for sub-points — they render as paragraphs in the client proposal.
+        </p>
       </div>
 
       {/* Delivery timeline */}
