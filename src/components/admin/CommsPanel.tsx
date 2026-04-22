@@ -493,6 +493,26 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           </div>
 
           <div className="space-y-3 pt-2 border-t border-border">
+            {draft.templateKey === 'key_findings_proposal' && (
+              <div className="rounded-lg border border-amber-400/40 bg-amber-500/5 p-3 flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex-1 min-w-[240px]">
+                  <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Want a final QA pass?</p>
+                  <p className="text-[11px] text-amber-700/80 mt-1 leading-relaxed">
+                    Send the exact proposal email to Aidan + Eoghan first (not the client). Useful for reviewing copy, totals, scope and delivery phases before it goes out.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
+                  onClick={sendInternalDraft}
+                  disabled={sendingInternalDraft || !draft.subject || !draft.body}
+                >
+                  {sendingInternalDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                  Send draft to us first
+                </Button>
+              </div>
+            )}
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
