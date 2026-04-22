@@ -94,6 +94,29 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview');
   const [expandedSent, setExpandedSent] = useState<string | null>(null);
   const [draftNoteId, setDraftNoteId] = useState<string | null>(null);
+  const editorRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Run a contentEditable formatting command and sync the HTML back into draft state.
+  const exec = (command: string, value?: string) => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    try {
+      document.execCommand(command, false, value);
+    } catch {
+      // execCommand is deprecated but still widely supported for contentEditable.
+    }
+    const html = editorRef.current.innerHTML;
+    setDraft(prev => (prev ? { ...prev, body: html } : prev));
+    setConfirmSend(false);
+  };
+
+  const promptLink = () => {
+    const url = window.prompt('Enter URL (include https://):', 'https://');
+    if (!url) return;
+    exec('createLink', url);
+  };
+
+  const setBlock = (tag: string) => exec('formatBlock', tag);
 
   // Load sent email history + saved drafts
   useEffect(() => {
