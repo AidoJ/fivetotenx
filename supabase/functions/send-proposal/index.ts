@@ -605,8 +605,8 @@ Deno.serve(async (req) => {
       itemsIncluded: includedCount,
       itemsRemoved: removedItems.length,
       email: {
-        subject,
-        body: emailHtml,
+        subject: finalSubject,
+        body: finalHtml,
       },
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
