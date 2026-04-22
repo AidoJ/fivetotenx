@@ -363,7 +363,7 @@ Perform a THOROUGH technology analysis covering:
                             },
                           },
                         },
-                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "tools"],
+                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "one_off_setup_range", "tools"],
                       },
                       gold: {
                         type: "object",
@@ -388,7 +388,7 @@ Perform a THOROUGH technology analysis covering:
                             },
                           },
                         },
-                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "tools"],
+                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "one_off_setup_range", "tools"],
                       },
                       entry: {
                         type: "object",
@@ -413,7 +413,7 @@ Perform a THOROUGH technology analysis covering:
                             },
                           },
                         },
-                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "tools"],
+                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "one_off_setup_range", "tools"],
                       },
                       recommended_tier: { type: "string", enum: ["premier", "gold", "entry"], description: "Which tier 5to10X recommends for this client (usually 'gold' unless context says otherwise)" },
                       summary: { type: "string", description: "2-3 sentence comparison helping the client choose" },
