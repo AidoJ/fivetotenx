@@ -225,7 +225,20 @@ Perform a THOROUGH technology analysis covering:
    - Phase 1 quick wins (tools that can be deployed in weeks)
    - Phase 2 core platform build
    - Phase 3 advanced automation and AI
-   - Migration strategy from existing tools`;
+   - Migration strategy from existing tools
+
+7. **THREE TIERED TECH STACKS** (CRITICAL — must always be provided):
+   For the same set of agreed scope items, design THREE complete, internally-consistent tech stacks at different price/capability points. Each tier MUST list specific named products (not categories), realistic monthly running costs in AUD, and an honest trade-off summary.
+   - **PREMIER** — best-in-class enterprise solution. No compromise on capability, security, support or scalability. Picks tools used by ASX-listed firms, large agencies, regulated enterprises. Higher monthly cost is expected. Examples: Salesforce, Microsoft 365 E5, Snowflake, Auth0, Datadog, Azure OpenAI with private endpoints.
+   - **GOLD** — recommended balanced solution. The stack 5to10X would default to: strong capability, sensible cost, well-supported in AU, fast to deploy, fits SME-to-mid-market. Examples: HubSpot, Make.com, Supabase, Clerk, Vercel, OpenAI/Anthropic API with proper PII handling.
+   - **ENTRY LEVEL** — minimalist budget solution. Cheapest defensible stack that still delivers the core outcome. Heavy use of free tiers, all-in-one tools, lighter automation. Honest about what is sacrificed (scale ceiling, integrations, support, advanced AI). Examples: Airtable, Zapier free tier, Google Workspace, Lovable Cloud, no-code form builders.
+   For EACH tier produce:
+   - A short positioning headline (1 sentence)
+   - 4-8 named tools with: name, role/category, monthly cost (AUD, e.g. "$120/mo" or "Free"), short justification
+   - Estimated TOTAL monthly running cost (range, AUD)
+   - Estimated one-off setup/build cost band (AUD)
+   - "Best for" line (who this tier suits)
+   - "Trade-offs" line (what they give up vs the next tier up)
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
