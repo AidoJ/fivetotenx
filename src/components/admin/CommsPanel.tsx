@@ -85,6 +85,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const [draft, setDraft] = useState<DraftEmail | null>(null);
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendingInternalDraft, setSendingInternalDraft] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sentEmails, setSentEmails] = useState<SentEmail[]>([]);
   const [confirmSend, setConfirmSend] = useState(false);
@@ -281,6 +282,28 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
     setSending(false);
   };
 
+  // Send the proposal email to the internal team (Aidan + Eoghan) for review
+  // BEFORE it goes to the client. Does NOT mark the proposal as delivered.
+  const sendInternalDraft = async () => {
+    if (!draft || draft.templateKey !== 'key_findings_proposal') return;
+    setSendingInternalDraft(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-proposal', {
+        body: { assessmentId, draftToTeamOnly: true },
+      });
+      if (error) throw error;
+      if (!data?.success || !data?.providerId) throw new Error(data?.error || 'Internal draft was not accepted by the mail provider');
+      const recipients = Array.isArray(data.sentTo) ? data.sentTo.join(', ') : 'aidan@5to10x.app, eoghan@5to10x.app';
+      toast({
+        title: 'Draft sent for internal review ✅',
+        description: `Sent to ${recipients}. The client has NOT received this — review and then click Send Email when ready.`,
+      });
+    } catch (err: any) {
+      toast({ title: 'Internal draft send failed', description: err.message, variant: 'destructive' });
+    }
+    setSendingInternalDraft(false);
+  };
+
   const templateMeta = EMAIL_TEMPLATES.find(t => t.id === selectedTemplate);
 
   return (
@@ -470,6 +493,26 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
           </div>
 
           <div className="space-y-3 pt-2 border-t border-border">
+            {draft.templateKey === 'key_findings_proposal' && (
+              <div className="rounded-lg border border-amber-400/40 bg-amber-500/5 p-3 flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex-1 min-w-[240px]">
+                  <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Want a final QA pass?</p>
+                  <p className="text-[11px] text-amber-700/80 mt-1 leading-relaxed">
+                    Send the exact proposal email to Aidan + Eoghan first (not the client). Useful for reviewing copy, totals, scope and delivery phases before it goes out.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 border-amber-500/50 text-amber-700 hover:bg-amber-500/10"
+                  onClick={sendInternalDraft}
+                  disabled={sendingInternalDraft || !draft.subject || !draft.body}
+                >
+                  {sendingInternalDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                  Send draft to us first
+                </Button>
+              </div>
+            )}
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"

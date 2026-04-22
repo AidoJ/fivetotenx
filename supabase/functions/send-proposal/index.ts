@@ -124,11 +124,19 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { assessmentId, proposalId, previewOnly, cc } = await req.json();
+    const { assessmentId, proposalId, previewOnly, cc, draftToTeamOnly, draftRecipients } = await req.json();
     if (!assessmentId) throw new Error('assessmentId is required');
     const ccList: string[] = Array.isArray(cc)
       ? cc.filter((e: any) => typeof e === 'string' && e.includes('@'))
       : [];
+    // When draftToTeamOnly is true, the email is sent to the internal team
+    // (Aidan + Eoghan by default) for review BEFORE going to the client.
+    // The proposal is NOT marked as delivered, no client token is created,
+    // and no revision is cloned — it's a true preview send.
+    const isInternalDraft = !!draftToTeamOnly;
+    const internalRecipients: string[] = Array.isArray(draftRecipients) && draftRecipients.length > 0
+      ? draftRecipients.filter((e: any) => typeof e === 'string' && e.includes('@'))
+      : ['aidan@5to10x.app', 'eoghan@5to10x.app'];
 
     const { data: assessment, error: assessErr } = await supabase
       .from('roi_assessments')
@@ -171,7 +179,8 @@ Deno.serve(async (req) => {
 
     // Revision logic: if the targeted proposal has already been delivered,
     // clone it into a new revision so the previously-sent version stays intact.
-    if (proposal.delivered_at && !previewOnly) {
+    // Skip cloning for internal team drafts — they are reviews of the existing draft.
+    if (proposal.delivered_at && !previewOnly && !isInternalDraft) {
       // For the diff, the "previous" is the one we're about to clone from.
       previousProposal = { proposal_data: proposal.proposal_data, revision: proposal.revision || 1 };
 
@@ -203,7 +212,8 @@ Deno.serve(async (req) => {
     }
 
     // Generate a fresh client access token for sent emails only.
-    const token = previewOnly
+    // Internal team drafts use the preview URL — no client token issued.
+    const token = (previewOnly || isInternalDraft)
       ? 'preview'
       : await (async () => {
           const { data: tokenRow, error: tokenErr } = await supabase
@@ -227,14 +237,17 @@ Deno.serve(async (req) => {
     // the admin app, which would send clients to the wrong site.
     const appOrigin = 'https://5to10x.app';
 
-    const baseUrl = previewOnly
+    const baseUrl = (previewOnly || isInternalDraft)
       ? `${appOrigin}/proposal/${proposal.id}?preview=1`
       : `${appOrigin}/proposal/${proposal.id}?t=${token}`;
     const viewUrl = baseUrl;
 
-    const subject = isRevised
+    const baseSubject = isRevised
       ? `[Revised v${revision}] ${firstName}, your updated proposal for ${businessName}`
       : `${firstName}, your custom proposal for ${businessName} is ready`;
+    const subject = isInternalDraft
+      ? `[INTERNAL DRAFT — DO NOT FORWARD] ${baseSubject}`
+      : baseSubject;
 
     const fromField = '5to10X <grow@5to10x.app>';
 
@@ -285,6 +298,13 @@ Deno.serve(async (req) => {
     const oversight: string = proposalData.oversight_note || '';
     const closing: string = proposalData.closing_paragraph
       || `Any questions before you decide, just reply directly to this email. We can begin discovery within a week of sign-off.`;
+
+    const internalDraftBannerHtml = isInternalDraft
+      ? `<div style="margin:0 0 18px;padding:16px 20px;background:#fef2f2;border:2px solid #dc2626;border-radius:8px;">
+           <p style="margin:0;color:#991b1b;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">⚠️ Internal Review Copy — Do Not Forward</p>
+           <p style="margin:8px 0 0;color:#7f1d1d;font-size:13px;line-height:1.6;">This is a preview of the proposal that will be sent to <strong>${escapeHtml(assessment.contact_email)}</strong> (${escapeHtml(contactName || 'client')}). Review the content, copy, totals, scope items, and delivery phases. The "Review &amp; Accept" button below points to the preview URL — clicking it will NOT trigger acceptance. To send to the client, use <strong>Send Email</strong> in the Comms tab.</p>
+         </div>`
+      : '';
 
     const revisionBannerHtml = isRevised
       ? `<div style="margin:0 0 24px;padding:14px 18px;background:${AMBER_BG};border-left:4px solid ${AMBER};border-radius:6px;">
@@ -454,6 +474,7 @@ Deno.serve(async (req) => {
         </td></tr>
 
         <tr><td style="padding:32px 40px 8px;">
+          ${internalDraftBannerHtml}
           ${revisionBannerHtml}
           <p style="color:${TEXT};font-size:15px;line-height:1.85;margin:0 0 16px;">Hi ${escapeHtml(firstName)},</p>
 
@@ -527,6 +548,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    const recipientList = isInternalDraft ? internalRecipients : [assessment.contact_email];
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -535,8 +558,8 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: fromField,
-        to: [assessment.contact_email],
-        ...(ccList.length > 0 ? { cc: ccList } : {}),
+        to: recipientList,
+        ...(!isInternalDraft && ccList.length > 0 ? { cc: ccList } : {}),
         subject,
         html: emailHtml,
       }),
@@ -552,17 +575,22 @@ Deno.serve(async (req) => {
       throw new Error('Mail provider did not return a delivery id');
     }
 
-    const deliveredAt = new Date().toISOString();
-    await supabase
-      .from('proposals')
-      .update({ delivered_at: deliveredAt, sent_at: deliveredAt })
-      .eq('id', proposal.id);
+    // Only mark the proposal as delivered when it actually went to the client.
+    if (!isInternalDraft) {
+      const deliveredAt = new Date().toISOString();
+      await supabase
+        .from('proposals')
+        .update({ delivered_at: deliveredAt, sent_at: deliveredAt })
+        .eq('id', proposal.id);
+    }
 
     return new Response(JSON.stringify({
       success: true,
       proposalId: proposal.id,
       revision,
       isRevised,
+      isInternalDraft,
+      sentTo: recipientList,
       providerId: resendData.id,
       token,
       viewUrl,
