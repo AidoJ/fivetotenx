@@ -72,7 +72,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const [saving, setSaving] = useState(false);
   const [keyFindings, setKeyFindings] = useState('');
   const [projectOverview, setProjectOverview] = useState('');
-  const [techRows, setTechRows] = useState<TechStackItem[]>([]);
+  
   const [legalDoc, setLegalDoc] = useState<{ content: string; version: string } | null>(null);
   const [revisions, setRevisions] = useState<any[]>([]);
   const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
@@ -155,8 +155,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         ? pData.projectOverview
         : `Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared a Phase 1 build for ${businessName || 'this client'}, focused on the highest-leverage opportunities identified in the analysis.`
     );
-    const savedTechRows = Array.isArray(pData.techStackRows) ? pData.techStackRows as TechStackItem[] : null;
-    setTechRows(savedTechRows && savedTechRows.length > 0 ? savedTechRows : deriveTechStackRows(techStack));
     if (Array.isArray(pData.items) && pData.items.length > 0) {
       setKeyFindings(pData.keyFindings || analysis?.summary || '');
       setItems((pData.items as any[]).map((i: any) => ({
@@ -214,7 +212,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         setItems(buildItemsFromAnalysis());
         setKeyFindings(analysis.summary || '');
         setProjectOverview(`Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared a Phase 1 build for ${businessName || 'this client'}, focused on the highest-leverage opportunities identified in the analysis.`);
-        setTechRows(deriveTechStackRows(techStack));
       }
     })();
     return () => { cancelled = true; };
@@ -303,16 +300,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
   };
 
-  const updateTechRow = (idx: number, patch: Partial<TechStackItem>) => {
-    setTechRows((prev) => prev.map((row, rowIdx) => rowIdx === idx ? { ...row, ...patch } : row));
-  };
-
-  const addTechRow = () => setTechRows((prev) => [...prev, { name: '', category: '', purpose: '', status: 'keep' }]);
-  const removeTechRow = (idx: number) => setTechRows((prev) => prev.filter((_, rowIdx) => rowIdx !== idx));
-  const handleRefreshTechFromTab = () => {
-    setTechRows(deriveTechStackRows(techStack));
-    toast({ title: 'Tech stack refreshed', description: 'Click Save Proposal to keep these rows.' });
-  };
 
   const handleAutoFillNarrative = async () => {
     setAutoFillingNarrative(true);
@@ -352,7 +339,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         ...existingData,
         keyFindings,
         projectOverview,
-        techStackRows: techRows,
+        
         items: included.map(i => ({
           title: i.title,
           impact_category: i.impact_category,
