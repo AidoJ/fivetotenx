@@ -522,7 +522,8 @@ Deno.serve(async (req) => {
           <p style="margin:0;color:${MUTED};font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Co-Founder — Engineering Build Advisor, 5to10X</p>
         </td></tr>
 
-        <tr><td style="padding:20px 40px;background:${BG_SOFT};border-top:1px solid ${BORDER};text-align:center;">
+        <tr><td style="padding:24px 40px 20px;background:${BG_SOFT};border-top:1px solid ${BORDER};text-align:center;">
+          <img src="https://hfszmulinpwzmroqemke.supabase.co/storage/v1/object/public/email-assets/logo-5to10x.png" alt="5to10X" width="140" style="display:inline-block;width:140px;height:auto;margin:0 0 14px;border:0;outline:none;text-decoration:none;" />
           <p style="color:${NAVY};font-size:14px;font-weight:700;margin:0 0 4px;">You're not buying tech. You're buying profit.</p>
           <p style="color:${MUTED};font-size:12px;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">5to10X — Strategic App ROI Assessment</p>
         </td></tr>
