@@ -275,10 +275,7 @@ const Proposal = () => {
         setSelectedItemIdx(new Set(items.map((_, i) => i)));
       }
 
-      // Initial overview + tech stack rows (proposal_data wins, otherwise derive from assessment)
-      setProjectOverview(typeof pData.projectOverview === 'string' ? pData.projectOverview : '');
-      const savedRows = Array.isArray(pData.techStackRows) ? pData.techStackRows as TechStackItem[] : null;
-      setTechRows(savedRows && savedRows.length > 0 ? savedRows : deriveTechStackRows(assess?.tech_stack));
+      // (narrative + tech-stack rows are now read directly from proposal_data inside JuliaProposalView)
 
       setLoading(false);
     })();
@@ -344,36 +341,7 @@ const Proposal = () => {
     });
   };
 
-  const handleAdminSave = async () => {
-    if (!proposal) return;
-    setSaving(true);
-    const newData = {
-      ...(proposal.proposal_data || {}),
-      projectOverview,
-      techStackRows: techRows,
-    };
-    const { error } = await supabase.from('proposals').update({ proposal_data: newData }).eq('id', proposal.id);
-    if (error) {
-      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
-    } else {
-      setProposal(p => p ? { ...p, proposal_data: newData } : null);
-      toast({ title: 'Proposal saved ✅' });
-      setEditing(false);
-    }
-    setSaving(false);
-  };
-
-  const handleRefreshTechFromTab = () => {
-    if (!assessment) return;
-    setTechRows(deriveTechStackRows(assessment.tech_stack));
-    toast({ title: 'Tech stack refreshed from analysis', description: 'Click Save to persist.' });
-  };
-
-  const updateTechRow = (i: number, patch: Partial<TechStackItem>) => {
-    setTechRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r));
-  };
-  const addTechRow = () => setTechRows(prev => [...prev, { name: '', category: '', purpose: '', status: 'keep' }]);
-  const removeTechRow = (i: number) => setTechRows(prev => prev.filter((_, idx) => idx !== i));
+  // (Admin Save / tech-stack edit handlers removed — admin editing lives in ProposalBuilder.tsx)
 
   const handleRequestRevision = async () => {
     if (!proposal || !id) return;
