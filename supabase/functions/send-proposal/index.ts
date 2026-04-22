@@ -124,8 +124,10 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { assessmentId, proposalId, previewOnly, cc, draftToTeamOnly, draftRecipients } = await req.json();
+    const { assessmentId, proposalId, previewOnly, cc, draftToTeamOnly, draftRecipients, overrideSubject, overrideHtml } = await req.json();
     if (!assessmentId) throw new Error('assessmentId is required');
+    const hasOverrideHtml = typeof overrideHtml === 'string' && overrideHtml.trim().length > 0;
+    const hasOverrideSubject = typeof overrideSubject === 'string' && overrideSubject.trim().length > 0;
     const ccList: string[] = Array.isArray(cc)
       ? cc.filter((e: any) => typeof e === 'string' && e.includes('@'))
       : [];
