@@ -784,8 +784,8 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-xs font-bold text-foreground">10% — Initial Deposit</p>
-                  <p className="text-[10px] text-muted-foreground">On Commencement</p>
+                  <p className="text-xs font-bold text-foreground">10% — Commitment Deposit</p>
+                  <p className="text-[10px] text-muted-foreground">On commencement — kicks off discovery & build</p>
                 </div>
                 <span className="text-sm font-bold text-primary">{formatCurrency(deposit)}</span>
               </div>
@@ -793,8 +793,8 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
             <div className="rounded-lg bg-secondary/50 border border-border p-3">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-xs font-bold text-foreground">50% — MVP Milestone</p>
-                  <p className="text-[10px] text-muted-foreground">On MVP Achieved & Reviewed</p>
+                  <p className="text-xs font-bold text-foreground">50% — MVP Payment</p>
+                  <p className="text-[10px] text-muted-foreground">On MVP working in test environment with real data</p>
                 </div>
                 <span className="text-sm font-bold text-foreground">{formatCurrency(mvp)}</span>
               </div>
@@ -802,8 +802,8 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
             <div className="rounded-lg bg-secondary/50 border border-border p-3">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-xs font-bold text-foreground">40% — Final Handover</p>
-                  <p className="text-[10px] text-muted-foreground">On Handover of Final Build</p>
+                  <p className="text-xs font-bold text-foreground">40% — Final Balance</p>
+                  <p className="text-[10px] text-muted-foreground">On go-live — system in production, signed off</p>
                 </div>
                 <span className="text-sm font-bold text-foreground">{formatCurrency(final)}</span>
               </div>
