@@ -15,6 +15,7 @@ import {
   History, Plus, Eye, ExternalLink, Server, Printer, X,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
+import JuliaNarrativeEditor, { JuliaNarrativeFields } from '@/components/admin/JuliaNarrativeEditor';
 
 interface Opportunity {
   title: string;
@@ -119,6 +120,16 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const [revisions, setRevisions] = useState<any[]>([]);
   const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
   const [creatingRevision, setCreatingRevision] = useState(false);
+  const emptyNarrative: JuliaNarrativeFields = {
+    proposal_title: '',
+    what_we_heard: '',
+    highlight_box: { headline: '', body: '' },
+    what_this_means: [],
+    what_we_need_from_you: [],
+    oversight_note: '',
+    closing_paragraph: '',
+  };
+  const [narrative, setNarrative] = useState<JuliaNarrativeFields>(emptyNarrative);
 
   // The currently-loaded proposal row (selected via dropdown).
   const existingProposal = useMemo(
@@ -205,6 +216,19 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         locked: !!i.locked,
       })));
     }
+    // Hydrate Julia narrative blocks (with safe defaults if missing)
+    setNarrative({
+      proposal_title: pData.proposal_title || '',
+      what_we_heard: pData.what_we_heard || '',
+      highlight_box: {
+        headline: pData.highlight_box?.headline || '',
+        body: pData.highlight_box?.body || '',
+      },
+      what_this_means: Array.isArray(pData.what_this_means) ? pData.what_this_means : [],
+      what_we_need_from_you: Array.isArray(pData.what_we_need_from_you) ? pData.what_we_need_from_you : [],
+      oversight_note: pData.oversight_note || '',
+      closing_paragraph: pData.closing_paragraph || '',
+    });
   };
 
   // Initial load: revisions + hydrate the selected one (or fall back to analysis).
