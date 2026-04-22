@@ -15,6 +15,7 @@ import {
   History, Plus, Eye, ExternalLink, Server, Printer, X,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
+import JuliaNarrativeEditor, { JuliaNarrativeFields } from '@/components/admin/JuliaNarrativeEditor';
 
 interface Opportunity {
   title: string;
