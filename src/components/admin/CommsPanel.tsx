@@ -333,7 +333,12 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
     setSendingInternalDraft(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-proposal', {
-        body: { assessmentId, draftToTeamOnly: true },
+        body: {
+          assessmentId,
+          draftToTeamOnly: true,
+          overrideSubject: draft.subject,
+          overrideHtml: draft.body,
+        },
       });
       if (error) throw error;
       if (!data?.success || !data?.providerId) throw new Error(data?.error || 'Internal draft was not accepted by the mail provider');
