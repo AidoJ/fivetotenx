@@ -124,11 +124,19 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { assessmentId, proposalId, previewOnly, cc } = await req.json();
+    const { assessmentId, proposalId, previewOnly, cc, draftToTeamOnly, draftRecipients } = await req.json();
     if (!assessmentId) throw new Error('assessmentId is required');
     const ccList: string[] = Array.isArray(cc)
       ? cc.filter((e: any) => typeof e === 'string' && e.includes('@'))
       : [];
+    // When draftToTeamOnly is true, the email is sent to the internal team
+    // (Aidan + Eoghan by default) for review BEFORE going to the client.
+    // The proposal is NOT marked as delivered, no client token is created,
+    // and no revision is cloned — it's a true preview send.
+    const isInternalDraft = !!draftToTeamOnly;
+    const internalRecipients: string[] = Array.isArray(draftRecipients) && draftRecipients.length > 0
+      ? draftRecipients.filter((e: any) => typeof e === 'string' && e.includes('@'))
+      : ['aidan@5to10x.app', 'eoghan@5to10x.app'];
 
     const { data: assessment, error: assessErr } = await supabase
       .from('roi_assessments')
