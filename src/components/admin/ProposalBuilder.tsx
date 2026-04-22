@@ -11,8 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Loader2, Save, DollarSign, Clock, FileText,
-  Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
-  History, Plus, Eye, ExternalLink, Server, Printer, X,
+  Calculator, CheckCircle2, AlertTriangle, RotateCcw, Lock, Unlock,
+  History, Plus, Eye, ExternalLink, Printer,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
 import JuliaNarrativeEditor, { JuliaNarrativeFields } from '@/components/admin/JuliaNarrativeEditor';
@@ -36,13 +36,6 @@ interface BuildItem extends Opportunity {
   _type?: 'big_hit' | 'quick_win';
   // If true, client cannot deselect this item on the proposal page
   locked?: boolean;
-}
-
-interface TechStackItem {
-  name: string;
-  category: string;
-  purpose: string;
-  status: 'keep' | 'replace' | 'integrate';
 }
 
 interface Props {
@@ -72,42 +65,6 @@ const autoEstimateCost = (opp: Opportunity, totalImpact: number, buildCostMid: n
   return Math.max(2000, Math.round(share * buildCostMid / 500) * 500);
 };
 
-const deriveTechStackRows = (techStack: any): TechStackItem[] => {
-  if (!techStack || typeof techStack !== 'object') return [];
-  if (Array.isArray(techStack.proposal_rows)) {
-    return (techStack.proposal_rows as TechStackItem[]).filter((row) => row && row.name);
-  }
-
-  const rows: TechStackItem[] = [];
-  const audit = Array.isArray(techStack.existing_tools_audit) ? techStack.existing_tools_audit : [];
-  audit.forEach((tool: any) => {
-    const verdict = String(tool.verdict || 'keep').toLowerCase();
-    rows.push({
-      name: tool.tool_name || 'Unnamed tool',
-      category: tool.category || 'Existing Tool',
-      purpose: tool.current_use || tool.reasoning || '',
-      status: verdict === 'replace' ? 'replace' : verdict === 'integrate' ? 'integrate' : 'keep',
-    });
-  });
-
-  const recommendations = Array.isArray(techStack.recommended_tools) ? techStack.recommended_tools : [];
-  recommendations.forEach((tool: any) => {
-    rows.push({
-      name: tool.primary_recommendation || tool.category || 'Recommended tool',
-      category: tool.category || 'New',
-      purpose: tool.alternatives ? `Alternatives: ${tool.alternatives}` : '',
-      status: 'integrate',
-    });
-  });
-
-  return rows;
-};
-
-const techStatusBadge: Record<TechStackItem['status'], string> = {
-  keep: 'bg-green-500/10 text-green-700 border-green-500/30',
-  replace: 'bg-red-500/10 text-red-700 border-red-500/30',
-  integrate: 'bg-blue-500/10 text-blue-700 border-blue-500/30',
-};
 
 const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, contactName, businessName, contactEmail, techStack }) => {
   const { toast } = useToast();
