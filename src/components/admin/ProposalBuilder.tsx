@@ -336,7 +336,11 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, included: !it.included } : it));
   };
 
-  const updateItem = (idx: number, field: 'manualCost' | 'manualWeeks', value: string) => {
+  const updateItem = (
+    idx: number,
+    field: 'manualCost' | 'manualWeeks' | 'title' | 'explanation' | 'recommendation',
+    value: string,
+  ) => {
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
   };
 
@@ -616,9 +620,8 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
                     onCheckedChange={() => toggleItem(idx)}
                     className="mt-0.5"
                   />
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-foreground">{item.title}</span>
                       <Badge variant="outline" className="text-[9px]">
                         {(item as any)._type === 'big_hit' ? '🎯 Big Hit' : '⚡ Quick Win'}
                       </Badge>
@@ -629,7 +632,29 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
                         {formatCurrency(item.estimated_annual_impact)}/yr impact
                       </Badge>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{item.explanation}</p>
+                    <Input
+                      value={item.title}
+                      onChange={e => updateItem(idx, 'title', e.target.value)}
+                      placeholder="Scope item title"
+                      className="h-8 text-xs font-bold bg-background border-border"
+                      disabled={isReadOnly}
+                    />
+                    <Textarea
+                      value={item.explanation}
+                      onChange={e => updateItem(idx, 'explanation', e.target.value)}
+                      rows={2}
+                      placeholder="What this scope item delivers (shown to client)…"
+                      className="text-[11px] bg-background border-border resize-none"
+                      disabled={isReadOnly}
+                    />
+                    <Textarea
+                      value={item.recommendation || ''}
+                      onChange={e => updateItem(idx, 'recommendation', e.target.value)}
+                      rows={2}
+                      placeholder="Recommendation / how we'll build it (optional)…"
+                      className="text-[11px] bg-background border-border resize-none"
+                      disabled={isReadOnly}
+                    />
 
                     {item.included && (
                       <div className="flex items-center gap-4 mt-2">
