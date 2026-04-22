@@ -4,6 +4,8 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Send, Loader2, FileText, Sparkles, ChevronDown, ChevronUp,
   Mail, CheckCircle2, Edit3, RefreshCw, Clock, Handshake, Target, Rocket, Save,
+  Bold, Italic, Underline, Strikethrough, List, ListOrdered, Link2, Unlink,
+  Heading1, Heading2, Quote, AlignLeft, AlignCenter, AlignRight, Eraser, Undo2, Redo2, Palette,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
