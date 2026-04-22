@@ -120,6 +120,16 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const [revisions, setRevisions] = useState<any[]>([]);
   const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
   const [creatingRevision, setCreatingRevision] = useState(false);
+  const emptyNarrative: JuliaNarrativeFields = {
+    proposal_title: '',
+    what_we_heard: '',
+    highlight_box: { headline: '', body: '' },
+    what_this_means: [],
+    what_we_need_from_you: [],
+    oversight_note: '',
+    closing_paragraph: '',
+  };
+  const [narrative, setNarrative] = useState<JuliaNarrativeFields>(emptyNarrative);
 
   // The currently-loaded proposal row (selected via dropdown).
   const existingProposal = useMemo(
