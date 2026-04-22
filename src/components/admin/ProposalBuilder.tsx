@@ -89,6 +89,8 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     closing_paragraph: '',
   };
   const [narrative, setNarrative] = useState<JuliaNarrativeFields>(emptyNarrative);
+  // Manual override for the Investment Summary timeline. Empty string = use auto.
+  const [manualTotalWeeks, setManualTotalWeeks] = useState<string>('');
 
   // The currently-loaded proposal row (selected via dropdown).
   const existingProposal = useMemo(
@@ -173,6 +175,11 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         locked: !!i.locked,
       })));
     }
+    // Hydrate manual timeline override if previously saved
+    const savedManualWeeks = pData?.totals?.manualTotalWeeks;
+    setManualTotalWeeks(
+      typeof savedManualWeeks === 'number' && savedManualWeeks > 0 ? String(savedManualWeeks) : '',
+    );
     // Hydrate Julia narrative blocks (with safe defaults if missing)
     setNarrative({
       proposal_title: pData.proposal_title || '',
