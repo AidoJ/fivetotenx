@@ -124,8 +124,10 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { assessmentId, proposalId, previewOnly, cc, draftToTeamOnly, draftRecipients } = await req.json();
+    const { assessmentId, proposalId, previewOnly, cc, draftToTeamOnly, draftRecipients, overrideSubject, overrideHtml } = await req.json();
     if (!assessmentId) throw new Error('assessmentId is required');
+    const hasOverrideHtml = typeof overrideHtml === 'string' && overrideHtml.trim().length > 0;
+    const hasOverrideSubject = typeof overrideSubject === 'string' && overrideSubject.trim().length > 0;
     const ccList: string[] = Array.isArray(cc)
       ? cc.filter((e: any) => typeof e === 'string' && e.includes('@'))
       : [];
@@ -550,6 +552,12 @@ Deno.serve(async (req) => {
 
     const recipientList = isInternalDraft ? internalRecipients : [assessment.contact_email];
 
+    // Allow the admin Comms panel to override subject/body with the edited draft.
+    const finalSubject = hasOverrideSubject
+      ? (isInternalDraft ? `[INTERNAL DRAFT — DO NOT FORWARD] ${overrideSubject}` : overrideSubject)
+      : subject;
+    const finalHtml = hasOverrideHtml ? overrideHtml : emailHtml;
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -560,8 +568,8 @@ Deno.serve(async (req) => {
         from: fromField,
         to: recipientList,
         ...(!isInternalDraft && ccList.length > 0 ? { cc: ccList } : {}),
-        subject,
-        html: emailHtml,
+        subject: finalSubject,
+        html: finalHtml,
       }),
     });
 
@@ -597,8 +605,8 @@ Deno.serve(async (req) => {
       itemsIncluded: includedCount,
       itemsRemoved: removedItems.length,
       email: {
-        subject,
-        body: emailHtml,
+        subject: finalSubject,
+        body: finalHtml,
       },
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
