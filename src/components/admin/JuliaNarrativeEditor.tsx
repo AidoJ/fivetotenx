@@ -202,6 +202,58 @@ const JuliaNarrativeEditor: React.FC<Props> = ({ value, onChange, disabled, onAu
         ))}
       </div>
 
+      {/* Delivery timeline */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <CalendarClock className="w-3.5 h-3.5" /> Delivery Timeline
+          </Label>
+          <Button type="button" variant="ghost" size="sm" onClick={addPhase} disabled={disabled} className="gap-1.5 h-7">
+            <Plus className="w-3.5 h-3.5" /> Add phase
+          </Button>
+        </div>
+        {phases.length === 0 && (
+          <p className="text-[11px] text-muted-foreground italic">No phases yet — add week-by-week delivery blocks for the proposal page.</p>
+        )}
+        {phases.map((phase, idx) => (
+          <div key={idx} className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2 relative">
+            <button
+              type="button"
+              onClick={() => removePhase(idx)}
+              disabled={disabled}
+              className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+              title="Remove phase"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+            <div className="grid gap-2 sm:grid-cols-[140px,1fr]">
+              <Input
+                value={phase.weeks}
+                onChange={e => updatePhase(idx, { weeks: e.target.value })}
+                placeholder="Week 1"
+                className="text-xs bg-background border-border pr-8"
+                disabled={disabled}
+              />
+              <Input
+                value={phase.title}
+                onChange={e => updatePhase(idx, { title: e.target.value })}
+                placeholder="Discovery & Specification"
+                className="text-xs bg-background border-border"
+                disabled={disabled}
+              />
+            </div>
+            <Textarea
+              value={phase.body}
+              onChange={e => updatePhase(idx, { body: e.target.value })}
+              rows={4}
+              placeholder="Describe what happens in this phase and what gets delivered."
+              className="text-xs bg-background border-border resize-none"
+              disabled={disabled}
+            />
+          </div>
+        ))}
+      </div>
+
       {/* Oversight note */}
       <div className="space-y-1.5">
         <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
