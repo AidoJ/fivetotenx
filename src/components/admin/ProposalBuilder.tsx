@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Loader2, Save, DollarSign, Clock, FileText,
-  Calculator, CheckCircle2, AlertTriangle, RotateCcw, Lock, Unlock,
+  Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
   History, Plus, Eye, ExternalLink, Printer,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
@@ -648,84 +648,13 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Server className="w-4 h-4 text-primary" /> 3. Recommended Tech Stack
-          </h3>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefreshTechFromTab} disabled={isReadOnly} className="gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Refresh from Tech Stack tab
-            </Button>
-            <Button variant="ghost" size="sm" onClick={addTechRow} disabled={isReadOnly} className="gap-1.5">
-              <Plus className="w-3.5 h-3.5" /> Add tool
-            </Button>
-          </div>
-        </div>
-
-        {techRows.length === 0 ? (
-          <div className="rounded-lg border border-border bg-secondary/20 p-4 text-xs text-muted-foreground">
-            No tech stack rows yet — refresh from the Tech Stack tab or add them manually.
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {techRows.map((row, idx) => (
-              <div key={`${row.name}-${idx}`} className="grid grid-cols-12 gap-2 rounded-lg border border-border bg-secondary/20 p-3">
-                <Input value={row.name} onChange={e => updateTechRow(idx, { name: e.target.value })} placeholder="Name" className="col-span-3 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
-                <Input value={row.category} onChange={e => updateTechRow(idx, { category: e.target.value })} placeholder="Category" className="col-span-2 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
-                <Input value={row.purpose} onChange={e => updateTechRow(idx, { purpose: e.target.value })} placeholder="Purpose" className="col-span-4 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
-                <Select value={row.status} onValueChange={(value) => updateTechRow(idx, { status: value as TechStackItem['status'] })} disabled={isReadOnly}>
-                  <SelectTrigger className="col-span-2 h-8 text-xs bg-background border-border">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="keep">Keep</SelectItem>
-                    <SelectItem value="replace">Replace</SelectItem>
-                    <SelectItem value="integrate">Integrate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="ghost" size="sm" onClick={() => removeTechRow(idx)} disabled={isReadOnly} className="col-span-1 h-8 px-0">
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="overflow-hidden rounded-lg border border-border">
-          <table className="w-full text-xs">
-            <thead className="bg-secondary/40 text-muted-foreground uppercase tracking-wider">
-              <tr>
-                <th className="px-3 py-2 text-left">Name</th>
-                <th className="px-3 py-2 text-left">Category</th>
-                <th className="px-3 py-2 text-left">Purpose</th>
-                <th className="px-3 py-2 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {techRows.map((row, idx) => (
-                <tr key={`preview-${row.name}-${idx}`} className="border-t border-border">
-                  <td className="px-3 py-2 font-semibold text-foreground">{row.name || '—'}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{row.category || '—'}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{row.purpose || '—'}</td>
-                  <td className="px-3 py-2">
-                    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${techStatusBadge[row.status || 'keep']}`}>
-                      {row.status || 'keep'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       {/* Totals & Fee Structure */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Investment Summary */}
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Calculator className="w-4 h-4 text-primary" /> 4. Investment Summary
+            <Calculator className="w-4 h-4 text-primary" /> 3. Investment Summary
           </h3>
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
