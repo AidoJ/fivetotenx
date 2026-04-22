@@ -472,6 +472,8 @@ Deno.serve(async (req) => {
 
           ${needsHtml}
 
+          ${phasesHtml}
+
           ${oversightHtml}
 
           ${closing ? `<p style="color:${TEXT};font-size:15px;line-height:1.85;margin:30px 0 0;">${escapeHtml(closing)}</p>` : ''}

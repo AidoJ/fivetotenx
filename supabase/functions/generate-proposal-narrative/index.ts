@@ -104,6 +104,7 @@ Produce the narrative as JSON via the supplied tool. Rules:
 - highlight_box.body: 2 sentences explaining why this outcome matters in their world.
 - what_this_means: 3 short blocks. Each has a heading (3-6 words) and a 1-2 sentence body. Cover: (a) the quantified value (use ${fmt(annual)}), (b) the next-most-important opportunity from the scope, (c) what stays the same — human oversight, compliance, sign-offs.
 - what_we_need_from_you: 3-5 specific, concrete items (access, sample data, a nominated reviewer, time for one discovery session). No vague asks.
+- delivery_phases: 3-5 phases describing the week-by-week build. Each phase has: weeks (e.g. "Week 1", "Weeks 2-3", "Weeks 4-5", "Weeks 6-8"), title (3-6 words, e.g. "Discovery & Specification", "Core Pipeline Build", "Validation & Compliance", "Parallel Run & Go-Live"), and body (2-4 sentences naming concrete activities, integrations, who is involved, and what is delivered at the end of the phase). Keep total weeks consistent with the build scope provided.
 - oversight_note: 2-3 sentence reassurance that humans stay in the loop — drafts not auto-sends, parallel run before cut-over, exception handling stays manual until validated. Address compliance/PII if the industry implies it.
 - closing_paragraph: 1-2 sentences inviting questions and stating we can begin discovery within a week of sign-off.
 
@@ -154,10 +155,22 @@ Tone: confident, specific, never salesy. Australian English. No em-dashes used a
                   type: "array",
                   items: { type: "string" },
                 },
+                delivery_phases: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      weeks: { type: "string" },
+                      title: { type: "string" },
+                      body: { type: "string" },
+                    },
+                    required: ["weeks", "title", "body"],
+                  },
+                },
                 oversight_note: { type: "string" },
                 closing_paragraph: { type: "string" },
               },
-              required: ["proposal_title", "what_we_heard", "highlight_box", "what_this_means", "what_we_need_from_you", "oversight_note", "closing_paragraph"],
+              required: ["proposal_title", "what_we_heard", "highlight_box", "what_this_means", "what_we_need_from_you", "delivery_phases", "oversight_note", "closing_paragraph"],
             },
           },
         }],
