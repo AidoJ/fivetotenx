@@ -225,7 +225,20 @@ Perform a THOROUGH technology analysis covering:
    - Phase 1 quick wins (tools that can be deployed in weeks)
    - Phase 2 core platform build
    - Phase 3 advanced automation and AI
-   - Migration strategy from existing tools`;
+   - Migration strategy from existing tools
+
+7. **THREE TIERED TECH STACKS** (CRITICAL — must always be provided):
+   For the same set of agreed scope items, design THREE complete, internally-consistent tech stacks at different price/capability points. Each tier MUST list specific named products (not categories), realistic monthly running costs in AUD, and an honest trade-off summary.
+   - **PREMIER** — best-in-class enterprise solution. No compromise on capability, security, support or scalability. Picks tools used by ASX-listed firms, large agencies, regulated enterprises. Higher monthly cost is expected. Examples: Salesforce, Microsoft 365 E5, Snowflake, Auth0, Datadog, Azure OpenAI with private endpoints.
+   - **GOLD** — recommended balanced solution. The stack 5to10X would default to: strong capability, sensible cost, well-supported in AU, fast to deploy, fits SME-to-mid-market. Examples: HubSpot, Make.com, Supabase, Clerk, Vercel, OpenAI/Anthropic API with proper PII handling.
+   - **ENTRY LEVEL** — minimalist budget solution. Cheapest defensible stack that still delivers the core outcome. Heavy use of free tiers, all-in-one tools, lighter automation. Honest about what is sacrificed (scale ceiling, integrations, support, advanced AI). Examples: Airtable, Zapier free tier, Google Workspace, Lovable Cloud, no-code form builders.
+   For EACH tier produce:
+   - A short positioning headline (1 sentence)
+   - 4-8 named tools with: name, role/category, monthly cost (AUD, e.g. "$120/mo" or "Free"), short justification
+   - Estimated TOTAL monthly running cost (range, AUD)
+   - Estimated one-off setup/build cost band (AUD)
+   - "Best for" line (who this tier suits)
+   - "Trade-offs" line (what they give up vs the next tier up)`;
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -234,7 +247,7 @@ Perform a THOROUGH technology analysis covering:
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.5-pro",
           messages: [
             { role: "system", content: "You are a senior solutions architect specialising in business automation, compliance, and secure data architecture. Be extremely specific — name actual products, vendors, and pricing tiers. Consider the client's existing tools and regional market. Always address data security and PII protection." },
             { role: "user", content: techPrompt },
@@ -322,8 +335,93 @@ Perform a THOROUGH technology analysis covering:
                     required: ["phase_1_quick_wins", "phase_2_core_build", "phase_3_advanced"],
                   },
                   reasoning: { type: "string", description: "Executive summary of the tech stack strategy" },
+                  tiered_stacks: {
+                    type: "object",
+                    description: "Three complete tech-stack options at different price/capability tiers, all delivering the same agreed scope.",
+                    properties: {
+                      premier: {
+                        type: "object",
+                        description: "Best-in-class enterprise tier — no compromise on capability, security or scale.",
+                        properties: {
+                          headline: { type: "string", description: "One-sentence positioning of this tier" },
+                          best_for: { type: "string", description: "Who this tier suits" },
+                          tradeoffs: { type: "string", description: "What you accept at this tier (usually higher cost, more setup)" },
+                          monthly_cost_range: { type: "string", description: "Estimated monthly running cost range in AUD, e.g. '$1,800 – $3,200/mo'" },
+                          one_off_setup_range: { type: "string", description: "Estimated one-off setup/build cost band in AUD" },
+                          tools: {
+                            type: "array",
+                            description: "4-8 specific named products that make up this stack",
+                            items: {
+                              type: "object",
+                              properties: {
+                                name: { type: "string", description: "Product name, e.g. 'Salesforce Sales Cloud'" },
+                                role: { type: "string", description: "What it does in the stack, e.g. 'CRM & sales pipeline'" },
+                                monthly_cost: { type: "string", description: "Monthly cost in AUD, e.g. '$220/mo' or 'Free'" },
+                                justification: { type: "string", description: "Why this product at this tier" },
+                              },
+                              required: ["name", "role", "monthly_cost", "justification"],
+                            },
+                          },
+                        },
+                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "tools"],
+                      },
+                      gold: {
+                        type: "object",
+                        description: "Recommended balanced tier — the default 5to10X choice for SME-to-mid-market.",
+                        properties: {
+                          headline: { type: "string" },
+                          best_for: { type: "string" },
+                          tradeoffs: { type: "string" },
+                          monthly_cost_range: { type: "string" },
+                          one_off_setup_range: { type: "string" },
+                          tools: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                name: { type: "string" },
+                                role: { type: "string" },
+                                monthly_cost: { type: "string" },
+                                justification: { type: "string" },
+                              },
+                              required: ["name", "role", "monthly_cost", "justification"],
+                            },
+                          },
+                        },
+                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "tools"],
+                      },
+                      entry: {
+                        type: "object",
+                        description: "Minimalist budget tier — cheapest defensible stack that still delivers the core outcome.",
+                        properties: {
+                          headline: { type: "string" },
+                          best_for: { type: "string" },
+                          tradeoffs: { type: "string" },
+                          monthly_cost_range: { type: "string" },
+                          one_off_setup_range: { type: "string" },
+                          tools: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                name: { type: "string" },
+                                role: { type: "string" },
+                                monthly_cost: { type: "string" },
+                                justification: { type: "string" },
+                              },
+                              required: ["name", "role", "monthly_cost", "justification"],
+                            },
+                          },
+                        },
+                        required: ["headline", "best_for", "tradeoffs", "monthly_cost_range", "tools"],
+                      },
+                      recommended_tier: { type: "string", enum: ["premier", "gold", "entry"], description: "Which tier 5to10X recommends for this client (usually 'gold' unless context says otherwise)" },
+                      summary: { type: "string", description: "2-3 sentence comparison helping the client choose" },
+                    },
+                    required: ["premier", "gold", "entry", "recommended_tier", "summary"],
+                  },
                 },
-                required: ["existing_tools_audit", "recommended_tools", "compliance", "data_security", "architecture", "implementation_roadmap", "reasoning"],
+                required: ["existing_tools_audit", "recommended_tools", "compliance", "data_security", "architecture", "implementation_roadmap", "reasoning", "tiered_stacks"],
               },
             },
           }],

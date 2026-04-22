@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Loader2, Save, DollarSign, Clock, FileText,
   Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
-  History, Plus, Eye, ExternalLink, Server, Printer, X,
+  History, Plus, Eye, ExternalLink, Printer,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
 import JuliaNarrativeEditor, { JuliaNarrativeFields } from '@/components/admin/JuliaNarrativeEditor';
@@ -36,13 +36,6 @@ interface BuildItem extends Opportunity {
   _type?: 'big_hit' | 'quick_win';
   // If true, client cannot deselect this item on the proposal page
   locked?: boolean;
-}
-
-interface TechStackItem {
-  name: string;
-  category: string;
-  purpose: string;
-  status: 'keep' | 'replace' | 'integrate';
 }
 
 interface Props {
@@ -72,42 +65,6 @@ const autoEstimateCost = (opp: Opportunity, totalImpact: number, buildCostMid: n
   return Math.max(2000, Math.round(share * buildCostMid / 500) * 500);
 };
 
-const deriveTechStackRows = (techStack: any): TechStackItem[] => {
-  if (!techStack || typeof techStack !== 'object') return [];
-  if (Array.isArray(techStack.proposal_rows)) {
-    return (techStack.proposal_rows as TechStackItem[]).filter((row) => row && row.name);
-  }
-
-  const rows: TechStackItem[] = [];
-  const audit = Array.isArray(techStack.existing_tools_audit) ? techStack.existing_tools_audit : [];
-  audit.forEach((tool: any) => {
-    const verdict = String(tool.verdict || 'keep').toLowerCase();
-    rows.push({
-      name: tool.tool_name || 'Unnamed tool',
-      category: tool.category || 'Existing Tool',
-      purpose: tool.current_use || tool.reasoning || '',
-      status: verdict === 'replace' ? 'replace' : verdict === 'integrate' ? 'integrate' : 'keep',
-    });
-  });
-
-  const recommendations = Array.isArray(techStack.recommended_tools) ? techStack.recommended_tools : [];
-  recommendations.forEach((tool: any) => {
-    rows.push({
-      name: tool.primary_recommendation || tool.category || 'Recommended tool',
-      category: tool.category || 'New',
-      purpose: tool.alternatives ? `Alternatives: ${tool.alternatives}` : '',
-      status: 'integrate',
-    });
-  });
-
-  return rows;
-};
-
-const techStatusBadge: Record<TechStackItem['status'], string> = {
-  keep: 'bg-green-500/10 text-green-700 border-green-500/30',
-  replace: 'bg-red-500/10 text-red-700 border-red-500/30',
-  integrate: 'bg-blue-500/10 text-blue-700 border-blue-500/30',
-};
 
 const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, contactName, businessName, contactEmail, techStack }) => {
   const { toast } = useToast();
@@ -115,7 +72,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const [saving, setSaving] = useState(false);
   const [keyFindings, setKeyFindings] = useState('');
   const [projectOverview, setProjectOverview] = useState('');
-  const [techRows, setTechRows] = useState<TechStackItem[]>([]);
+  
   const [legalDoc, setLegalDoc] = useState<{ content: string; version: string } | null>(null);
   const [revisions, setRevisions] = useState<any[]>([]);
   const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
@@ -198,8 +155,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         ? pData.projectOverview
         : `Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared a Phase 1 build for ${businessName || 'this client'}, focused on the highest-leverage opportunities identified in the analysis.`
     );
-    const savedTechRows = Array.isArray(pData.techStackRows) ? pData.techStackRows as TechStackItem[] : null;
-    setTechRows(savedTechRows && savedTechRows.length > 0 ? savedTechRows : deriveTechStackRows(techStack));
     if (Array.isArray(pData.items) && pData.items.length > 0) {
       setKeyFindings(pData.keyFindings || analysis?.summary || '');
       setItems((pData.items as any[]).map((i: any) => ({
@@ -257,7 +212,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         setItems(buildItemsFromAnalysis());
         setKeyFindings(analysis.summary || '');
         setProjectOverview(`Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared a Phase 1 build for ${businessName || 'this client'}, focused on the highest-leverage opportunities identified in the analysis.`);
-        setTechRows(deriveTechStackRows(techStack));
       }
     })();
     return () => { cancelled = true; };
@@ -346,16 +300,6 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
   };
 
-  const updateTechRow = (idx: number, patch: Partial<TechStackItem>) => {
-    setTechRows((prev) => prev.map((row, rowIdx) => rowIdx === idx ? { ...row, ...patch } : row));
-  };
-
-  const addTechRow = () => setTechRows((prev) => [...prev, { name: '', category: '', purpose: '', status: 'keep' }]);
-  const removeTechRow = (idx: number) => setTechRows((prev) => prev.filter((_, rowIdx) => rowIdx !== idx));
-  const handleRefreshTechFromTab = () => {
-    setTechRows(deriveTechStackRows(techStack));
-    toast({ title: 'Tech stack refreshed', description: 'Click Save Proposal to keep these rows.' });
-  };
 
   const handleAutoFillNarrative = async () => {
     setAutoFillingNarrative(true);
@@ -395,7 +339,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         ...existingData,
         keyFindings,
         projectOverview,
-        techStackRows: techRows,
+        
         items: included.map(i => ({
           title: i.title,
           impact_category: i.impact_category,
@@ -704,84 +648,13 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Server className="w-4 h-4 text-primary" /> 3. Recommended Tech Stack
-          </h3>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefreshTechFromTab} disabled={isReadOnly} className="gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Refresh from Tech Stack tab
-            </Button>
-            <Button variant="ghost" size="sm" onClick={addTechRow} disabled={isReadOnly} className="gap-1.5">
-              <Plus className="w-3.5 h-3.5" /> Add tool
-            </Button>
-          </div>
-        </div>
-
-        {techRows.length === 0 ? (
-          <div className="rounded-lg border border-border bg-secondary/20 p-4 text-xs text-muted-foreground">
-            No tech stack rows yet — refresh from the Tech Stack tab or add them manually.
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {techRows.map((row, idx) => (
-              <div key={`${row.name}-${idx}`} className="grid grid-cols-12 gap-2 rounded-lg border border-border bg-secondary/20 p-3">
-                <Input value={row.name} onChange={e => updateTechRow(idx, { name: e.target.value })} placeholder="Name" className="col-span-3 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
-                <Input value={row.category} onChange={e => updateTechRow(idx, { category: e.target.value })} placeholder="Category" className="col-span-2 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
-                <Input value={row.purpose} onChange={e => updateTechRow(idx, { purpose: e.target.value })} placeholder="Purpose" className="col-span-4 h-8 text-xs bg-background border-border" disabled={isReadOnly} />
-                <Select value={row.status} onValueChange={(value) => updateTechRow(idx, { status: value as TechStackItem['status'] })} disabled={isReadOnly}>
-                  <SelectTrigger className="col-span-2 h-8 text-xs bg-background border-border">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="keep">Keep</SelectItem>
-                    <SelectItem value="replace">Replace</SelectItem>
-                    <SelectItem value="integrate">Integrate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="ghost" size="sm" onClick={() => removeTechRow(idx)} disabled={isReadOnly} className="col-span-1 h-8 px-0">
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="overflow-hidden rounded-lg border border-border">
-          <table className="w-full text-xs">
-            <thead className="bg-secondary/40 text-muted-foreground uppercase tracking-wider">
-              <tr>
-                <th className="px-3 py-2 text-left">Name</th>
-                <th className="px-3 py-2 text-left">Category</th>
-                <th className="px-3 py-2 text-left">Purpose</th>
-                <th className="px-3 py-2 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {techRows.map((row, idx) => (
-                <tr key={`preview-${row.name}-${idx}`} className="border-t border-border">
-                  <td className="px-3 py-2 font-semibold text-foreground">{row.name || '—'}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{row.category || '—'}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{row.purpose || '—'}</td>
-                  <td className="px-3 py-2">
-                    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${techStatusBadge[row.status || 'keep']}`}>
-                      {row.status || 'keep'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       {/* Totals & Fee Structure */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Investment Summary */}
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Calculator className="w-4 h-4 text-primary" /> 4. Investment Summary
+            <Calculator className="w-4 h-4 text-primary" /> 3. Investment Summary
           </h3>
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
@@ -807,7 +680,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         {/* Fee Structure */}
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-primary" /> 4. Payment Schedule
+            <DollarSign className="w-4 h-4 text-primary" /> 3. Payment Schedule
           </h3>
           <div className="space-y-3">
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
@@ -848,7 +721,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
 
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-          <FileText className="w-4 h-4 text-primary" /> 5. Initial Engagement Agreement
+          <FileText className="w-4 h-4 text-primary" /> 4. Initial Engagement Agreement
         </h3>
         <p className="text-xs text-muted-foreground">
           This proposal uses the current master agreement from the legal documents table{legalDoc?.version ? ` (v${legalDoc.version})` : ''}.

@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Sparkles, RefreshCw, Pencil, Save, Server, Layout, Database, Cloud, Puzzle, Shield, Scale, Eye, Clock, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, ArrowRightLeft, Wrench } from 'lucide-react';
+import { Loader2, Sparkles, RefreshCw, Pencil, Save, Server, Layout, Database, Cloud, Puzzle, Shield, Scale, Eye, Clock, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, ArrowRightLeft, Wrench, Crown, Award, Wallet, Star } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface TechStackData {
@@ -53,12 +53,28 @@ interface TechStackData {
   };
   reasoning?: string;
   generated_at?: string;
+  tiered_stacks?: {
+    premier?: TierData;
+    gold?: TierData;
+    entry?: TierData;
+    recommended_tier?: 'premier' | 'gold' | 'entry';
+    summary?: string;
+  };
   // Legacy flat fields
   frontend?: string;
   backend?: string;
   database?: string;
   hosting?: string;
   integrations?: string;
+}
+
+interface TierData {
+  headline?: string;
+  best_for?: string;
+  tradeoffs?: string;
+  monthly_cost_range?: string;
+  one_off_setup_range?: string;
+  tools?: Array<{ name: string; role: string; monthly_cost: string; justification: string }>;
 }
 
 interface Props {
@@ -217,6 +233,87 @@ const TechStackPanel = ({ assessmentId, techStack, onUpdate }: Props) => {
           </h4>
           <EditableText value={techStack.reasoning} path="reasoning" rows={4} />
         </div>
+      )}
+
+      {/* Three-tier stack comparison (Premier / Gold / Entry) */}
+      {techStack.tiered_stacks && (techStack.tiered_stacks.premier || techStack.tiered_stacks.gold || techStack.tiered_stacks.entry) && (
+        <CollapsibleSection
+          title="Tech Stack Options — Premier · Gold · Entry"
+          icon={Star}
+          isOpen={expandedSections['tiers'] !== false}
+          onToggle={() => toggleSection('tiers')}
+          badge={techStack.tiered_stacks.recommended_tier ? `Recommended: ${techStack.tiered_stacks.recommended_tier.toUpperCase()}` : undefined}
+        >
+          {techStack.tiered_stacks.summary && (
+            <p className="text-xs text-muted-foreground mb-4 italic">{techStack.tiered_stacks.summary}</p>
+          )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {(['premier', 'gold', 'entry'] as const).map((tierKey) => {
+              const tier = techStack.tiered_stacks?.[tierKey];
+              if (!tier) return null;
+              const isRecommended = techStack.tiered_stacks?.recommended_tier === tierKey;
+              const tierMeta = {
+                premier: { label: 'Premier', icon: Crown, accent: 'border-purple-500/40 bg-purple-500/5', chip: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
+                gold: { label: 'Gold', icon: Award, accent: 'border-amber-500/40 bg-amber-500/5', chip: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
+                entry: { label: 'Entry Level', icon: Wallet, accent: 'border-emerald-500/40 bg-emerald-500/5', chip: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
+              }[tierKey];
+              const TIcon = tierMeta.icon;
+              return (
+                <div key={tierKey} className={`rounded-xl border-2 ${tierMeta.accent} p-4 space-y-3 ${isRecommended ? 'ring-2 ring-primary/40' : ''}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TIcon className="w-4 h-4 text-foreground" />
+                      <h5 className="text-sm font-bold text-foreground">{tierMeta.label}</h5>
+                    </div>
+                    {isRecommended && <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">Recommended</Badge>}
+                  </div>
+                  {tier.headline && <p className="text-xs text-foreground/80 italic leading-relaxed">{tier.headline}</p>}
+                  <div className="space-y-1.5">
+                    {tier.monthly_cost_range && (
+                      <div className="rounded-md bg-background/60 border border-border px-2.5 py-1.5">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Monthly run-cost</p>
+                        <p className="text-sm font-bold text-foreground">{tier.monthly_cost_range}</p>
+                      </div>
+                    )}
+                    {tier.one_off_setup_range && (
+                      <div className="rounded-md bg-background/60 border border-border px-2.5 py-1.5">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">One-off setup</p>
+                        <p className="text-sm font-bold text-foreground">{tier.one_off_setup_range}</p>
+                      </div>
+                    )}
+                  </div>
+                  {tier.tools && tier.tools.length > 0 && (
+                    <div className="space-y-1.5 pt-2 border-t border-border">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Tools</p>
+                      {tier.tools.map((t, i) => (
+                        <div key={i} className="rounded-md bg-background/60 border border-border p-2 space-y-0.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-xs font-bold text-foreground">{t.name}</p>
+                            <span className={`text-[10px] font-bold whitespace-nowrap ${tierMeta.chip} border rounded-full px-1.5 py-0.5`}>{t.monthly_cost}</span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">{t.role}</p>
+                          {t.justification && <p className="text-[11px] text-foreground/70 leading-snug">{t.justification}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {tier.best_for && (
+                    <div className="pt-2 border-t border-border">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Best for</p>
+                      <p className="text-xs text-foreground/80">{tier.best_for}</p>
+                    </div>
+                  )}
+                  {tier.tradeoffs && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Trade-offs</p>
+                      <p className="text-xs text-foreground/70">{tier.tradeoffs}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CollapsibleSection>
       )}
 
       {/* Existing Tools Audit */}
