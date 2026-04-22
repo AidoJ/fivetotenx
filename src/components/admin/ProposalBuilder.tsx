@@ -120,6 +120,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
   const [revisions, setRevisions] = useState<any[]>([]);
   const [selectedRevisionId, setSelectedRevisionId] = useState<string | null>(null);
   const [creatingRevision, setCreatingRevision] = useState(false);
+  const [autoFillingNarrative, setAutoFillingNarrative] = useState(false);
   const emptyNarrative: JuliaNarrativeFields = {
     proposal_title: '',
     what_we_heard: '',
