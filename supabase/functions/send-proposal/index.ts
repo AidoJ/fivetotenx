@@ -540,6 +540,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    const recipientList = isInternalDraft ? internalRecipients : [assessment.contact_email];
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -548,8 +550,8 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: fromField,
-        to: [assessment.contact_email],
-        ...(ccList.length > 0 ? { cc: ccList } : {}),
+        to: recipientList,
+        ...(!isInternalDraft && ccList.length > 0 ? { cc: ccList } : {}),
         subject,
         html: emailHtml,
       }),
@@ -565,11 +567,14 @@ Deno.serve(async (req) => {
       throw new Error('Mail provider did not return a delivery id');
     }
 
-    const deliveredAt = new Date().toISOString();
-    await supabase
-      .from('proposals')
-      .update({ delivered_at: deliveredAt, sent_at: deliveredAt })
-      .eq('id', proposal.id);
+    // Only mark the proposal as delivered when it actually went to the client.
+    if (!isInternalDraft) {
+      const deliveredAt = new Date().toISOString();
+      await supabase
+        .from('proposals')
+        .update({ delivered_at: deliveredAt, sent_at: deliveredAt })
+        .eq('id', proposal.id);
+    }
 
     return new Response(JSON.stringify({
       success: true,
