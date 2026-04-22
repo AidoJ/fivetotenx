@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Sparkles, RefreshCw, Pencil, Save, Server, Layout, Database, Cloud, Puzzle, Shield, Scale, Eye, Clock, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, ArrowRightLeft, Wrench } from 'lucide-react';
+import { Loader2, Sparkles, RefreshCw, Pencil, Save, Server, Layout, Database, Cloud, Puzzle, Shield, Scale, Eye, Clock, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, ArrowRightLeft, Wrench, Crown, Award, Wallet, Star } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface TechStackData {
@@ -53,12 +53,28 @@ interface TechStackData {
   };
   reasoning?: string;
   generated_at?: string;
+  tiered_stacks?: {
+    premier?: TierData;
+    gold?: TierData;
+    entry?: TierData;
+    recommended_tier?: 'premier' | 'gold' | 'entry';
+    summary?: string;
+  };
   // Legacy flat fields
   frontend?: string;
   backend?: string;
   database?: string;
   hosting?: string;
   integrations?: string;
+}
+
+interface TierData {
+  headline?: string;
+  best_for?: string;
+  tradeoffs?: string;
+  monthly_cost_range?: string;
+  one_off_setup_range?: string;
+  tools?: Array<{ name: string; role: string; monthly_cost: string; justification: string }>;
 }
 
 interface Props {
