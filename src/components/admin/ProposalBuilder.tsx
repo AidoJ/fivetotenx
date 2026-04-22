@@ -383,10 +383,18 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
           totalWeeks,
         },
         feeStructure: {
-          deposit: { percent: DEPOSIT_PCT * 100, amount: deposit, label: 'On Commencement' },
-          mvp: { percent: MVP_PCT * 100, amount: mvp, label: 'On MVP Achieved & Reviewed' },
-          final: { percent: FINAL_PCT * 100, amount: final, label: 'On Handover of Final Build' },
+          deposit: { percent: DEPOSIT_PCT * 100, amount: deposit, label: 'Commitment Deposit', when: 'On commencement — kicks off discovery session and build' },
+          mvp: { percent: MVP_PCT * 100, amount: mvp, label: 'MVP Payment', when: 'On MVP working in test environment with real data' },
+          final: { percent: FINAL_PCT * 100, amount: final, label: 'Final Balance', when: 'On go-live — system in production, signed off, legacy workflow retired' },
         },
+        // Julia-pixel narrative blocks (editable above)
+        proposal_title: narrative.proposal_title,
+        what_we_heard: narrative.what_we_heard,
+        highlight_box: narrative.highlight_box,
+        what_this_means: narrative.what_this_means,
+        what_we_need_from_you: narrative.what_we_need_from_you,
+        oversight_note: narrative.oversight_note,
+        closing_paragraph: narrative.closing_paragraph,
         manually_edited_at: new Date().toISOString(),
       };
 
