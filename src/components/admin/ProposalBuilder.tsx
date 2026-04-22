@@ -336,7 +336,11 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, included: !it.included } : it));
   };
 
-  const updateItem = (idx: number, field: 'manualCost' | 'manualWeeks', value: string) => {
+  const updateItem = (
+    idx: number,
+    field: 'manualCost' | 'manualWeeks' | 'title' | 'explanation' | 'recommendation',
+    value: string,
+  ) => {
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
   };
 
