@@ -474,6 +474,7 @@ Deno.serve(async (req) => {
         </td></tr>
 
         <tr><td style="padding:32px 40px 8px;">
+          ${internalDraftBannerHtml}
           ${revisionBannerHtml}
           <p style="color:${TEXT};font-size:15px;line-height:1.85;margin:0 0 16px;">Hi ${escapeHtml(firstName)},</p>
 
