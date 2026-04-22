@@ -523,7 +523,7 @@ Deno.serve(async (req) => {
         </td></tr>
 
         <tr><td style="padding:24px 40px 20px;background:${BG_SOFT};border-top:1px solid ${BORDER};text-align:center;">
-          <img src="https://hfszmulinpwzmroqemke.supabase.co/storage/v1/object/public/email-assets/logo-5to10x-v2.png" alt="5to10X" width="160" style="display:inline-block;width:160px;height:auto;margin:0 0 14px;border:0;outline:none;text-decoration:none;" />
+          <img src="https://hfszmulinpwzmroqemke.supabase.co/storage/v1/object/public/email-assets/logo-5to10x-cropped.png" alt="5to10X" width="180" style="display:inline-block;width:180px;height:auto;margin:0 0 12px;border:0;outline:none;text-decoration:none;" />
           <p style="color:${NAVY};font-size:14px;font-weight:700;margin:0 0 4px;">You're not buying tech. You're buying profit.</p>
           <p style="color:${MUTED};font-size:12px;margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">5to10X — Strategic App ROI Assessment</p>
         </td></tr>
