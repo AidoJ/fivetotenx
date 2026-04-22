@@ -85,6 +85,7 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const [draft, setDraft] = useState<DraftEmail | null>(null);
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendingInternalDraft, setSendingInternalDraft] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sentEmails, setSentEmails] = useState<SentEmail[]>([]);
   const [confirmSend, setConfirmSend] = useState(false);
