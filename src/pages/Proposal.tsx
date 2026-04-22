@@ -14,17 +14,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Pencil, Save, X,
-  Lock, AlertTriangle, Send, Sparkles, Server, ExternalLink, Plus, FileText,
+  Loader2, Printer, CheckCircle2, Clock, DollarSign, Pencil, Save, X,
+  Lock, AlertTriangle, Send, ExternalLink, FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/logo-5to10x-color.webp';
 import SigningModal from '@/components/proposal/SigningModal';
+import JuliaProposalView from '@/components/proposal/JuliaProposalView';
 
 type Mode = 'admin' | 'view' | 'edit' | 'accept';
 
