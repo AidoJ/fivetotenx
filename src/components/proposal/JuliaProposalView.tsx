@@ -26,6 +26,7 @@ export interface JuliaProposalData {
   highlight_box?: { headline?: string; body?: string };
   what_this_means?: { heading?: string; body?: string }[];
   what_we_need_from_you?: string[];
+  delivery_phases?: { weeks?: string; title?: string; body?: string }[];
   oversight_note?: string;
   closing_paragraph?: string;
   keyFindings?: string;
@@ -99,6 +100,7 @@ const JuliaProposalView: React.FC<Props> = ({
   const highlight = proposalData.highlight_box;
   const whatThisMeans = (proposalData.what_this_means || []).filter(b => b.heading || b.body);
   const needs = (proposalData.what_we_need_from_you || []).filter(Boolean);
+  const phases = (proposalData.delivery_phases || []).filter(p => p && (p.weeks || p.title || p.body));
   const oversight = proposalData.oversight_note;
   const closing = proposalData.closing_paragraph;
 
