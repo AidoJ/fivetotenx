@@ -272,6 +272,9 @@ Deno.serve(async (req) => {
     const needs: string[] = Array.isArray(proposalData.what_we_need_from_you)
       ? proposalData.what_we_need_from_you.filter((s: any) => typeof s === 'string' && s.trim())
       : [];
+    const phases: { weeks?: string; title?: string; body?: string }[] = Array.isArray(proposalData.delivery_phases)
+      ? proposalData.delivery_phases.filter((p: any) => p && (p.weeks || p.title || p.body))
+      : [];
     const oversight: string = proposalData.oversight_note || '';
     const closing: string = proposalData.closing_paragraph
       || `Any questions before you decide, just reply directly to this email. We can begin discovery within a week of sign-off.`;
@@ -369,6 +372,18 @@ Deno.serve(async (req) => {
     const needsHtml = needs.length > 0
       ? sectionHeading('What We Need from You') +
         `<ul style="padding-left:22px;margin:0 0 16px;color:${TEXT};font-size:14px;line-height:1.75;">${needs.map(n => `<li style="margin-bottom:6px;">${escapeHtml(n)}</li>`).join('')}</ul>`
+      : '';
+
+    const phasesHtml = phases.length > 0
+      ? sectionHeading('Delivery Timeline') +
+        `<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">${phases.map((p) => `
+          <tr>
+            <td valign="top" style="padding:14px 14px 14px 0;border-top:1px solid ${BORDER};width:140px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;font-weight:700;color:${NAVY};text-transform:uppercase;letter-spacing:0.5px;">${escapeHtml(p.weeks || '')}</td>
+            <td valign="top" style="padding:14px 0;border-top:1px solid ${BORDER};">
+              ${p.title ? `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;font-weight:700;color:${TEXT_DARK};margin-bottom:4px;">${escapeHtml(p.title)}</div>` : ''}
+              ${p.body ? `<div style="color:${TEXT};font-size:14px;line-height:1.75;">${escapeHtml(p.body)}</div>` : ''}
+            </td>
+          </tr>`).join('')}</table>`
       : '';
 
     const oversightHtml = oversight
