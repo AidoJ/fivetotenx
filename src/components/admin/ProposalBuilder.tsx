@@ -680,7 +680,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         {/* Fee Structure */}
         <div className="rounded-xl border border-border bg-card p-5 space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-primary" /> 4. Payment Schedule
+            <DollarSign className="w-4 h-4 text-primary" /> 3. Payment Schedule
           </h3>
           <div className="space-y-3">
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
@@ -721,7 +721,7 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
 
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-          <FileText className="w-4 h-4 text-primary" /> 5. Initial Engagement Agreement
+          <FileText className="w-4 h-4 text-primary" /> 4. Initial Engagement Agreement
         </h3>
         <p className="text-xs text-muted-foreground">
           This proposal uses the current master agreement from the legal documents table{legalDoc?.version ? ` (v${legalDoc.version})` : ''}.

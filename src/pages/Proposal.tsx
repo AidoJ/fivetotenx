@@ -54,13 +54,6 @@ interface ProposalItem {
   locked?: boolean;
 }
 
-interface TechStackItem {
-  name: string;
-  category: string;
-  purpose: string;
-  status: 'keep' | 'replace' | 'integrate';
-}
-
 interface AssessmentRow {
   contact_name: string;
   contact_email: string;
@@ -76,46 +69,6 @@ const formatCurrency = (v: number) =>
 
 const formatDate = (d: string | null | undefined) =>
   d ? new Date(d).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
-
-// Map the rich tech_stack JSON (existing_tools_audit + recommended_tools) into
-// a flat list of {name, category, purpose, status} rows that admins can edit
-// and clients can read.
-const deriveTechStackRows = (techStack: any): TechStackItem[] => {
-  if (!techStack || typeof techStack !== 'object') return [];
-  // If already in the simplified shape, use it directly.
-  if (Array.isArray(techStack.proposal_rows)) {
-    return (techStack.proposal_rows as TechStackItem[]).filter(r => r && r.name);
-  }
-  const rows: TechStackItem[] = [];
-  const audit = Array.isArray(techStack.existing_tools_audit) ? techStack.existing_tools_audit : [];
-  audit.forEach((t: any) => {
-    const verdict = String(t.verdict || 'keep').toLowerCase();
-    const status: TechStackItem['status'] =
-      verdict === 'replace' ? 'replace' : verdict === 'integrate' ? 'integrate' : 'keep';
-    rows.push({
-      name: t.tool_name || 'Unnamed tool',
-      category: t.category || 'Existing Tool',
-      purpose: t.current_use || t.reasoning || '',
-      status,
-    });
-  });
-  const recs = Array.isArray(techStack.recommended_tools) ? techStack.recommended_tools : [];
-  recs.forEach((r: any) => {
-    rows.push({
-      name: r.primary_recommendation || r.category || 'Recommended tool',
-      category: r.category || 'New',
-      purpose: r.alternatives ? `Alternatives: ${r.alternatives}` : '',
-      status: 'integrate',
-    });
-  });
-  return rows;
-};
-
-const techStatusBadge: Record<TechStackItem['status'], { label: string; cls: string }> = {
-  keep: { label: 'Keep', cls: 'bg-green-500/10 text-green-700 border-green-500/30' },
-  replace: { label: 'Replace', cls: 'bg-red-500/10 text-red-700 border-red-500/30' },
-  integrate: { label: 'Integrate', cls: 'bg-blue-500/10 text-blue-700 border-blue-500/30' },
-};
 
 const SectionTitle = ({ icon: Icon, number, title }: { icon: any; number: number; title: string }) => (
   <h2 className="text-xl font-display font-bold text-foreground mb-4 flex items-center gap-3">
