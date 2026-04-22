@@ -14,17 +14,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Loader2, Printer, CheckCircle2, Clock, DollarSign, Target, Wrench, Pencil, Save, X,
-  Lock, AlertTriangle, Send, Sparkles, Server, ExternalLink, Plus, FileText,
+  Loader2, Printer, CheckCircle2, Clock, DollarSign, Pencil, Save, X,
+  Lock, AlertTriangle, Send, ExternalLink, FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/logo-5to10x-color.webp';
 import SigningModal from '@/components/proposal/SigningModal';
+import JuliaProposalView from '@/components/proposal/JuliaProposalView';
 
 type Mode = 'admin' | 'view' | 'edit' | 'accept';
 
@@ -193,11 +191,7 @@ const Proposal = () => {
     initialAction === 'edit' ? 'edit' : initialAction === 'accept' ? 'accept' : 'view',
   );
 
-  // Admin editing state
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [projectOverview, setProjectOverview] = useState('');
-  const [techRows, setTechRows] = useState<TechStackItem[]>([]);
+  // (Admin editing now happens entirely in ProposalBuilder; this page is render-only for narrative)
 
   // Selection / signing state
   const [selectedItemIdx, setSelectedItemIdx] = useState<Set<number>>(new Set());
@@ -281,10 +275,7 @@ const Proposal = () => {
         setSelectedItemIdx(new Set(items.map((_, i) => i)));
       }
 
-      // Initial overview + tech stack rows (proposal_data wins, otherwise derive from assessment)
-      setProjectOverview(typeof pData.projectOverview === 'string' ? pData.projectOverview : '');
-      const savedRows = Array.isArray(pData.techStackRows) ? pData.techStackRows as TechStackItem[] : null;
-      setTechRows(savedRows && savedRows.length > 0 ? savedRows : deriveTechStackRows(assess?.tech_stack));
+      // (narrative + tech-stack rows are now read directly from proposal_data inside JuliaProposalView)
 
       setLoading(false);
     })();
@@ -350,36 +341,7 @@ const Proposal = () => {
     });
   };
 
-  const handleAdminSave = async () => {
-    if (!proposal) return;
-    setSaving(true);
-    const newData = {
-      ...(proposal.proposal_data || {}),
-      projectOverview,
-      techStackRows: techRows,
-    };
-    const { error } = await supabase.from('proposals').update({ proposal_data: newData }).eq('id', proposal.id);
-    if (error) {
-      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
-    } else {
-      setProposal(p => p ? { ...p, proposal_data: newData } : null);
-      toast({ title: 'Proposal saved ✅' });
-      setEditing(false);
-    }
-    setSaving(false);
-  };
-
-  const handleRefreshTechFromTab = () => {
-    if (!assessment) return;
-    setTechRows(deriveTechStackRows(assessment.tech_stack));
-    toast({ title: 'Tech stack refreshed from analysis', description: 'Click Save to persist.' });
-  };
-
-  const updateTechRow = (i: number, patch: Partial<TechStackItem>) => {
-    setTechRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r));
-  };
-  const addTechRow = () => setTechRows(prev => [...prev, { name: '', category: '', purpose: '', status: 'keep' }]);
-  const removeTechRow = (i: number) => setTechRows(prev => prev.filter((_, idx) => idx !== i));
+  // (Admin Save / tech-stack edit handlers removed — admin editing lives in ProposalBuilder.tsx)
 
   const handleRequestRevision = async () => {
     if (!proposal || !id) return;
@@ -532,29 +494,15 @@ const Proposal = () => {
   }
 
   // ============ VIEW / ACCEPT / ADMIN — full proposal ============
+  const proposalData = (proposal.proposal_data || {}) as any;
   return (
     <>
-      {/* Floating action bar — admin only gets edit/save/print, clients get nothing here */}
+      {/* Floating action bar — admin only gets print, clients get nothing here */}
       <div className="print:hidden fixed top-4 right-4 z-50 flex gap-2">
-        {mode === 'admin' && !editing && (
-          <>
-            <Button variant="outline" onClick={() => setEditing(true)} className="gap-2 shadow-lg">
-              <Pencil className="w-4 h-4" /> Edit
-            </Button>
-            <Button onClick={() => window.print()} className="gap-2 shadow-lg">
-              <Printer className="w-4 h-4" /> Print / PDF
-            </Button>
-          </>
-        )}
-        {mode === 'admin' && editing && (
-          <>
-            <Button variant="outline" onClick={() => setEditing(false)} className="gap-2 shadow-lg">
-              <X className="w-4 h-4" /> Cancel
-            </Button>
-            <Button onClick={handleAdminSave} disabled={saving} className="gap-2 shadow-lg">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
-            </Button>
-          </>
+        {mode === 'admin' && (
+          <Button onClick={() => window.print()} className="gap-2 shadow-lg">
+            <Printer className="w-4 h-4" /> Print / PDF
+          </Button>
         )}
       </div>
 
@@ -567,8 +515,8 @@ const Proposal = () => {
         }
       `}</style>
 
-      <div className="min-h-screen bg-background text-foreground [--muted-foreground:230_20%_25%]">
-        <div className="max-w-3xl mx-auto px-8 py-12">
+      <div className="min-h-screen bg-[#f8fafc] text-foreground">
+        <div className="max-w-[760px] mx-auto px-6 py-10">
           {proposal.superseded_by && (
             <div className="print:hidden mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
@@ -586,33 +534,17 @@ const Proposal = () => {
             </div>
           )}
 
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <img src={logo} alt="5to10X" className="h-14" />
-            <div className="text-right text-sm text-muted-foreground">
+          {/* Top utility bar */}
+          <div className="flex items-center justify-between mb-6 print:hidden">
+            <img src={logo} alt="5to10X" className="h-10" />
+            <div className="text-right text-xs text-muted-foreground">
               <p>Proposal #{proposal.id.slice(0, 8).toUpperCase()}</p>
-              <p>{formatDate(proposal.sent_at)}</p>
-              {(proposal.revision || 1) > 1 && (
-                <p className="text-xs mt-1">Revision v{proposal.revision}</p>
-              )}
+              {(proposal.revision || 1) > 1 && <p className="mt-0.5">Revision v{proposal.revision}</p>}
             </div>
           </div>
 
-          {/* Title */}
-          <div className="mb-8 pb-8 border-b border-border">
-            <h1 className="text-3xl font-display font-bold text-foreground mb-2">App Development & Automation Proposal</h1>
-            <p className="text-sm text-muted-foreground mb-1">Including Terms of Engagement</p>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-              <div><span className="text-muted-foreground">Prepared for:</span> <strong className="text-foreground">{assessment.contact_name}</strong>{assessment.business_name && <> at <strong className="text-foreground">{assessment.business_name}</strong></>}</div>
-              <div><span className="text-muted-foreground">Prepared by:</span> <strong className="text-foreground">5to10X</strong></div>
-              <div><span className="text-muted-foreground">Date:</span> <strong className="text-foreground">{formatDate(proposal.sent_at)}</strong></div>
-              {assessment.industry && <div><span className="text-muted-foreground">Industry:</span> <strong className="text-foreground">{assessment.industry}</strong></div>}
-            </div>
-          </div>
-
-          {/* Accepted banner */}
           {proposal.accepted && (
-            <div className="flex items-center gap-3 bg-primary/10 text-primary border border-primary/20 rounded-lg px-5 py-3 mb-8">
+            <div className="flex items-center gap-3 bg-green-500/10 text-green-700 border border-green-500/30 rounded-lg px-5 py-3 mb-6">
               <CheckCircle2 className="w-5 h-5" />
               <div>
                 <p className="font-semibold text-sm">Proposal Accepted</p>
@@ -623,259 +555,48 @@ const Proposal = () => {
 
           <StageTracker proposal={proposal} mode={mode} />
 
-          {/* 1. Project Overview */}
-          <section className="mb-10">
-            <SectionTitle icon={Target} number={1} title="Project Overview" />
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-              {mode === 'admin' && editing ? (
-                <Textarea
-                  value={projectOverview}
-                  onChange={e => setProjectOverview(e.target.value)}
-                  className="text-sm min-h-[200px]"
-                  placeholder="Write a tailored project overview…"
-                />
-              ) : projectOverview ? (
-                <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{projectOverview}</div>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">
-                  Based on your Reality Check™ assessment and Straight Talk™ conversation, we have prepared the following Phase 1 build for {businessName}, focused on the highest-leverage opportunities we uncovered together.
-                </p>
-              )}
-              {roi?.totalAnnualImpact ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{formatCurrency(roi.totalAnnualImpact)}</p>
-                    <p className="text-xs text-muted-foreground">Projected Annual Impact</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-foreground">{Math.round(roi.roiPercentage || 0)}%</p>
-                    <p className="text-xs text-muted-foreground">Projected ROI</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-foreground">{Math.round(roi.breakEvenMonths || 0)} mo</p>
-                    <p className="text-xs text-muted-foreground">Break-even</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-foreground">{roi.pricing?.tierLabel || '—'}</p>
-                    <p className="text-xs text-muted-foreground">Recommended Tier</p>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </section>
+          {/* Julia-pixel proposal body */}
+          <JuliaProposalView
+            proposalData={proposalData}
+            contactName={assessment.contact_name}
+            businessName={businessName}
+            preparedBy="Aidan Leonard & Eoghan"
+            proposalDate={formatDate(proposal.sent_at)}
+            industry={assessment.industry}
+            roiAnnualImpact={roi?.totalAnnualImpact || 0}
+          />
 
-          {/* 2. Build Scope */}
-          {hasSelectableItems && (
-            <section className="mb-10">
-              <SectionTitle icon={Sparkles} number={2} title="Build Scope" />
-              <div className="bg-card border border-border rounded-lg p-6 space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {proposal.accepted
-                    ? 'You accepted the following scope:'
-                    : `We've recommended ${proposalItems.length} items based on your assessment. Below is your current scope. To adjust it, click Edit Scope at the bottom of this page.`}
-                </p>
-                <div className="space-y-2">
-                  {proposalItems.map((item, idx) => {
-                    const sel = selectedItemIdx.has(idx);
-                    return (
-                      <div
-                        key={idx}
-                        className={`rounded-lg border p-3 ${sel ? 'border-primary/40 bg-primary/5' : 'border-border bg-secondary/20 opacity-60'}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="mt-1 w-4 h-4 rounded border border-primary/40 flex items-center justify-center flex-shrink-0">
-                            {sel && <CheckCircle2 className="w-4 h-4 text-primary" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-bold text-foreground">{item.title}</span>
-                              {item._type && (
-                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
-                                  {item._type === 'big_hit' ? 'Big Hit' : 'Quick Win'}
-                                </span>
-                              )}
-                            </div>
-                            {item.explanation && (
-                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.explanation}</p>
-                            )}
-                            <div className="flex items-center gap-4 mt-2 text-xs">
-                              <span className="font-semibold text-foreground">{formatCurrency(item.cost ?? 0)}</span>
-                              {typeof item.weeks === 'number' && item.weeks > 0 && (
-                                <span className="text-muted-foreground inline-flex items-center gap-1">
-                                  <Clock className="w-3 h-3" /> {item.weeks}w
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* 3. Tech Stack */}
-          <section className="mb-10">
-            <SectionTitle icon={Server} number={3} title="Recommended Tech Stack" />
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-              <p className="text-sm text-muted-foreground">
-                The platforms, tools and services that will support the build above. <strong className="text-foreground">Keep</strong> = stays in place. <strong className="text-foreground">Replace</strong> = we'll move you off it. <strong className="text-foreground">Integrate</strong> = we'll connect or augment it.
-              </p>
-
-              {mode === 'admin' && editing ? (
-                <div className="space-y-3">
-                  {techRows.map((r, i) => (
-                    <div key={i} className="grid grid-cols-12 gap-2 items-start rounded-lg border border-border bg-secondary/20 p-3">
-                      <Input
-                        value={r.name}
-                        onChange={e => updateTechRow(i, { name: e.target.value })}
-                        placeholder="Tool name"
-                        className="text-sm col-span-3"
-                      />
-                      <Input
-                        value={r.category}
-                        onChange={e => updateTechRow(i, { category: e.target.value })}
-                        placeholder="Category"
-                        className="text-sm col-span-2"
-                      />
-                      <Input
-                        value={r.purpose}
-                        onChange={e => updateTechRow(i, { purpose: e.target.value })}
-                        placeholder="Purpose / role in stack"
-                        className="text-sm col-span-5"
-                      />
-                      <Select
-                        value={r.status}
-                        onValueChange={(v) => updateTechRow(i, { status: v as TechStackItem['status'] })}
-                      >
-                        <SelectTrigger className="h-9 text-xs col-span-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="keep">Keep</SelectItem>
-                          <SelectItem value="replace">Replace</SelectItem>
-                          <SelectItem value="integrate">Integrate</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeTechRow(i)}
-                        className="col-span-1 h-9 w-9 p-0 text-destructive justify-self-end"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={addTechRow} className="gap-1.5">
-                      <Plus className="w-3.5 h-3.5" /> Add tool
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={handleRefreshTechFromTab} className="gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" /> Refresh from Tech Stack tab
-                    </Button>
-                  </div>
-                </div>
-              ) : techRows.length === 0 ? (
-                <p className="text-sm text-muted-foreground italic">
-                  No tech stack confirmed yet. {mode === 'admin' ? 'Edit this proposal to add the recommended tools.' : 'Your final tech stack will be confirmed during build refinement.'}
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-                        <th className="py-2 pr-3 font-semibold">Tool</th>
-                        <th className="py-2 pr-3 font-semibold">Category</th>
-                        <th className="py-2 pr-3 font-semibold">Purpose</th>
-                        <th className="py-2 font-semibold">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {techRows.map((r, i) => {
-                        const b = techStatusBadge[r.status] || techStatusBadge.keep;
-                        return (
-                          <tr key={i} className="border-b border-border last:border-0">
-                            <td className="py-3 pr-3 font-semibold text-foreground">{r.name}</td>
-                            <td className="py-3 pr-3 text-muted-foreground">{r.category}</td>
-                            <td className="py-3 pr-3 text-muted-foreground">{r.purpose}</td>
-                            <td className="py-3">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${b.cls}`}>
-                                {b.label}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* 4. Investment */}
-          <section className="mb-10">
-            <SectionTitle icon={DollarSign} number={4} title="Investment" />
-            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <div className="text-center bg-primary/5 rounded-lg p-6 border border-primary/20">
-                <p className="text-xs text-muted-foreground mb-2">Total Project Investment (inc GST)</p>
-                <p className="text-3xl font-bold text-primary">{formatCurrency(totals.totalIncGst)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formatCurrency(totals.subtotalExGst)} ex GST + {formatCurrency(totals.gst)} GST
-                  {totals.totalWeeks > 0 && <> · est. {totals.totalWeeks} weeks</>}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm font-bold text-foreground mb-3">Payment Schedule</p>
-                <div className="space-y-3">
-                  {[
-                    { label: 'Commitment Deposit', percentage: 10, amount: totals.deposit, desc: 'On Commencement' },
-                    { label: 'MVP Payment', percentage: 50, amount: totals.mvp, desc: 'On MVP Achieved & Reviewed' },
-                    { label: 'Final Balance', percentage: 40, amount: totals.final, desc: 'On Handover of Final Build' },
-                  ].map((ps, i) => (
-                    <div key={i} className="flex items-center gap-4 bg-secondary/30 rounded-lg p-3">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">
-                        {ps.percentage}%
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-foreground">{ps.label} – {formatCurrency(ps.amount)}</p>
-                        <p className="text-xs text-muted-foreground">{ps.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground italic">
-                Invoices are payable within 7 days unless otherwise agreed. Late payments may delay project progress.
-              </p>
-            </div>
-          </section>
-
-          {/* 5. Engagement Agreement (full legal doc) */}
-          <section className="mb-10 page-break">
-            <SectionTitle icon={FileText} number={5} title="Initial Engagement Agreement" />
-            <div className="bg-card border border-border rounded-lg p-6 space-y-3">
-              <p className="text-sm text-muted-foreground">
+          {/* Initial Engagement Agreement (kept inline before sign-off) */}
+          <section className="mt-10 page-break">
+            <h2 style={{
+              fontFamily: 'Georgia, serif',
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#1e3a5f',
+              margin: '36px 0 14px',
+              paddingBottom: '8px',
+              borderBottom: '2px solid #e2e8f0',
+            }}>
+              Initial Engagement Agreement
+            </h2>
+            <div className="bg-white border border-[#e2e8f0] rounded-xl p-5 space-y-3">
+              <p className="text-sm text-[#475569]" style={{ fontFamily: 'Georgia, serif' }}>
                 The full Initial AI Consultancy Engagement Agreement (v{legalDoc?.version || '—'}) governs this proposal. By accepting and signing below, you confirm you've read and agree to this document in full.
               </p>
               {legalDoc?.content ? (
-                <div className="max-h-[400px] overflow-y-auto rounded-lg border border-border bg-secondary/20 p-4 text-xs leading-relaxed whitespace-pre-wrap text-foreground">
+                <div className="max-h-[400px] overflow-y-auto rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4 text-xs leading-relaxed whitespace-pre-wrap text-[#1e293b]">
                   {legalDoc.content}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground italic">Agreement document not yet available. Please contact grow@5to10x.app.</p>
+                <p className="text-sm text-[#64748b] italic">Agreement document not yet available. Please contact grow@5to10x.app.</p>
               )}
             </div>
           </section>
 
           {/* Action area */}
           {!proposal.accepted && !proposal.superseded_by && (mode === 'view' || mode === 'accept') && (
-            <div className="print:hidden text-center py-8 space-y-4 border-t border-border">
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            <div className="print:hidden text-center py-8 space-y-4 mt-8 border-t border-[#e2e8f0]">
+              <p className="text-sm text-[#475569] max-w-md mx-auto" style={{ fontFamily: 'Georgia, serif' }}>
                 Happy with the scope? Accept and sign below. Want to change what's included? Click Edit Scope.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
@@ -899,15 +620,15 @@ const Proposal = () => {
           )}
 
           {!proposal.accepted && proposal.superseded_by && (
-            <div className="print:hidden text-center py-8 border-t border-border">
-              <p className="text-sm text-muted-foreground">
+            <div className="print:hidden text-center py-8 border-t border-[#e2e8f0]">
+              <p className="text-sm text-[#64748b]">
                 Acceptance is disabled — a revised proposal has been issued. Please use the latest version we emailed you.
               </p>
             </div>
           )}
 
           {mode === 'admin' && (
-            <div className="print:hidden text-center py-6 border-t border-border">
+            <div className="print:hidden text-center py-6 border-t border-[#e2e8f0]">
               <a
                 href={`/proposal/${proposal.id}?admin=1`}
                 target="_blank"
@@ -920,15 +641,16 @@ const Proposal = () => {
           )}
 
           {/* Footer */}
-          <footer className="border-t border-border pt-6 mt-10 flex items-center justify-between text-xs text-muted-foreground">
+          <footer className="border-t border-[#e2e8f0] pt-6 mt-10 flex items-center justify-between text-xs text-[#94a3b8]" style={{ fontFamily: '-apple-system, sans-serif' }}>
             <div className="flex items-center gap-2">
-              <img src={logo} alt="5to10X" className="h-6 opacity-50" />
+              <img src={logo} alt="5to10X" className="h-6 opacity-60" />
               <span>5to10X — App Development &amp; Automation</span>
             </div>
             <span>grow@5to10x.app</span>
           </footer>
         </div>
       </div>
+
 
       <SigningModal
         open={signingOpen}
