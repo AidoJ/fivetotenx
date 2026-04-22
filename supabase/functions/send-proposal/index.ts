@@ -5,15 +5,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Brand colours (match landing page pipeline)
-const PURPLE = '#6d3ce8';      // Accept Proposal — vibrant violet (matches pipeline)
-const PURPLE_DARK = '#5a2dd1';
-const AMBER = '#f59e0b';       // Edit Proposal — warm orange
+// Julia-pixel palette — matches JuliaProposalView (client page) and the
+// 5to10X email design system. Inline-only styles for email-client safety.
 const NAVY = '#1e3a5f';
+const NAVY_DEEP = '#1e40af';
+const NAVY_LIGHT = '#93c5fd';
+const NAVY_PALE = '#bfdbfe';
+const PURPLE = '#6d3ce8';      // CTA button
+const PURPLE_DARK = '#5a2dd1';
+const AMBER = '#f59e0b';       // Highlight + oversight callout border
+const AMBER_BG = '#fffbeb';
+const AMBER_BORDER = '#fde68a';
+const AMBER_TEXT = '#92400e';
+const AMBER_TEXT_DEEP = '#78350f';
 const TEXT = '#334155';
+const TEXT_DARK = '#1e293b';
 const MUTED = '#64748b';
 const BORDER = '#e2e8f0';
 const BG_SOFT = '#f8fafc';
+const BG_BLUE = '#f0f9ff';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(n || 0);
