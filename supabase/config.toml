@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.analyze-opportunities]
 verify_jwt = false
+
+[functions.generate-proposal-narrative]
+verify_jwt = false
