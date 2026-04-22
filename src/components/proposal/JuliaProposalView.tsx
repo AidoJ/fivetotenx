@@ -283,7 +283,7 @@ const JuliaProposalView: React.FC<Props> = ({
           <h2 style={sectionH2}>What We Need from You</h2>
           <ul style={{ paddingLeft: '22px', marginBottom: '14px' }}>
             {needs.map((n, i) => (
-              <li key={i} style={{ marginBottom: '6px', color: '#334155' }}>{n}</li>
+              <li key={i} style={{ marginBottom: '6px', color: '#334155', whiteSpace: 'pre-wrap' }}>{n}</li>
             ))}
           </ul>
         </section>
