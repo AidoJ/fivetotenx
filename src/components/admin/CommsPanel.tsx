@@ -4,6 +4,8 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Send, Loader2, FileText, Sparkles, ChevronDown, ChevronUp,
   Mail, CheckCircle2, Edit3, RefreshCw, Clock, Handshake, Target, Rocket, Save,
+  Bold, Italic, Underline, Strikethrough, List, ListOrdered, Link2, Unlink,
+  Heading1, Heading2, Quote, AlignLeft, AlignCenter, AlignRight, Eraser, Undo2, Redo2, Palette,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -79,6 +81,20 @@ type SavedDraftPayload = DraftEmail & {
   savedAt?: string;
 };
 
+const ToolbarBtn: React.FC<{ onClick: () => void; title: string; children: React.ReactNode }> = ({ onClick, title, children }) => (
+  <button
+    type="button"
+    onMouseDown={e => e.preventDefault()} // keep selection in editor
+    onClick={onClick}
+    title={title}
+    className="inline-flex items-center justify-center h-7 w-7 rounded text-foreground hover:bg-secondary"
+  >
+    {children}
+  </button>
+);
+
+const Sep: React.FC = () => <span className="w-px h-5 bg-border mx-0.5" />;
+
 const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -92,6 +108,29 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
   const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview');
   const [expandedSent, setExpandedSent] = useState<string | null>(null);
   const [draftNoteId, setDraftNoteId] = useState<string | null>(null);
+  const editorRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Run a contentEditable formatting command and sync the HTML back into draft state.
+  const exec = (command: string, value?: string) => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    try {
+      document.execCommand(command, false, value);
+    } catch {
+      // execCommand is deprecated but still widely supported for contentEditable.
+    }
+    const html = editorRef.current.innerHTML;
+    setDraft(prev => (prev ? { ...prev, body: html } : prev));
+    setConfirmSend(false);
+  };
+
+  const promptLink = () => {
+    const url = window.prompt('Enter URL (include https://):', 'https://');
+    if (!url) return;
+    exec('createLink', url);
+  };
+
+  const setBlock = (tag: string) => exec('formatBlock', tag);
 
   // Load sent email history + saved drafts
   useEffect(() => {
@@ -451,15 +490,62 @@ const CommsPanel: React.FC<CommsPanelProps> = ({ assessmentId, lead }) => {
 
               {viewMode === 'preview' ? (
                 <div className="rounded-lg border border-border overflow-hidden">
-                  <div className="bg-secondary/30 px-4 py-2 border-b border-border flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-destructive/60" />
-                      <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
-                      <div className="w-2 h-2 rounded-full bg-green-500/60" />
-                      <span className="text-[10px] text-muted-foreground ml-2">Click anywhere to edit — click Save Draft to persist</span>
-                    </div>
+                  <div className="bg-secondary/30 px-3 py-2 border-b border-border flex items-center gap-1 flex-wrap">
+                    {/* Block / heading group */}
+                    <select
+                      onChange={e => { setBlock(e.target.value); e.target.value = ''; }}
+                      defaultValue=""
+                      className="h-7 text-[11px] rounded border border-border bg-card px-1.5"
+                      title="Paragraph style"
+                    >
+                      <option value="" disabled>Style…</option>
+                      <option value="P">Paragraph</option>
+                      <option value="H1">Heading 1</option>
+                      <option value="H2">Heading 2</option>
+                      <option value="H3">Heading 3</option>
+                      <option value="BLOCKQUOTE">Quote</option>
+                      <option value="PRE">Code block</option>
+                    </select>
+                    <ToolbarBtn onClick={() => exec('bold')} title="Bold (⌘B)"><Bold className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('italic')} title="Italic (⌘I)"><Italic className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('underline')} title="Underline (⌘U)"><Underline className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('strikeThrough')} title="Strikethrough"><Strikethrough className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <Sep />
+                    <ToolbarBtn onClick={() => setBlock('H1')} title="Heading 1"><Heading1 className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => setBlock('H2')} title="Heading 2"><Heading2 className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => setBlock('BLOCKQUOTE')} title="Quote"><Quote className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <Sep />
+                    <ToolbarBtn onClick={() => exec('insertUnorderedList')} title="Bullet list"><List className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('insertOrderedList')} title="Numbered list"><ListOrdered className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <Sep />
+                    <ToolbarBtn onClick={() => exec('justifyLeft')} title="Align left"><AlignLeft className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('justifyCenter')} title="Align center"><AlignCenter className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('justifyRight')} title="Align right"><AlignRight className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <Sep />
+                    <ToolbarBtn onClick={promptLink} title="Insert link"><Link2 className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('unlink')} title="Remove link"><Unlink className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <Sep />
+                    <label className="inline-flex items-center justify-center h-7 w-7 rounded hover:bg-secondary cursor-pointer relative" title="Text color">
+                      <Palette className="w-3.5 h-3.5" />
+                      <input
+                        type="color"
+                        onChange={e => exec('foreColor', e.target.value)}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </label>
+                    <ToolbarBtn onClick={() => exec('removeFormat')} title="Clear formatting"><Eraser className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <Sep />
+                    <ToolbarBtn onClick={() => exec('undo')} title="Undo"><Undo2 className="w-3.5 h-3.5" /></ToolbarBtn>
+                    <ToolbarBtn onClick={() => exec('redo')} title="Redo"><Redo2 className="w-3.5 h-3.5" /></ToolbarBtn>
+                  </div>
+                  <div className="bg-secondary/30 px-4 py-1.5 border-b border-border flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-destructive/60" />
+                    <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
+                    <div className="w-2 h-2 rounded-full bg-green-500/60" />
+                    <span className="text-[10px] text-muted-foreground ml-2">Edits autosave on blur — click Save Draft to persist</span>
                   </div>
                   <div
+                    ref={editorRef}
                     contentEditable
                     suppressContentEditableWarning
                     dangerouslySetInnerHTML={{ __html: draft.body }}
