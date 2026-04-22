@@ -829,6 +829,15 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
         </div>
       </div>
 
+      {/* Julia-pixel narrative editor — editable blocks shown in client proposal + email */}
+      <JuliaNarrativeEditor
+        value={narrative}
+        onChange={setNarrative}
+        disabled={isReadOnly}
+        onAutoFill={handleAutoFillNarrative}
+        autoFilling={autoFillingNarrative}
+      />
+
       {/* Stale warning */}
       {existingProposal && (() => {
         const proposalSavedAt = new Date(existingProposal.created_at).getTime();
