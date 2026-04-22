@@ -31,7 +31,83 @@ export const autoEstimateCost = (opp: Opportunity, totalImpact: number, buildCos
   return Math.max(2000, Math.round(share * buildCostMid / 500) * 500);
 };
 
-export const buildProposalData = (analysis: Analysis, roiResults: any) => {
+// ---- Julia-pixel narrative defaults ----
+// Every section below is editable in the admin Proposal Builder. These
+// defaults are only used when the LLM hasn't generated a richer narrative yet.
+
+export interface NarrativeBlock { heading: string; body: string }
+
+export const buildDefaultNarrative = (
+  analysis: Analysis,
+  roiResults: any,
+  contactName: string,
+  businessName: string,
+) => {
+  const top = analysis.big_hits?.[0];
+  const second = analysis.big_hits?.[1];
+  const annual = roiResults?.totalAnnualImpact || analysis.total_potential_impact || 0;
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(n || 0);
+
+  const proposal_title = top
+    ? `${top.title} for ${businessName || 'your business'}`
+    : `Phase 1 Proposal for ${businessName || 'your business'}`;
+
+  const what_we_heard = analysis.summary
+    ? analysis.summary
+    : `Based on our Reality Check™ assessment and Straight Talk™ conversation, we have identified the highest-leverage opportunities for ${businessName || 'your business'}. The pain points you described are quantifiable, and the destination you want to reach is clear.`;
+
+  const highlight_box = {
+    headline: top ? top.title : 'A focused Phase 1 build',
+    body: top?.recommendation || top?.explanation || 'A targeted Phase 1 build that delivers measurable value within weeks, not months.',
+  };
+
+  const what_this_means: NarrativeBlock[] = [];
+  if (annual > 0) {
+    what_this_means.push({
+      heading: 'Quantified value',
+      body: `Projected annual impact of ${fmt(annual)} from this Phase 1 build alone — recovered hours, faster turnaround, and reduced manual error.`,
+    });
+  }
+  if (second) {
+    what_this_means.push({
+      heading: second.title,
+      body: second.recommendation || second.explanation || '',
+    });
+  }
+  what_this_means.push({
+    heading: 'Oversight stays in place',
+    body: 'We are removing the data-entry and repetitive workload — not the human review and compliance gates that protect your business.',
+  });
+
+  const what_we_need_from_you = [
+    'A 1-hour discovery session with the operational owner to walk through current workflows on screen.',
+    'API or admin access to the systems we will integrate with (read/write where required).',
+    'Sample documents from a recent transaction (redacted is fine) to verify field mapping before build.',
+    'A nominated reviewer for sign-off during the parallel-run phase.',
+  ];
+
+  const oversight_note = 'The automated system produces drafts for your team to review. Nothing is sent to a customer or counterparty without human approval. During the parallel run, exception handling stays manual until you have validated accuracy on real cases. We are replacing the data-entry burden — not the compliance review.';
+
+  const closing_paragraph = `Any questions before you decide, reply directly to this email. We can begin discovery within a week of sign-off.`;
+
+  return {
+    proposal_title,
+    what_we_heard,
+    highlight_box,
+    what_this_means,
+    what_we_need_from_you,
+    oversight_note,
+    closing_paragraph,
+  };
+};
+
+export const buildProposalData = (
+  analysis: Analysis,
+  roiResults: any,
+  contactName: string = '',
+  businessName: string = '',
+) => {
   const buildCostMid = roiResults?.pricing?.buildCost || 15000;
   const totalImpact = analysis.total_potential_impact || roiResults?.totalAnnualImpact || 0;
 
@@ -67,15 +143,34 @@ export const buildProposalData = (analysis: Analysis, roiResults: any) => {
   });
   const totalWeeks = Math.ceil(maxBigHit + quickWinWeeks) || 0;
 
+  const narrative = buildDefaultNarrative(analysis, roiResults, contactName, businessName);
+
   return {
     keyFindings: analysis.summary || '',
     items: items.map(({ _type, ...rest }) => rest),
     totals: { subtotalExGst, gst, totalIncGst, deposit, mvp, final, totalWeeks },
     feeStructure: {
-      deposit: { percent: DEPOSIT_PCT * 100, amount: deposit, label: 'On Commencement' },
-      mvp: { percent: MVP_PCT * 100, amount: mvp, label: 'On MVP Achieved & Reviewed' },
-      final: { percent: FINAL_PCT * 100, amount: final, label: 'On Handover of Final Build' },
+      deposit: {
+        percent: DEPOSIT_PCT * 100,
+        amount: deposit,
+        label: 'Commitment Deposit',
+        when: 'On commencement — kicks off discovery session and build',
+      },
+      mvp: {
+        percent: MVP_PCT * 100,
+        amount: mvp,
+        label: 'MVP Payment',
+        when: 'On MVP working in test environment with real data',
+      },
+      final: {
+        percent: FINAL_PCT * 100,
+        amount: final,
+        label: 'Final Balance',
+        when: 'On go-live — system in production, signed off, legacy workflow retired',
+      },
     },
+    // New Julia-pixel narrative fields (all editable in admin)
+    ...narrative,
     regenerated_at: new Date().toISOString(),
   };
 };
