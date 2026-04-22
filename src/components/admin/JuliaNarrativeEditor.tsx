@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sparkles, Plus, X, Loader2, Wand2, MessageSquareQuote, ListChecks, ShieldCheck, FileText } from 'lucide-react';
+import { Sparkles, Plus, X, Loader2, Wand2, MessageSquareQuote, ListChecks, ShieldCheck, FileText, CalendarClock } from 'lucide-react';
 
 export interface NarrativeBlock { heading: string; body: string }
+export interface DeliveryPhase { weeks: string; title: string; body: string }
 
 export interface JuliaNarrativeFields {
   proposal_title: string;
@@ -17,6 +18,7 @@ export interface JuliaNarrativeFields {
   highlight_box: { headline: string; body: string };
   what_this_means: NarrativeBlock[];
   what_we_need_from_you: string[];
+  delivery_phases: DeliveryPhase[];
   oversight_note: string;
   closing_paragraph: string;
 }
@@ -44,6 +46,12 @@ const JuliaNarrativeEditor: React.FC<Props> = ({ value, onChange, disabled, onAu
     patch({ what_we_need_from_you: value.what_we_need_from_you.map((row, i) => i === idx ? v : row) });
   const addNeed = () => patch({ what_we_need_from_you: [...value.what_we_need_from_you, ''] });
   const removeNeed = (idx: number) => patch({ what_we_need_from_you: value.what_we_need_from_you.filter((_, i) => i !== idx) });
+
+  const phases = value.delivery_phases || [];
+  const updatePhase = (idx: number, p: Partial<DeliveryPhase>) =>
+    patch({ delivery_phases: phases.map((row, i) => i === idx ? { ...row, ...p } : row) });
+  const addPhase = () => patch({ delivery_phases: [...phases, { weeks: '', title: '', body: '' }] });
+  const removePhase = (idx: number) => patch({ delivery_phases: phases.filter((_, i) => i !== idx) });
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 space-y-5">
