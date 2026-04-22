@@ -496,13 +496,13 @@ Deno.serve(async (req) => {
 
           ${meansHtml}
 
+          ${phasesHtml}
+
           ${sectionHeading('Investment')}
           ${investmentTilesHtml}
           ${paymentScheduleHtml}
 
           ${needsHtml}
-
-          ${phasesHtml}
 
           ${oversightHtml}
 
