@@ -179,7 +179,8 @@ Deno.serve(async (req) => {
 
     // Revision logic: if the targeted proposal has already been delivered,
     // clone it into a new revision so the previously-sent version stays intact.
-    if (proposal.delivered_at && !previewOnly) {
+    // Skip cloning for internal team drafts — they are reviews of the existing draft.
+    if (proposal.delivered_at && !previewOnly && !isInternalDraft) {
       // For the diff, the "previous" is the one we're about to clone from.
       previousProposal = { proposal_data: proposal.proposal_data, revision: proposal.revision || 1 };
 
@@ -211,7 +212,8 @@ Deno.serve(async (req) => {
     }
 
     // Generate a fresh client access token for sent emails only.
-    const token = previewOnly
+    // Internal team drafts use the preview URL — no client token issued.
+    const token = (previewOnly || isInternalDraft)
       ? 'preview'
       : await (async () => {
           const { data: tokenRow, error: tokenErr } = await supabase
@@ -235,14 +237,17 @@ Deno.serve(async (req) => {
     // the admin app, which would send clients to the wrong site.
     const appOrigin = 'https://5to10x.app';
 
-    const baseUrl = previewOnly
+    const baseUrl = (previewOnly || isInternalDraft)
       ? `${appOrigin}/proposal/${proposal.id}?preview=1`
       : `${appOrigin}/proposal/${proposal.id}?t=${token}`;
     const viewUrl = baseUrl;
 
-    const subject = isRevised
+    const baseSubject = isRevised
       ? `[Revised v${revision}] ${firstName}, your updated proposal for ${businessName}`
       : `${firstName}, your custom proposal for ${businessName} is ready`;
+    const subject = isInternalDraft
+      ? `[INTERNAL DRAFT — DO NOT FORWARD] ${baseSubject}`
+      : baseSubject;
 
     const fromField = '5to10X <grow@5to10x.app>';
 
