@@ -299,6 +299,13 @@ Deno.serve(async (req) => {
     const closing: string = proposalData.closing_paragraph
       || `Any questions before you decide, just reply directly to this email. We can begin discovery within a week of sign-off.`;
 
+    const internalDraftBannerHtml = isInternalDraft
+      ? `<div style="margin:0 0 18px;padding:16px 20px;background:#fef2f2;border:2px solid #dc2626;border-radius:8px;">
+           <p style="margin:0;color:#991b1b;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">⚠️ Internal Review Copy — Do Not Forward</p>
+           <p style="margin:8px 0 0;color:#7f1d1d;font-size:13px;line-height:1.6;">This is a preview of the proposal that will be sent to <strong>${escapeHtml(assessment.contact_email)}</strong> (${escapeHtml(contactName || 'client')}). Review the content, copy, totals, scope items, and delivery phases. The "Review &amp; Accept" button below points to the preview URL — clicking it will NOT trigger acceptance. To send to the client, use <strong>Send Email</strong> in the Comms tab.</p>
+         </div>`
+      : '';
+
     const revisionBannerHtml = isRevised
       ? `<div style="margin:0 0 24px;padding:14px 18px;background:${AMBER_BG};border-left:4px solid ${AMBER};border-radius:6px;">
            <p style="margin:0;color:${AMBER_TEXT};font-size:13px;font-weight:700;">This is a revised proposal (v${revision}).</p>
