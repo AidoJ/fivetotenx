@@ -408,8 +408,8 @@ Deno.serve(async (req) => {
     <tr><td align="center">
       <table width="720" cellpadding="0" cellspacing="0" style="max-width:720px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(30,58,95,0.08);">
 
-        <!-- Julia-pixel header: navy gradient -->
-        <tr><td style="background:linear-gradient(135deg, ${NAVY}, ${NAVY_DEEP});padding:44px 40px;color:#ffffff;">
+        <!-- Julia-pixel header: solid navy (gradients unsupported in Outlook) -->
+        <tr><td bgcolor="${NAVY_DEEP}" style="background-color:${NAVY_DEEP};padding:44px 40px;color:#ffffff;">
           <p style="color:${NAVY_LIGHT};font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${isRevised ? `Revised Proposal — v${revision}` : 'Phase 4 Proposal · Green Light™'}</p>
           <h1 style="color:#ffffff;font-size:28px;margin:0 0 10px;font-weight:700;line-height:1.3;">${escapeHtml(proposalTitle)}</h1>
           ${highlight.headline ? `<div style="color:${NAVY_PALE};font-size:15px;margin-bottom:8px;">${escapeHtml(highlight.headline)}</div>` : ''}
