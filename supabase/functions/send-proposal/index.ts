@@ -581,6 +581,8 @@ Deno.serve(async (req) => {
       proposalId: proposal.id,
       revision,
       isRevised,
+      isInternalDraft,
+      sentTo: recipientList,
       providerId: resendData.id,
       token,
       viewUrl,
