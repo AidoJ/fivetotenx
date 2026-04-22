@@ -100,7 +100,14 @@ const JuliaProposalView: React.FC<Props> = ({
   const highlight = proposalData.highlight_box;
   const whatThisMeans = (proposalData.what_this_means || []).filter(b => b.heading || b.body);
   const needs = (proposalData.what_we_need_from_you || []).filter(Boolean);
-  const phases = (proposalData.delivery_phases || []).filter(p => p && (p.weeks || p.title || p.body));
+  const savedPhases = (proposalData.delivery_phases || []).filter(p => p && (p.weeks || p.title || p.body));
+  const defaultPhases = [
+    { weeks: 'Week 1', title: 'Discovery & Specification', body: 'Working session with you and the nominated reviewer to confirm the workflow we are automating, verify field mapping against live data, and finalise the compliance checklist. We produce a signed-off field specification before any build begins.' },
+    { weeks: 'Weeks 2–3', title: 'Core Build', body: 'Automation layer configured and connected to the agreed inputs. Integration with your existing systems built and tested against real sample data from your environment.' },
+    { weeks: 'Weeks 4–5', title: 'Validation & Review Interface', body: 'Validation rules implemented (missing fields flagged before review). Reviewer interface built and deployed — audit log live, notifications configured. End-to-end tested with real data.' },
+    { weeks: 'Weeks 6–8', title: 'Parallel Run & Go-Live', body: 'The automated system runs alongside the existing manual process. You and the reviewer validate output accuracy on real cases. Edge cases are resolved as they appear. When you sign off, the system goes live and the manual workflow is retired.' },
+  ];
+  const phases = savedPhases.length > 0 ? savedPhases : defaultPhases;
   const oversight = proposalData.oversight_note;
   const closing = proposalData.closing_paragraph;
 
