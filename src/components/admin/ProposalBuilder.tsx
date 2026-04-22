@@ -351,6 +351,34 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     toast({ title: 'Tech stack refreshed', description: 'Click Save Proposal to keep these rows.' });
   };
 
+  const handleAutoFillNarrative = async () => {
+    setAutoFillingNarrative(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-proposal-narrative', {
+        body: { assessmentId },
+      });
+      if (error) throw error;
+      const n = (data as any)?.narrative;
+      if (!n) throw new Error('No narrative returned');
+      setNarrative({
+        proposal_title: n.proposal_title || narrative.proposal_title,
+        what_we_heard: n.what_we_heard || narrative.what_we_heard,
+        highlight_box: {
+          headline: n.highlight_box?.headline || narrative.highlight_box.headline,
+          body: n.highlight_box?.body || narrative.highlight_box.body,
+        },
+        what_this_means: Array.isArray(n.what_this_means) && n.what_this_means.length > 0 ? n.what_this_means : narrative.what_this_means,
+        what_we_need_from_you: Array.isArray(n.what_we_need_from_you) && n.what_we_need_from_you.length > 0 ? n.what_we_need_from_you : narrative.what_we_need_from_you,
+        oversight_note: n.oversight_note || narrative.oversight_note,
+        closing_paragraph: n.closing_paragraph || narrative.closing_paragraph,
+      });
+      toast({ title: 'Narrative auto-filled ✨', description: 'Review the blocks below, then click Save Proposal.' });
+    } catch (err: any) {
+      toast({ title: 'Auto-fill failed', description: err.message, variant: 'destructive' });
+    }
+    setAutoFillingNarrative(false);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
