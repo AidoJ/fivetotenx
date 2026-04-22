@@ -65,72 +65,50 @@ const impactValueBadge = (annual: number) => {
 // Build a stable identity for an item so we can diff revisions
 const itemKey = (it: any) => `${(it?.title || '').trim().toLowerCase()}`;
 
-const renderItemCard = (item: any, opts: { removed?: boolean } = {}) => {
+// Julia-pixel scope item: numbered circle + title + description + cost/weeks
+const renderScopeItem = (item: any, idx: number, opts: { removed?: boolean } = {}) => {
   const removed = !!opts.removed;
-  const titleStyle = removed
-    ? `color:#94a3b8;text-decoration:line-through;`
-    : `color:${NAVY};`;
-  const borderColor = removed ? '#e2e8f0' : '#cbd5e1';
-  const bg = removed ? '#f8fafc' : '#ffffff';
+  const titleColor = removed ? '#94a3b8' : TEXT_DARK;
+  const titleDecoration = removed ? 'text-decoration:line-through;' : '';
+  const bodyColor = removed ? '#94a3b8' : '#475569';
   const opacity = removed ? '0.65' : '1';
-
+  const numBg = removed ? '#94a3b8' : NAVY;
   const removedTag = removed
-    ? `<span style="display:inline-block;padding:3px 10px;background:#f1f5f9;color:#64748b;border-radius:999px;font-size:11px;font-weight:700;border:1px solid #cbd5e1;">Removed by client</span>`
-    : `<span style="display:inline-block;padding:3px 10px;background:#ede9fe;color:${PURPLE};border-radius:999px;font-size:11px;font-weight:700;">Included</span>`;
+    ? `<div style="margin-top:6px;display:inline-block;padding:3px 9px;background:#f1f5f9;color:#64748b;border-radius:999px;font-size:11px;font-weight:700;border:1px solid #cbd5e1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Removed by client</div>`
+    : '';
 
   return `
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;border:1px solid ${borderColor};border-radius:12px;background:${bg};opacity:${opacity};">
-    <tr><td style="padding:16px 18px;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-          <td style="vertical-align:top;">
-            <div style="font-size:15px;font-weight:700;${titleStyle}line-height:1.35;margin:0 0 8px;">${escapeHtml(item.title || 'Untitled item')}</div>
-          </td>
-          <td style="vertical-align:top;text-align:right;white-space:nowrap;padding-left:12px;">
-            ${removedTag}
-          </td>
-        </tr>
-        <tr><td colspan="2" style="padding:0;">
-          <p style="margin:0 0 12px;color:${removed ? '#94a3b8' : TEXT};font-size:13px;line-height:1.6;">
-            ${escapeHtml(truncate(item.explanation || item.recommendation || '', 280))}
-          </p>
-        </td></tr>
-        <tr><td colspan="2" style="padding:8px 0 0;border-top:1px solid #f1f5f9;">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="font-size:12px;color:${MUTED};">
-                <strong style="color:${removed ? '#94a3b8' : NAVY};">${fmt(Number(item.cost) || 0)}</strong>
-                <span style="margin:0 8px;color:#cbd5e1;">·</span>
-                ${item.weeks || 0} ${item.weeks === 1 ? 'week' : 'weeks'}
-              </td>
-            </tr>
-          </table>
-        </td></tr>
-      </table>
-    </td></tr>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;border:1px solid ${BORDER};border-radius:10px;background:#ffffff;opacity:${opacity};">
+    <tr>
+      <td valign="top" width="48" style="padding:18px 0 18px 18px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:${numBg};color:#ffffff;font-size:13px;font-weight:700;text-align:center;line-height:30px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${idx + 1}</div>
+      </td>
+      <td valign="top" style="padding:18px 20px 18px 14px;">
+        <div style="font-size:15px;font-weight:700;color:${titleColor};${titleDecoration}line-height:1.4;margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escapeHtml(item.title || 'Untitled item')}</div>
+        <p style="margin:0;font-size:14px;color:${bodyColor};line-height:1.65;">
+          ${escapeHtml(truncate(item.recommendation || item.explanation || '', 320))}
+          ${item.estimated_annual_impact && !removed ? ` <span style="color:${MUTED};">Estimated annual impact: <strong style="color:${TEXT_DARK};">${fmt(Number(item.estimated_annual_impact))}</strong>.</span>` : ''}
+        </p>
+        <div style="margin-top:8px;font-size:12px;color:${MUTED};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+          <strong style="color:${removed ? '#94a3b8' : NAVY};">${fmt(Number(item.cost) || 0)}</strong>
+          ${item.weeks ? ` <span style="color:#cbd5e1;">·</span> ${item.weeks} ${item.weeks === 1 ? 'week' : 'weeks'}` : ''}
+        </div>
+        ${removedTag}
+      </td>
+    </tr>
   </table>`;
 };
 
-const renderKeyFindings = (analysis: any): string => {
-  if (!analysis) return '';
-  const bigHits = Array.isArray(analysis.big_hits) ? analysis.big_hits.slice(0, 3) : [];
-  if (bigHits.length === 0 && !analysis.summary) return '';
-
-  const bullets = bigHits
-    .map((h: any) => `
-      <li style="margin:0 0 10px;color:${TEXT};font-size:14px;line-height:1.6;">
-        <strong style="color:${NAVY};">${escapeHtml(h.title || '')}</strong> —
-        ${escapeHtml(truncate(h.explanation || h.recommendation || '', 180))}
-      </li>`)
-    .join('');
-
-  return `
-  <div style="margin:0 0 24px;padding:18px 20px;background:${BG_SOFT};border-left:4px solid ${PURPLE};border-radius:6px;">
-    <p style="margin:0 0 12px;font-size:13px;font-weight:800;color:${NAVY};text-transform:uppercase;letter-spacing:1.2px;">Key Findings</p>
-    ${analysis.summary ? `<p style="margin:0 0 12px;color:${TEXT};font-size:14px;line-height:1.65;">${escapeHtml(truncate(analysis.summary, 360))}</p>` : ''}
-    ${bullets ? `<ul style="margin:0;padding-left:20px;">${bullets}</ul>` : ''}
+// "What This Means in Practice" block
+const renderMeansBlock = (b: { heading?: string; body?: string }) => `
+  <div style="margin:0 0 14px;">
+    ${b.heading ? `<h3 style="margin:0 0 6px;font-size:16px;font-weight:700;color:${TEXT_DARK};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escapeHtml(b.heading)}</h3>` : ''}
+    ${b.body ? `<p style="margin:0;color:${TEXT};font-size:14px;line-height:1.75;">${escapeHtml(b.body)}</p>` : ''}
   </div>`;
-};
+
+// Section heading (Julia-pixel: serif, navy, underline)
+const sectionHeading = (label: string) => `
+  <h2 style="font-size:20px;font-weight:700;color:${NAVY};margin:36px 0 14px;padding-bottom:8px;border-bottom:2px solid ${BORDER};font-family:Georgia,'Times New Roman',serif;">${escapeHtml(label)}</h2>`;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
