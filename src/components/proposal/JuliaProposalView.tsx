@@ -282,6 +282,22 @@ const JuliaProposalView: React.FC<Props> = ({
         </section>
       )}
 
+      {/* Delivery Timeline */}
+      {phases.length > 0 && (
+        <section>
+          <h2 style={sectionH2}>Delivery Timeline</h2>
+          {phases.map((p, i) => (
+            <div key={i} style={phaseRow}>
+              <div style={phaseWeeks}>{p.weeks || '—'}</div>
+              <div style={{ flex: 1 }}>
+                {p.title && <h3 style={{ ...subH3, marginTop: 0, marginBottom: '4px' }}>{p.title}</h3>}
+                {p.body && <p style={{ margin: 0, color: '#334155', lineHeight: 1.75 }}>{p.body}</p>}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
       {/* Oversight callout */}
       {oversight && (
         <div style={{
@@ -436,6 +452,22 @@ const paymentAmount: React.CSSProperties = {
   fontSize: '18px',
   fontWeight: 800,
   color: '#1e3a5f',
+};
+const phaseRow: React.CSSProperties = {
+  display: 'flex',
+  gap: '20px',
+  alignItems: 'flex-start',
+  padding: '16px 0',
+  borderTop: '1px solid #e2e8f0',
+};
+const phaseWeeks: React.CSSProperties = {
+  minWidth: '110px',
+  fontWeight: 700,
+  color: '#1e3a5f',
+  fontSize: '13px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+  fontFamily: '-apple-system, sans-serif',
 };
 
 export default JuliaProposalView;
