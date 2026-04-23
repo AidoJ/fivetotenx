@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Loader2, Save, DollarSign, Clock, FileText,
   Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
-  History, Plus, Eye, ExternalLink, Printer,
+  History, Plus, Eye, ExternalLink, Printer, ArrowUp, ArrowDown, Trash2,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
 import JuliaNarrativeEditor, { JuliaNarrativeFields } from '@/components/admin/JuliaNarrativeEditor';
@@ -305,6 +305,42 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, included: !it.included } : it));
   };
 
+  const moveItem = (idx: number, dir: -1 | 1) => {
+    setItems(prev => {
+      const next = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
+  };
+
+  const removeItemAt = (idx: number) => {
+    if (!window.confirm('Remove this scope item from the proposal? You can re-add it manually or hit Reset to restore AI defaults.')) return;
+    setItems(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const addCustomItem = () => {
+    setItems(prev => [
+      ...prev,
+      {
+        title: 'New custom build item',
+        impact_category: 'custom',
+        estimated_annual_impact: 0,
+        difficulty: 'medium',
+        explanation: '',
+        recommendation: '',
+        included: true,
+        estimatedCost: 5000,
+        estimatedWeeks: 4,
+        manualCost: '',
+        manualWeeks: '',
+        _type: 'big_hit',
+        locked: false,
+      } as BuildItem,
+    ]);
+  };
+
   const updateItem = (
     idx: number,
     field: 'manualCost' | 'manualWeeks' | 'title' | 'explanation' | 'recommendation',
@@ -589,6 +625,9 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
                   />
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                        {idx + 1}
+                      </span>
                       <Badge variant="outline" className="text-[9px]">
                         {(item as any)._type === 'big_hit' ? '🎯 Big Hit' : '⚡ Quick Win'}
                       </Badge>
@@ -598,6 +637,35 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
                       <Badge variant="outline" className="text-[9px] text-green-700">
                         {formatCurrency(item.estimated_annual_impact)}/yr impact
                       </Badge>
+                      <div className="ml-auto flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveItem(idx, -1)}
+                          disabled={isReadOnly || idx === 0}
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md border border-border bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move up"
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveItem(idx, 1)}
+                          disabled={isReadOnly || idx === items.length - 1}
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md border border-border bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move down"
+                        >
+                          <ArrowDown className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeItemAt(idx)}
+                          disabled={isReadOnly}
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md border border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Remove item"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                     <Input
                       value={item.title}
@@ -664,6 +732,19 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
               </div>
             );
           })}
+        </div>
+
+        <div className="flex justify-center pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addCustomItem}
+            disabled={isReadOnly}
+            className="gap-1.5"
+          >
+            <Plus className="w-4 h-4" /> Add custom build item
+          </Button>
         </div>
       </div>
 

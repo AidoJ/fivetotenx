@@ -85,10 +85,10 @@ const renderScopeItem = (item: any, idx: number, opts: { removed?: boolean } = {
       </td>
       <td valign="top" style="padding:18px 20px 18px 14px;">
         <div style="font-size:15px;font-weight:700;color:${titleColor};${titleDecoration}line-height:1.4;margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">${escapeHtml(item.title || 'Untitled item')}</div>
-        <p style="margin:0;font-size:14px;color:${bodyColor};line-height:1.65;">
-          ${escapeHtml(truncate(item.recommendation || item.explanation || '', 320))}
-          ${item.estimated_annual_impact && !removed ? ` <span style="color:${MUTED};">Estimated annual impact: <strong style="color:${TEXT_DARK};">${fmt(Number(item.estimated_annual_impact))}</strong>.</span>` : ''}
-        </p>
+        <div style="margin:0;font-size:14px;color:${bodyColor};line-height:1.65;">
+          ${(item.recommendation || item.explanation || '').split(/\n\n+/).filter((p: string) => p.trim()).map((p: string) => `<p style="margin:0 0 8px;">${escapeHtml(p.trim())}</p>`).join('')}
+          ${item.estimated_annual_impact && !removed ? `<p style="margin:6px 0 0;color:${MUTED};">Estimated annual impact: <strong style="color:${TEXT_DARK};">${fmt(Number(item.estimated_annual_impact))}</strong>.</p>` : ''}
+        </div>
         <div style="margin-top:8px;font-size:12px;color:${MUTED};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
           <strong style="color:${removed ? '#94a3b8' : NAVY};">${fmt(Number(item.cost) || 0)}</strong>
           ${item.weeks ? ` <span style="color:#cbd5e1;">·</span> ${item.weeks} ${item.weeks === 1 ? 'week' : 'weeks'}` : ''}
