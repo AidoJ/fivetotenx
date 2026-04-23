@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sparkles, Plus, X, Loader2, Wand2, MessageSquareQuote, ListChecks, ShieldCheck, FileText, CalendarClock } from 'lucide-react';
+import { Sparkles, Plus, X, Loader2, Wand2, MessageSquareQuote, ListChecks, ShieldCheck, FileText, CalendarClock, Ban } from 'lucide-react';
 
 export interface NarrativeBlock { heading: string; body: string }
 export interface DeliveryPhase { weeks: string; title: string; body: string }
@@ -17,6 +17,7 @@ export interface JuliaNarrativeFields {
   what_we_heard: string;
   highlight_box: { headline: string; body: string };
   what_this_means: NarrativeBlock[];
+  out_of_scope: string[];
   what_we_need_from_you: string[];
   delivery_phases: DeliveryPhase[];
   oversight_note: string;
@@ -46,6 +47,12 @@ const JuliaNarrativeEditor: React.FC<Props> = ({ value, onChange, disabled, onAu
     patch({ what_we_need_from_you: value.what_we_need_from_you.map((row, i) => i === idx ? v : row) });
   const addNeed = () => patch({ what_we_need_from_you: [...value.what_we_need_from_you, ''] });
   const removeNeed = (idx: number) => patch({ what_we_need_from_you: value.what_we_need_from_you.filter((_, i) => i !== idx) });
+
+  const oos = value.out_of_scope || [];
+  const updateOos = (idx: number, v: string) =>
+    patch({ out_of_scope: oos.map((row, i) => i === idx ? v : row) });
+  const addOos = () => patch({ out_of_scope: [...oos, ''] });
+  const removeOos = (idx: number) => patch({ out_of_scope: oos.filter((_, i) => i !== idx) });
 
   const phases = value.delivery_phases || [];
   const updatePhase = (idx: number, p: Partial<DeliveryPhase>) =>
@@ -163,6 +170,45 @@ const JuliaNarrativeEditor: React.FC<Props> = ({ value, onChange, disabled, onAu
               className="text-xs bg-background border-border resize-none"
               disabled={disabled}
             />
+          </div>
+        ))}
+      </div>
+
+      {/* Out of Scope */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Ban className="w-3.5 h-3.5" /> Out of Scope
+          </Label>
+          <Button type="button" variant="ghost" size="sm" onClick={addOos} disabled={disabled} className="gap-1.5 h-7">
+            <Plus className="w-3.5 h-3.5" /> Add item
+          </Button>
+        </div>
+        {oos.length === 0 && (
+          <p className="text-[11px] text-muted-foreground italic">No items — add anything explicitly NOT included in this Phase 1 build (renders as a numbered list to set client expectations).</p>
+        )}
+        {oos.map((n, idx) => (
+          <div key={idx} className="flex items-start gap-2">
+            <div className="flex flex-col items-center pt-2 shrink-0">
+              <span className="text-[10px] font-bold text-muted-foreground tabular-nums">{idx + 1}.</span>
+            </div>
+            <Textarea
+              value={n}
+              onChange={e => updateOos(idx, e.target.value)}
+              placeholder="e.g. Migration of historical contracts (pre-2024) — handled in a separate Phase 2 if required."
+              rows={2}
+              className="text-xs bg-background border-border resize-y min-h-[60px]"
+              disabled={disabled}
+            />
+            <button
+              type="button"
+              onClick={() => removeOos(idx)}
+              disabled={disabled}
+              className="text-muted-foreground hover:text-destructive shrink-0 mt-2"
+              title="Remove"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         ))}
       </div>
