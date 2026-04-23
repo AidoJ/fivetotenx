@@ -174,6 +174,45 @@ const JuliaNarrativeEditor: React.FC<Props> = ({ value, onChange, disabled, onAu
         ))}
       </div>
 
+      {/* Out of Scope */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Ban className="w-3.5 h-3.5" /> Out of Scope
+          </Label>
+          <Button type="button" variant="ghost" size="sm" onClick={addOos} disabled={disabled} className="gap-1.5 h-7">
+            <Plus className="w-3.5 h-3.5" /> Add item
+          </Button>
+        </div>
+        {oos.length === 0 && (
+          <p className="text-[11px] text-muted-foreground italic">No items — add anything explicitly NOT included in this Phase 1 build (renders as a numbered list to set client expectations).</p>
+        )}
+        {oos.map((n, idx) => (
+          <div key={idx} className="flex items-start gap-2">
+            <div className="flex flex-col items-center pt-2 shrink-0">
+              <span className="text-[10px] font-bold text-muted-foreground tabular-nums">{idx + 1}.</span>
+            </div>
+            <Textarea
+              value={n}
+              onChange={e => updateOos(idx, e.target.value)}
+              placeholder="e.g. Migration of historical contracts (pre-2024) — handled in a separate Phase 2 if required."
+              rows={2}
+              className="text-xs bg-background border-border resize-y min-h-[60px]"
+              disabled={disabled}
+            />
+            <button
+              type="button"
+              onClick={() => removeOos(idx)}
+              disabled={disabled}
+              className="text-muted-foreground hover:text-destructive shrink-0 mt-2"
+              title="Remove"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ))}
+      </div>
+
       {/* What we need from you */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
