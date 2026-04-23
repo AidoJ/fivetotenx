@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sparkles, Plus, X, Loader2, Wand2, MessageSquareQuote, ListChecks, ShieldCheck, FileText, CalendarClock } from 'lucide-react';
+import { Sparkles, Plus, X, Loader2, Wand2, MessageSquareQuote, ListChecks, ShieldCheck, FileText, CalendarClock, Ban } from 'lucide-react';
 
 export interface NarrativeBlock { heading: string; body: string }
 export interface DeliveryPhase { weeks: string; title: string; body: string }
@@ -17,6 +17,7 @@ export interface JuliaNarrativeFields {
   what_we_heard: string;
   highlight_box: { headline: string; body: string };
   what_this_means: NarrativeBlock[];
+  out_of_scope: string[];
   what_we_need_from_you: string[];
   delivery_phases: DeliveryPhase[];
   oversight_note: string;
