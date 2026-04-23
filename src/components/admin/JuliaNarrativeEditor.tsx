@@ -48,6 +48,12 @@ const JuliaNarrativeEditor: React.FC<Props> = ({ value, onChange, disabled, onAu
   const addNeed = () => patch({ what_we_need_from_you: [...value.what_we_need_from_you, ''] });
   const removeNeed = (idx: number) => patch({ what_we_need_from_you: value.what_we_need_from_you.filter((_, i) => i !== idx) });
 
+  const oos = value.out_of_scope || [];
+  const updateOos = (idx: number, v: string) =>
+    patch({ out_of_scope: oos.map((row, i) => i === idx ? v : row) });
+  const addOos = () => patch({ out_of_scope: [...oos, ''] });
+  const removeOos = (idx: number) => patch({ out_of_scope: oos.filter((_, i) => i !== idx) });
+
   const phases = value.delivery_phases || [];
   const updatePhase = (idx: number, p: Partial<DeliveryPhase>) =>
     patch({ delivery_phases: phases.map((row, i) => i === idx ? { ...row, ...p } : row) });
