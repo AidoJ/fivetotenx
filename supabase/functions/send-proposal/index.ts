@@ -287,6 +287,9 @@ Deno.serve(async (req) => {
     const needs: string[] = Array.isArray(proposalData.what_we_need_from_you)
       ? proposalData.what_we_need_from_you.filter((s: any) => typeof s === 'string' && s.trim())
       : [];
+    const outOfScope: string[] = Array.isArray(proposalData.out_of_scope)
+      ? proposalData.out_of_scope.filter((s: any) => typeof s === 'string' && s.trim())
+      : [];
     const savedPhases: { weeks?: string; title?: string; body?: string }[] = Array.isArray(proposalData.delivery_phases)
       ? proposalData.delivery_phases.filter((p: any) => p && (p.weeks || p.title || p.body))
       : [];
@@ -396,6 +399,11 @@ Deno.serve(async (req) => {
 
     const meansHtml = whatThisMeans.length > 0
       ? sectionHeading('What This Means in Practice') + whatThisMeans.map(renderMeansBlock).join('')
+      : '';
+
+    const outOfScopeHtml = outOfScope.length > 0
+      ? sectionHeading('Out of Scope') +
+        `<ol style="padding-left:22px;margin:0 0 16px;color:${TEXT};font-size:14px;line-height:1.75;">${outOfScope.map(n => `<li style="margin-bottom:6px;">${escapeHtml(n)}</li>`).join('')}</ol>`
       : '';
 
     const needsHtml = needs.length > 0
