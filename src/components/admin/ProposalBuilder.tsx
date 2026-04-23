@@ -733,6 +733,19 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
             );
           })}
         </div>
+
+        <div className="flex justify-center pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addCustomItem}
+            disabled={isReadOnly}
+            className="gap-1.5"
+          >
+            <Plus className="w-4 h-4" /> Add custom build item
+          </Button>
+        </div>
       </div>
 
 
