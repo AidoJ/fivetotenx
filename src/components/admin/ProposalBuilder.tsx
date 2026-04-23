@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Loader2, Save, DollarSign, Clock, FileText,
   Calculator, CheckCircle2, Sparkles, AlertTriangle, RotateCcw, Lock, Unlock,
-  History, Plus, Eye, ExternalLink, Printer,
+  History, Plus, Eye, ExternalLink, Printer, ArrowUp, ArrowDown, Trash2,
 } from 'lucide-react';
 import SignedAgreementCard from '@/components/admin/SignedAgreementCard';
 import JuliaNarrativeEditor, { JuliaNarrativeFields } from '@/components/admin/JuliaNarrativeEditor';
@@ -303,6 +303,42 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
 
   const toggleItem = (idx: number) => {
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, included: !it.included } : it));
+  };
+
+  const moveItem = (idx: number, dir: -1 | 1) => {
+    setItems(prev => {
+      const next = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
+  };
+
+  const removeItemAt = (idx: number) => {
+    if (!window.confirm('Remove this scope item from the proposal? You can re-add it manually or hit Reset to restore AI defaults.')) return;
+    setItems(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const addCustomItem = () => {
+    setItems(prev => [
+      ...prev,
+      {
+        title: 'New custom build item',
+        impact_category: 'custom',
+        estimated_annual_impact: 0,
+        difficulty: 'medium',
+        explanation: '',
+        recommendation: '',
+        included: true,
+        estimatedCost: 5000,
+        estimatedWeeks: 4,
+        manualCost: '',
+        manualWeeks: '',
+        _type: 'big_hit',
+        locked: false,
+      } as BuildItem,
+    ]);
   };
 
   const updateItem = (
