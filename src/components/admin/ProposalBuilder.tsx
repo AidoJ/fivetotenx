@@ -625,6 +625,9 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
                   />
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                        {idx + 1}
+                      </span>
                       <Badge variant="outline" className="text-[9px]">
                         {(item as any)._type === 'big_hit' ? '🎯 Big Hit' : '⚡ Quick Win'}
                       </Badge>
@@ -634,6 +637,35 @@ const ProposalBuilder: React.FC<Props> = ({ assessmentId, analysis, roiResults, 
                       <Badge variant="outline" className="text-[9px] text-green-700">
                         {formatCurrency(item.estimated_annual_impact)}/yr impact
                       </Badge>
+                      <div className="ml-auto flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveItem(idx, -1)}
+                          disabled={isReadOnly || idx === 0}
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md border border-border bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move up"
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveItem(idx, 1)}
+                          disabled={isReadOnly || idx === items.length - 1}
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md border border-border bg-secondary/50 text-muted-foreground hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move down"
+                        >
+                          <ArrowDown className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeItemAt(idx)}
+                          disabled={isReadOnly}
+                          className="inline-flex items-center justify-center w-6 h-6 rounded-md border border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Remove item"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                     <Input
                       value={item.title}
