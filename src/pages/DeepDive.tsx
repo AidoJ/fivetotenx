@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles, Building2, Target, Wrench, Users, Send } from 'lucide-react';
 import logo from '@/assets/logo-5to10x-color.webp';
+import SEO from '@/components/SEO';
 
 const GOAL_OPTIONS = [
   'Increase revenue / sales',
@@ -253,6 +254,7 @@ const DeepDive = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Deep Dive — 5to10X" noindex />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">

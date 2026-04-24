@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SEO from '@/components/SEO';
 import {
   ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles,
   CreditCard, Users, Target, Send,
@@ -288,6 +289,7 @@ const StraightTalk = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Straight Talk — 5to10X" noindex />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
