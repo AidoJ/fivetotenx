@@ -293,6 +293,50 @@ const LeadCard = React.forwardRef<HTMLDivElement, LeadCardProps>(({
         </div>
       )}
 
+      {/* Manual stage selector — move backward or forward to ANY stage */}
+      <div className="px-4 pb-2">
+        <div className="flex items-center gap-1.5">
+          <Shuffle className="w-3 h-3 text-muted-foreground shrink-0" />
+          <Select
+            value={lead.pipeline_stage}
+            onValueChange={(v) => onMove(lead.id, v as PipelineStage)}
+          >
+            <SelectTrigger className="h-7 text-[10px] flex-1">
+              <SelectValue placeholder="Move to stage…" />
+            </SelectTrigger>
+            <SelectContent>
+              {PIPELINE_STEPS.map(s => (
+                <SelectItem key={s.key} value={s.key} className="text-[11px]">
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Persistent manual invite buttons — always available regardless of stage */}
+      <div className="px-3 pb-2 grid grid-cols-2 gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-[9px] gap-1 px-1"
+          onClick={() => onSendSelfInterview(lead)}
+          title="Send Self-Interview + Calendly choice email"
+        >
+          <Mic2 className="w-3 h-3" /> ST Invite (Both)
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-[9px] gap-1 px-1"
+          onClick={() => onSendDiscoveryInvite(lead)}
+          title="Send Calendly booking link only"
+        >
+          <CalendarDays className="w-3 h-3" /> Calendly Only
+        </Button>
+      </div>
+
       {/* Action buttons row */}
       <div className="px-3 pb-3 flex items-center gap-1.5">
         <Button
