@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import SEO from '@/components/SEO';
 
 const LOGO_URL = 'https://hfszmulinpwzmroqemke.supabase.co/storage/v1/object/public/email-assets/logo-5to10x.png';
 
@@ -225,6 +226,7 @@ const RefinementPortal: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO title="Refinement Portal — 5to10X" noindex />
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#0f0a1e] shadow-sm">
         <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">

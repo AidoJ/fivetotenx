@@ -28,6 +28,7 @@ import CallGuide from '@/components/admin/CallGuide';
 import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
 import AutomationSettings from '@/components/admin/AutomationSettings';
 import ClientDetailModal from '@/components/admin/ClientDetailModal';
+import SEO from '@/components/SEO';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
@@ -1378,6 +1379,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Admin — 5to10X" noindex />
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-[1600px] mx-auto px-3 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3">
