@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,12 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Mic, Square, RotateCcw, ArrowRight, CheckCircle,
+  Mic, Square, ArrowRight, ArrowLeft, CheckCircle,
   Loader2, Sparkles, Calendar, Users, CreditCard, Settings, MessageSquare,
   UserCircle, Plug, Shield, Rocket, Hammer, Briefcase, Send,
-  Save, MinusCircle, HelpCircle, Clock, ChevronDown,
+  Save, MinusCircle, HelpCircle, Clock, ChevronDown, Pencil, ListChecks,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
@@ -29,6 +30,8 @@ const CALENDLY_REFINEMENT_URL = 'https://calendly.com/aidan-rejuvenators/discove
 interface Category { id: string; label: string; icon: string; sort_order: number; }
 interface Question { id: string; category_id: string; question: string; detail_prompt: string; sort_order: number; }
 
+type Stage = 'intro' | 'category-picker' | 'runner' | 'review';
+
 const SelfInterview = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -42,14 +45,18 @@ const SelfInterview = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('');
 
-  // Recording state — per question (tracks both answer and note recordings)
+  const [stage, setStage] = useState<Stage>('intro');
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answerMode, setAnswerMode] = useState<'text' | 'voice'>('text');
+
+  // Recording state
   const [recordingQuestionId, setRecordingQuestionId] = useState<string | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [transcribingId, setTranscribingId] = useState<string | null>(null);
 
-  // Separate recording state for analyst notes
+  // Note recording (kept available on each question)
   const [noteRecordingId, setNoteRecordingId] = useState<string | null>(null);
   const [noteRecordingTime, setNoteRecordingTime] = useState(0);
   const [noteTranscribingId, setNoteTranscribingId] = useState<string | null>(null);
@@ -58,11 +65,9 @@ const SelfInterview = () => {
   const noteTimerRef = useRef<NodeJS.Timeout | null>(null);
   const noteStreamRef = useRef<MediaStream | null>(null);
 
-  // Responses
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [started, setStarted] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [existingResponseId, setExistingResponseId] = useState<string | null>(null);
@@ -72,10 +77,20 @@ const SelfInterview = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const allQuestions = categories.flatMap(cat =>
-    questions.filter(q => q.category_id === cat.id).sort((a, b) => a.sort_order - b.sort_order)
-  );
+  // ── Derived: ordered question list based on selected categories ──
+  const runnerQuestions = useMemo(() => {
+    const orderedCats = categories
+      .filter(c => selectedCategoryIds.includes(c.id))
+      .sort((a, b) => a.sort_order - b.sort_order);
+    return orderedCats.flatMap(cat =>
+      questions
+        .filter(q => q.category_id === cat.id)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(q => ({ ...q, _categoryLabel: cat.label, _categoryIcon: cat.icon }))
+    );
+  }, [categories, questions, selectedCategoryIds]);
 
+  // ── Load assessment + existing responses ──
   useEffect(() => {
     if (!assessmentId) { setLoading(false); return; }
     const load = async () => {
@@ -109,9 +124,11 @@ const SelfInterview = () => {
         const catIds = cats.map((c: Category) => c.id);
         setCategories(cats);
         setQuestions(allQ.filter((q: Question) => catIds.includes(q.category_id)));
-        if (cats.length > 0) setActiveTab(cats[0].id);
 
-        const isInvalidAnswer = (v: string) => 
+        // Default: all categories selected
+        let initialSelected: string[] = catIds;
+
+        const isInvalidAnswer = (v: string) =>
           !v?.trim() || v === 'not_found' || v.toLowerCase().includes('[no audible response]');
 
         let merged: Record<string, string> = {};
@@ -133,21 +150,38 @@ const SelfInterview = () => {
           .order('created_at', { ascending: false })
           .limit(1);
 
+        let resumeIndex = 0;
+        let hadProgress = false;
+
         if (existing?.[0]) {
           setExistingResponseId(existing[0].id);
-          const savedResponses = (existing[0].responses || {}) as Record<string, string>;
-          // Filter invalid answers but keep meta keys (_note_, _skip_)
+          const savedResponses = (existing[0].responses || {}) as Record<string, any>;
           for (const [k, v] of Object.entries(savedResponses)) {
-            if (k.startsWith('_') || !isInvalidAnswer(v)) {
-              merged[k] = v;
+            if (k === '_meta') continue;
+            if (typeof v === 'string') {
+              if (k.startsWith('_') || !isInvalidAnswer(v)) merged[k] = v;
             }
           }
           if (existing[0].completed) setSubmitted(true);
+
+          // Restore meta if present
+          const meta = (savedResponses._meta || {}) as { selected_category_ids?: string[]; current_index?: number };
+          if (Array.isArray(meta.selected_category_ids) && meta.selected_category_ids.length > 0) {
+            initialSelected = meta.selected_category_ids.filter(id => catIds.includes(id));
+            if (initialSelected.length === 0) initialSelected = catIds;
+          }
+          if (typeof meta.current_index === 'number' && meta.current_index >= 0) {
+            resumeIndex = meta.current_index;
+          }
+          hadProgress = Object.keys(merged).length > 0;
         }
 
-        if (Object.keys(merged).length > 0) {
-          setResponses(merged);
-          setStarted(true);
+        setSelectedCategoryIds(initialSelected);
+        if (Object.keys(merged).length > 0) setResponses(merged);
+
+        // If they had real progress, jump to runner at saved cursor; otherwise start at intro
+        if (hadProgress && !existing?.[0]?.completed) {
+          setCurrentIndex(resumeIndex);
         }
       }
       setLoading(false);
@@ -155,28 +189,50 @@ const SelfInterview = () => {
     load();
   }, [assessmentId]);
 
-  const saveResponsesToDb = useCallback(async (updatedResponses: Record<string, string>) => {
+  // ── Persistence ──
+  const saveResponsesToDb = useCallback(async (
+    updatedResponses: Record<string, string>,
+    metaOverride?: { selected_category_ids?: string[]; current_index?: number }
+  ) => {
     if (!assessmentId) return;
     setAutoSaving(true);
     try {
+      const meta = {
+        selected_category_ids: metaOverride?.selected_category_ids ?? selectedCategoryIds,
+        current_index: metaOverride?.current_index ?? currentIndex,
+      };
+      const payloadResponses: Record<string, any> = { ...updatedResponses, _meta: meta };
       const payload = {
-        responses: JSON.parse(JSON.stringify(updatedResponses)),
+        responses: JSON.parse(JSON.stringify(payloadResponses)),
         updated_at: new Date().toISOString(),
       };
       if (existingResponseId) {
         await supabase.from('straight_talk_responses').update(payload).eq('id', existingResponseId);
       } else {
         const { data } = await supabase.from('straight_talk_responses')
-          .insert([{ assessment_id: assessmentId, industry: 'self-interview', responses: JSON.parse(JSON.stringify(updatedResponses)), completed: false }])
+          .insert([{
+            assessment_id: assessmentId,
+            industry: 'self-interview',
+            responses: payload.responses,
+            completed: false,
+          }])
           .select('id').single();
         if (data) setExistingResponseId(data.id);
       }
       setLastSaved(new Date());
     } catch (err) { console.error('Auto-save failed:', err); }
     finally { setAutoSaving(false); }
-  }, [assessmentId, existingResponseId]);
+  }, [assessmentId, existingResponseId, selectedCategoryIds, currentIndex]);
 
-  // Transcribe a blob for a specific question
+  // Persist meta whenever cursor or selection changes (but not before they've started)
+  useEffect(() => {
+    if (stage === 'runner' || stage === 'review') {
+      saveResponsesToDb(responses);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, selectedCategoryIds, stage]);
+
+  // ── Transcription ──
   const transcribeBlob = useCallback(async (blob: Blob, questionId: string, questionText: string) => {
     setTranscribingId(questionId);
     try {
@@ -216,7 +272,7 @@ const SelfInterview = () => {
     }
   }, [toast, saveResponsesToDb]);
 
-  const startRecording = useCallback(async (questionId: string) => {
+  const startRecording = useCallback(async (questionId: string, questionText: string) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -230,17 +286,13 @@ const SelfInterview = () => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
 
-      // Find the question text for transcription context
-      const q = allQuestions.find(q => q.id === questionId);
-
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         stream.getTracks().forEach(t => t.stop());
         streamRef.current = null;
         setRecordingQuestionId(null);
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-        // Auto-transcribe immediately
-        transcribeBlob(blob, questionId, q?.question || '');
+        transcribeBlob(blob, questionId, questionText);
       };
 
       mediaRecorder.start(1000);
@@ -248,7 +300,7 @@ const SelfInterview = () => {
     } catch {
       toast({ title: 'Microphone access denied', description: 'Please allow microphone access.', variant: 'destructive' });
     }
-  }, [allQuestions, toast, transcribeBlob]);
+  }, [toast, transcribeBlob]);
 
   const stopRecording = useCallback(() => {
     mediaRecorderRef.current?.stop();
@@ -262,7 +314,6 @@ const SelfInterview = () => {
       const formData = new FormData();
       formData.append('audio', blob, 'note.webm');
       formData.append('question', `Analyst refinement note for: ${questionText}`);
-
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const res = await fetch(`https://${projectId}.supabase.co/functions/v1/transcribe-question`, {
         method: 'POST',
@@ -272,12 +323,10 @@ const SelfInterview = () => {
         },
         body: formData,
       });
-
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Unknown error' }));
         throw new Error(err.error || `Failed: ${res.status}`);
       }
-
       const { transcript } = await res.json();
       if (transcript) {
         setResponses(prev => {
@@ -296,7 +345,7 @@ const SelfInterview = () => {
     }
   }, [toast, saveResponsesToDb]);
 
-  const startNoteRecording = useCallback(async (questionId: string) => {
+  const startNoteRecording = useCallback(async (questionId: string, questionText: string) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       noteStreamRef.current = stream;
@@ -305,90 +354,38 @@ const SelfInterview = () => {
       noteChunksRef.current = [];
       setNoteRecordingTime(0);
       setNoteRecordingId(questionId);
-
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) noteChunksRef.current.push(e.data);
       };
-
-      const q = allQuestions.find(q => q.id === questionId);
-
       mediaRecorder.onstop = () => {
         const blob = new Blob(noteChunksRef.current, { type: 'audio/webm' });
         stream.getTracks().forEach(t => t.stop());
         noteStreamRef.current = null;
         setNoteRecordingId(null);
         if (noteTimerRef.current) { clearInterval(noteTimerRef.current); noteTimerRef.current = null; }
-        transcribeNoteBlob(blob, questionId, q?.question || '');
+        transcribeNoteBlob(blob, questionId, questionText);
       };
-
       mediaRecorder.start(1000);
       noteTimerRef.current = setInterval(() => setNoteRecordingTime(t => t + 1), 1000);
     } catch {
       toast({ title: 'Microphone access denied', description: 'Please allow microphone access.', variant: 'destructive' });
     }
-  }, [allQuestions, toast, transcribeNoteBlob]);
+  }, [toast, transcribeNoteBlob]);
 
   const stopNoteRecording = useCallback(() => {
     noteMediaRecorderRef.current?.stop();
   }, []);
 
+  // ── Text editing ──
   const handleTextChange = useCallback((questionId: string, value: string) => {
-    setResponses(prev => {
-      const updated = { ...prev, [questionId]: value };
-      return updated;
-    });
+    setResponses(prev => ({ ...prev, [questionId]: value }));
   }, []);
 
-  const handleTextBlur = useCallback((questionId: string) => {
-    // Save on blur
+  const handleTextBlur = useCallback(() => {
     saveResponsesToDb(responses);
   }, [responses, saveResponsesToDb]);
 
-  const handleSubmit = async () => {
-    if (!assessmentId) return;
-    setSubmitting(true);
-    try {
-      if (existingResponseId) {
-        await supabase.from('straight_talk_responses')
-          .update({ responses: JSON.parse(JSON.stringify(responses)), completed: true, updated_at: new Date().toISOString() })
-          .eq('id', existingResponseId);
-      } else {
-        await supabase.from('straight_talk_responses').insert([{
-          assessment_id: assessmentId, industry: 'self-interview',
-          responses: JSON.parse(JSON.stringify(responses)), completed: true,
-        }]);
-      }
-
-      await supabase.from('roi_assessments')
-        .update({ pipeline_stage: 'deep_dive_complete' as any, discovery_ready: true })
-        .eq('id', assessmentId);
-
-      const { data: assessment } = await supabase
-        .from('roi_assessments')
-        .select('contact_name, contact_email, business_name')
-        .eq('id', assessmentId).single();
-
-      if (assessment) {
-        supabase.functions.invoke('notify-admin', {
-          body: {
-            eventType: 'self_interview_completed',
-            leadName: assessment.contact_name,
-            leadEmail: assessment.contact_email,
-            businessName: assessment.business_name,
-            assessmentId,
-          },
-        }).catch(console.error);
-      }
-
-      setSubmitted(true);
-      toast({ title: 'Self-Interview Complete! 🎉' });
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
-    } finally { setSubmitting(false); }
-  };
-
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-
+  // ── Skip ──
   const SKIP_REASONS = [
     { value: 'na', label: 'Not Applicable', icon: MinusCircle, description: 'Not relevant to my business' },
     { value: 'dont_know', label: "Don't Know", icon: HelpCircle, description: 'Need help answering this' },
@@ -424,10 +421,63 @@ const SelfInterview = () => {
     return skip === 'na' || skip === 'dont_know';
   };
 
-  const answeredCount = allQuestions.filter(q => isQuestionComplete(q.id)).length;
-  const progress = allQuestions.length > 0 ? (answeredCount / allQuestions.length) * 100 : 0;
+  // ── Submit ──
+  const handleSubmit = async () => {
+    if (!assessmentId) return;
+    setSubmitting(true);
+    try {
+      const meta = { selected_category_ids: selectedCategoryIds, current_index: currentIndex };
+      const finalPayload: Record<string, any> = { ...responses, _meta: meta };
 
-  // ── Loading ──
+      if (existingResponseId) {
+        await supabase.from('straight_talk_responses')
+          .update({
+            responses: JSON.parse(JSON.stringify(finalPayload)),
+            completed: true,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingResponseId);
+      } else {
+        await supabase.from('straight_talk_responses').insert([{
+          assessment_id: assessmentId, industry: 'self-interview',
+          responses: JSON.parse(JSON.stringify(finalPayload)), completed: true,
+        }]);
+      }
+
+      await supabase.from('roi_assessments')
+        .update({ pipeline_stage: 'deep_dive_complete' as any, discovery_ready: true })
+        .eq('id', assessmentId);
+
+      const { data: assessment } = await supabase
+        .from('roi_assessments')
+        .select('contact_name, contact_email, business_name')
+        .eq('id', assessmentId).single();
+
+      if (assessment) {
+        supabase.functions.invoke('notify-admin', {
+          body: {
+            eventType: 'self_interview_completed',
+            leadName: assessment.contact_name,
+            leadEmail: assessment.contact_email,
+            businessName: assessment.business_name,
+            assessmentId,
+          },
+        }).catch(console.error);
+      }
+
+      setSubmitted(true);
+      toast({ title: 'Self-Interview Complete! 🎉' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally { setSubmitting(false); }
+  };
+
+  const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+  const answeredCount = runnerQuestions.filter(q => isQuestionComplete(q.id)).length;
+  const progress = runnerQuestions.length > 0 ? (answeredCount / runnerQuestions.length) * 100 : 0;
+
+  // ── LOADING ──
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -479,7 +529,7 @@ const SelfInterview = () => {
     );
   }
 
-  if (allQuestions.length === 0) {
+  if (categories.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="text-center space-y-4">
@@ -490,8 +540,33 @@ const SelfInterview = () => {
     );
   }
 
-  // ── INTRO SCREEN ──
-  if (!started) {
+  // ── Header (shared by runner/review) ──
+  const Header = () => (
+    <div className="border-b border-border bg-card sticky top-0 z-10">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <img src={logo} alt="5to10x" className="h-7 flex-shrink-0" />
+        <div className="flex items-center gap-3 min-w-0">
+          {autoSaving ? (
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+            </span>
+          ) : lastSaved ? (
+            <span className="flex items-center gap-1 text-[10px] text-primary/70">
+              <Save className="w-3 h-3" /> Saved
+            </span>
+          ) : null}
+          <Badge variant="outline" className="text-[10px]">
+            {answeredCount}/{runnerQuestions.length}
+          </Badge>
+          <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[160px]">{businessName}</span>
+        </div>
+      </div>
+      <Progress value={progress} className="h-1" />
+    </div>
+  );
+
+  // ── INTRO ──
+  if (stage === 'intro') {
     const existingAnswers = answeredCount;
     return (
       <div className="min-h-screen bg-background">
@@ -514,45 +589,45 @@ const SelfInterview = () => {
               Welcome to your <strong className="text-foreground">Straight Talk™ Self-Interview</strong>
             </p>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              We've put together a bank of specifically curated questions to help us understand as much as possible about {businessName || 'your business'} — your goals, challenges, and what makes your business tick.
+              We'll walk through one question at a time. You choose which areas you want to cover, then answer each one by typing or recording your voice.
             </p>
             <p className="text-muted-foreground max-w-lg mx-auto mt-3">
-              There's no pressure to answer every single question — just do the best you can. Skip anything that doesn't apply or that you're unsure about. Every answer helps us build a better plan for you. 💛
+              No pressure to do it all in one sitting — we save your progress automatically. 💛
             </p>
           </motion.div>
 
           {existingAnswers > 0 && (
             <div className="rounded-xl bg-primary/5 border border-primary/20 p-4">
-              <p className="text-sm font-medium text-primary">
-                Welcome back! You've made great progress already.
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">Your answers were saved — pick up right where you left off.</p>
+              <p className="text-sm font-medium text-primary">Welcome back! You've made great progress already.</p>
+              <p className="text-xs text-muted-foreground mt-1">Pick up right where you left off.</p>
             </div>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto text-left">
             <div className="rounded-xl bg-card border border-border p-4 space-y-1">
+              <ListChecks className="w-5 h-5 text-primary" />
+              <p className="text-sm font-medium text-foreground">Pick Your Topics</p>
+              <p className="text-xs text-muted-foreground">Skip what isn't relevant</p>
+            </div>
+            <div className="rounded-xl bg-card border border-border p-4 space-y-1">
               <Mic className="w-5 h-5 text-primary" />
-              <p className="text-sm font-medium text-foreground">Record or Type</p>
-              <p className="text-xs text-muted-foreground">Answer each question your way</p>
+              <p className="text-sm font-medium text-foreground">Type or Record</p>
+              <p className="text-xs text-muted-foreground">Whichever feels easier</p>
             </div>
             <div className="rounded-xl bg-card border border-border p-4 space-y-1">
-              <CheckCircle className="w-5 h-5 text-primary" />
+              <Save className="w-5 h-5 text-primary" />
               <p className="text-sm font-medium text-foreground">Auto-Saved</p>
-              <p className="text-xs text-muted-foreground">Pause and come back anytime</p>
-            </div>
-            <div className="rounded-xl bg-card border border-border p-4 space-y-1">
-              <Send className="w-5 h-5 text-primary" />
-              <p className="text-sm font-medium text-foreground">We Do The Rest</p>
-              <p className="text-xs text-muted-foreground">We analyse & prepare your plan</p>
+              <p className="text-xs text-muted-foreground">Pause and return anytime</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <Button size="lg" className="gap-2 px-8 w-full sm:w-auto" onClick={() => setStarted(true)}>
-              {existingAnswers > 0 ? 'Continue Self-Interview' : 'Start Self-Interview'} <ArrowRight className="w-4 h-4" />
+            <Button size="lg" className="gap-2 px-8 w-full sm:w-auto" onClick={() => {
+              if (existingAnswers > 0) setStage('runner');
+              else setStage('category-picker');
+            }}>
+              {existingAnswers > 0 ? 'Continue Self-Interview' : 'Get Started'} <ArrowRight className="w-4 h-4" />
             </Button>
-            <p className="text-xs text-muted-foreground">Progress saves automatically after each answer</p>
           </div>
 
           <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-6 space-y-3 max-w-lg mx-auto">
@@ -560,7 +635,7 @@ const SelfInterview = () => {
               <Calendar className="w-5 h-5 text-primary" /> Prefer to chat with us instead?
             </h3>
             <p className="text-sm text-muted-foreground">
-              You're welcome to book an interview with Aidan & Eoghan — we'll walk through everything together on a Zoom call. You can also start the self-interview now and finish up anything remaining during the call.
+              Book a Zoom call with Aidan & Eoghan and we'll walk through everything together.
             </p>
             <Button variant="outline" size="lg" className="gap-2" onClick={() => window.open(CALENDLY_REFINEMENT_URL, '_blank')}>
               <Calendar className="w-4 h-4" /> Book an Interview Instead
@@ -571,225 +646,429 @@ const SelfInterview = () => {
     );
   }
 
-  // ── MAIN TAB-BASED INTERVIEW ──
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
-          <img src={logo} alt="5to10x" className="h-7" />
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              {autoSaving ? (
-                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <Loader2 className="w-3 h-3 animate-spin" /> Saving...
-                </span>
-              ) : lastSaved ? (
-                <span className="flex items-center gap-1 text-[10px] text-primary/70">
-                  <Save className="w-3 h-3" /> Saved
-                </span>
-              ) : null}
+  // ── CATEGORY PICKER ──
+  if (stage === 'category-picker') {
+    const toggleCat = (id: string) => {
+      setSelectedCategoryIds(prev =>
+        prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      );
+    };
+    const selectAll = () => setSelectedCategoryIds(categories.map(c => c.id));
+    const clearAll = () => setSelectedCategoryIds([]);
+    const totalSelectedQs = questions.filter(q => selectedCategoryIds.includes(q.category_id)).length;
+
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-card">
+          <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+            <img src={logo} alt="5to10x" className="h-8" />
+            <div className="text-right">
+              <p className="text-sm font-medium text-foreground">{businessName}</p>
+              <p className="text-xs text-muted-foreground">Choose your topics</p>
             </div>
-            <Badge variant="outline" className="text-[10px]">
-              {progress === 100 ? 'All done ✅' : 'In progress'}
-            </Badge>
-            <span className="text-xs text-muted-foreground hidden sm:inline">{businessName}</span>
           </div>
         </div>
-        <Progress value={progress} className="h-1" />
-      </div>
 
-      {/* Tab content */}
-      <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
-            {categories.map((cat) => {
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center bg-primary/10 mb-2">
+              <ListChecks className="w-7 h-7 text-primary" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Which areas would you like to cover?</h1>
+            <p className="text-muted-foreground max-w-lg mx-auto text-sm">
+              All topics are pre-selected. Untick anything that isn't relevant to {businessName || 'your business'}. You can always change your mind later.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm text-muted-foreground">
+              <strong className="text-foreground">{selectedCategoryIds.length}</strong> of {categories.length} topics
+              {totalSelectedQs > 0 && <span className="ml-1">· ~{totalSelectedQs} questions</span>}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={selectAll} className="text-xs">Select all</Button>
+              <Button variant="ghost" size="sm" onClick={clearAll} className="text-xs">Clear</Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {categories.map(cat => {
               const Icon = ICON_MAP[cat.icon] || Sparkles;
-              const catQuestions = questions.filter(q => q.category_id === cat.id);
-              const catAnswered = catQuestions.filter(q => isQuestionComplete(q.id)).length;
-              const allDone = catAnswered === catQuestions.length && catQuestions.length > 0;
+              const checked = selectedCategoryIds.includes(cat.id);
+              const qCount = questions.filter(q => q.category_id === cat.id).length;
               return (
-                <TabsTrigger key={cat.id} value={cat.id} className="flex items-center gap-1.5 text-xs px-3 py-2 data-[state=active]:bg-background">
-                  {allDone ? (
-                    <CheckCircle className="w-3.5 h-3.5 text-primary" />
-                  ) : (
-                    <Icon className="w-3.5 h-3.5" />
-                  )}
-                  <span className="hidden sm:inline">{cat.label}</span>
-                </TabsTrigger>
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => toggleCat(cat.id)}
+                  className={`flex items-center gap-3 text-left p-3 rounded-xl border-2 transition-colors ${
+                    checked
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border bg-card hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <Checkbox checked={checked} onCheckedChange={() => toggleCat(cat.id)} />
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    checked ? 'bg-primary/15' : 'bg-muted'
+                  }`}>
+                    <Icon className={`w-4 h-4 ${checked ? 'text-primary' : 'text-muted-foreground'}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{cat.label}</p>
+                    <p className="text-[11px] text-muted-foreground">{qCount} {qCount === 1 ? 'question' : 'questions'}</p>
+                  </div>
+                </button>
               );
             })}
-          </TabsList>
+          </div>
 
-          {categories.map((cat) => {
-            const Icon = ICON_MAP[cat.icon] || Sparkles;
-            const catQuestions = questions.filter(q => q.category_id === cat.id).sort((a, b) => a.sort_order - b.sort_order);
+          <div className="flex items-center justify-between gap-3 pt-4">
+            <Button variant="ghost" onClick={() => setStage('intro')} className="gap-1.5">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </Button>
+            <Button
+              size="lg"
+              className="gap-2"
+              disabled={selectedCategoryIds.length === 0}
+              onClick={() => {
+                setCurrentIndex(0);
+                setStage('runner');
+                saveResponsesToDb(responses, { selected_category_ids: selectedCategoryIds, current_index: 0 });
+              }}
+            >
+              Begin · {totalSelectedQs} {totalSelectedQs === 1 ? 'question' : 'questions'} <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-            return (
-              <TabsContent key={cat.id} value={cat.id} className="mt-6 space-y-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-primary" />
+  // ── REVIEW ──
+  if (stage === 'review') {
+    const orderedSelectedCats = categories
+      .filter(c => selectedCategoryIds.includes(c.id))
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <div className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+          <div className="text-center space-y-1">
+            <h1 className="text-2xl font-bold text-foreground">Review your answers</h1>
+            <p className="text-sm text-muted-foreground">
+              Tap any question to edit. When you're happy, hit submit and we'll take it from there.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {orderedSelectedCats.map(cat => {
+              const Icon = ICON_MAP[cat.icon] || Sparkles;
+              const catQs = questions.filter(q => q.category_id === cat.id).sort((a, b) => a.sort_order - b.sort_order);
+              return (
+                <div key={cat.id} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-4 h-4 text-primary" />
+                    </div>
+                    <h2 className="text-base font-bold text-foreground">{cat.label}</h2>
                   </div>
-                  <h2 className="text-lg font-bold text-foreground">{cat.label}</h2>
-                </div>
-
-                <div className="space-y-4">
-                  {catQuestions.map((q, idx) => {
-                    const hasAnswer = !!responses[q.id]?.trim();
-                    const isRecordingThis = recordingQuestionId === q.id;
-                    const isTranscribingThis = transcribingId === q.id;
-                    const skipReason = getSkipReason(q.id);
-                    const skipMeta = skipReason ? SKIP_REASONS.find(s => s.value === skipReason) : null;
-                    const complete = isQuestionComplete(q.id);
-
-                    return (
-                      <div key={q.id} className={`rounded-xl border bg-card p-4 sm:p-5 space-y-3 ${skipReason && !hasAnswer ? 'border-muted opacity-75' : 'border-border'}`}>
-                        {/* Question header */}
-                        <div className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
-                            {idx + 1}
-                          </span>
-                          <div className="flex-1 space-y-1">
-                            <p className="text-sm font-semibold text-foreground leading-snug">{q.question}</p>
-                            {q.detail_prompt && (
-                              <p className="text-xs text-muted-foreground">{q.detail_prompt}</p>
-                            )}
-                            {skipMeta && !hasAnswer && (
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <skipMeta.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground italic">{skipMeta.label}</span>
-                                <button onClick={() => clearSkip(q.id)} className="text-[10px] text-primary underline ml-1">Undo</button>
-                              </div>
-                            )}
-                          </div>
-                          {complete && !isTranscribingThis && (
-                            <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                          )}
-                          {isTranscribingThis && (
-                            <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0 mt-0.5" />
-                          )}
-                        </div>
-
-                        {/* Answer area */}
-                        <div className="pl-9 space-y-2">
-                          {/* Text answer */}
-                          <Textarea
-                            placeholder="Type your answer here, or use the mic to record..."
-                            value={responses[q.id] || ''}
-                            onChange={(e) => handleTextChange(q.id, e.target.value)}
-                            onBlur={() => handleTextBlur(q.id)}
-                            rows={2}
-                            className="bg-secondary border-border resize-none text-sm"
-                            disabled={isTranscribingThis}
-                          />
-
-                          {/* Recording controls */}
-                          <div className="flex items-center gap-2">
-                            {isRecordingThis ? (
-                              <Button size="sm" variant="destructive" className="gap-1.5 text-xs" onClick={stopRecording}>
-                                <Square className="w-3 h-3" /> Stop ({formatTime(recordingTime)})
-                              </Button>
-                            ) : isTranscribingThis ? (
-                              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing...
-                              </span>
-                            ) : (
-                              <Button
-                                size="sm" variant="outline" className="gap-1.5 text-xs"
-                                onClick={() => startRecording(q.id)}
-                                disabled={recordingQuestionId !== null}
-                              >
-                                <Mic className="w-3.5 h-3.5" /> {hasAnswer ? 'Re-record' : 'Record'}
-                              </Button>
-                            )}
-
-                            {/* Skip dropdown */}
-                            {!hasAnswer && !isRecordingThis && !isTranscribingThis && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button size="sm" variant="ghost" className="gap-1 text-xs text-muted-foreground">
-                                    <ChevronDown className="w-3 h-3" /> Skip
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start">
-                                  {SKIP_REASONS.map(sr => (
-                                    <DropdownMenuItem key={sr.value} onClick={() => handleSkip(q.id, sr.value)} className="gap-2">
-                                      <sr.icon className="w-4 h-4" />
-                                      <div>
-                                        <p className="text-sm font-medium">{sr.label}</p>
-                                        <p className="text-[10px] text-muted-foreground">{sr.description}</p>
-                                      </div>
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </div>
-
-                          {/* Analyst Notes */}
-                          <div className="border-l-2 border-accent pl-3 mt-1">
-                            <p className="text-[10px] text-accent-foreground/60 uppercase tracking-wider font-medium mb-1">Analyst Notes</p>
-                            <Textarea
-                              placeholder="Add refinement notes for the proposal…"
-                              value={responses[`_note_${q.id}`] || ''}
-                              onChange={(e) => handleTextChange(`_note_${q.id}`, e.target.value)}
-                              onBlur={() => handleTextBlur(`_note_${q.id}`)}
-                              rows={2}
-                              className="text-xs bg-accent/10 border-accent/20 resize-none italic"
-                              disabled={noteTranscribingId === q.id}
-                            />
-                            <div className="flex items-center gap-2 mt-1.5">
-                              {noteRecordingId === q.id ? (
-                                <Button size="sm" variant="destructive" className="gap-1.5 text-xs" onClick={stopNoteRecording}>
-                                  <Square className="w-3 h-3" /> Stop ({formatTime(noteRecordingTime)})
-                                </Button>
-                              ) : noteTranscribingId === q.id ? (
-                                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing note...
-                                </span>
+                  <div className="space-y-2">
+                    {catQs.map((q, idx) => {
+                      const answer = responses[q.id]?.trim() || '';
+                      const skipReason = getSkipReason(q.id);
+                      const skipMeta = skipReason ? SKIP_REASONS.find(s => s.value === skipReason) : null;
+                      const globalIdx = runnerQuestions.findIndex(rq => rq.id === q.id);
+                      return (
+                        <div key={q.id} className="rounded-xl border border-border bg-card p-3 sm:p-4">
+                          <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
+                              {idx + 1}
+                            </span>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <p className="text-sm font-medium text-foreground leading-snug">{q.question}</p>
+                              {answer ? (
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">{answer}</p>
+                              ) : skipMeta ? (
+                                <p className="text-xs italic text-muted-foreground flex items-center gap-1.5">
+                                  <skipMeta.icon className="w-3.5 h-3.5" /> {skipMeta.label}
+                                </p>
                               ) : (
-                                <Button
-                                  size="sm" variant="outline" className="gap-1.5 text-xs border-accent/30"
-                                  onClick={() => startNoteRecording(q.id)}
-                                  disabled={recordingQuestionId !== null || noteRecordingId !== null}
-                                >
-                                  <Mic className="w-3.5 h-3.5" /> {responses[`_note_${q.id}`]?.trim() ? 'Add to Note' : 'Record Note'}
-                                </Button>
+                                <p className="text-xs italic text-muted-foreground">Not answered yet</p>
                               )}
                             </div>
+                            <Button
+                              size="sm" variant="ghost" className="gap-1 text-xs"
+                              onClick={() => { if (globalIdx >= 0) { setCurrentIndex(globalIdx); setStage('runner'); } }}
+                            >
+                              <Pencil className="w-3.5 h-3.5" /> Edit
+                            </Button>
                           </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
+            <Button variant="ghost" onClick={() => { setCurrentIndex(Math.max(0, runnerQuestions.length - 1)); setStage('runner'); }} className="gap-1.5">
+              <ArrowLeft className="w-4 h-4" /> Back to questions
+            </Button>
+            <Button
+              size="lg" className="gap-2"
+              onClick={handleSubmit}
+              disabled={submitting || answeredCount === 0}
+            >
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Submit All Answers
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── RUNNER (one question at a time) ──
+  if (runnerQuestions.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold text-foreground">No topics selected</h1>
+          <Button onClick={() => setStage('category-picker')}>Pick topics</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const safeIndex = Math.min(Math.max(currentIndex, 0), runnerQuestions.length - 1);
+  const currentQ = runnerQuestions[safeIndex];
+  const CategoryIcon = ICON_MAP[currentQ._categoryIcon] || Sparkles;
+  const hasAnswer = !!responses[currentQ.id]?.trim();
+  const isRecordingThis = recordingQuestionId === currentQ.id;
+  const isTranscribingThis = transcribingId === currentQ.id;
+  const skipReason = getSkipReason(currentQ.id);
+  const skipMeta = skipReason ? SKIP_REASONS.find(s => s.value === skipReason) : null;
+  const complete = isQuestionComplete(currentQ.id);
+  const isLast = safeIndex === runnerQuestions.length - 1;
+  const isFirst = safeIndex === 0;
+
+  const goNext = () => {
+    if (isLast) setStage('review');
+    else setCurrentIndex(safeIndex + 1);
+  };
+  const goPrev = () => {
+    if (!isFirst) setCurrentIndex(safeIndex - 1);
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+      <div className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 space-y-5">
+        {/* Crumb */}
+        <div className="flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-muted-foreground min-w-0">
+            <CategoryIcon className="w-3.5 h-3.5 flex-shrink-0 text-primary" />
+            <span className="truncate">{currentQ._categoryLabel}</span>
+          </div>
+          <span className="text-muted-foreground flex-shrink-0">
+            Question <strong className="text-foreground">{safeIndex + 1}</strong> of {runnerQuestions.length}
+          </span>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQ.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-2xl border border-border bg-card p-5 sm:p-6 space-y-4"
+          >
+            {/* Question */}
+            <div className="flex items-start gap-3">
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                {safeIndex + 1}
+              </span>
+              <div className="flex-1 space-y-1">
+                <h2 className="text-base sm:text-lg font-semibold text-foreground leading-snug">
+                  {currentQ.question}
+                </h2>
+                {currentQ.detail_prompt && (
+                  <p className="text-xs sm:text-sm text-muted-foreground">{currentQ.detail_prompt}</p>
+                )}
+              </div>
+              {complete && !isTranscribingThis && (
+                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+              )}
+              {isTranscribingThis && (
+                <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0 mt-1" />
+              )}
+            </div>
+
+            {skipMeta && !hasAnswer && (
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-muted/50">
+                <skipMeta.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground italic">Marked: {skipMeta.label}</span>
+                <button onClick={() => clearSkip(currentQ.id)} className="text-[10px] text-primary underline ml-1">Undo</button>
+              </div>
+            )}
+
+            {/* Answer mode tabs */}
+            <Tabs value={answerMode} onValueChange={(v) => setAnswerMode(v as 'text' | 'voice')}>
+              <TabsList className="grid grid-cols-2 w-full max-w-xs">
+                <TabsTrigger value="text" className="gap-1.5 text-xs">
+                  <Pencil className="w-3.5 h-3.5" /> Write
+                </TabsTrigger>
+                <TabsTrigger value="voice" className="gap-1.5 text-xs">
+                  <Mic className="w-3.5 h-3.5" /> Voice
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="text" className="mt-3 space-y-2">
+                <Textarea
+                  placeholder="Type your answer here..."
+                  value={responses[currentQ.id] || ''}
+                  onChange={(e) => handleTextChange(currentQ.id, e.target.value)}
+                  onBlur={handleTextBlur}
+                  rows={5}
+                  className="bg-secondary border-border resize-none text-sm"
+                  disabled={isTranscribingThis}
+                />
+                <p className="text-[10px] text-muted-foreground">Saves automatically when you click away.</p>
+              </TabsContent>
+
+              <TabsContent value="voice" className="mt-3 space-y-3">
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-4 sm:p-5 flex flex-col items-center justify-center gap-3 min-h-[140px]">
+                  {isRecordingThis ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+                        <span className="text-sm font-mono text-foreground">{formatTime(recordingTime)}</span>
                       </div>
-                    );
-                  })}
+                      <Button size="lg" variant="destructive" className="gap-2" onClick={stopRecording}>
+                        <Square className="w-4 h-4" /> Stop & Transcribe
+                      </Button>
+                    </>
+                  ) : isTranscribingThis ? (
+                    <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" /> Transcribing your answer...
+                    </span>
+                  ) : (
+                    <>
+                      <Button
+                        size="lg" className="gap-2"
+                        onClick={() => startRecording(currentQ.id, currentQ.question)}
+                        disabled={recordingQuestionId !== null}
+                      >
+                        <Mic className="w-4 h-4" />
+                        {hasAnswer ? 'Re-record answer' : 'Start recording'}
+                      </Button>
+                      <p className="text-[11px] text-muted-foreground text-center">
+                        Speak naturally — we'll transcribe and you can edit before moving on.
+                      </p>
+                    </>
+                  )}
                 </div>
 
-                {/* Next section / Submit */}
-                <div className="flex items-center justify-between pt-4">
-                  <div />
-                  {(() => {
-                    const catIndex = categories.findIndex(c => c.id === cat.id);
-                    const isLast = catIndex === categories.length - 1;
-                    if (isLast) {
-                      return (
-                        <Button className="gap-2" onClick={handleSubmit} disabled={submitting || answeredCount === 0}>
-                          {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                          Submit All Answers
-                        </Button>
-                      );
-                    }
-                    return (
-                      <Button variant="outline" className="gap-1.5" onClick={() => setActiveTab(categories[catIndex + 1].id)}>
-                        Next Section <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    );
-                  })()}
-                </div>
+                {hasAnswer && !isRecordingThis && !isTranscribingThis && (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Transcript (editable)</p>
+                    <Textarea
+                      value={responses[currentQ.id] || ''}
+                      onChange={(e) => handleTextChange(currentQ.id, e.target.value)}
+                      onBlur={handleTextBlur}
+                      rows={5}
+                      className="bg-secondary border-border resize-none text-sm"
+                    />
+                  </div>
+                )}
               </TabsContent>
-            );
-          })}
-        </Tabs>
+            </Tabs>
+
+            {/* Skip option */}
+            {!hasAnswer && !isRecordingThis && !isTranscribingThis && !skipMeta && (
+              <div className="pt-2 border-t border-border">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="ghost" className="gap-1 text-xs text-muted-foreground">
+                      <ChevronDown className="w-3 h-3" /> Skip this one
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    {SKIP_REASONS.map(sr => (
+                      <DropdownMenuItem key={sr.value} onClick={() => handleSkip(currentQ.id, sr.value)} className="gap-2">
+                        <sr.icon className="w-4 h-4" />
+                        <div>
+                          <p className="text-sm font-medium">{sr.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{sr.description}</p>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
+            {/* Analyst notes (kept) */}
+            <details className="border-t border-border pt-3">
+              <summary className="text-[11px] text-muted-foreground cursor-pointer hover:text-foreground">
+                + Add a note for our analyst (optional)
+              </summary>
+              <div className="mt-2 border-l-2 border-accent pl-3 space-y-2">
+                <Textarea
+                  placeholder="Anything extra you'd like us to know..."
+                  value={responses[`_note_${currentQ.id}`] || ''}
+                  onChange={(e) => handleTextChange(`_note_${currentQ.id}`, e.target.value)}
+                  onBlur={handleTextBlur}
+                  rows={2}
+                  className="text-xs bg-accent/10 border-accent/20 resize-none italic"
+                  disabled={noteTranscribingId === currentQ.id}
+                />
+                <div>
+                  {noteRecordingId === currentQ.id ? (
+                    <Button size="sm" variant="destructive" className="gap-1.5 text-xs" onClick={stopNoteRecording}>
+                      <Square className="w-3 h-3" /> Stop ({formatTime(noteRecordingTime)})
+                    </Button>
+                  ) : noteTranscribingId === currentQ.id ? (
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transcribing note...
+                    </span>
+                  ) : (
+                    <Button
+                      size="sm" variant="outline" className="gap-1.5 text-xs border-accent/30"
+                      onClick={() => startNoteRecording(currentQ.id, currentQ.question)}
+                      disabled={recordingQuestionId !== null || noteRecordingId !== null}
+                    >
+                      <Mic className="w-3.5 h-3.5" /> {responses[`_note_${currentQ.id}`]?.trim() ? 'Add to note' : 'Record note'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </details>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Nav */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <Button variant="outline" className="gap-1.5" onClick={goPrev} disabled={isFirst}>
+            <ArrowLeft className="w-4 h-4" /> Previous
+          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost" size="sm"
+              onClick={() => setStage('category-picker')}
+              className="text-xs"
+            >
+              Edit topics
+            </Button>
+            <Button className="gap-1.5" onClick={goNext} disabled={isRecordingThis || isTranscribingThis}>
+              {isLast ? 'Review & Submit' : 'Next'} <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
