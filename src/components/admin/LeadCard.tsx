@@ -6,12 +6,13 @@ import { motion } from 'framer-motion';
 import {
   Mail, DollarSign, ChevronDown, Send, FileText, ExternalLink, Copy, Check,
   Clock, AlertCircle, Eye, Plus, Phone, Building2, Calendar, Upload, Mic, Loader2, RefreshCw,
-  Trash2, FolderOpen, MessageSquare,
+  Trash2, FolderOpen, MessageSquare, Mic2, CalendarDays, Shuffle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Assessment = Tables<'roi_assessments'>;
 type PipelineStage = Assessment['pipeline_stage'];
