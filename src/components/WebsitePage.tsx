@@ -28,6 +28,7 @@ import logoChatGPT from '@/assets/logo-chatgpt.png';
 import logoClaude from '@/assets/logo-claude.png';
 import logoSupabase from '@/assets/logo-supabase.png';
 import NewsSection from '@/components/NewsSection';
+import SEO from '@/components/SEO';
 import ClarityEngineSection from '@/components/ClarityEngineSection';
 import { FormData, initialFormData, calculateROI, ROIResults } from '@/lib/formTypes';
 import StepIndicator from '@/components/StepIndicator';
@@ -1179,6 +1180,7 @@ const WebsitePage = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden relative">
+      <SEO />
       {/* Staff Login */}
       <button
         onClick={() => navigate('/admin')}
