@@ -1,3 +1,5 @@
+# https://www.robotstxt.org/robotstxt.html
+
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +12,24 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /proposal
+Disallow: /proposal/
+Disallow: /self-interview
+Disallow: /self-interview/
+Disallow: /refinement-portal
+Disallow: /refinement-portal/
+Disallow: /scoping
+Disallow: /scoping/
+Disallow: /deep-dive
+Disallow: /deep-dive/
+Disallow: /straight-talk
+Disallow: /straight-talk/
+
+Sitemap: https://5to10x.app/sitemap.xml

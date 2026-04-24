@@ -18,6 +18,7 @@ import {
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import SEO from '@/components/SEO';
 import logo from '@/assets/logo-5to10x-color.webp';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -865,6 +866,7 @@ const SelfInterview = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEO title="Straight Talk Self-Interview — 5to10X" noindex />
       <Header />
       <div className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 space-y-5">
         {/* Crumb */}

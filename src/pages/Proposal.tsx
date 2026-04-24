@@ -18,6 +18,7 @@ import {
   Lock, AlertTriangle, Send, ExternalLink, FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/SEO';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/logo-5to10x-color.webp';
@@ -450,6 +451,7 @@ const Proposal = () => {
   const proposalData = (proposal.proposal_data || {}) as any;
   return (
     <>
+      <SEO title="Your Proposal — 5to10X" noindex />
       {/* Floating action bar — admin only gets print, clients get nothing here */}
       <div className="print:hidden fixed top-4 right-4 z-50 flex gap-2">
         {mode === 'admin' && (
