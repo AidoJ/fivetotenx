@@ -28,6 +28,7 @@ import CallGuide from '@/components/admin/CallGuide';
 import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
 import AutomationSettings from '@/components/admin/AutomationSettings';
 import ClientDetailModal from '@/components/admin/ClientDetailModal';
+import NotificationBell from '@/components/admin/NotificationBell';
 import SEO from '@/components/SEO';
 
 type Assessment = Tables<'roi_assessments'>;
