@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_notifications: {
+        Row: {
+          assessment_id: string | null
+          business_name: string | null
+          created_at: string
+          details: Json | null
+          event_type: string
+          id: string
+          lead_name: string | null
+          message: string | null
+          read: boolean
+          read_at: string | null
+          read_by: string | null
+          title: string
+        }
+        Insert: {
+          assessment_id?: string | null
+          business_name?: string | null
+          created_at?: string
+          details?: Json | null
+          event_type: string
+          id?: string
+          lead_name?: string | null
+          message?: string | null
+          read?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          title: string
+        }
+        Update: {
+          assessment_id?: string | null
+          business_name?: string | null
+          created_at?: string
+          details?: Json | null
+          event_type?: string
+          id?: string
+          lead_name?: string | null
+          message?: string | null
+          read?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       admin_tasks: {
         Row: {
           action: string
