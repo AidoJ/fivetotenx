@@ -212,8 +212,34 @@ Deno.serve(async (req) => {
         });
     }
 
+    // Always insert in-app notification (independent of email setting) so admins
+    // see the bell badge even when an email channel is muted.
+    try {
+      const inAppTitles: Record<string, string> = {
+        booking_created: '📅 New Straight Talk™ booking',
+        gameplan_completed: '✅ Game Plan™ completed',
+        proposal_accepted: '🎉 Proposal accepted',
+        refinement_submitted: '📝 Refinement answers received',
+        proposal_revision_requested: '✏️ Revised proposal requested',
+        agreement_signed: '✍️ Agreement signed',
+      };
+      const inAppTitle = inAppTitles[eventType] || eventType;
+      const inAppMessage = `${leadName || 'A client'}${businessName ? ` (${businessName})` : ''}`;
+      await supabase.from('admin_notifications').insert({
+        event_type: eventType,
+        title: inAppTitle,
+        message: inAppMessage,
+        assessment_id: assessmentId || null,
+        lead_name: leadName || null,
+        business_name: businessName || null,
+        details: details || {},
+      });
+    } catch (e) {
+      console.error('Failed to insert in-app notification:', e);
+    }
+
     if (!shouldNotify) {
-      return new Response(JSON.stringify({ success: true, skipped: true, reason: 'Notification disabled' }), {
+      return new Response(JSON.stringify({ success: true, skipped: true, reason: 'Email notification disabled' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
