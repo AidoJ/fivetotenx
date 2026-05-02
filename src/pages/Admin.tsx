@@ -28,6 +28,7 @@ import CallGuide from '@/components/admin/CallGuide';
 import ScopingQuestionEditor from '@/components/admin/ScopingQuestionEditor';
 import AutomationSettings from '@/components/admin/AutomationSettings';
 import ClientDetailModal from '@/components/admin/ClientDetailModal';
+import NotificationBell from '@/components/admin/NotificationBell';
 import SEO from '@/components/SEO';
 
 type Assessment = Tables<'roi_assessments'>;
@@ -1391,6 +1392,7 @@ const Admin = () => {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-none">{session.user.email}</span>
+            <NotificationBell onOpenLead={(id) => setDetailModalId(id)} />
             <Button variant="outline" size="sm" className="text-xs h-7 sm:h-9" onClick={fetchLeads}>Refresh</Button>
             <Button variant="ghost" size="sm" className="text-xs h-7 sm:h-9" onClick={() => supabase.auth.signOut()}>Sign Out</Button>
           </div>
