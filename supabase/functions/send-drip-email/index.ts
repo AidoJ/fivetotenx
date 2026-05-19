@@ -183,6 +183,7 @@ Deno.serve(async (req) => {
 
     const name = firstName(p.contact_name, p.business_name);
     const tpl = templates(name)[step];
+    const unsubscribeUrl = `${APP_URL}/unsubscribe?id=${p.id}`;
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -194,9 +195,10 @@ Deno.serve(async (req) => {
         from: FROM,
         to: [p.email],
         subject: tpl.subject,
-        html: toHtml(tpl.body),
-        text: tpl.body,
+        html: toHtml(tpl.body, unsubscribeUrl),
+        text: `${tpl.body}\n\n---\nUnsubscribe: ${unsubscribeUrl}`,
         reply_to: 'aidan@5to10x.app',
+        headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
       }),
     });
 
