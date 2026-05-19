@@ -182,7 +182,9 @@ Deno.serve(async (req) => {
     if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
 
     const name = firstName(p.contact_name, p.business_name);
-    const tpl = templates(name)[step];
+    const tpl = templates(name);
+    const trackedLink = `${APP_URL}/discover-efficiency?p=${p.id}`;
+    const body = tpl[step].body.replace(new RegExp(`${APP_URL}/discover-efficiency`, 'g'), trackedLink);
     const unsubscribeUrl = `${APP_URL}/unsubscribe?id=${p.id}`;
 
     const res = await fetch('https://api.resend.com/emails', {
