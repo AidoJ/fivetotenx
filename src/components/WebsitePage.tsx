@@ -1177,6 +1177,15 @@ const WebsitePage = () => {
   };
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Auto-trigger assessment when landing via the dedicated /discover-efficiency slug
+  useEffect(() => {
+    if (location.pathname === '/discover-efficiency') {
+      handleStartAssessment();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen overflow-x-hidden relative">
