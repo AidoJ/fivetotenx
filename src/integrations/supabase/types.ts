@@ -429,8 +429,10 @@ export type Database = {
       outbound_prospects: {
         Row: {
           address: string | null
+          auto_drip: boolean
           business_name: string
           category: string | null
+          clicked_link_at: string | null
           contact_name: string | null
           created_at: string
           drip_step: number
@@ -438,6 +440,7 @@ export type Database = {
           id: string
           last_contacted_at: string | null
           next_action_at: string | null
+          next_send_at: string | null
           notes: string | null
           phone: string | null
           source: string | null
@@ -451,8 +454,10 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          auto_drip?: boolean
           business_name: string
           category?: string | null
+          clicked_link_at?: string | null
           contact_name?: string | null
           created_at?: string
           drip_step?: number
@@ -460,6 +465,7 @@ export type Database = {
           id?: string
           last_contacted_at?: string | null
           next_action_at?: string | null
+          next_send_at?: string | null
           notes?: string | null
           phone?: string | null
           source?: string | null
@@ -473,8 +479,10 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          auto_drip?: boolean
           business_name?: string
           category?: string | null
+          clicked_link_at?: string | null
           contact_name?: string | null
           created_at?: string
           drip_step?: number
@@ -482,6 +490,7 @@ export type Database = {
           id?: string
           last_contacted_at?: string | null
           next_action_at?: string | null
+          next_send_at?: string | null
           notes?: string | null
           phone?: string | null
           source?: string | null
