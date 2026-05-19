@@ -13,6 +13,7 @@ import Proposal from "./pages/Proposal";
 import StraightTalk from "./pages/StraightTalk";
 import SelfInterview from "./pages/SelfInterview";
 import RefinementPortal from "./pages/RefinementPortal";
+import Unsubscribe from "./pages/Unsubscribe";
 
 const queryClient = new QueryClient();
 
