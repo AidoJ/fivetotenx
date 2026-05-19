@@ -162,6 +162,28 @@ export default function OutboundFunnel() {
     load();
   };
 
+  const toggleAutoDrip = async (p: Prospect) => {
+    if (!p.email && !p.auto_drip) {
+      return toast({ title: 'No email on file', description: 'Add an email before starting the auto campaign.', variant: 'destructive' });
+    }
+    if (p.unsubscribed) {
+      return toast({ title: 'Prospect unsubscribed', variant: 'destructive' });
+    }
+    const turningOn = !p.auto_drip;
+    if (turningOn && !confirm(`Start auto-campaign for ${p.business_name}? The next email will go out within the hour, then every 7 days until they click the link or you stop it.`)) return;
+    const { error } = await supabase
+      .from('outbound_prospects')
+      .update({
+        auto_drip: turningOn,
+        next_send_at: turningOn ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', p.id);
+    if (error) return toast({ title: 'Update failed', description: error.message, variant: 'destructive' });
+    toast({ title: turningOn ? 'Auto-campaign started' : 'Auto-campaign paused' });
+    load();
+  };
+
   const categories = Array.from(new Set(prospects.map(p => p.category).filter(Boolean))) as string[];
 
   const filtered = prospects.filter(p => {
