@@ -315,12 +315,32 @@ export default function OutboundFunnel() {
                         {p.drip_step > 0 && (
                           <p className="text-[10px] text-muted-foreground mt-1">Step {p.drip_step}</p>
                         )}
+                        {p.clicked_link_at && (
+                          <p className="text-[10px] text-emerald-600 mt-1 flex items-center gap-1">
+                            <MousePointerClick className="w-3 h-3" /> Clicked
+                          </p>
+                        )}
+                        {p.auto_drip && !p.clicked_link_at && (
+                          <p className="text-[10px] text-blue-600 mt-1">
+                            Auto • next {p.next_send_at ? new Date(p.next_send_at).toLocaleDateString() : 'soon'}
+                          </p>
+                        )}
                       </td>
                       <td className="p-3 align-top text-[11px] text-muted-foreground">
                         {p.last_contacted_at ? new Date(p.last_contacted_at).toLocaleDateString() : '—'}
                       </td>
                       <td className="p-3 align-top">
                         <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant={p.auto_drip ? 'default' : 'outline'}
+                            onClick={() => toggleAutoDrip(p)}
+                            disabled={!p.email || p.unsubscribed || !!p.clicked_link_at}
+                            className="h-7 text-[11px] gap-1"
+                            title={p.auto_drip ? 'Pause auto-campaign' : 'Start 7-day auto-campaign'}
+                          >
+                            {p.auto_drip ? <><Pause className="w-3 h-3" /> Auto</> : <><Play className="w-3 h-3" /> Auto</>}
+                          </Button>
                           <Select
                             value=""
                             onValueChange={(v) => sendDrip(p, parseInt(v, 10))}
