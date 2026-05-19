@@ -32,6 +32,10 @@ type Prospect = {
   tags: string[] | null;
   created_at: string;
   updated_at: string;
+  auto_drip?: boolean;
+  next_send_at?: string | null;
+  clicked_link_at?: string | null;
+  unsubscribed?: boolean;
 };
 
 const STAGES = [
