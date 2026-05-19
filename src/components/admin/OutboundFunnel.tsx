@@ -295,9 +295,20 @@ export default function OutboundFunnel() {
                       </td>
                       <td className="p-3 align-top">
                         <div className="flex items-center justify-end gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => advanceStage(p)} title="Advance drip step">
-                            <Send className="w-3.5 h-3.5" />
-                          </Button>
+                          <Select
+                            value=""
+                            onValueChange={(v) => sendDrip(p, parseInt(v, 10))}
+                            disabled={sendingId === p.id || !p.email}
+                          >
+                            <SelectTrigger className="h-7 w-[110px] text-[11px]">
+                              <SelectValue placeholder={sendingId === p.id ? 'Sending…' : `Send #${Math.min((p.drip_step || 0) + 1, 3)}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">Send Email 1</SelectItem>
+                              <SelectItem value="2">Send Email 2</SelectItem>
+                              <SelectItem value="3">Send Email 3</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Button size="sm" variant="ghost" onClick={() => openEdit(p)}>
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
