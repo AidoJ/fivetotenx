@@ -1603,6 +1603,10 @@ const Admin = () => {
               )}
             </div>
           </TabsContent>
+
+          <TabsContent value="funnel">
+            <OutboundFunnel />
+          </TabsContent>
         </Tabs>
       </main>
 
