@@ -12,7 +12,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Mail, Phone, MapPin, Send, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Mail, Phone, MapPin, Send, Search, Play, Pause, MousePointerClick } from 'lucide-react';
 
 type Prospect = {
   id: string;
