@@ -25,6 +25,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/discover-efficiency" element={<Index />} />
           <Route path="/deep-dive" element={<DeepDive />} />
           <Route path="/straight-talk" element={<StraightTalk />} />
           {/* /scoping route retired — Game Plan merged into Straight Talk */}
