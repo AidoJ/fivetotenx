@@ -1183,6 +1183,21 @@ const WebsitePage = () => {
   useEffect(() => {
     if (location.pathname === '/discover-efficiency') {
       handleStartAssessment();
+      // Stop the outbound drip campaign if this visit came from a tracked email link
+      const params = new URLSearchParams(location.search);
+      const prospectId = params.get('p');
+      if (prospectId) {
+        supabase
+          .from('outbound_prospects')
+          .update({
+            clicked_link_at: new Date().toISOString(),
+            auto_drip: false,
+            next_send_at: null,
+            stage: 'replied',
+          })
+          .eq('id', prospectId)
+          .then(() => {});
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
