@@ -131,20 +131,21 @@ export default function OutboundFunnel() {
     load();
   };
 
-  const advanceStage = async (p: Prospect) => {
-    const idx = STAGES.findIndex(s => s.value === p.stage);
-    const next = STAGES[Math.min(idx + 1, STAGES.length - 3)]; // up to email_3_sent max via this button
-    const { error } = await supabase
-      .from('outbound_prospects')
-      .update({
-        stage: next.value,
-        drip_step: (p.drip_step || 0) + 1,
-        last_contacted_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', p.id);
-    if (error) return toast({ title: 'Update failed', description: error.message, variant: 'destructive' });
-    toast({ title: `Moved to ${next.label}` });
+  const [sendingId, setSendingId] = useState<string | null>(null);
+
+  const sendDrip = async (p: Prospect, step?: number) => {
+    if (!p.email) {
+      return toast({ title: 'No email on file', description: `Add an email for ${p.business_name} first.`, variant: 'destructive' });
+    }
+    const nextStep = step ?? Math.min((p.drip_step || 0) + 1, 3);
+    if (!confirm(`Send drip Email ${nextStep} to ${p.email}?`)) return;
+    setSendingId(p.id);
+    const { error } = await supabase.functions.invoke('send-drip-email', {
+      body: { prospect_id: p.id, step: nextStep },
+    });
+    setSendingId(null);
+    if (error) return toast({ title: 'Send failed', description: error.message, variant: 'destructive' });
+    toast({ title: `Email ${nextStep} sent`, description: p.email ?? undefined });
     load();
   };
 
@@ -294,9 +295,20 @@ export default function OutboundFunnel() {
                       </td>
                       <td className="p-3 align-top">
                         <div className="flex items-center justify-end gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => advanceStage(p)} title="Advance drip step">
-                            <Send className="w-3.5 h-3.5" />
-                          </Button>
+                          <Select
+                            value=""
+                            onValueChange={(v) => sendDrip(p, parseInt(v, 10))}
+                            disabled={sendingId === p.id || !p.email}
+                          >
+                            <SelectTrigger className="h-7 w-[110px] text-[11px]">
+                              <SelectValue placeholder={sendingId === p.id ? 'Sending…' : `Send #${Math.min((p.drip_step || 0) + 1, 3)}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">Send Email 1</SelectItem>
+                              <SelectItem value="2">Send Email 2</SelectItem>
+                              <SelectItem value="3">Send Email 3</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Button size="sm" variant="ghost" onClick={() => openEdit(p)}>
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
