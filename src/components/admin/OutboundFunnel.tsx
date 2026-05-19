@@ -131,20 +131,21 @@ export default function OutboundFunnel() {
     load();
   };
 
-  const advanceStage = async (p: Prospect) => {
-    const idx = STAGES.findIndex(s => s.value === p.stage);
-    const next = STAGES[Math.min(idx + 1, STAGES.length - 3)]; // up to email_3_sent max via this button
-    const { error } = await supabase
-      .from('outbound_prospects')
-      .update({
-        stage: next.value,
-        drip_step: (p.drip_step || 0) + 1,
-        last_contacted_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', p.id);
-    if (error) return toast({ title: 'Update failed', description: error.message, variant: 'destructive' });
-    toast({ title: `Moved to ${next.label}` });
+  const [sendingId, setSendingId] = useState<string | null>(null);
+
+  const sendDrip = async (p: Prospect, step?: number) => {
+    if (!p.email) {
+      return toast({ title: 'No email on file', description: `Add an email for ${p.business_name} first.`, variant: 'destructive' });
+    }
+    const nextStep = step ?? Math.min((p.drip_step || 0) + 1, 3);
+    if (!confirm(`Send drip Email ${nextStep} to ${p.email}?`)) return;
+    setSendingId(p.id);
+    const { error } = await supabase.functions.invoke('send-drip-email', {
+      body: { prospect_id: p.id, step: nextStep },
+    });
+    setSendingId(null);
+    if (error) return toast({ title: 'Send failed', description: error.message, variant: 'destructive' });
+    toast({ title: `Email ${nextStep} sent`, description: p.email ?? undefined });
     load();
   };
 
