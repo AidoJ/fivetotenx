@@ -426,6 +426,66 @@ export type Database = {
         }
         Relationships: []
       }
+      outbound_prospects: {
+        Row: {
+          address: string | null
+          business_name: string
+          category: string | null
+          contact_name: string | null
+          created_at: string
+          drip_step: number
+          email: string | null
+          id: string
+          last_contacted_at: string | null
+          next_action_at: string | null
+          notes: string | null
+          phone: string | null
+          source: string | null
+          stage: string
+          suburb: string | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          category?: string | null
+          contact_name?: string | null
+          created_at?: string
+          drip_step?: number
+          email?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          next_action_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          stage?: string
+          suburb?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          category?: string | null
+          contact_name?: string | null
+          created_at?: string
+          drip_step?: number
+          email?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          next_action_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          stage?: string
+          suburb?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       proposal_tokens: {
         Row: {
           created_at: string

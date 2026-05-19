@@ -9,8 +9,9 @@ import {
   Users, Mail, Phone, Building2, Calendar, DollarSign, ChevronDown, ChevronUp,
   Loader2, Send, FileText, ExternalLink, Copy, Check, Save, Eye, Code,
   MessageSquare, Plus, ClipboardList, Target, Wrench, Clock, AlertCircle, Pencil,
-  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain, ClipboardCheck, GraduationCap
+  Mic, Upload, Trash2, LayoutDashboard, CheckSquare, Circle, CircleDot, ListTodo, Brain, ClipboardCheck, GraduationCap, Megaphone
 } from 'lucide-react';
+import OutboundFunnel from '@/components/admin/OutboundFunnel';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -1411,6 +1412,7 @@ const Admin = () => {
               <TabsTrigger value="settings" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><Wrench className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Settings</TabsTrigger>
               <TabsTrigger value="scoping" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Scoping</TabsTrigger>
               <TabsTrigger value="training" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Training</TabsTrigger>
+              <TabsTrigger value="funnel" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><Megaphone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Funnel</TabsTrigger>
             </TabsList>
           </div>
 
@@ -1600,6 +1602,10 @@ const Admin = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="funnel">
+            <OutboundFunnel />
           </TabsContent>
         </Tabs>
       </main>
