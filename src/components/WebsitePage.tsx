@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -1177,6 +1177,15 @@ const WebsitePage = () => {
   };
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Auto-trigger assessment when landing via the dedicated /discover-efficiency slug
+  useEffect(() => {
+    if (location.pathname === '/discover-efficiency') {
+      handleStartAssessment();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen overflow-x-hidden relative">
