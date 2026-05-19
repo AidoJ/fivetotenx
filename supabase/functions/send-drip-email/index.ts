@@ -196,9 +196,9 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: FROM,
         to: [p.email],
-        subject: tpl.subject,
-        html: toHtml(tpl.body, unsubscribeUrl),
-        text: `${tpl.body}\n\n---\nUnsubscribe: ${unsubscribeUrl}`,
+        subject: tpl[step].subject,
+        html: toHtml(body, unsubscribeUrl),
+        text: `${body}\n\n---\nUnsubscribe: ${unsubscribeUrl}`,
         reply_to: 'aidan@5to10x.app',
         headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
       }),
