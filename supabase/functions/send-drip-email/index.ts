@@ -120,7 +120,7 @@ Sometimes the fastest growth comes from removing what's slowing you down.
   },
 });
 
-const toHtml = (body: string) => {
+const toHtml = (body: string, unsubscribeUrl: string) => {
   const escaped = body
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -142,11 +142,15 @@ const toHtml = (body: string) => {
       return `<p style="margin:0 0 16px;color:#334155;line-height:1.6;">${block.replace(/\n/g, '<br/>')}</p>`;
     })
     .join('');
+  const footer = `<div style="margin-top:28px;padding-top:18px;border-top:1px solid #e2e8f0;text-align:center;color:#94a3b8;font-size:12px;line-height:1.6;">
+    You're receiving this because we identified your business as a potential fit for AI-driven efficiency improvements.<br/>
+    Not interested? <a href="${unsubscribeUrl}" style="color:#6d3ce8;font-weight:600;text-decoration:underline;">Unsubscribe here</a> — we won't email you again.
+  </div>`;
   return `<!doctype html><html><body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:32px 16px;">
       <tr><td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e2e8f0;">
-          <tr><td>${html}</td></tr>
+          <tr><td>${html}${footer}</td></tr>
         </table>
       </td></tr>
     </table>
@@ -179,6 +183,7 @@ Deno.serve(async (req) => {
 
     const name = firstName(p.contact_name, p.business_name);
     const tpl = templates(name)[step];
+    const unsubscribeUrl = `${APP_URL}/unsubscribe?id=${p.id}`;
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -190,9 +195,10 @@ Deno.serve(async (req) => {
         from: FROM,
         to: [p.email],
         subject: tpl.subject,
-        html: toHtml(tpl.body),
-        text: tpl.body,
+        html: toHtml(tpl.body, unsubscribeUrl),
+        text: `${tpl.body}\n\n---\nUnsubscribe: ${unsubscribeUrl}`,
         reply_to: 'aidan@5to10x.app',
+        headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
       }),
     });
 

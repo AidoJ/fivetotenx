@@ -13,6 +13,7 @@ import Proposal from "./pages/Proposal";
 import StraightTalk from "./pages/StraightTalk";
 import SelfInterview from "./pages/SelfInterview";
 import RefinementPortal from "./pages/RefinementPortal";
+import Unsubscribe from "./pages/Unsubscribe";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/proposal/:id" element={<Proposal />} />
           <Route path="/self-interview" element={<SelfInterview />} />
           <Route path="/refinement/:token" element={<RefinementPortal />} />
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -444,6 +444,9 @@ export type Database = {
           stage: string
           suburb: string | null
           tags: string[] | null
+          unsubscribe_reason: string | null
+          unsubscribed: boolean
+          unsubscribed_at: string | null
           updated_at: string
         }
         Insert: {
@@ -463,6 +466,9 @@ export type Database = {
           stage?: string
           suburb?: string | null
           tags?: string[] | null
+          unsubscribe_reason?: string | null
+          unsubscribed?: boolean
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -482,6 +488,9 @@ export type Database = {
           stage?: string
           suburb?: string | null
           tags?: string[] | null
+          unsubscribe_reason?: string | null
+          unsubscribed?: boolean
+          unsubscribed_at?: string | null
           updated_at?: string
         }
         Relationships: []
