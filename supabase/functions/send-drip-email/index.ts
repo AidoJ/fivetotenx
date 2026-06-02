@@ -184,8 +184,38 @@ Deno.serve(async (req) => {
     const name = firstName(p.contact_name, p.business_name);
     const tpl = templates(name);
     const trackedLink = `${APP_URL}/discover-efficiency?p=${p.id}`;
-    const body = tpl[step].body.replace(new RegExp(`${APP_URL}/discover-efficiency`, 'g'), trackedLink);
     const unsubscribeUrl = `${APP_URL}/unsubscribe?id=${p.id}`;
+
+    // Try to load editable template from DB
+    const templateKey = `drip-email-${step}`;
+    const { data: dbTemplate } = await supabase
+      .from('email_templates')
+      .select('*')
+      .eq('template_key', templateKey)
+      .maybeSingle();
+
+    let subject: string;
+    let html: string;
+    let textBody: string;
+    let fromField = FROM;
+
+    if (dbTemplate) {
+      const replace = (s: string) => s
+        .replace(/\{\{firstName\}\}/g, name)
+        .replace(/\{\{contactName\}\}/g, name)
+        .replace(/\{\{businessName\}\}/g, p.business_name || 'your business')
+        .replace(/\{\{trackedLink\}\}/g, trackedLink)
+        .replace(/\{\{unsubscribeUrl\}\}/g, unsubscribeUrl);
+      subject = replace(dbTemplate.subject);
+      html = replace(dbTemplate.html_body);
+      textBody = html.replace(/<[^>]+>/g, '').replace(/\n{3,}/g, '\n\n').trim();
+      fromField = `${dbTemplate.from_name} <${dbTemplate.from_email}>`;
+    } else {
+      const body = tpl[step].body.replace(new RegExp(`${APP_URL}/discover-efficiency`, 'g'), trackedLink);
+      subject = tpl[step].subject;
+      html = toHtml(body, unsubscribeUrl);
+      textBody = `${body}\n\n---\nUnsubscribe: ${unsubscribeUrl}`;
+    }
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -194,15 +224,16 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM,
+        from: fromField,
         to: [p.email],
-        subject: tpl[step].subject,
-        html: toHtml(body, unsubscribeUrl),
-        text: `${body}\n\n---\nUnsubscribe: ${unsubscribeUrl}`,
+        subject,
+        html,
+        text: textBody,
         reply_to: 'aidan@5to10x.app',
         headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
       }),
     });
+
 
     if (!res.ok) {
       const errBody = await res.text();
