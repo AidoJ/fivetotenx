@@ -1211,11 +1211,22 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
           </p>
         </motion.div>
 
+        {resuming && (
+          <div className="mb-4 text-center text-sm text-muted-foreground">Restoring your previous answers…</div>
+        )}
+
         {results ? (
-          <ROIDashboard results={results} formData={formData} onReset={handleReset} />
+          <ROIDashboard results={results} formData={formData} onReset={handleReset} draftId={draftId} />
         ) : (
           <>
             <StepIndicator currentStep={step} totalSteps={totalSteps} labels={STEP_LABELS} />
+            {draftId && (
+              <div className="mt-3 mb-1 text-xs text-muted-foreground text-right h-4">
+                {savingState === 'saving' && '💾 Saving…'}
+                {savingState === 'saved' && '✓ Progress saved'}
+                {savingState === 'idle' && 'Your progress is saved automatically'}
+              </div>
+            )}
 
             <AnimatePresence mode="wait">
               <motion.div
