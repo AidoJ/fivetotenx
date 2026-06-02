@@ -1419,6 +1419,7 @@ const Admin = () => {
               <TabsTrigger value="scoping" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Scoping</TabsTrigger>
               <TabsTrigger value="training" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Training</TabsTrigger>
               <TabsTrigger value="funnel" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><Megaphone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Funnel</TabsTrigger>
+              <TabsTrigger value="drafts" className="gap-1.5 text-[11px] sm:text-sm sm:gap-2 px-2 sm:px-3 whitespace-nowrap"><ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4" />Drafts {drafts.length > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1">{drafts.length}</Badge>}</TabsTrigger>
             </TabsList>
           </div>
 
