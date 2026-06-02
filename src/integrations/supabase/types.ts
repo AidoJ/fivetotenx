@@ -739,6 +739,7 @@ export type Database = {
           contact_name: string
           contact_phone: string | null
           created_at: string
+          current_step: number
           discovery_answers: Json | null
           discovery_checklist: Json | null
           discovery_ready: boolean | null
@@ -751,7 +752,9 @@ export type Database = {
           industry_id: string | null
           invite_sent: boolean | null
           invite_sent_at: string | null
+          is_draft: boolean
           is_qualified: boolean
+          last_saved_at: string | null
           pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
           proposal_follow_up_days: number | null
           proposal_follow_up_scheduled_at: string | null
@@ -773,6 +776,7 @@ export type Database = {
           contact_name: string
           contact_phone?: string | null
           created_at?: string
+          current_step?: number
           discovery_answers?: Json | null
           discovery_checklist?: Json | null
           discovery_ready?: boolean | null
@@ -785,7 +789,9 @@ export type Database = {
           industry_id?: string | null
           invite_sent?: boolean | null
           invite_sent_at?: string | null
+          is_draft?: boolean
           is_qualified?: boolean
+          last_saved_at?: string | null
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
           proposal_follow_up_days?: number | null
           proposal_follow_up_scheduled_at?: string | null
@@ -807,6 +813,7 @@ export type Database = {
           contact_name?: string
           contact_phone?: string | null
           created_at?: string
+          current_step?: number
           discovery_answers?: Json | null
           discovery_checklist?: Json | null
           discovery_ready?: boolean | null
@@ -819,7 +826,9 @@ export type Database = {
           industry_id?: string | null
           invite_sent?: boolean | null
           invite_sent_at?: string | null
+          is_draft?: boolean
           is_qualified?: boolean
+          last_saved_at?: string | null
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
           proposal_follow_up_days?: number | null
           proposal_follow_up_scheduled_at?: string | null
