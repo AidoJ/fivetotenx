@@ -1614,6 +1614,69 @@ const Admin = () => {
           <TabsContent value="funnel">
             <OutboundFunnel />
           </TabsContent>
+
+          <TabsContent value="drafts">
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-display font-bold text-foreground">Reality Check™ Drafts</h2>
+                <p className="text-sm text-muted-foreground">Partially-completed assessments. Send a resume prompt to nudge them back, or copy the resume link to share manually.</p>
+              </div>
+              {drafts.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground border border-dashed border-border rounded-xl">
+                  <ClipboardList className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">No drafts in progress.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 text-muted-foreground">
+                      <tr>
+                        <th className="text-left px-3 py-2 font-medium">Business</th>
+                        <th className="text-left px-3 py-2 font-medium">Contact</th>
+                        <th className="text-left px-3 py-2 font-medium">Industry</th>
+                        <th className="text-left px-3 py-2 font-medium">Step</th>
+                        <th className="text-left px-3 py-2 font-medium">Last saved</th>
+                        <th className="text-right px-3 py-2 font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {drafts.map(d => {
+                        const stepNames = ['Industry', 'Business', 'Metrics', 'Insights', 'Growth'];
+                        const cs = Math.min((d as any).current_step || 0, 4);
+                        const saved = (d as any).last_saved_at || d.created_at;
+                        const resumeUrl = `${window.location.origin}/discover-efficiency?resume=${d.id}`;
+                        return (
+                          <tr key={d.id} className="hover:bg-muted/30">
+                            <td className="px-3 py-2 font-medium text-foreground">{d.business_name || '—'}</td>
+                            <td className="px-3 py-2">
+                              <div>{d.contact_name || '—'}</div>
+                              <div className="text-xs text-muted-foreground">{d.contact_email || ''}</div>
+                            </td>
+                            <td className="px-3 py-2 text-muted-foreground">{d.industry || '—'}</td>
+                            <td className="px-3 py-2"><Badge variant="outline" className="text-[10px]">{cs + 1}/5 · {stepNames[cs]}</Badge></td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(saved).toLocaleString()}</td>
+                            <td className="px-3 py-2 text-right space-x-2 whitespace-nowrap">
+                              <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(resumeUrl); toast({ title: 'Copied', description: 'Resume link copied to clipboard.' }); }}>Copy link</Button>
+                              <Button
+                                size="sm"
+                                disabled={!d.contact_email}
+                                onClick={async () => {
+                                  const { error } = await supabase.functions.invoke('send-resume-prompt', { body: { assessment_id: d.id } });
+                                  if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                                  else toast({ title: 'Resume prompt sent', description: `Emailed ${d.contact_email}` });
+                                }}
+                              >Send resume email</Button>
+                              <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setDeleteConfirmId(d.id)}>Delete</Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
 
