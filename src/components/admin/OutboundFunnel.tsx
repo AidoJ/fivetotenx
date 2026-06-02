@@ -191,7 +191,93 @@ export default function OutboundFunnel() {
 
   const categories = Array.from(new Set(prospects.map(p => p.category).filter(Boolean))) as string[];
 
+  const toggleOne = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+  const toggleAllVisible = (ids: string[], on: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => on ? next.add(id) : next.delete(id));
+      return next;
+    });
+  };
+  const clearSelection = () => setSelected(new Set());
+
+  const selectedProspects = () => prospects.filter(p => selected.has(p.id));
+
+  const bulkSendDrip = async (step: number) => {
+    const targets = selectedProspects().filter(p => p.email && !p.unsubscribed);
+    const skipped = selected.size - targets.length;
+    if (targets.length === 0) {
+      return toast({ title: 'No sendable prospects', description: 'Selected leads need an email and must not be unsubscribed.', variant: 'destructive' });
+    }
+    if (!confirm(`Send Email #${step} to ${targets.length} prospect${targets.length === 1 ? '' : 's'}?${skipped ? ` (${skipped} skipped — missing email or unsubscribed)` : ''}`)) return;
+    setBulkBusy(true);
+    let ok = 0, fail = 0;
+    for (const p of targets) {
+      const { error } = await supabase.functions.invoke('send-drip-email', { body: { prospect_id: p.id, step } });
+      if (error) fail++; else ok++;
+    }
+    setBulkBusy(false);
+    toast({ title: `Bulk send complete`, description: `${ok} sent${fail ? `, ${fail} failed` : ''}${skipped ? `, ${skipped} skipped` : ''}` });
+    clearSelection();
+    load();
+  };
+
+  const bulkAutoDrip = async (turnOn: boolean) => {
+    const targets = selectedProspects().filter(p => turnOn ? (p.email && !p.unsubscribed && !p.clicked_link_at) : true);
+    if (targets.length === 0) return toast({ title: 'Nothing to update', variant: 'destructive' });
+    if (!confirm(`${turnOn ? 'Start' : 'Pause'} auto-campaign for ${targets.length} prospect${targets.length === 1 ? '' : 's'}?`)) return;
+    setBulkBusy(true);
+    const ids = targets.map(p => p.id);
+    const { error } = await supabase
+      .from('outbound_prospects')
+      .update({
+        auto_drip: turnOn,
+        next_send_at: turnOn ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .in('id', ids);
+    setBulkBusy(false);
+    if (error) return toast({ title: 'Bulk update failed', description: error.message, variant: 'destructive' });
+    toast({ title: turnOn ? 'Auto-campaign started' : 'Auto-campaign paused', description: `${targets.length} updated` });
+    clearSelection();
+    load();
+  };
+
+  const bulkSetStage = async (stage: string) => {
+    if (selected.size === 0) return;
+    if (!confirm(`Set stage to "${STAGES.find(s => s.value === stage)?.label}" for ${selected.size} prospect${selected.size === 1 ? '' : 's'}?`)) return;
+    setBulkBusy(true);
+    const { error } = await supabase
+      .from('outbound_prospects')
+      .update({ stage, updated_at: new Date().toISOString() })
+      .in('id', Array.from(selected));
+    setBulkBusy(false);
+    if (error) return toast({ title: 'Bulk update failed', description: error.message, variant: 'destructive' });
+    toast({ title: 'Stage updated', description: `${selected.size} prospects` });
+    clearSelection();
+    load();
+  };
+
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Delete ${selected.size} prospect${selected.size === 1 ? '' : 's'}? This cannot be undone.`)) return;
+    setBulkBusy(true);
+    const { error } = await supabase.from('outbound_prospects').delete().in('id', Array.from(selected));
+    setBulkBusy(false);
+    if (error) return toast({ title: 'Bulk delete failed', description: error.message, variant: 'destructive' });
+    toast({ title: `${selected.size} prospects deleted` });
+    clearSelection();
+    load();
+  };
+
   const filtered = prospects.filter(p => {
+
     if (stageFilter !== 'all' && p.stage !== stageFilter) return false;
     if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
     if (search) {
