@@ -13,6 +13,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, Mail, Phone, MapPin, Send, Search, Play, Pause, MousePointerClick } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 type Prospect = {
   id: string;
