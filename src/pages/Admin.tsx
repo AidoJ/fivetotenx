@@ -1362,14 +1362,20 @@ const Admin = () => {
     { id: 'go_live', label: 'Go Live™', icon: Check, stages: ['completed'] },
   ];
 
+  const nonDraftLeads = leads.filter(l => !(l as any).is_draft);
+  const drafts = leads.filter(l => (l as any).is_draft).sort((a, b) => {
+    const ax = new Date((a as any).last_saved_at || a.created_at).getTime();
+    const bx = new Date((b as any).last_saved_at || b.created_at).getTime();
+    return bx - ax;
+  });
   const grouped = PIPELINE_GROUPS.map(group => ({
     ...group,
     leads: group.filter
-      ? leads.filter(group.filter)
-      : leads.filter(l => group.stages.includes(l.pipeline_stage)),
+      ? nonDraftLeads.filter(group.filter)
+      : nonDraftLeads.filter(l => group.stages.includes(l.pipeline_stage)),
   }));
-  const totalImpact = leads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
-  const qualifiedCount = leads.filter(l => l.is_qualified).length;
+  const totalImpact = nonDraftLeads.reduce((sum, l) => sum + ((l.roi_results as any)?.totalAnnualImpact || 0), 0);
+  const qualifiedCount = nonDraftLeads.filter(l => l.is_qualified).length;
 
   if (authLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
