@@ -991,12 +991,109 @@ const FooterSection = () =>
 
 const STEP_LABELS = ['Industry', 'Business', 'Metrics', 'Insights', 'Growth'];
 
+const DRAFT_KEY = 'realityCheckDraftId';
+
 const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTMLDivElement> }) => {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [results, setResults] = useState<ROIResults | null>(null);
   const [selectedIndustry, setSelectedIndustry] = useState<any>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [savingState, setSavingState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [resuming, setResuming] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasMounted = useRef(false);
+
+  // Resume from URL ?resume=<id> or from localStorage on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const resumeId = params.get('resume') || localStorage.getItem(DRAFT_KEY);
+    if (!resumeId) return;
+    setResuming(true);
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('roi_assessments')
+          .select('id, form_data, current_step, industry, industry_id, is_draft')
+          .eq('id', resumeId)
+          .maybeSingle();
+        if (error || !data) {
+          localStorage.removeItem(DRAFT_KEY);
+          return;
+        }
+        if (!data.is_draft) {
+          // Already submitted — don't resume
+          localStorage.removeItem(DRAFT_KEY);
+          return;
+        }
+        setDraftId(data.id);
+        if (data.form_data && typeof data.form_data === 'object') {
+          setFormData({ ...initialFormData, ...(data.form_data as any) });
+        }
+        const restoredStep = Math.min(Math.max(data.current_step || 0, 0), 4);
+        setStep(restoredStep);
+        if ((data as any).industry_id) {
+          setSelectedIndustry({ id: (data as any).industry_id, slug: (data.form_data as any)?.selectedIndustrySlug, label: data.industry });
+        }
+        localStorage.setItem(DRAFT_KEY, data.id);
+        // Scroll the form into view
+        setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+      } finally {
+        setResuming(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounced autosave whenever formData or step changes (once we have enough to save)
+  useEffect(() => {
+    if (!hasMounted.current) { hasMounted.current = true; return; }
+    if (results) return; // don't autosave drafts after submission
+    const canSave = formData.contactEmail.trim() && formData.businessName.trim();
+    if (!canSave) return;
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      setSavingState('saving');
+      const payload: any = {
+        contact_name: formData.contactName,
+        contact_email: formData.contactEmail,
+        contact_phone: formData.contactPhone,
+        business_name: formData.businessName,
+        industry: formData.industry,
+        industry_id: formData.selectedIndustryId || null,
+        form_data: JSON.parse(JSON.stringify(formData)),
+        current_step: step,
+        is_draft: true,
+        last_saved_at: new Date().toISOString(),
+      };
+      try {
+        if (draftId) {
+          const { error } = await supabase.from('roi_assessments').update(payload).eq('id', draftId);
+          if (error) throw error;
+        } else {
+          const { data, error } = await supabase
+            .from('roi_assessments')
+            .insert([{ ...payload, roi_results: {} }])
+            .select('id')
+            .single();
+          if (error) throw error;
+          if (data?.id) {
+            setDraftId(data.id);
+            localStorage.setItem(DRAFT_KEY, data.id);
+          }
+        }
+        setSavingState('saved');
+        setTimeout(() => setSavingState('idle'), 1500);
+      } catch (e) {
+        console.error('Autosave failed', e);
+        setSavingState('idle');
+      }
+    }, 800);
+
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+  }, [formData, step, draftId, results]);
 
   const handleChange = (partial: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
@@ -1021,7 +1118,6 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
 
   const validateStep = (currentStep: number): boolean => {
     if (currentStep === 1) {
-      // Business Snapshot: require name, email, business name
       const errs: Record<string, string> = {};
       if (!formData.contactName.trim()) errs.contactName = 'Required';
       if (!formData.contactEmail.trim()) errs.contactEmail = 'Required';
@@ -1030,7 +1126,6 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
       return Object.keys(errs).length === 0;
     }
     if (currentStep === 2) {
-      // Customer Metrics: require core CLV fields
       const errs = validateCustomerMetrics(formData);
       setFieldErrors(errs);
       return Object.keys(errs).length === 0;
@@ -1046,7 +1141,6 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
   };
 
   const handleSubmit = () => {
-    // Validate metrics step one more time
     const metricsErrors = validateCustomerMetrics(formData);
     if (Object.keys(metricsErrors).length > 0) {
       setFieldErrors(metricsErrors);
@@ -1062,7 +1156,10 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
     setResults(null);
     setStep(0);
     setSelectedIndustry(null);
+    setDraftId(null);
+    localStorage.removeItem(DRAFT_KEY);
   };
+
 
   const totalSteps = 5;
 
@@ -1114,11 +1211,22 @@ const SignalCaptureSection = ({ sectionRef }: { sectionRef: React.RefObject<HTML
           </p>
         </motion.div>
 
+        {resuming && (
+          <div className="mb-4 text-center text-sm text-muted-foreground">Restoring your previous answers…</div>
+        )}
+
         {results ? (
-          <ROIDashboard results={results} formData={formData} onReset={handleReset} />
+          <ROIDashboard results={results} formData={formData} onReset={handleReset} draftId={draftId} />
         ) : (
           <>
             <StepIndicator currentStep={step} totalSteps={totalSteps} labels={STEP_LABELS} />
+            {draftId && (
+              <div className="mt-3 mb-1 text-xs text-muted-foreground text-right h-4">
+                {savingState === 'saving' && '💾 Saving…'}
+                {savingState === 'saved' && '✓ Progress saved'}
+                {savingState === 'idle' && 'Your progress is saved automatically'}
+              </div>
+            )}
 
             <AnimatePresence mode="wait">
               <motion.div
