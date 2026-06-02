@@ -13,6 +13,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, Mail, Phone, MapPin, Send, Search, Play, Pause, MousePointerClick } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 type Prospect = {
   id: string;
@@ -72,6 +74,9 @@ export default function OutboundFunnel() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Partial<Prospect>>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
 
   const load = async () => {
     setLoading(true);
@@ -186,7 +191,93 @@ export default function OutboundFunnel() {
 
   const categories = Array.from(new Set(prospects.map(p => p.category).filter(Boolean))) as string[];
 
+  const toggleOne = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+  const toggleAllVisible = (ids: string[], on: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => on ? next.add(id) : next.delete(id));
+      return next;
+    });
+  };
+  const clearSelection = () => setSelected(new Set());
+
+  const selectedProspects = () => prospects.filter(p => selected.has(p.id));
+
+  const bulkSendDrip = async (step: number) => {
+    const targets = selectedProspects().filter(p => p.email && !p.unsubscribed);
+    const skipped = selected.size - targets.length;
+    if (targets.length === 0) {
+      return toast({ title: 'No sendable prospects', description: 'Selected leads need an email and must not be unsubscribed.', variant: 'destructive' });
+    }
+    if (!confirm(`Send Email #${step} to ${targets.length} prospect${targets.length === 1 ? '' : 's'}?${skipped ? ` (${skipped} skipped — missing email or unsubscribed)` : ''}`)) return;
+    setBulkBusy(true);
+    let ok = 0, fail = 0;
+    for (const p of targets) {
+      const { error } = await supabase.functions.invoke('send-drip-email', { body: { prospect_id: p.id, step } });
+      if (error) fail++; else ok++;
+    }
+    setBulkBusy(false);
+    toast({ title: `Bulk send complete`, description: `${ok} sent${fail ? `, ${fail} failed` : ''}${skipped ? `, ${skipped} skipped` : ''}` });
+    clearSelection();
+    load();
+  };
+
+  const bulkAutoDrip = async (turnOn: boolean) => {
+    const targets = selectedProspects().filter(p => turnOn ? (p.email && !p.unsubscribed && !p.clicked_link_at) : true);
+    if (targets.length === 0) return toast({ title: 'Nothing to update', variant: 'destructive' });
+    if (!confirm(`${turnOn ? 'Start' : 'Pause'} auto-campaign for ${targets.length} prospect${targets.length === 1 ? '' : 's'}?`)) return;
+    setBulkBusy(true);
+    const ids = targets.map(p => p.id);
+    const { error } = await supabase
+      .from('outbound_prospects')
+      .update({
+        auto_drip: turnOn,
+        next_send_at: turnOn ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .in('id', ids);
+    setBulkBusy(false);
+    if (error) return toast({ title: 'Bulk update failed', description: error.message, variant: 'destructive' });
+    toast({ title: turnOn ? 'Auto-campaign started' : 'Auto-campaign paused', description: `${targets.length} updated` });
+    clearSelection();
+    load();
+  };
+
+  const bulkSetStage = async (stage: string) => {
+    if (selected.size === 0) return;
+    if (!confirm(`Set stage to "${STAGES.find(s => s.value === stage)?.label}" for ${selected.size} prospect${selected.size === 1 ? '' : 's'}?`)) return;
+    setBulkBusy(true);
+    const { error } = await supabase
+      .from('outbound_prospects')
+      .update({ stage, updated_at: new Date().toISOString() })
+      .in('id', Array.from(selected));
+    setBulkBusy(false);
+    if (error) return toast({ title: 'Bulk update failed', description: error.message, variant: 'destructive' });
+    toast({ title: 'Stage updated', description: `${selected.size} prospects` });
+    clearSelection();
+    load();
+  };
+
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Delete ${selected.size} prospect${selected.size === 1 ? '' : 's'}? This cannot be undone.`)) return;
+    setBulkBusy(true);
+    const { error } = await supabase.from('outbound_prospects').delete().in('id', Array.from(selected));
+    setBulkBusy(false);
+    if (error) return toast({ title: 'Bulk delete failed', description: error.message, variant: 'destructive' });
+    toast({ title: `${selected.size} prospects deleted` });
+    clearSelection();
+    load();
+  };
+
   const filtered = prospects.filter(p => {
+
     if (stageFilter !== 'all' && p.stage !== stageFilter) return false;
     if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
     if (search) {
@@ -254,6 +345,44 @@ export default function OutboundFunnel() {
         </Select>
       </div>
 
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="rounded-xl border border-primary/40 bg-primary/5 p-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-foreground mr-2">
+            {selected.size} selected
+          </span>
+          <Button size="sm" variant="outline" disabled={bulkBusy} onClick={() => bulkSendDrip(1)} className="h-7 text-[11px] gap-1">
+            <Send className="w-3 h-3" /> Send #1
+          </Button>
+          <Button size="sm" variant="outline" disabled={bulkBusy} onClick={() => bulkSendDrip(2)} className="h-7 text-[11px] gap-1">
+            <Send className="w-3 h-3" /> Send #2
+          </Button>
+          <Button size="sm" variant="outline" disabled={bulkBusy} onClick={() => bulkSendDrip(3)} className="h-7 text-[11px] gap-1">
+            <Send className="w-3 h-3" /> Send #3
+          </Button>
+          <Button size="sm" variant="outline" disabled={bulkBusy} onClick={() => bulkAutoDrip(true)} className="h-7 text-[11px] gap-1">
+            <Play className="w-3 h-3" /> Start Auto
+          </Button>
+          <Button size="sm" variant="outline" disabled={bulkBusy} onClick={() => bulkAutoDrip(false)} className="h-7 text-[11px] gap-1">
+            <Pause className="w-3 h-3" /> Pause Auto
+          </Button>
+          <Select value="" onValueChange={bulkSetStage} disabled={bulkBusy}>
+            <SelectTrigger className="h-7 w-[160px] text-[11px]">
+              <SelectValue placeholder="Set stage…" />
+            </SelectTrigger>
+            <SelectContent>
+              {STAGES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkDelete} className="h-7 text-[11px] gap-1 text-destructive hover:text-destructive">
+            <Trash2 className="w-3 h-3" /> Delete
+          </Button>
+          <Button size="sm" variant="ghost" onClick={clearSelection} className="h-7 text-[11px] ml-auto">
+            Clear
+          </Button>
+        </div>
+      )}
+
       {/* Table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {loading ? (
@@ -265,6 +394,13 @@ export default function OutboundFunnel() {
             <table className="w-full text-sm">
               <thead className="bg-secondary/50 text-xs text-muted-foreground">
                 <tr>
+                  <th className="p-3 w-8">
+                    <Checkbox
+                      checked={filtered.length > 0 && filtered.every(p => selected.has(p.id))}
+                      onCheckedChange={(v) => toggleAllVisible(filtered.map(p => p.id), !!v)}
+                      aria-label="Select all"
+                    />
+                  </th>
                   <th className="text-left p-3">Business</th>
                   <th className="text-left p-3">Contact</th>
                   <th className="text-left p-3">Category</th>
@@ -276,8 +412,17 @@ export default function OutboundFunnel() {
               <tbody>
                 {filtered.map(p => {
                   const stageMeta = STAGES.find(s => s.value === p.stage) ?? STAGES[0];
+                  const isSelected = selected.has(p.id);
                   return (
-                    <tr key={p.id} className="border-t border-border hover:bg-secondary/30">
+                    <tr key={p.id} className={`border-t border-border hover:bg-secondary/30 ${isSelected ? 'bg-primary/5' : ''}`}>
+                      <td className="p-3 align-top">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => toggleOne(p.id)}
+                          aria-label={`Select ${p.business_name}`}
+                        />
+                      </td>
+
                       <td className="p-3 align-top">
                         <p className="font-semibold text-foreground">{p.business_name}</p>
                         {p.address && (
