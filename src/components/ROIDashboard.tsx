@@ -11,7 +11,9 @@ interface Props {
   results: ROIResults;
   formData: FormData;
   onReset: () => void;
+  draftId?: string | null;
 }
+
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
