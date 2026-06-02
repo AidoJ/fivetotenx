@@ -35,10 +35,10 @@ const ResultCard = ({ icon: Icon, label, value, color, delay }: {
   </motion.div>
 );
 
-const ROIDashboard = ({ results, formData, onReset }: Props) => {
+const ROIDashboard = ({ results, formData, onReset, draftId }: Props) => {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [assessmentId, setAssessmentId] = useState<string | null>(null);
+  const [assessmentId, setAssessmentId] = useState<string | null>(draftId || null);
   const { toast } = useToast();
 
   const handleSendReport = async (_includeZoom: boolean) => {
@@ -49,7 +49,7 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
 
     setSending(true);
     try {
-      const { data: insertedRow, error: dbError } = await supabase.from('roi_assessments').insert([{
+      const payload = {
         contact_name: formData.contactName,
         contact_email: formData.contactEmail,
         contact_phone: formData.contactPhone,
@@ -63,8 +63,31 @@ const ROIDashboard = ({ results, formData, onReset }: Props) => {
         is_qualified: results.pricing.isQualified,
         pipeline_stage: results.pricing.isQualified ? 'qualified' : 'assessment',
         qualified_at: results.pricing.isQualified ? new Date().toISOString() : null,
-      } as any]).select('id').single();
-      if (dbError) throw dbError;
+        is_draft: false,
+        last_saved_at: new Date().toISOString(),
+      };
+
+      let insertedRow: { id: string } | null = null;
+      if (draftId) {
+        const { data, error: dbError } = await supabase
+          .from('roi_assessments')
+          .update(payload as any)
+          .eq('id', draftId)
+          .select('id')
+          .single();
+        if (dbError) throw dbError;
+        insertedRow = data;
+      } else {
+        const { data, error: dbError } = await supabase
+          .from('roi_assessments')
+          .insert([payload as any])
+          .select('id')
+          .single();
+        if (dbError) throw dbError;
+        insertedRow = data;
+      }
+      try { localStorage.removeItem('realityCheckDraftId'); } catch {}
+
 
       const { error: fnError } = await supabase.functions.invoke('send-report', {
         body: {
