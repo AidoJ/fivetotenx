@@ -74,6 +74,9 @@ export default function OutboundFunnel() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Partial<Prospect>>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
 
   const load = async () => {
     setLoading(true);
